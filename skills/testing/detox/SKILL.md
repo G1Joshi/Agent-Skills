@@ -1,79 +1,55 @@
 ---
 name: detox
-description: Detox end-to-end testing for React Native apps. Use for mobile E2E tests.
+description: Detox React Native E2E testing. Use for RN testing.
 ---
 
 # Detox
 
-End-to-end testing framework for React Native.
+Detox is designed for React Native. Unlike Appium (Black-box), Detox works "Gray-box" by running _inside_ your app, monitoring the main thread. It _knows_ when the app is busy/idle, eliminating flaky waits.
 
 ## When to Use
 
-- React Native E2E testing
-- Automated UI testing
-- CI/CD mobile testing
-- Cross-platform test suites
+- **React Native Apps**: The gold standard for RN E2E.
+- **Speed & Stability**: Much less flaky than Appium for RN because of synchronization.
+- **CI/CD**: Designed to be fast enough for CI.
 
 ## Quick Start
 
-```typescript
-// e2e/login.test.ts
-describe("Login", () => {
+```javascript
+describe("Example", () => {
   beforeAll(async () => {
     await device.launchApp();
   });
 
-  it("should login successfully", async () => {
-    await element(by.id("email")).typeText("user@example.com");
-    await element(by.id("password")).typeText("password123");
-    await element(by.id("login-button")).tap();
-    await expect(element(by.text("Welcome"))).toBeVisible();
+  it("should show hello screen after tap", async () => {
+    await element(by.id("hello_button")).tap();
+    await expect(element(by.text("Hello!!!"))).toBeVisible();
   });
 });
 ```
 
 ## Core Concepts
 
+### Synchronization
+
+Detox monitors network requests, animations, and timers. It waits for the app to go "Idle" before executing the next command. No `sleep()` needed.
+
 ### Matchers
 
-```typescript
-// By ID (recommended)
-element(by.id("button"));
+`by.id()`, `by.text()`, `by.label()`. Needs `testID` props on React Native components.
 
-// By text
-element(by.text("Submit"));
+## Best Practices (2025)
 
-// By label (accessibility)
-element(by.label("Close"));
+**Do**:
 
-// Nested
-element(by.id("list")).atIndex(0);
-```
+- **Add `testID` props**: Add them to all interactive elements in your React Native code.
+- **Use `device.reloadReactNative()`**: Faster than relaunching the whole app for every test.
+- **Mock Metro**: Mock JS bundles to avoid network flakes in CI.
 
-### Actions
+**Don't**:
 
-```typescript
-await element(by.id("input")).typeText("Hello");
-await element(by.id("input")).clearText();
-await element(by.id("button")).tap();
-await element(by.id("button")).longPress();
-await element(by.id("scroll")).scroll(200, "down");
-await element(by.id("refresh")).swipe("down");
-```
-
-### Expectations
-
-```typescript
-await expect(element(by.id("title"))).toBeVisible();
-await expect(element(by.id("title"))).toHaveText("Hello");
-await expect(element(by.id("input"))).toHaveFocus();
-await expect(element(by.id("modal"))).not.toExist();
-```
-
-## Best Practices
-
-**Do**: Use testID props, reset state between tests
-**Don't**: Use platform-specific selectors, rely on timing
+- **Don't run animations**: Disable them in the test build for speed and stability.
+- **Don't combine with Appium**: Choose one for your project.
 
 ## References
 

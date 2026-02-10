@@ -1,130 +1,59 @@
 ---
 name: playwright
-description: Playwright cross-browser testing with auto-wait and tracing. Use for E2E browser automation.
+description: Playwright end-to-end testing for web. Use for browser automation.
 ---
 
 # Playwright
 
-Cross-browser testing with auto-waiting and powerful debugging.
+Playwright is Microsoft's modern automation library. It enables reliable end-to-end testing for modern web apps across Chromium, WebKit, and Firefox.
 
 ## When to Use
 
-- Cross-browser E2E testing
-- Multi-page/context testing
-- Visual regression testing
-- API testing integration
+- **Cross-Browser**: Testing Chrome, Safari, and Firefox with one API.
+- **Speed**: It is significantly faster than Cypress and Selenium due to parallel execution and fast context creation.
+- **Modern Features**: Native support for Auto-waiting (no more `sleep(1000)`), Network interception, and Mobile emulation.
 
 ## Quick Start
 
 ```typescript
-// tests/login.spec.ts
 import { test, expect } from "@playwright/test";
 
-test("should login successfully", async ({ page }) => {
-  await page.goto("/login");
-  await page.fill('[data-testid="email"]', "user@example.com");
-  await page.fill('[data-testid="password"]', "password123");
-  await page.click('[data-testid="submit"]');
-  await expect(page).toHaveURL(/dashboard/);
+test.describe("Navigation", () => {
+  test("should navigate to login", async ({ page }) => {
+    await page.goto("https://example.com");
+    await page.getByRole("button", { name: "Log in" }).click();
+    await expect(page).toHaveURL(/.*login/);
+  });
 });
 ```
 
 ## Core Concepts
 
-### Locators & Actions
+### Auto-waiting
 
-```typescript
-// Locators (recommended)
-page.getByRole("button", { name: "Submit" });
-page.getByTestId("email");
-page.getByLabel("Email");
-page.getByPlaceholder("Enter email");
-page.getByText("Welcome");
+Playwright waits for elements to be actionable (visible, stable, not obscured) before performing actions.
 
-// Actions
-await page.fill("input", "text");
-await page.click("button");
-await page.selectOption("select", "value");
-await page.check('input[type="checkbox"]');
-await page.waitForSelector(".loaded");
-```
+### Browser Contexts
 
-### Assertions
+Playwright creates a fresh "Context" (Incognito profile) for each test in milliseconds. This provides full isolation without the overhead of restarting the browser process.
 
-```typescript
-// Auto-retrying assertions
-await expect(page.getByRole("heading")).toBeVisible();
-await expect(page.getByTestId("count")).toHaveText("5");
-await expect(page).toHaveURL("/dashboard");
-await expect(page).toHaveTitle(/My App/);
-await expect(locator).toHaveAttribute("href", "/link");
-```
+### Locators
 
-## Common Patterns
+`page.getByRole('button')` is strict. If it finds two buttons, it throws an error (forcing you to be specific), avoiding flakiness.
 
-### Page Object Model
-
-```typescript
-// pages/LoginPage.ts
-export class LoginPage {
-  constructor(private page: Page) {}
-
-  async login(email: string, password: string) {
-    await this.page.getByTestId("email").fill(email);
-    await this.page.getByTestId("password").fill(password);
-    await this.page.getByRole("button", { name: "Login" }).click();
-  }
-}
-
-// Usage in test
-test("login flow", async ({ page }) => {
-  const loginPage = new LoginPage(page);
-  await page.goto("/login");
-  await loginPage.login("user@example.com", "password");
-});
-```
-
-### API Mocking
-
-```typescript
-test("mocked api", async ({ page }) => {
-  await page.route("/api/users", async (route) => {
-    await route.fulfill({
-      status: 200,
-      body: JSON.stringify([{ id: 1, name: "John" }]),
-    });
-  });
-
-  await page.goto("/users");
-  await expect(page.getByText("John")).toBeVisible();
-});
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use role-based locators
-- Leverage auto-waiting
-- Use Page Object Model
-- Enable tracing for CI
+- **Use Locators**: `page.locator()` or `page.getByRole()` instead of `$` or `$$`.
+- **Use `codegen`**: Run `npx playwright codegen` to record user interactions and generate test code automatically.
+- **Use UI Mode**: `npx playwright test --ui` for a time-travel debugging experience.
 
 **Don't**:
 
-- Use hardcoded waits
-- Chain too many assertions
-- Skip accessibility locators
-- Ignore test isolation
-
-## Troubleshooting
-
-| Issue          | Cause          | Solution                 |
-| -------------- | -------------- | ------------------------ |
-| Element hidden | Timing issue   | Use proper locator       |
-| Timeout error  | Slow page      | Increase timeout         |
-| Flaky test     | Race condition | Use web-first assertions |
+- **Don't use Xpath/CSS selectors**: They are brittle. Use user-facing locators (Role, Text).
+- **Don't use extensive waits**: Trust the auto-waiting mechanism.
 
 ## References
 
-- [Playwright Documentation](https://playwright.dev/docs/)
-- [Playwright Test](https://playwright.dev/docs/test-intro)
+- [Playwright Documentation](https://playwright.dev/)
