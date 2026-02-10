@@ -1,73 +1,59 @@
 ---
 name: bcrypt
-description: bcrypt password hashing for secure credential storage. Use for password hashing.
+description: bcrypt password hashing. Use for password security.
 ---
 
-# bcrypt
+# Bcrypt
 
-Password hashing algorithm with adaptive cost factor.
+Bcrypt is a password-hashing function designed to be slow, protecting against brute-force attacks. It incorporates a salt to protect against rainbow table attacks.
 
 ## When to Use
 
-- User password storage
-- Authentication systems
-- Credential verification
-- Legacy system support
+- **User Passwords**: Storing passwords in a database. NEVER store them in plain text.
+- **API Keys**: Hashing API keys before storage (if you only show them once).
 
-## Quick Start
+## Quick Start (Node.js)
 
-```typescript
+```javascript
 import bcrypt from "bcrypt";
 
-const SALT_ROUNDS = 12;
+const saltRounds = 10;
+const myPlaintextPassword = "s0m3password";
 
-// Hash password
-const hash = await bcrypt.hash(password, SALT_ROUNDS);
+// Hashing
+const hash = await bcrypt.hash(myPlaintextPassword, saltRounds);
+// Store 'hash' in DB: $2b$10$EpIxT98h....
 
-// Verify password
-const isValid = await bcrypt.compare(password, hash);
+// Verifying
+const match = await bcrypt.compare("s0m3password", hash);
+if (match) {
+  // Login successful
+}
 ```
 
 ## Core Concepts
 
-### Hashing
+### Salt
 
-```typescript
-async function hashPassword(password: string): Promise<string> {
-  const salt = await bcrypt.genSalt(12);
-  return bcrypt.hash(password, salt);
-}
+Random data added to the password input before hashing. Ensures that two users with the same password have different hashes. Bcrypt handles this automatically.
 
-async function verifyPassword(
-  password: string,
-  hash: string,
-): Promise<boolean> {
-  return bcrypt.compare(password, hash);
-}
-```
+### Work Factor (Cost)
 
-### Cost Factor
+The `saltRounds` (e.g., 10 or 12). Determines how slow the hashing is. As computers get faster, you increase the cost to keep brute-forcing expensive.
 
-```typescript
-// Adjust cost based on hardware (2^cost iterations)
-const COST = 12; // ~250ms on modern hardware
+## Best Practices (2025)
 
-// Benchmark to find optimal cost
-async function benchmarkCost() {
-  for (let cost = 10; cost <= 14; cost++) {
-    const start = Date.now();
-    await bcrypt.hash("test", cost);
-    console.log(`Cost ${cost}: ${Date.now() - start}ms`);
-  }
-}
-```
+**Do**:
 
-## Best Practices
+- **Use Cost 10-12**: A good balance between security (slow for attackers) and UX (fast enough for login).
+- **Consider Argon2id**: For new high-security projects, **Argon2id** is the modern winner (OWASP recommendation) as it resists GPU cracking better than Bcrypt. But Bcrypt is still "secure enough" for most web apps.
+- **Async**: Always use the async version to avoid blocking the Event Loop in Node.js.
 
-**Do**: Use cost factor 12+, store full hash string
-**Don't**: Use cost below 10, implement custom bcrypt
+**Don't**:
+
+- **Don't Roll Your Own Crypto**: Never use SHA-256 or MD5 for passwords.
+- **Don't pre-hash**: Don't MD5 the password on the client before sending it. Send via HTTPS, then Bcrypt on server.
 
 ## References
 
-- [bcrypt npm](https://www.npmjs.com/package/bcrypt)
-- [OWASP Password Storage](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
+- [OWASP Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
