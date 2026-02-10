@@ -1,167 +1,121 @@
 ---
 name: react-native
-description: React Native cross-platform mobile with native modules and Expo. Use for .tsx mobile apps.
+description: React Native cross-platform mobile with JavaScript. Use for iOS/Android.
 ---
 
 # React Native
 
-Cross-platform mobile development with React.
+React Native allows you to build native mobile apps using React and JavaScript/TypeScript. It renders veritable native UI components (not webviews), offering performance close to native apps while maintaining the React developer experience.
 
 ## When to Use
 
-- Cross-platform iOS/Android apps
-- Teams with React experience
-- Apps requiring native modules
-- Rapid mobile development
+- Building iOS and Android apps with a shared codebase.
+- Teams with existing React/Web expertise.
+- Apps requiring Over-the-Air (OTA) updates (via Expo Updates or CodePush).
+- Prototyping cross-platform mobile experiences rapidly.
 
 ## Quick Start
 
-```tsx
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+Using **Expo** (Recommended for 2024/2025):
 
-export default function App() {
+```bash
+npx create-expo-app@latest my-app
+cd my-app
+npx expo start
+```
+
+```tsx
+// app/index.tsx (Expo Router)
+import { useState } from "react";
+import { View, Text, Button, StyleSheet } from "react-native";
+import { Link } from "expo-router";
+
+export default function Home() {
+  const [count, setCount] = useState(0);
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Hello React Native!</Text>
+      <Text style={styles.text}>Count: {count}</Text>
+      <Button title="Increment" onPress={() => setCount((c) => c + 1)} />
+
+      <Link href="/details" style={styles.link}>
+        Go to Details
+      </Link>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: "center", alignItems: "center" },
-  title: { fontSize: 24, fontWeight: "bold" },
+  text: { fontSize: 24, marginBottom: 20 },
+  link: { marginTop: 20, color: "blue" },
 });
 ```
 
 ## Core Concepts
 
-### Components & State
+### Native Components vs Web
 
-```tsx
-import { useState } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+React Native works by bridging JavaScript to Native UI components.
 
-function Counter() {
-  const [count, setCount] = useState(0);
+- `<View>` maps to `UIView` (iOS) / `android.view.View` (Android).
+- `<Text>` maps to `UITextView` / `TextView`.
+- **New Architecture (Fabric/TurboModules)**: Removes the async bridge for synchronous, direct C++ communication (JSI), improving performance.
 
-  return (
-    <View>
-      <Text>Count: {count}</Text>
-      <TouchableOpacity onPress={() => setCount((c) => c + 1)}>
-        <Text>Increment</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
-```
+### Flexbox Layout
 
-### Navigation
+Layouts use Flexbox (like CSS), but defaults to `flexDirection: 'column'` (unlike row on web). Everything needs strict dimensions or flex grow capabilities.
 
-```tsx
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+### Fast Refresh
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
-
-export default function App() {
-  return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Profile" component={ProfileScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
-}
-
-// Navigate
-navigation.navigate("Profile", { userId: "123" });
-```
+React Native preserves local state while reloading components instantly on file save, significantly speeding up the dev loop.
 
 ## Common Patterns
 
-### Styling
+### Expo Router (File-based Routing)
 
-```tsx
-import { StyleSheet, useColorScheme } from "react-native";
+Modern React Native apps use `expo-router` which mimics Next.js.
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
-  card: {
-    backgroundColor: "white",
-    borderRadius: 8,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3, // Android
-  },
-});
+- `app/index.tsx` -> Home screen
+- `app/(tabs)/_layout.tsx` -> Tab navigation
+- `app/[id].tsx` -> Dynamic routes
 
-// Dynamic theming
-function ThemedView() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+### Server State (React Query)
 
-  return (
-    <View style={{ backgroundColor: isDark ? "#000" : "#fff" }}>
-      <Text style={{ color: isDark ? "#fff" : "#000" }}>Themed content</Text>
-    </View>
-  );
-}
-```
+Avoid Redux for API state. Use `TanStack Query` (React Query).
 
-### Expo Router
+- Caches data, handles loading/error states, and manages refetching.
 
-```tsx
-// app/_layout.tsx
-export default function Layout() {
-  return (
-    <Stack>
-      <Stack.Screen name="index" options={{ title: "Home" }} />
-      <Stack.Screen name="[id]" options={{ title: "Details" }} />
-    </Stack>
-  );
-}
+### Client State (Zustand)
 
-// app/index.tsx
-import { Link } from "expo-router";
-
-export default function Home() {
-  return <Link href="/123">Go to Details</Link>;
-}
-```
+For global app state (theme, auth token), `Zustand` is preferred over Redux/Context for its simplicity and performance (selectors).
 
 ## Best Practices
 
 **Do**:
 
-- Use TypeScript for type safety
-- Use React Query for server state
-- Implement proper error boundaries
-- Test on both platforms
+- Use **Expo** for new projects unless you have strict native code dependency needs that Config Plugins can't handle.
+- Use **TypeScript** for type safety.
+- Use **FlashList** (by Shopify) instead of `FlatList` for long lists performance.
+- Use **Reanimated** for complex animations (runs on UI thread).
 
 **Don't**:
 
-- Use inline styles extensively
-- Ignore platform differences
-- Skip accessibility props
-- Use deprecated APIs
+- Don't leave `console.log` in production builds (it slows down the bridge).
+- Don't do heavy calculations in the JS thread during animations/gestures.
+- Don't define styles inside the render function (recreates objects every render).
 
 ## Troubleshooting
 
-| Issue               | Cause         | Solution                |
-| ------------------- | ------------- | ----------------------- |
-| Metro bundler error | Cache issue   | Clear cache, restart    |
-| Native module error | Linking issue | Run pod install         |
-| Style not applied   | Platform diff | Check platform-specific |
+| Error                                                     | Cause                                   | Solution                               |
+| :-------------------------------------------------------- | :-------------------------------------- | :------------------------------------- |
+| `Metro Bundler process exited with code 1`                | Port in use or bad cache.               | `npx expo start -c` (clear cache).     |
+| `Invariant Violation: View config not found`              | Import issues or upgrading RN versions. | Check node_modules, clear watchman.    |
+| `CocoaPods could not find compatible versions`            | iOS dependency conflict.                | `cd ios && pod install --repo-update`. |
+| `Text strings must be rendered within a <Text> component` | Raw text directly inside View.          | Wrap all strings in `<Text>`.          |
 
 ## References
 
-- [React Native Docs](https://reactnative.dev/)
-- [Expo Documentation](https://docs.expo.dev/)
+- [React Native Docs](https://reactnative.dev)
+- [Expo Documentation](https://docs.expo.dev)
+- [React Native Directory (Libraries)](https://reactnative.directory)

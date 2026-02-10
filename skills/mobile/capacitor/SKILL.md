@@ -1,153 +1,88 @@
 ---
 name: capacitor
-description: Capacitor for web-to-native mobile apps with plugins. Use for hybrid mobile apps.
+description: Capacitor cross-platform native runtime. Use for web to native.
 ---
 
 # Capacitor
 
-Web-native runtime for building cross-platform mobile apps.
+Capacitor by Ionic is a cross-platform native runtime that makes it easy to build web apps that run on iOS, Android, and the web as Progressive Web Apps (PWAs). It provides a bridge to native APIs.
 
 ## When to Use
 
-- Convert web apps to mobile
-- Access native device features
-- Single codebase for web/mobile
-- Progressive Web App enhancement
+- Converting existing React/Angular/Vue web apps to mobile apps.
+- Need specific native functionality (Camera, Haptics, Push) in a web app.
+- Building plugins that need to work across iOS, Android, and Web consistent APIs.
 
 ## Quick Start
 
 ```bash
-# Add to existing web project
 npm install @capacitor/core @capacitor/cli
-npx cap init
-
-# Add platforms
-npm install @capacitor/ios @capacitor/android
-npx cap add ios
+npx cap init MyMobileApp com.example.app
+npm install @capacitor/android @capacitor/ios
 npx cap add android
+npx cap add ios
+```
+
+```javascript
+import { Geolocation } from "@capacitor/geolocation";
+
+const printCurrentPosition = async () => {
+  const coordinates = await Geolocation.getCurrentPosition();
+  console.log("Current position:", coordinates);
+};
 ```
 
 ## Core Concepts
 
-### Plugin Usage
+### Native Bridge
 
-```typescript
-import { Camera, CameraResultType } from "@capacitor/camera";
-import { Geolocation } from "@capacitor/geolocation";
-import { LocalNotifications } from "@capacitor/local-notifications";
+Capacitor injects a native bridge into the WebView, allowing JavaScript to call Native Code (Java/Kotlin/Swift/Obj-C) asynchronously.
 
-async function takePicture() {
-  const image = await Camera.getPhoto({
-    resultType: CameraResultType.Uri,
-    quality: 90,
-  });
-  return image.webPath;
-}
+### Plugins
 
-async function getLocation() {
-  const position = await Geolocation.getCurrentPosition();
-  return {
-    lat: position.coords.latitude,
-    lng: position.coords.longitude,
-  };
-}
+Modular blocks of code that provide interface to native functionality.
 
-async function scheduleNotification() {
-  await LocalNotifications.schedule({
-    notifications: [
-      {
-        title: "Reminder",
-        body: "Check your tasks!",
-        id: 1,
-        schedule: { at: new Date(Date.now() + 3600 * 1000) },
-      },
-    ],
-  });
-}
-```
+- **Official Plugins**: Maintained by Ionic team (Camera, Filesystem).
+- **Community Plugins**: Maintained by the community.
 
-### Configuration
+### Native Project Management
 
-```typescript
-// capacitor.config.ts
-import type { CapacitorConfig } from "@capacitor/cli";
-
-const config: CapacitorConfig = {
-  appId: "com.example.app",
-  appName: "My App",
-  webDir: "dist",
-  server: {
-    androidScheme: "https",
-  },
-  plugins: {
-    SplashScreen: {
-      launchAutoHide: false,
-    },
-    Keyboard: {
-      resize: "body",
-    },
-  },
-};
-
-export default config;
-```
+Capacitor treats native projects (`android/`, `ios/`) as "source artifacts", meaning you commit them to git and use native tooling (Android Studio/Xcode) to build and configure them (permissions, icons).
 
 ## Common Patterns
 
-### Native Bridge
+### Secure Storage
 
-```typescript
-import { registerPlugin } from "@capacitor/core";
+Use `@capacitor-community/http` for secure requests (bypassing CORS) and secure storage plugins for tokens (Keychain/Keystore) instead of `localStorage`.
 
-interface MyPluginPlugin {
-  echo(options: { value: string }): Promise<{ value: string }>;
-}
+### Deep Linking
 
-const MyPlugin = registerPlugin<MyPluginPlugin>("MyPlugin");
-
-// Usage
-const result = await MyPlugin.echo({ value: "Hello" });
-```
-
-### Build & Deploy
-
-```bash
-# Sync web code to native
-npx cap sync
-
-# Open in IDE
-npx cap open ios
-npx cap open android
-
-# Live reload during dev
-npx cap run ios --livereload --external
-```
+Handle custom URL schemes (`myapp://`) for authentication redirects or opening specific content.
 
 ## Best Practices
 
 **Do**:
 
-- Use official Capacitor plugins
-- Run `cap sync` after web builds
-- Handle permissions gracefully
-- Test on real devices
+- Use **official plugins** whenever possible for long-term maintenance.
+- Sync your project frequently: `npx cap sync`.
+- Handle **Permissions** gracefully in your UI before calling native APIs.
+- Use **Live Reload** during development: `npx cap run android -l --external`.
 
 **Don't**:
 
-- Forget to sync after changes
-- Ignore platform differences
-- Skip error handling
-- Use deprecated Cordova plugins
+- Don't store sensitive data (API Keys) in JS code; use environment variables or native config.
+- Don't ignore platform differences; test on real iOS and Android devices.
+- Don't rely on `alert()`/`confirm()`; use Capacitor Dialog plugin or UI framework modals.
 
 ## Troubleshooting
 
-| Issue             | Cause           | Solution               |
-| ----------------- | --------------- | ---------------------- |
-| Plugin not found  | Not installed   | Install and sync       |
-| White screen      | Web build issue | Check webDir path      |
-| Permission denied | Not requested   | Add permission prompts |
+| Error                                  | Cause                                       | Solution                                                      |
+| :------------------------------------- | :------------------------------------------ | :------------------------------------------------------------ |
+| `Plugin not implemented`               | Plugin not installed or platform not added. | Run `npx cap sync` and check imports.                         |
+| `Cleartext HTTP traffic not permitted` | Android security preventing http requests.  | Use HTTPS or update `network_security_config.xml` (dev only). |
+| `Xcode build failed`                   | Pods out of sync or signing issue.          | `npx cap update ios` then check Signing in Xcode.             |
 
 ## References
 
 - [Capacitor Documentation](https://capacitorjs.com/docs)
-- [Capacitor Plugins](https://capacitorjs.com/docs/plugins)
+- [Capacitor Plugins](https://capacitorjs.com/docs/apis)

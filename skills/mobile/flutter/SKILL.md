@@ -1,35 +1,82 @@
 ---
 name: flutter
-description: Flutter cross-platform development with widgets, state management, and navigation. Use for .dart mobile apps.
+description: Flutter cross-platform UI toolkit with Dart. Use for mobile/web/desktop.
 ---
 
 # Flutter
 
-Cross-platform UI framework for mobile, web, and desktop.
+Flutter is Google's UI toolkit for building natively compiled applications for mobile, web, and desktop from a single codebase. It uses the Dart programming language and the Skia/Impeller graphics engine to render high-performance, pixel-perfect UIs.
 
 ## When to Use
 
-- Cross-platform mobile apps
-- Single codebase for iOS/Android
-- Custom UI with animations
-- Rapid prototyping
+- Building high-performance Android and iOS apps with a single codebase.
+- Creating custom, branded UI designs that need to look identical across platforms.
+- Developing prototypes or MVPs quickly with Hot Reload.
+- needing a solution that compiles to native code (ARM/x86) and WebAssembly.
 
 ## Quick Start
 
 ```dart
+// main.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
-void main() => runApp(const MyApp());
+void main() {
+  runApp(const MyApp());
+}
+
+// Router configuration
+final _router = GoRouter(
+  routes: [
+    GoRoute(
+      path: '/',
+      builder: (context, state) => const HomePage(),
+    ),
+  ],
+);
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text('My App')),
-        body: const Center(child: Text('Hello Flutter!')),
+    return BlocProvider(
+      create: (_) => CounterCubit(),
+      child: MaterialApp.router(
+        routerConfig: _router,
+        theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blue),
+      ),
+    );
+  }
+}
+
+// Bloc/Cubit Logic
+class CounterCubit extends Cubit<int> {
+  CounterCubit() : super(0);
+
+  void increment() => emit(state + 1);
+}
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Access state via context.read/watch or BlocBuilder
+    final count = context.select((CounterCubit cubit) => cubit.state);
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Flutter & Bloc')),
+      body: Center(
+        child: Text(
+          'Count: $count',
+          style: Theme.of(context).textTheme.headlineMedium,
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.read<CounterCubit>().increment(),
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -38,128 +85,83 @@ class MyApp extends StatelessWidget {
 
 ## Core Concepts
 
-### Widgets & State
+### Widget Tree & Element Tree
 
-```dart
-class Counter extends StatefulWidget {
-  const Counter({super.key});
+Flutter uses a reactive style where the UI is built from a tree of immutable Widgets.
 
-  @override
-  State<Counter> createState() => _CounterState();
-}
+- **Widget**: A configuration for an Element. Immutable description of part of the UI.
+- **Element**: An instantiation of a Widget at a particular location in the tree. Mutable manager of state and lifecycle.
+- **RenderObject**: The actual object that gets painted on the screen.
 
-class _CounterState extends State<Counter> {
-  int _count = 0;
+### State Management (Bloc)
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text('Count: $_count'),
-        ElevatedButton(
-          onPressed: () => setState(() => _count++),
-          child: const Text('Increment'),
-        ),
-      ],
-    );
-  }
-}
-```
+Modern Flutter apps often use the **Bloc** (Business Logic Component) pattern for separation of concerns and predictable state.
 
-### Riverpod State Management
+- **Events**: Inputs to the Bloc (e.g., button pressed).
+- **States**: Outputs from the Bloc (e.g., loading, data loaded).
+- **Bloc/Cubit**: The class that receives events and emits new states.
+- **BlocBuilder**: Widget that rebuilds in response to new states.
 
-```dart
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+### Asynchronous Programming (Isolates)
 
-final counterProvider = StateNotifierProvider<CounterNotifier, int>(
-  (ref) => CounterNotifier(),
-);
-
-class CounterNotifier extends StateNotifier<int> {
-  CounterNotifier() : super(0);
-
-  void increment() => state++;
-}
-
-// Usage
-class MyWidget extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final count = ref.watch(counterProvider);
-    return Text('Count: $count');
-  }
-}
-```
+Dart is single-threaded but event-driven. Heavy computations should be moved to background **Isolates** to avoid blocking the UI thread (jank).
 
 ## Common Patterns
 
-### Navigation with GoRouter
+### Feature-First Architecture
 
-```dart
-final router = GoRouter(
-  routes: [
-    GoRoute(
-      path: '/',
-      builder: (context, state) => const HomeScreen(),
-      routes: [
-        GoRoute(
-          path: 'user/:id',
-          builder: (context, state) => UserScreen(
-            id: state.pathParameters['id']!,
-          ),
-        ),
-      ],
-    ),
-  ],
-);
+Organize files by feature rather than by layer.
 
-// Navigate
-context.go('/user/123');
-context.push('/user/123');
+```text
+lib/
+  src/
+    features/
+      auth/
+        data/
+        domain/
+        presentation/
+          bloc/
+          views/
+      products/
+    shared/
+      components/
+      constants/
+    app.dart
+    main.dart
 ```
 
-### Async Data
+### Clean Architecture with Repositories
 
-```dart
-final userProvider = FutureProvider.autoDispose.family<User, String>(
-  (ref, userId) async {
-    return ref.read(apiProvider).fetchUser(userId);
-  },
-);
-
-// In widget
-ref.watch(userProvider(userId)).when(
-  data: (user) => UserCard(user: user),
-  loading: () => const CircularProgressIndicator(),
-  error: (error, stack) => Text('Error: $error'),
-);
-```
+- **Data Layer**: Repositories, API clients (Dio/Http), DTOs.
+- **Domain Layer**: Entities, business logic (pure Dart).
+- **Presentation Layer**: Widgets, Blocs/Cubits.
 
 ## Best Practices
 
 **Do**:
 
-- Use const constructors
-- Prefer StatelessWidget
-- Use Riverpod for state
-- Follow widget composition
+- **Use `const` constructors** everywhere possible to optimize rebuilds.
+- **Use `GoRouter`** for deep linking and declarative navigation.
+- **Use `flutter_bloc`** to separate business logic from UI.
+- **Use `ThemeData`** and `TextTheme` for consistent styling.
 
 **Don't**:
 
-- Put logic in build methods
-- Use setState for global state
-- Create deep widget trees
-- Ignore key parameters
+- **Don't put complex logic** inside `build()` methods.
+- **Don't misuse `setState`** for complex global state.
+- **Don't block the main thread**; use `compute()` for heavy JSON parsing or calculations.
 
 ## Troubleshooting
 
-| Issue               | Cause            | Solution                    |
-| ------------------- | ---------------- | --------------------------- |
-| Widget not updating | Missing setState | Use proper state management |
-| Overflow error      | Unbounded size   | Add constraints             |
-| Hot reload fails    | State corruption | Hot restart                 |
+| Error | Cause | Solution |
+140: | :--------------------------------------------- | :--------------------------------------------- | :----------------------------------------------------------- |
+141: | `RenderFlex overflowed by ... pixels` | Content is too wide/tall for the parent. | Wrap in `Expanded`, `Flexible`, or `SingleChildScrollView`. |
+142: | `ProviderNotFoundException` | Reading a Bloc without a provider up the tree. | Ensure `BlocProvider` wraps the widget trying to access it. |
+143: | `LateInitializationError` | Accessing a `late` variable before assignment. | Ensure generic initialization or use nullable types locally. |
+144: | `Vertical viewport was given unbounded height` | ListView inside Column without constraints. | Wrap ListView in `Expanded` or `SizedBox`. |
 
 ## References
 
-- [Flutter Documentation](https://flutter.dev/docs)
-- [Riverpod Documentation](https://riverpod.dev/)
+- [Official Flutter Docs](https://docs.flutter.dev)
+- [Bloc Library Documentation](https://bloclibrary.dev)
+- [Flutter Engineering](https://medium.com/flutter)

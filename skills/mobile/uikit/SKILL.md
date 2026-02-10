@@ -1,36 +1,43 @@
 ---
 name: uikit
-description: UIKit framework for iOS programmatic and storyboard UI. Use for traditional iOS development.
+description: UIKit imperative iOS UI framework. Use for iOS development.
 ---
 
 # UIKit
 
-Traditional iOS UI framework with imperative patterns.
+UIKit is the traditional, imperative framework for building iOS user interfaces. While SwiftUI is the future, UIKit remains essential for maintaining existing apps and unrestricted access to the OS.
 
 ## When to Use
 
-- Legacy iOS app maintenance
-- Complex custom animations
-- Low-level UI control
-- Bridging with SwiftUI
+- Maintaining legacy iOS codebases (Objective-C or Swift).
+- Fine-grained control over view hierarchy performance not yet possible in SwiftUI.
+- Using third-party libraries that haven't migrated to SwiftUI ViewRepresentables.
 
 ## Quick Start
 
 ```swift
-import UIKit
+// Programmatic UIKit (No Storyboards) in SceneDelegate
+func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options: UIScene.ConnectionOptions) {
+    guard let windowScene = (scene as? UIWindowScene) else { return }
+    window = UIWindow(windowScene: windowScene)
+    window?.rootViewController = UINavigationController(rootViewController: HomeViewController())
+    window?.makeKeyAndVisible()
+}
 
-class ViewController: UIViewController {
+class HomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .systemBackground
+        title = "UIKit Home"
 
-        let label = UILabel()
-        label.text = "Hello UIKit!"
-        label.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(label)
+        let button = UIButton(type: .system)
+        button.setTitle("Tap Me", for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(button)
 
         NSLayoutConstraint.activate([
-            label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            label.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            button.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            button.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
 }
@@ -38,129 +45,58 @@ class ViewController: UIViewController {
 
 ## Core Concepts
 
-### View Controllers
+### View Controller Lifecycle
 
-```swift
-class ProfileViewController: UIViewController {
-    private let nameLabel = UILabel()
-    private let avatarImageView = UIImageView()
-
-    private let user: User
-
-    init(user: User) {
-        self.user = user
-        super.init(nibName: nil, bundle: nil)
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        setupUI()
-        configure(with: user)
-    }
-
-    private func setupUI() {
-        view.backgroundColor = .systemBackground
-        // Add subviews and constraints
-    }
-
-    private func configure(with user: User) {
-        nameLabel.text = user.name
-    }
-}
-```
-
-### Table Views
-
-```swift
-class UsersViewController: UITableViewController {
-    private var users: [User] = []
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        tableView.register(UserCell.self, forCellReuseIdentifier: "UserCell")
-    }
-
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        users.count
-    }
-
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "UserCell", for: indexPath) as! UserCell
-        cell.configure(with: users[indexPath.row])
-        return cell
-    }
-}
-```
-
-## Common Patterns
-
-### Navigation
-
-```swift
-// Push
-navigationController?.pushViewController(detailVC, animated: true)
-
-// Present
-present(modalVC, animated: true)
-
-// Coordinator pattern
-protocol Coordinator {
-    var navigationController: UINavigationController { get set }
-    func start()
-}
-
-class AppCoordinator: Coordinator {
-    var navigationController: UINavigationController
-
-    func start() {
-        let vc = HomeViewController()
-        vc.onUserSelected = { [weak self] user in
-            self?.showProfile(for: user)
-        }
-        navigationController.pushViewController(vc, animated: false)
-    }
-}
-```
+Understanding `viewDidLoad`, `viewWillAppear`, `viewDidLayoutSubviews` is critical for managing state and layout updates correctly in the imperative model.
 
 ### Auto Layout
 
-```swift
-NSLayoutConstraint.activate([
-    stackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-    stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-    stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-])
-```
+The layout engine based on constraints. Use `NSLayoutConstraint` or library wrappers (SnapKit) to define rules (e.g., "A is 10px below B").
+
+### Delegates & Data Sources
+
+Common pattern for handling events (UITableViewDelegate) and providing data (UITableViewDataSource).
+
+## Common Patterns
+
+### Diffable Data Source
+
+Modern replacement for `reloadData()`.
+
+- Uses `NSDiffableDataSourceSnapshot` to animate changes automatically and safely.
+- eliminates "Index out of range" crashes during updates.
+
+### Compositional Layout
+
+Modern API for building complex collection view layouts (grids, carousels) without subclassing `UICollectionViewLayout`.
+
+### Coordinator Pattern
+
+Moving navigation logic out of ViewControllers to improve reusability and testing.
 
 ## Best Practices
 
 **Do**:
 
-- Use programmatic Auto Layout
-- Implement Coordinator pattern
-- Use composition over inheritance
-- Support Dynamic Type
+- Use **Diffable Data Sources** for Lists and Collections.
+- Use **Compositional Layouts** instead of FlowLayouts.
+- Use **View Binding** mechanisms (like Combine) to update UI, rather than manually setting properties everywhere.
 
 **Don't**:
 
-- Force unwrap UI elements
-- Block main thread
-- Ignore retain cycles
-- Mix storyboard and code
+- Don't use massive Storyboards (merge conflicts hell).
+- Don't force `layoutIfNeeded()` unless animating changes.
+- Don't forget `[weak self]` in closures to avoid memory leaks (Retain Cycles).
 
 ## Troubleshooting
 
-| Issue               | Cause               | Solution                    |
-| ------------------- | ------------------- | --------------------------- |
-| Constraint conflict | Ambiguous layout    | Check constraint priorities |
-| Memory leak         | Retain cycle        | Use weak references         |
-| UI freeze           | Main thread blocked | Move work to background     |
+| Error                       | Cause                          | Solution                                                                   |
+| :-------------------------- | :----------------------------- | :------------------------------------------------------------------------- |
+| `Unsatisfiable Constraints` | Conflicting Auto Layout rules. | Check console log for breaking constraint IDs; simplify rules.             |
+| `TableView Updates Crash`   | Inconsistent data vs rows.     | Use Diffable Data Source or ensure data model updates before `insertRows`. |
+| `Retain Cycle`              | Strong reference loop.         | Use Memory Graph Debugger; verify `[weak self]`.                           |
 
 ## References
 
-- [UIKit Documentation](https://developer.apple.com/documentation/uikit)
-- [Human Interface Guidelines](https://developer.apple.com/design/)
+- [Apple UIKit Documentation](https://developer.apple.com/documentation/uikit)
+- [Modern UIKit Patterns](https://developer.apple.com/videos/play/wwdc2020/10097/)
