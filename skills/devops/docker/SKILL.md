@@ -1,159 +1,64 @@
 ---
 name: docker
-description: Docker containerization with Dockerfile, Compose, multi-stage builds, and production optimization. Use for containers.
+description: Docker containerization with Dockerfile, Compose, and multi-stage builds. Use for containers.
 ---
 
 # Docker
 
-Container platform for building, shipping, and running applications.
+Docker standardizes software delivery by packaging apps into containers. In 2025, Docker emphasizes **BuildKit** for high-performance builds and **Docker Scout** for supply chain security.
 
 ## When to Use
 
-- Containerizing applications
-- Development environment consistency
-- Microservices deployment
-- CI/CD pipelines
+- **Local Development**: Replicate production environments locally (`docker compose`).
+- **CI/CD**: Standard unit of deployment for 99% of modern pipelines.
+- **Legacy Migration**: Wrap old apps in containers to extend their life.
 
-## Quick Start
+## Quick Start (BuildKit)
 
 ```dockerfile
-# Multi-stage build
-FROM node:20-alpine AS builder
+# syntax=docker/dockerfile:1
+FROM node:22-alpine AS base
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
 
-FROM node:20-alpine
-WORKDIR /app
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-USER node
-EXPOSE 3000
-CMD ["node", "dist/server.js"]
+FROM base AS deps
+RUN npm ci
+
+FROM base AS release
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+CMD ["node", "index.js"]
 ```
 
 ## Core Concepts
 
-### Dockerfile Best Practices
+### BuildKit
 
-```dockerfile
-FROM python:3.12-slim
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+The modern build engine (default in 2025). Features concurrent build steps, secret mounting, and cache exports.
+`DOCKER_BUILDKIT=1 docker build .`
 
-WORKDIR /app
+### Multi-stage Builds
 
-# Install dependencies first (better caching)
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Create non-root user
-RUN adduser --disabled-password appuser
-USER appuser
-
-COPY --chown=appuser:appuser . .
-
-EXPOSE 8000
-CMD ["gunicorn", "main:app", "-b", "0.0.0.0:8000"]
-```
+Keep images tiny by separating "build" environment (compilers, SDKs) from "runtime" environment (minimal OS).
 
 ### Docker Compose
 
-```yaml
-version: "3.9"
+Define multi-container apps.
+`docker compose up -d --watch` (New `watch` mode syncs files continuously).
 
-services:
-  app:
-    build:
-      context: .
-      target: development
-    volumes:
-      - .:/app
-      - /app/node_modules
-    ports:
-      - "3000:3000"
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/app
-    depends_on:
-      db:
-        condition: service_healthy
-
-  db:
-    image: postgres:16-alpine
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_PASSWORD: postgres
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-volumes:
-  postgres_data:
-```
-
-## Common Patterns
-
-### Layer Optimization
-
-```dockerfile
-# Order layers by change frequency
-COPY package*.json ./           # Changes less often
-RUN npm ci
-COPY . .                        # Changes more often
-
-# Combine RUN commands
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl && \
-    rm -rf /var/lib/apt/lists/*
-```
-
-### Common Commands
-
-```bash
-# Build
-docker build -t myapp .
-docker build --target production -t myapp:prod .
-
-# Run
-docker run -d --name myapp -p 3000:3000 myapp
-docker run -it --rm myapp sh
-
-# Compose
-docker compose up -d
-docker compose logs -f app
-docker compose down -v
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use multi-stage builds
-- Run as non-root user
-- Use specific base image tags
-- Include health checks
+- **Use `docker init`**: Generates best-practice Dockerfiles and .dockerignore for your language.
+- **Use Distroless / Alpine**: Minimize attack surface.
+- **Scan with Docker Scout**: Check for CVEs early in the pipeline.
 
 **Don't**:
 
-- Use `latest` tag
-- Run as root in production
-- Copy unnecessary files
-- Ignore .dockerignore
-
-## Troubleshooting
-
-| Issue           | Cause            | Solution                           |
-| --------------- | ---------------- | ---------------------------------- |
-| Build slow      | No layer caching | Order commands by change frequency |
-| Image too large | No multi-stage   | Use multi-stage builds             |
-| Container exits | Process crashes  | Check logs, add healthcheck        |
+- **Don't run as Root**: Use `USER node` or create a specific user in the Dockerfile.
+- **Don't leak secrets**: Use `--mount=type=secret` during build, never `COPY .env`.
 
 ## References
 
 - [Docker Documentation](https://docs.docker.com/)
-- [Docker Best Practices](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/)

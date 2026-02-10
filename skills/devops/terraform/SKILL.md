@@ -5,156 +5,56 @@ description: Terraform infrastructure as code with providers and state managemen
 
 # Terraform
 
-Infrastructure as Code for provisioning cloud resources.
+Terraform is the world's most popular Infrastructure as Code (IaC) tool. It uses HCL to provision resources on any cloud. 2025 introduces **Terraform Stacks** for easier component management.
 
 ## When to Use
 
-- Multi-cloud infrastructure
-- Reproducible environments
-- Infrastructure versioning
-- Team collaboration on infra
+- **Provisioning**: Creating VPCs, Databases, K8s Clusters.
+- **Multi-Cloud**: Learn one syntax (HCL), use it for AWS, Azure, GCP, Datadog, etc.
+- **State Management**: It tracks resource state, allowing "Plan" (preview) and "Apply".
 
 ## Quick Start
 
 ```hcl
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
-}
-
+# main.tf
 provider "aws" {
-  region = "us-east-1"
+  region = "us-west-2"
 }
 
-resource "aws_instance" "web" {
-  ami           = "ami-0c55b159cbfafe1f0"
-  instance_type = "t3.micro"
-
+resource "aws_s3_bucket" "b" {
+  bucket = "my-tf-test-bucket"
   tags = {
-    Name = "WebServer"
+    Name = "My bucket"
   }
 }
 ```
 
 ## Core Concepts
 
-### Variables & Outputs
+### Providers
 
-```hcl
-# variables.tf
-variable "environment" {
-  type        = string
-  description = "Environment name"
-  default     = "dev"
-}
+Plugins that talk to APIs (AWS, Azure, Kubernetes).
 
-variable "instance_config" {
-  type = object({
-    type  = string
-    count = number
-  })
-  default = {
-    type  = "t3.micro"
-    count = 1
-  }
-}
+### State
 
-# outputs.tf
-output "instance_ip" {
-  value       = aws_instance.web.public_ip
-  description = "Public IP of the instance"
-}
-```
+`terraform.tfstate`. The source of truth mapping your code to real-world resource IDs. Must be stored remotely (S3 + DynamoDB Locking) in teams.
 
-### Modules
+### Stacks (2025)
 
-```hcl
-# modules/vpc/main.tf
-resource "aws_vpc" "main" {
-  cidr_block = var.cidr_block
+A new layer above Modules. Allows defined dependencies between deployments (e.g., Deploy VPC, _then_ Deploy K8s using VPC ID output).
 
-  tags = {
-    Name        = var.name
-    Environment = var.environment
-  }
-}
-
-# main.tf
-module "vpc" {
-  source      = "./modules/vpc"
-  name        = "production"
-  cidr_block  = "10.0.0.0/16"
-  environment = "prod"
-}
-```
-
-## Common Patterns
-
-### Remote State
-
-```hcl
-terraform {
-  backend "s3" {
-    bucket         = "my-terraform-state"
-    key            = "prod/terraform.tfstate"
-    region         = "us-east-1"
-    encrypt        = true
-    dynamodb_table = "terraform-locks"
-  }
-}
-```
-
-### Common Commands
-
-```bash
-# Initialize
-terraform init
-
-# Plan changes
-terraform plan -out=tfplan
-
-# Apply changes
-terraform apply tfplan
-
-# Destroy
-terraform destroy
-
-# Format
-terraform fmt -recursive
-
-# Validate
-terraform validate
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use remote state with locking
-- Use modules for reusability
-- Pin provider versions
-- Use workspaces for environments
+- **Use Remote State**: S3 backend or Terraform Cloud. Never local state.
+- **Use Modules**: DRY. Write a "Company Standard Bucket" module and reuse it.
+- **Use `tfsec` / `trivy`**: Scan HCL for misconfigurations (open security groups) before deploy.
 
 **Don't**:
 
-- Store secrets in state
-- Commit .tfstate files
-- Skip plan before apply
-- Use hardcoded values
-
-## Troubleshooting
-
-| Issue          | Cause            | Solution           |
-| -------------- | ---------------- | ------------------ |
-| State lock     | Concurrent apply | Check/force-unlock |
-| Drift detected | Manual changes   | Import or refresh  |
-| Provider error | Version mismatch | Pin versions       |
+- **Don't hardcode secrets**: Use `variable "db_password" {}` and pass it via `TF_VAR_` or a secret manager.
 
 ## References
 
-- [Terraform Documentation](https://developer.hashicorp.com/terraform/docs)
-- [Terraform Registry](https://registry.terraform.io/)
+- [Terraform Documentation](https://developer.hashicorp.com/terraform)
