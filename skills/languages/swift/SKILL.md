@@ -1,6 +1,6 @@
 ---
 name: swift
-description: Swift development best practices including protocol-oriented programming, async/await concurrency, SwiftUI patterns, and testing. Use for .swift files.
+description: Swift development for iOS/macOS with SwiftUI, async/await, and Combine. Use for .swift files.
 ---
 
 # Swift

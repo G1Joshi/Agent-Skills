@@ -1,6 +1,6 @@
 ---
 name: kotlin
-description: Kotlin programming with coroutines, null safety, extension functions, and Android/JVM development patterns. Use for .kt files.
+description: Kotlin programming for Android, coroutines, and JVM development. Use for .kt files.
 ---
 
 # Kotlin

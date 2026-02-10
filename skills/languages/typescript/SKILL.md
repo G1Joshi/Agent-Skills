@@ -1,6 +1,6 @@
 ---
 name: typescript
-description: TypeScript best practices including advanced types, generics, type guards, utility types, and patterns for type-safe applications. Use for .ts files.
+description: TypeScript static typing with interfaces, generics, decorators, and type inference. Use for .ts files.
 ---
 
 # TypeScript
