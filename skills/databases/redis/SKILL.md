@@ -5,137 +5,56 @@ description: Redis in-memory cache, pub/sub, streams, and data structures. Use f
 
 # Redis
 
-In-memory data store for caching, sessions, pub/sub, and real-time features.
+Redis (Remote Dictionary Server) is an in-memory data structure store, used as a database, cache, and message broker. It is incredibly fast.
 
 ## When to Use
 
-- Caching frequently accessed data
-- Session storage
-- Real-time leaderboards/counters
-- Pub/sub messaging
-- Rate limiting
+- **Caching**: The #1 use case. Cache HTML, JSON, or DB results.
+- **Session Store**: User sessions (speed + automatic expiry).
+- **Queues**: Simple background job queues using Lists (`LPUSH`/`RPOP`).
+- **Real-time**: Leaderboards, Counting, Pub/Sub.
 
 ## Quick Start
 
 ```bash
-# String operations
-SET user:1 '{"name":"John"}' EX 3600
-GET user:1
+# Set a value with 10 second expiry
+SET session:123 "active" EX 10
 
-# Hash operations
-HSET user:1 name "John" email "john@example.com"
-HGETALL user:1
+# Increment a counter atomically
+INCR page:views
+
+# Store a hash (object)
+HSET user:100 name "Jeevan" role "admin"
 ```
 
 ## Core Concepts
 
+### Single Threaded
+
+Redis uses a main single thread. Requests are processed sequentially, atomic by design. (Though I/O threading runs in background).
+
+### Persistence (RDB vs AOF)
+
+- **RDB**: Snapshots every X minutes. Fast restart, potential data loss.
+- **AOF**: Logs every write. Slower, better durability.
+
 ### Data Structures
 
-```bash
-# Strings
-SET key "value"
-INCR counter
-SETEX session:abc "token" 3600
+Strings, Lists, Sets, Sorted Sets (`ZSET`), Hashes, Bitmaps, HyperLogLogs, Geospatial, Streams.
 
-# Hashes
-HSET user:1 name "John" age 30
-HGET user:1 name
-HINCRBY user:1 age 1
-
-# Lists
-LPUSH queue:tasks "task1"
-RPOP queue:tasks
-LRANGE queue:tasks 0 -1
-
-# Sets
-SADD tags:post:1 "redis" "database"
-SMEMBERS tags:post:1
-SINTER tags:post:1 tags:post:2
-
-# Sorted Sets
-ZADD leaderboard 100 "player1" 85 "player2"
-ZREVRANGE leaderboard 0 9 WITHSCORES
-ZINCRBY leaderboard 5 "player1"
-```
-
-### Caching Patterns
-
-```python
-# Cache-aside pattern
-def get_user(user_id):
-    # Try cache first
-    cached = redis.get(f"user:{user_id}")
-    if cached:
-        return json.loads(cached)
-
-    # Cache miss - fetch from DB
-    user = db.query(User).get(user_id)
-
-    # Store in cache
-    redis.setex(f"user:{user_id}", 3600, json.dumps(user))
-    return user
-
-# Write-through
-def update_user(user_id, data):
-    db.update(User, user_id, data)
-    redis.setex(f"user:{user_id}", 3600, json.dumps(data))
-```
-
-## Common Patterns
-
-### Pub/Sub
-
-```python
-# Publisher
-redis.publish("events", json.dumps({"type": "user_created", "id": 123}))
-
-# Subscriber
-pubsub = redis.pubsub()
-pubsub.subscribe("events")
-for message in pubsub.listen():
-    if message["type"] == "message":
-        handle_event(json.loads(message["data"]))
-```
-
-### Rate Limiting
-
-```python
-def rate_limit(key, limit, window):
-    current = redis.incr(key)
-    if current == 1:
-        redis.expire(key, window)
-    return current <= limit
-
-# Usage
-if not rate_limit(f"api:{user_id}", 100, 60):
-    raise RateLimitExceeded()
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use appropriate data structures
-- Set TTL on cache keys
-- Use pipelining for bulk operations
-- Enable persistence for durability
+- **Use Redis Stack**: Includes extensions like RediSearch (`FT.SEARCH`), RedisJSON, and Bloom Filters.
+- **Use Connection Pooling**: Opening connections is expensive.
+- **Set `maxmemory-policy`**: Configure what happens when RAM is full (e.g., `allkeys-lru` to delete old data).
 
 **Don't**:
 
-- Store large objects (> 1MB)
-- Use KEYS command in production
-- Forget to handle connection failures
-- Use single Redis for everything
-
-## Troubleshooting
-
-| Issue              | Cause                | Solution                 |
-| ------------------ | -------------------- | ------------------------ |
-| Memory full        | No eviction policy   | Set maxmemory-policy     |
-| Slow commands      | Large key operations | Use SCAN instead of KEYS |
-| Connection timeout | Network/overload     | Use connection pooling   |
+- **Don't use `KEYS *`**: It blocks the server scanning all keys. Use `SCAN`.
+- **Don't store huge values**: Redis is for small, fast data.
 
 ## References
 
 - [Redis Documentation](https://redis.io/docs/)
-- [Redis Best Practices](https://redis.io/docs/management/optimization/)

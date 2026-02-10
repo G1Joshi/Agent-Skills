@@ -3,136 +3,67 @@ name: firebase
 description: Firebase Realtime Database and Firestore for mobile/web sync. Use for real-time apps.
 ---
 
-# Firebase
+# Firebase (Firestore & Realtime Database)
 
-Real-time database and backend services for mobile and web applications.
+Firebase provides two NoSQL databases:
+
+1.  **Cloud Firestore**: The newer, recommended scalable database.
+2.  **Realtime Database**: The original low-latency JSON tree sync.
 
 ## When to Use
 
-- Real-time data synchronization
-- Mobile app backend
-- Serverless applications
-- Rapid prototyping
+- **Mobile Apps**: Best-in-class integration with Android/iOS/Flutter.
+- **Realtime Sync**: Chat apps, live dashboards.
+- **Offline Support**: Outstanding offline SDK capabilities.
 
-## Quick Start
+## Quick Start (Firestore)
 
 ```javascript
-import { initializeApp } from "firebase/app";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  onSnapshot,
-} from "firebase/firestore";
+import { getFirestore, collection, addDoc } from "firebase/firestore";
 
-const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // Add document
 await addDoc(collection(db, "users"), {
-  name: "John",
-  email: "john@example.com",
-  createdAt: new Date(),
+  first: "Ada",
+  last: "Lovelace",
+  born: 1815,
 });
 ```
 
 ## Core Concepts
 
-### Firestore Queries
-
-```javascript
-import { query, where, orderBy, limit, getDocs } from "firebase/firestore";
-
-// Complex query
-const q = query(
-  collection(db, "posts"),
-  where("status", "==", "published"),
-  where("authorId", "==", userId),
-  orderBy("createdAt", "desc"),
-  limit(10),
-);
-
-const snapshot = await getDocs(q);
-snapshot.forEach((doc) => console.log(doc.data()));
-
-// Real-time listener
-const unsubscribe = onSnapshot(q, (snapshot) => {
-  snapshot.docChanges().forEach((change) => {
-    if (change.type === "added") console.log("New:", change.doc.data());
-  });
-});
-```
-
 ### Security Rules
 
+Since you access Firebase from the client, you write JSON-like rules to secure it.
+
 ```javascript
-rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users can only read/write their own data
     match /users/{userId} {
       allow read, write: if request.auth.uid == userId;
-    }
-
-    // Public read, authenticated write
-    match /posts/{postId} {
-      allow read: if true;
-      allow create: if request.auth != null;
-      allow update, delete: if request.auth.uid == resource.data.authorId;
     }
   }
 }
 ```
 
-## Common Patterns
+### Realtime Updates
 
-### Data Modeling
+Listeners (`onSnapshot`) keep UI in sync automatically.
 
-```javascript
-// Subcollections for 1:many
-// users/{userId}/posts/{postId}
-await addDoc(collection(db, "users", userId, "posts"), postData);
-
-// Denormalization for queries
-const post = {
-  title: "My Post",
-  authorId: userId,
-  authorName: user.name, // Denormalized
-  createdAt: serverTimestamp(),
-};
-
-// Batched writes
-const batch = writeBatch(db);
-batch.set(doc(db, "users", id), userData);
-batch.update(doc(db, "stats", "users"), { count: increment(1) });
-await batch.commit();
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use security rules (never leave open)
-- Design data for query patterns
-- Use batched writes for atomicity
-- Enable offline persistence
+- **Use Firestore Preferentially**: It queries and scales better than Realtime DB.
+- **Use Cloud Functions**: For backend logic (sending emails, sanitizing text) triggered by DB events.
+- **Denormalize**: Duplicate data to avoid excessive reads (No joins in Firestore).
 
 **Don't**:
 
-- Store sensitive data without rules
-- Create deeply nested data
-- Over-fetch with listeners
-- Ignore billing alerts
-
-## Troubleshooting
-
-| Issue             | Cause                   | Solution             |
-| ----------------- | ----------------------- | -------------------- |
-| Permission denied | Security rules          | Check auth and rules |
-| Slow queries      | Missing composite index | Create in console    |
-| High reads bill   | Real-time over-fetching | Use pagination       |
+- **Don't use sequential keys**: Use auto-generated IDs.
+- **Don't ignore index limits**: Firestore requires composite indexes for sorting/filtering on multiple fields.
 
 ## References
 
 - [Firebase Documentation](https://firebase.google.com/docs)
-- [Firestore Best Practices](https://firebase.google.com/docs/firestore/best-practices)

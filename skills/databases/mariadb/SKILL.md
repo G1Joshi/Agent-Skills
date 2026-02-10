@@ -5,133 +5,54 @@ description: MariaDB MySQL-compatible database with Galera clustering. Use for M
 
 # MariaDB
 
-MySQL-compatible database with enhanced features and Galera clustering.
+MariaDB is a fork of MySQL, created by the original developers of MySQL. It is guaranteed to stay open source. It lists features that MySQL doesn't have, or adds them faster.
 
 ## When to Use
 
-- MySQL-compatible applications
-- High-availability setups with Galera
-- Drop-in MySQL replacement
-- Open-source enterprise databases
+- **MySQL Compatible**: Drop-in replacement for MySQL.
+- **Open Source**: If you prefer GPL over Oracle's dual license.
+- **Advanced Features**: Flashback, Sequences, Dynamic Columns (NoSQL), Spider Engine (Sharding).
 
 ## Quick Start
 
-```sql
--- Create table (MySQL compatible)
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
+Same as MySQL usually.
 
--- MariaDB-specific features
-CREATE TABLE events (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    data JSON NOT NULL,
-    created_at TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6)
-);
+```sql
+-- System-Versioned Tables (Time Travel)
+CREATE TABLE t (
+  x INT,
+  PERIOD FOR SYSTEM_TIME (ts_start, ts_end)
+) WITH SYSTEM VERSIONING;
+
+-- Query history
+SELECT * FROM t FOR SYSTEM_TIME AS OF TIMESTAMP '2024-01-01 00:00:00';
 ```
 
 ## Core Concepts
 
-### JSON Support
+### Storage Engines
 
-```sql
--- Store JSON data
-INSERT INTO products (data) VALUES (
-    '{"name": "Laptop", "specs": {"ram": 16, "storage": 512}}'
-);
+MariaDB supports many more engines out of the box than MySQL:
 
--- Query JSON
-SELECT
-    JSON_VALUE(data, '$.name') as name,
-    JSON_VALUE(data, '$.specs.ram') as ram
-FROM products
-WHERE JSON_VALUE(data, '$.specs.ram') > 8;
+- **Aria**: Crash-safe replacement for MyISAM.
+- **ColumnStore**: For analytics (Columnar storage).
+- **Spider**: For database sharding.
 
--- JSON table functions
-SELECT * FROM products,
-    JSON_TABLE(data, '$' COLUMNS(
-        name VARCHAR(100) PATH '$.name',
-        ram INT PATH '$.specs.ram'
-    )) AS jt;
-```
+### Galera Cluster
 
-### Window Functions
+Synchronous multi-master replication. Available in MariaDB by default.
 
-```sql
-SELECT
-    customer_id,
-    order_date,
-    amount,
-    SUM(amount) OVER (
-        PARTITION BY customer_id
-        ORDER BY order_date
-        ROWS UNBOUNDED PRECEDING
-    ) as running_total,
-    ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date) as order_num
-FROM orders;
-```
-
-## Common Patterns
-
-### Galera Cluster Setup
-
-```ini
-# my.cnf for Galera
-[galera]
-wsrep_on=ON
-wsrep_provider=/usr/lib/galera/libgalera_smm.so
-wsrep_cluster_address="gcomm://node1,node2,node3"
-wsrep_cluster_name="my_cluster"
-wsrep_node_address="node1_ip"
-wsrep_node_name="node1"
-wsrep_sst_method=rsync
-binlog_format=ROW
-```
-
-### Sequence Engine
-
-```sql
--- Generate sequences
-SELECT seq FROM seq_1_to_10;  -- 1,2,3...10
-SELECT seq FROM seq_0_to_100_step_5;  -- 0,5,10...100
-
--- Use in joins for reporting
-SELECT
-    d.seq as day,
-    COALESCE(COUNT(o.id), 0) as orders
-FROM seq_1_to_31 d
-LEFT JOIN orders o ON DAY(o.created_at) = d.seq
-GROUP BY d.seq;
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use InnoDB engine by default
-- Enable binary logging for replication
-- Use utf8mb4 charset
-- Monitor Galera cluster state
+- **Use Vector Search (2025)**: MariaDB Enterprise 2025 adds native vector search for AI RAG apps.
+- **Use Thread Pooling**: Enabled by default in MariaDB (unlike safe MySQL), handling high connection counts efficiently.
 
 **Don't**:
 
-- Mix storage engines in transactions
-- Use MyISAM for new tables
-- Ignore wsrep\_\* status variables
-- Skip backup testing
-
-## Troubleshooting
-
-| Issue         | Cause                         | Solution                   |
-| ------------- | ----------------------------- | -------------------------- |
-| Cluster split | Network partition             | Check wsrep_cluster_status |
-| SST slow      | Large dataset                 | Use xtrabackup SST         |
-| Deadlock      | Galera certification conflict | Retry transaction          |
+- **Don't assume 100% MySQL parity**: While mostly compatible, new JSON functions and optimizers diverge. Check the specific version docs (11.x).
 
 ## References
 
-- [MariaDB Documentation](https://mariadb.com/kb/)
-- [Galera Cluster](https://galeracluster.com/library/)
+- [MariaDB Knowledge Base](https://mariadb.com/kb/en/)
