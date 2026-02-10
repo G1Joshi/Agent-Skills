@@ -5,140 +5,56 @@ description: Django Python full-stack framework with ORM, admin, and auth. Use f
 
 # Django
 
-Python full-stack web framework with batteries included.
+Django is a high-level Python web framework that encourages rapid development and clean, pragmatic design. Django 5.0 (2025) introduces database-computed default values and expanded async support.
 
 ## When to Use
 
-- Full-stack Python web applications
-- Content management systems
-- Admin interfaces
-- Rapid prototyping with ORM
+- **Perfectionists with deadlines**: The "batteries-included" philosophy means Auth, Admin, and ORM are ready day one.
+- **Data-Driven Apps**: The Django Admin is still the best auto-generated admin interface in the industry.
+- **Enterprise**: Security features (CSRF, SQL Injection protection) are best-in-class.
 
 ## Quick Start
 
 ```python
-# views.py
-from django.http import JsonResponse
-from .models import User
+# models.py
+from django.db import models
 
-def user_list(request):
-    users = User.objects.filter(is_active=True).values('id', 'name', 'email')
-    return JsonResponse(list(users), safe=False)
-
-# urls.py
-from django.urls import path
-from . import views
-
-urlpatterns = [
-    path('api/users/', views.user_list),
-]
+class Post(models.Model):
+    title = models.CharField(max_length=200)
+    # New in 5.0: Database generated field
+    slug = models.GeneratedField(
+        expression=models.functions.Concat(models.F("title"), models.Value("-slug")),
+        output_field=models.CharField(max_length=205),
+        db_persist=True,
+    )
 ```
 
 ## Core Concepts
 
-### Models
+### MTV Architecture
 
-```python
-from django.db import models
+Model (Data), Template (Presentation), View (Business Logic).
 
-class User(models.Model):
-    email = models.EmailField(unique=True)
-    name = models.CharField(max_length=100)
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+### The ORM
 
-    class Meta:
-        ordering = ['-created_at']
+Powerful abstraction over SQL. `Post.objects.filter(pub_date__year=2025)`.
 
-    def __str__(self):
-        return self.name
+### Async Django
 
-class Post(models.Model):
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
-    title = models.CharField(max_length=200)
-    content = models.TextField()
-    published = models.BooleanField(default=False)
+Django 5 supports async views, ORM calls (`aget_object_or_404`), and Auth methods (`alogin`).
 
-    class Meta:
-        indexes = [
-            models.Index(fields=['author', 'published']),
-        ]
-```
-
-### QuerySets
-
-```python
-# Efficient queries
-users = User.objects.filter(
-    is_active=True,
-    posts__published=True
-).select_related('profile').prefetch_related('posts').distinct()
-
-# Aggregation
-from django.db.models import Count, Avg
-
-stats = User.objects.annotate(
-    post_count=Count('posts'),
-    avg_views=Avg('posts__views')
-).filter(post_count__gt=5)
-
-# F expressions for DB-level operations
-from django.db.models import F
-
-Post.objects.filter(id=post_id).update(views=F('views') + 1)
-```
-
-## Common Patterns
-
-### Class-Based Views
-
-```python
-from django.views.generic import ListView, DetailView, CreateView
-from django.contrib.auth.mixins import LoginRequiredMixin
-
-class PostListView(ListView):
-    model = Post
-    template_name = 'posts/list.html'
-    paginate_by = 10
-
-    def get_queryset(self):
-        return Post.objects.filter(published=True).select_related('author')
-
-class PostCreateView(LoginRequiredMixin, CreateView):
-    model = Post
-    fields = ['title', 'content']
-    success_url = '/posts/'
-
-    def form_valid(self, form):
-        form.instance.author = self.request.user
-        return super().form_valid(form)
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use select_related/prefetch_related
-- Use F() and Q() for complex queries
-- Implement proper permissions
-- Use Django REST Framework for APIs
+- **Use `GeneratedField`**: Let the database handle computed columns instead of Python properties for better performance.
+- **Use Async Views**: For I/O bound tasks (calling external APIs), use `async def view(request):`.
+- **Use `django-ninja`**: For building APIs, it's faster and cleaner than DRF (Django Rest Framework) and uses Pydantic.
 
 **Don't**:
 
-- Query in templates (N+1)
-- Store secrets in settings.py
-- Skip migrations in production
-- Use raw SQL without parameterization
-
-## Troubleshooting
-
-| Issue              | Cause            | Solution                    |
-| ------------------ | ---------------- | --------------------------- |
-| N+1 queries        | Missing prefetch | Add select/prefetch_related |
-| Migration conflict | Parallel changes | Merge migrations            |
-| CSRF error         | Missing token    | Add {% csrf_token %}        |
+- **Don't put logic in templates**: Keep templates dumb. Put logic in Models or Services.
 
 ## References
 
-- [Django Documentation](https://docs.djangoproject.com/)
-- [Django REST Framework](https://www.django-rest-framework.org/)
+- [Django Documentation](https://www.djangoproject.com/)

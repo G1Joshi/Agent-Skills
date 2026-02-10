@@ -5,14 +5,13 @@ description: FastAPI Python async framework with Pydantic and automatic OpenAPI.
 
 # FastAPI
 
-Modern Python async web framework with automatic API documentation.
+FastAPI is a modern, fast (high-performance), web framework for building APIs with Python 3.8+ based on standard Python type hints. It is one of the fastest Python frameworks available.
 
 ## When to Use
 
-- Building REST APIs
-- High-performance async services
-- APIs with automatic documentation
-- Microservices with Python
+- **APIs**: The default choice for modern Python APIs.
+- **Machine Learning**: Native integration with Pydantic makes JSON <-> Model interaction seamless.
+- **Performance**: Built on Starlette and Pydantic v2, it rivals Node.js and Go in benchmarks.
 
 ## Quick Start
 
@@ -22,135 +21,42 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-class User(BaseModel):
+class Item(BaseModel):
     name: str
-    email: str
+    price: float
 
-@app.get("/users/{user_id}")
-async def get_user(user_id: int) -> User:
-    return await db.get_user(user_id)
-
-@app.post("/users", status_code=201)
-async def create_user(user: User) -> User:
-    return await db.create_user(user)
+@app.post("/items/")
+async def create_item(item: Item):
+    return {"name": item.name, "price": item.price}
 ```
 
 ## Core Concepts
 
 ### Pydantic Models
 
-```python
-from pydantic import BaseModel, Field, EmailStr
-from datetime import datetime
-
-class UserBase(BaseModel):
-    name: str = Field(..., min_length=1, max_length=100)
-    email: EmailStr
-
-class UserCreate(UserBase):
-    password: str = Field(..., min_length=8)
-
-class UserResponse(UserBase):
-    id: int
-    created_at: datetime
-
-    class Config:
-        from_attributes = True  # For ORM mode
-```
+Define data shape using Python classes. Validation and JSON serialization happen automatically.
 
 ### Dependency Injection
 
-```python
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+FastAPI has a powerful DI system.
+`async def read_users(db: Session = Depends(get_db)):`.
 
-oauth2 = OAuth2PasswordBearer(tokenUrl="token")
+### OpenAPI (Swagger)
 
-async def get_current_user(token: str = Depends(oauth2)) -> User:
-    user = await verify_token(token)
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    return user
+Automatically generates interactive API documentation at `/docs`.
 
-async def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-@app.get("/me")
-async def get_me(user: User = Depends(get_current_user)) -> UserResponse:
-    return user
-```
-
-## Common Patterns
-
-### Router Organization
-
-```python
-# routers/users.py
-from fastapi import APIRouter, Depends
-
-router = APIRouter(prefix="/users", tags=["users"])
-
-@router.get("/")
-async def list_users(
-    skip: int = 0,
-    limit: int = 100,
-    db: Session = Depends(get_db)
-) -> list[UserResponse]:
-    return await crud.get_users(db, skip=skip, limit=limit)
-
-# main.py
-from routers import users, posts
-app.include_router(users.router)
-app.include_router(posts.router)
-```
-
-### Error Handling
-
-```python
-from fastapi import HTTPException
-from fastapi.responses import JSONResponse
-
-class NotFoundError(Exception):
-    def __init__(self, resource: str):
-        self.resource = resource
-
-@app.exception_handler(NotFoundError)
-async def not_found_handler(request, exc):
-    return JSONResponse(
-        status_code=404,
-        content={"detail": f"{exc.resource} not found"}
-    )
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use Pydantic for validation
-- Use dependency injection
-- Use async for I/O operations
-- Organize with routers
+- **Use Pydantic v2**: Ensure you are on v2 for the massive Rust-based performance boost.
+- **Use `lifespan`**: Use the new `lifespan` context manager for startup/shutdown events instead of deprecated `on_event`.
+- **Type Everything**: The more you type, the better the auto-generated docs and validation.
 
 **Don't**:
 
-- Block the event loop
-- Skip input validation
-- Return ORM models directly
-- Ignore error handling
-
-## Troubleshooting
-
-| Issue                | Cause           | Solution             |
-| -------------------- | --------------- | -------------------- |
-| 422 Validation Error | Schema mismatch | Check Pydantic model |
-| Slow response        | Blocking I/O    | Use async operations |
-| Circular import      | Router imports  | Use late binding     |
+- **Don't block the loop**: Run CPU bound code (image processing, heavy math) in `def` endpoints (threadpool), not `async def` (event loop), or use background tasks.
 
 ## References
 
 - [FastAPI Documentation](https://fastapi.tiangolo.com/)
-- [Pydantic Documentation](https://docs.pydantic.dev/)

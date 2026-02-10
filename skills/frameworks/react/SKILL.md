@@ -1,161 +1,92 @@
 ---
 name: react
-description: React component-based UI with hooks, context, state management, and performance optimization. Use for .jsx/.tsx files.
+description: React component-based UI with hooks, context, and state management. Use for .jsx/.tsx files.
 ---
 
 # React
 
-Component-based UI library with hooks, state management, and modern patterns.
+React is the standard library for building user interfaces. React 19 (2025) introduces a new era with the React Compiler, Server Components, and Actions.
 
 ## When to Use
 
-- Building interactive web UIs
-- Single-page applications
-- Component libraries
-- Server-side rendered apps (with Next.js)
+- **Single Page Apps (SPA)**: Rich, interactive dashboards.
+- **Complex UI**: Applications with many moving parts and state.
+- **Ecosystem**: When you need the largest library of 3rd party components.
 
-## Quick Start
+## Quick Start (React 19)
 
 ```tsx
-import { useState } from "react";
+import { use, Suspense } from "react";
 
-interface Props {
-  initialCount?: number;
+// New: 'use' hook for promises
+function Comments({ commentsPromise }) {
+  const comments = use(commentsPromise);
+  return comments.map((c) => <p key={c.id}>{c.text}</p>);
 }
 
-export function Counter({ initialCount = 0 }: Props) {
-  const [count, setCount] = useState(initialCount);
+export default function Page({ id }) {
+  const commentsPromise = fetchComments(id);
 
-  return <button onClick={() => setCount((c) => c + 1)}>Count: {count}</button>;
+  return (
+    <Suspense fallback={<p>Loading...</p>}>
+      <Comments commentsPromise={commentsPromise} />
+    </Suspense>
+  );
 }
 ```
 
 ## Core Concepts
 
-### Hooks
+### React Compiler
+
+React 19 introduces an auto-memoizing compiler. You no longer need `useMemo` or `useCallback` manually in 99% of cases. The compiler treats code as "memoized by default".
+
+### Server Components (RSC)
+
+Components that run _only_ on the server. They don't send JS to the client.
+
+- **`'use server'`**: Marks a function as a Server Action (callable from client).
+- **`'use client'`**: Marks a component as interactive (hydrated on client).
+
+### Actions and `useActionState`
+
+Native support for async form submission.
 
 ```tsx
-import { useState, useEffect, useCallback, useMemo } from "react";
-
-function UserProfile({ userId }: { userId: string }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      const data = await fetchUser(userId);
-      if (!cancelled) {
-        setUser(data);
-        setLoading(false);
-      }
-    }
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [userId]);
-
-  const displayName = useMemo(
-    () => (user ? `${user.firstName} ${user.lastName}` : ""),
-    [user],
-  );
-
-  const handleSave = useCallback(
-    async (updates: Partial<User>) => {
-      await updateUser(userId, updates);
+function Form() {
+  const [error, submitAction, isPending] = useActionState(
+    async (prev, formData) => {
+      const error = await updateProfile(formData);
+      if (error) return error;
+      return null;
     },
-    [userId],
+    null,
   );
 
-  if (loading) return <Spinner />;
-  return <ProfileForm user={user} onSave={handleSave} />;
-}
-```
-
-### Custom Hooks
-
-```tsx
-function useLocalStorage<T>(key: string, initial: T) {
-  const [value, setValue] = useState<T>(() => {
-    const stored = localStorage.getItem(key);
-    return stored ? JSON.parse(stored) : initial;
-  });
-
-  useEffect(() => {
-    localStorage.setItem(key, JSON.stringify(value));
-  }, [key, value]);
-
-  return [value, setValue] as const;
-}
-
-// Usage
-const [theme, setTheme] = useLocalStorage("theme", "light");
-```
-
-## Common Patterns
-
-### Context for State
-
-```tsx
-interface AppState {
-  user: User | null;
-  theme: "light" | "dark";
-}
-
-type Action =
-  | { type: "SET_USER"; user: User }
-  | { type: "LOGOUT" }
-  | { type: "TOGGLE_THEME" };
-
-const AppContext = createContext<{
-  state: AppState;
-  dispatch: Dispatch<Action>;
-} | null>(null);
-
-export function AppProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, initialState);
   return (
-    <AppContext.Provider value={{ state, dispatch }}>
-      {children}
-    </AppContext.Provider>
+    <form action={submitAction}>
+      <input name="name" />
+      <button disabled={isPending}>Save</button>
+      {error && <p>{error}</p>}
+    </form>
   );
-}
-
-export function useApp() {
-  const context = useContext(AppContext);
-  if (!context) throw new Error("useApp must be within AppProvider");
-  return context;
 }
 ```
 
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use TypeScript for type safety
-- Colocate state near where it's used
-- Memoize callbacks passed to children
-- Use React Query/TanStack for server state
+- **Trust the Compiler**: Stop writing `useMemo`/`useCallback` unless you are building a library or strictly optimizing.
+- **Use Server Actions**: Replace manual `fetch('/api/...')` with robust Server Actions for data mutations.
+- **Use `ref` as a prop**: In React 19, `ref` is a plain prop. No more `forwardRef`.
 
 **Don't**:
 
-- Overuse useEffect (prefer event handlers)
-- Mutate state directly
-- Use indexes as keys for dynamic lists
-- Create new objects in render
-
-## Troubleshooting
-
-| Issue              | Cause                      | Solution                |
-| ------------------ | -------------------------- | ----------------------- |
-| Infinite re-render | useEffect dependency issue | Check dependency array  |
-| Stale closure      | Missing dependency         | Add to dependency array |
-| Slow render        | Large lists                | Use virtualization      |
+- **Don't overuse `useEffect`**: Effects are for synchronization with external systems, not for data fetching or derived state.
+- **Don't spread props blindly**: Pass explicit props to make components easier to debug.
 
 ## References
 
+- [React 19 Blog](https://react.dev/blog/2024/04/25/react-19)
 - [React Documentation](https://react.dev/)
-- [React TypeScript Cheatsheet](https://react-typescript-cheatsheet.netlify.app/)

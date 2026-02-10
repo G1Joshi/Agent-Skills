@@ -5,19 +5,18 @@ description: Vue.js progressive framework with Composition API and Pinia. Use fo
 
 # Vue.js
 
-Progressive JavaScript framework with Composition API and reactivity.
+Vue is a progressive framework for building user interfaces. Vue 3.5 (2025) solidifies the Composition API and introduces "Vapor Mode" for solid-js like performance.
 
 ## When to Use
 
-- Single-page applications
-- Progressive enhancement
-- Component-based UIs
-- Projects requiring flexibility
+- **Progressive Adoption**: Drop it into an existing HTML page or build a full SPA.
+- **Developer Experience**: Often cited as having the best balance of simplicity and power.
+- **Performance**: With Vapor Mode, it rivals the fastest signals-based frameworks.
 
-## Quick Start
+## Quick Start (Composition API)
 
 ```vue
-<script setup lang="ts">
+<script setup>
 import { ref, computed } from "vue";
 
 const count = ref(0);
@@ -29,131 +28,40 @@ function increment() {
 </script>
 
 <template>
-  <button @click="increment">Count: {{ count }} (Double: {{ double }})</button>
+  <button @click="increment">
+    Count is: {{ count }}, Double is: {{ double }}
+  </button>
 </template>
 ```
 
 ## Core Concepts
 
-### Composition API
+### Composition API (`<script setup>`)
 
-```vue
-<script setup lang="ts">
-import { ref, reactive, computed, watch, onMounted } from "vue";
+The standard way to write Vue components. It groups logic by feature, not by option type (data, methods, mounted).
 
-interface User {
-  id: string;
-  name: string;
-}
+### Reactivity System (Signals)
 
-const user = ref<User | null>(null);
-const loading = ref(true);
+Vue's reactivity is based on proxies. `ref()` and `reactive()` allow fine-grained dependency tracking.
 
-const state = reactive({
-  filters: { status: "active" },
-  page: 1,
-});
+### Vapor Mode (Opt-in)
 
-const displayName = computed(() => user.value?.name.toUpperCase() ?? "Guest");
+A compilation strategy that compiles Vue components into highly efficient JavaScript that modifies the DOM directly (no Virtual DOM).
 
-watch(
-  () => state.filters,
-  async (newFilters) => {
-    await fetchData(newFilters);
-  },
-  { deep: true },
-);
-
-onMounted(async () => {
-  user.value = await fetchUser();
-  loading.value = false;
-});
-</script>
-```
-
-### Composables
-
-```typescript
-// composables/useUser.ts
-import { ref, onMounted } from "vue";
-
-export function useUser(userId: string) {
-  const user = ref<User | null>(null);
-  const loading = ref(true);
-  const error = ref<Error | null>(null);
-
-  async function load() {
-    loading.value = true;
-    try {
-      user.value = await fetchUser(userId);
-    } catch (e) {
-      error.value = e as Error;
-    } finally {
-      loading.value = false;
-    }
-  }
-
-  onMounted(load);
-
-  return { user, loading, error, reload: load };
-}
-
-// Usage
-const { user, loading } = useUser(props.userId);
-```
-
-## Common Patterns
-
-### Pinia Store
-
-```typescript
-import { defineStore } from "pinia";
-
-export const useUserStore = defineStore("user", () => {
-  const user = ref<User | null>(null);
-  const isLoggedIn = computed(() => !!user.value);
-
-  async function login(email: string, password: string) {
-    user.value = await authService.login(email, password);
-  }
-
-  function logout() {
-    user.value = null;
-  }
-
-  return { user, isLoggedIn, login, logout };
-});
-
-// In component
-const store = useUserStore();
-store.login(email, password);
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use Composition API with `<script setup>`
-- Use TypeScript for type safety
-- Create composables for reusable logic
-- Use Pinia for global state
+- **Use `<script setup>`**: It is less verbose and provides better TypeScript support.
+- **Use `defineModel`**: The new standard for two-way binding props (Vue 3.4+).
+- **Use Composables**: Extract logic into reusable `useFeature()` functions (Vue's version of Hooks).
 
 **Don't**:
 
-- Mix Options and Composition API
-- Mutate props directly
-- Use v-if and v-for on same element
-- Overuse watchers
-
-## Troubleshooting
-
-| Issue                 | Cause                   | Solution         |
-| --------------------- | ----------------------- | ---------------- |
-| Reactivity lost       | Destructuring reactive  | Use toRefs()     |
-| Watch not firing      | Shallow watch on object | Use deep: true   |
-| Computed not updating | Non-reactive dependency | Use ref/reactive |
+- **Don't mix Options and Composition API**: Stick to Composition API for new projects.
+- **Don't destructure `props`**: You lose reactivity (unless using `toRefs` or Vue 3.5 reactive destructuring).
 
 ## References
 
 - [Vue.js Documentation](https://vuejs.org/)
-- [Vue School](https://vueschool.io/)
+- [Vue Vapor Mode](https://github.com/vuejs/core-vapor)
