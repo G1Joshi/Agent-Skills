@@ -4,19 +4,19 @@
 
 ![Agents](https://img.shields.io/badge/Agents-40+-10B981)
 ![Categories](https://img.shields.io/badge/Categories-10+-F59E0B)
-![Skills](https://img.shields.io/badge/Skills-100+-8B5CF6)
+![Skills](https://img.shields.io/badge/Skills-350+-8B5CF6)
 
 ## Installation
 
 ```bash
-npx skills add g1joshi/agent-skills
+npx skills add g1joshi/agent-skills/skills
 ```
 
 Or install specific skills:
 
 ```bash
-npx skills add g1joshi/agent-skills --skill dart
-npx skills add g1joshi/agent-skills --skill flutter
+npx skills add g1joshi/agent-skills/skills --skill dart
+npx skills add g1joshi/agent-skills/skills --skill flutter
 ```
 
 ## Compatible Agents
