@@ -1,144 +1,44 @@
 ---
 name: vite
-description: Vite build tool for modern frontend development with HMR. Use for fast dev server and bundling.
+description: Vite fast build tool with HMR. Use for modern frontend builds.
 ---
 
 # Vite
 
-Next-generation frontend build tool with instant HMR.
+Vite is the standard build tool for modern web development. v6.0 (2025) introduces the **Environment API** for runtimes like Bun/Deno and native **Sass** support.
 
 ## When to Use
 
-- Modern frontend development
-- React/Vue/Svelte projects
-- Fast development server
-- Library bundling
-
-## Quick Start
-
-```bash
-# Create project
-npm create vite@latest my-app -- --template react-ts
-cd my-app
-npm install
-npm run dev
-```
+- **New Projects**: The default for React, Vue, Svelte, etc.
+- **SPA**: Optimized for Single Page Apps.
+- **Speed**: Instant server start via native ESM.
 
 ## Core Concepts
 
-### Configuration
+### Dev Server (ESM)
 
-```typescript
-// vite.config.ts
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import path from "path";
+Vite serves files as native ESM modules. The browser downloads files as needed. No bundling in dev.
 
-export default defineConfig({
-  plugins: [react()],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
-  server: {
-    port: 3000,
-    proxy: {
-      "/api": {
-        target: "http://localhost:8080",
-        changeOrigin: true,
-      },
-    },
-  },
-  build: {
-    outDir: "dist",
-    sourcemap: true,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ["react", "react-dom"],
-        },
-      },
-    },
-  },
-});
-```
+### Rollup Build
 
-### Environment Variables
+Vite uses Rollup for production builds, ensuring highly optimized chunks.
 
-```bash
-# .env
-VITE_API_URL=https://api.example.com
-VITE_APP_TITLE=My App
+### Plugins
 
-# .env.production
-VITE_API_URL=https://api.prod.example.com
-```
+Rollup-compatible plugin system.
 
-```typescript
-// Usage in code
-const apiUrl = import.meta.env.VITE_API_URL;
-const isDev = import.meta.env.DEV;
-```
-
-## Common Patterns
-
-### CSS & Assets
-
-```typescript
-// Import CSS
-import "./styles.css";
-import styles from "./Component.module.css";
-
-// Import assets
-import logo from "./logo.svg";
-import url from "./image.png?url";
-import raw from "./file.txt?raw";
-```
-
-### TypeScript Configuration
-
-```json
-// tsconfig.json
-{
-  "compilerOptions": {
-    "target": "ES2020",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "types": ["vite/client"],
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-  },
-  "include": ["src"]
-}
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use path aliases for imports
-- Configure proper proxy for API
-- Enable sourcemaps in dev
-- Use environment variables
+- **Use `vitest`**: The native test runner for Vite projects.
+- **Use `vite.config.ts`**: TypeScript config is standard.
+- **Environment API**: Use the new API to define custom environments (e.g. `ssr`, `worker`).
 
 **Don't**:
 
-- Import from node_modules manually
-- Skip TypeScript client types
-- Ignore build warnings
-- Use CommonJS in ESM project
-
-## Troubleshooting
-
-| Issue            | Cause            | Solution                     |
-| ---------------- | ---------------- | ---------------------------- |
-| HMR not working  | Browser cache    | Hard refresh or check config |
-| Module not found | Path alias issue | Check vite/ts config         |
-| Build error      | Dependency issue | Check for CJS/ESM conflicts  |
+- **Don't use `require`**: Vite is ESM-first. Use `import`.
 
 ## References
 
 - [Vite Documentation](https://vitejs.dev/)
-- [Vite Plugins](https://vitejs.dev/plugins/)
