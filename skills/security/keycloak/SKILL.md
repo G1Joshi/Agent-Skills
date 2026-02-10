@@ -1,67 +1,50 @@
 ---
 name: keycloak
-description: Keycloak open-source identity and access management. Use for enterprise SSO.
+description: Keycloak identity and access management. Use for SSO.
 ---
 
 # Keycloak
 
-Open-source IAM for enterprise authentication.
+Keycloak is an open-source Identity and Access Management solution aimed at modern applications and services. It makes it easy to secure applications and services with little to no code.
 
 ## When to Use
 
-- Enterprise SSO
-- SAML/OIDC integration
-- Self-hosted identity
-- Multi-tenant applications
+- **Self-Hosted IAM**: You want Auth0 features but deployed on your own infrastructure (GDPR/Compliance).
+- **Enterprise Integration**: Connecting to legacy LDAP/Active Directory user federations.
+- **Single Sign-On (SSO)**: One login for your internal wiki, chat, and cloud apps.
 
-## Quick Start
+## Quick Start (Docker)
 
-```typescript
-import Keycloak from "keycloak-js";
-
-const keycloak = new Keycloak({
-  url: "https://keycloak.example.com",
-  realm: "my-realm",
-  clientId: "my-app",
-});
-
-await keycloak.init({ onLoad: "login-required" });
-console.log("Authenticated:", keycloak.authenticated);
+```bash
+docker run -p 8080:8080 -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=admin quay.io/keycloak/keycloak:latest start-dev
 ```
 
 ## Core Concepts
 
-### Token Management
+### Realm
 
-```typescript
-// Get access token
-const token = keycloak.token;
+A space where you manage objects (users, apps, roles). You usually create a dedicated realm for your app (e.g., `my-app-realm`) and leave `master` for admin tasks.
 
-// Refresh token
-await keycloak.updateToken(30); // Refresh if expires in 30s
+### Clients
 
-// API call with token
-fetch("/api/data", {
-  headers: { Authorization: `Bearer ${token}` },
-});
-```
+Applications (Web, Mobile, Service) that can request login.
 
-### Protected Routes
+### Identity Brokering
 
-```typescript
-// Express middleware
-function keycloakProtect(req, res, next) {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) return res.status(401).send("Unauthorized");
-  // Verify with Keycloak
-  next();
-}
-```
+Keycloak can act as a broker: User clicks "Login with GitHub" -> Keycloak talks to GitHub -> Keycloak issues its own token to your app.
 
-## Best Practices
+## Best Practices (2025)
 
-**Do**: Use refresh token rotation, configure proper CORS
-**Don't**: Store tokens insecurely, skip token validation
+**Do**:
+
+- **Use the Operator**: On Kubernetes, use the Keycloak Operator for upgrades and scaling.
+- **Production Mode**: `start-dev` is for local only. Use an external DB (Postgres) and proper HTTPS for production.
+- **Theme It**: Don't use the default login page. Extend the theme to match your brand.
+
+**Don't**:
+
+- **Don't Modify Core**: Use the SPI (Service Provider Interface) to write plugins if you need custom logic.
+- **Don't expose Admin Console**: Block `/admin` and `/master` access from the public internet.
 
 ## References
 

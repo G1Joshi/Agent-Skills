@@ -1,18 +1,17 @@
 ---
 name: vscode
-description: VS Code editor configuration, extensions, debugging, and productivity tips. Use for editor customization.
+description: Visual Studio Code editor with extensions and debugging. Use for code editing.
 ---
 
-# VS Code
+# Visual Studio Code
 
-Visual Studio Code editor customization and productivity.
+VS Code is the industry standard editor. In 2025, it has evolved into an **AI-First** editor with a native AI Companion and generic **Agent Mode**.
 
 ## When to Use
 
-- Configuring development environment
-- Debugging applications
-- Creating workspace settings
-- Extension development
+- **Everyday Coding**: TypeScript, Python, Go, Rust. It wins almost everywhere.
+- **Remote Dev**: `Remote - SSH` and `Dev Containers` are best-in-class.
+- **AI-Assisted**: GitHub Copilot integration is deepest here.
 
 ## Quick Start
 
@@ -21,128 +20,40 @@ Visual Studio Code editor customization and productivity.
 {
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
-  },
-  "typescript.preferences.importModuleSpecifier": "relative"
+  "files.autoSave": "onFocusChange"
 }
 ```
 
 ## Core Concepts
 
-### Workspace Configuration
+### Extensions
 
-```json
-// .vscode/settings.json
-{
-  "editor.tabSize": 2,
-  "editor.rulers": [80, 120],
-  "files.exclude": {
-    "**/node_modules": true,
-    "**/.git": true
-  },
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[python]": {
-    "editor.defaultFormatter": "ms-python.black-formatter"
-  }
-}
-```
+The ecosystem is the key. 50k+ extensions.
 
-### Debug Configuration
+- `Python` (Microsoft)
+- `ESLint` (Microsoft)
+- `GitLens`
 
-```json
-// .vscode/launch.json
-{
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Debug Server",
-      "program": "${workspaceFolder}/src/server.ts",
-      "preLaunchTask": "npm: build",
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "env": {
-        "NODE_ENV": "development"
-      }
-    },
-    {
-      "type": "chrome",
-      "request": "launch",
-      "name": "Debug Frontend",
-      "url": "http://localhost:3000",
-      "webRoot": "${workspaceFolder}"
-    }
-  ]
-}
-```
+### Dev Containers
 
-## Common Patterns
+Define your dev environment in `.devcontainer/devcontainer.json`. VS Code spins up a Docker container and connects to it. 100% reproducible dev environments.
 
-### Tasks
+### Profiles (2025)
 
-```json
-// .vscode/tasks.json
-{
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "npm: dev",
-      "type": "npm",
-      "script": "dev",
-      "isBackground": true,
-      "problemMatcher": ["$tsc-watch"]
-    },
-    {
-      "label": "Build & Test",
-      "dependsOn": ["npm: build", "npm: test"],
-      "dependsOrder": "sequence"
-    }
-  ]
-}
-```
+Switch between "Work", "Personal", and "Demo" profiles with different settings/extensions enabled.
 
-### Extensions Recommendations
-
-```json
-// .vscode/extensions.json
-{
-  "recommendations": [
-    "esbenp.prettier-vscode",
-    "dbaeumer.vscode-eslint",
-    "bradlc.vscode-tailwindcss",
-    "ms-vscode.vscode-typescript-next"
-  ]
-}
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use workspace settings per project
-- Configure format on save
-- Create debug configurations
-- Share extension recommendations
+- **Use Sync**: Turn on Settings Sync (`GitHub` account) to keep keybindings across machines.
+- **Use `code .`**: Launch from terminal.
+- **Use Inline Chat**: `Cmd+I` to ask Copilot to refactor code in-place.
 
 **Don't**:
 
-- Commit user-specific settings
-- Install too many extensions
-- Ignore keybinding conflicts
-- Skip workspace trust settings
-
-## Troubleshooting
-
-| Issue                 | Cause               | Solution              |
-| --------------------- | ------------------- | --------------------- |
-| Extension not working | Conflict            | Check Output panel    |
-| Slow startup          | Too many extensions | Disable unused        |
-| Formatting wrong      | Multiple formatters | Set default formatter |
+- **Don't minimalize too much**: Hiding the sidebar/activity bar makes you slower. Learn the toggle shortcuts (`Cmd+B`) instead.
 
 ## References
 
 - [VS Code Documentation](https://code.visualstudio.com/docs)
-- [VS Code Tips](https://code.visualstudio.com/docs/getstarted/tips-and-tricks)

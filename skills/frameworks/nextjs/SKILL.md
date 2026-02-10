@@ -1,31 +1,32 @@
 ---
 name: nextjs
-description: Next.js React framework with App Router, Server Components, and full-stack capabilities. Use for full-stack React.
+description: Next.js React framework with SSR, App Router, and server components. Use for full-stack React.
 ---
 
 # Next.js
 
-Full-stack React framework with Server Components and App Router.
+Next.js is the leading full-stack framework for React. Next.js 15 (2025) stabilizes the App Router and Server Actions, making it a robust platform for modern web apps.
 
 ## When to Use
 
-- Full-stack React applications
-- Server-side rendering (SSR)
-- Static site generation (SSG)
-- API routes and edge functions
+- **Full-Stack React**: You need API routes, DB access, and UI in one codebase.
+- **SEO Critical**: Server-Side Rendering (SSR) is first-class.
+- **Vercel Ecosystem**: seamless deployment to Vercel's edge network.
 
-## Quick Start
+## Quick Start (App Router)
 
 ```tsx
-// app/page.tsx - Server Component by default
-export default async function Home() {
-  const posts = await db.posts.findMany();
+// app/page.tsx (Server Component by default)
+import { db } from "@/lib/db";
+
+export default async function Page() {
+  const posts = await db.post.findMany(); // Direct DB access!
 
   return (
     <main>
       <h1>Blog</h1>
       {posts.map((post) => (
-        <PostCard key={post.id} post={post} />
+        <p key={post.id}>{post.title}</p>
       ))}
     </main>
   );
@@ -34,116 +35,39 @@ export default async function Home() {
 
 ## Core Concepts
 
-### App Router Structure
+### App Router (`app/` dir)
 
-```
-app/
-├── layout.tsx          # Root layout
-├── page.tsx            # Home page
-├── loading.tsx         # Loading UI
-├── error.tsx           # Error UI
-├── blog/
-│   ├── page.tsx        # /blog
-│   └── [slug]/
-│       └── page.tsx    # /blog/:slug
-└── api/
-    └── users/
-        └── route.ts    # API route
-```
+File-system based routing where `page.tsx` is the UI, `layout.tsx` wraps children, and `loading.tsx` defines Suspense boundaries.
 
-### Server Components
+### Server Components (RSC)
 
-```tsx
-// Server Component - runs on server only
-async function UserList() {
-  const users = await db.users.findMany(); // Direct DB access
-  return (
-    <ul>
-      {users.map((user) => (
-        <li key={user.id}>{user.name}</li>
-      ))}
-    </ul>
-  );
-}
-
-// Client Component - interactive
-("use client");
-import { useState } from "react";
-
-function Counter() {
-  const [count, setCount] = useState(0);
-  return <button onClick={() => setCount((c) => c + 1)}>{count}</button>;
-}
-```
-
-## Common Patterns
+Components in `app/` are Server Components by default. They can't use `useState` or `useEffect`. To add interactivity, add `'use client'` to the top of a file.
 
 ### Server Actions
 
-```tsx
-// app/actions.ts
-"use server";
-
-import { revalidatePath } from "next/cache";
-
-export async function createPost(formData: FormData) {
-  const title = formData.get("title") as string;
-
-  await db.posts.create({ data: { title } });
-  revalidatePath("/posts");
-}
-
-// In component
-<form action={createPost}>
-  <input name="title" required />
-  <button type="submit">Create</button>
-</form>;
-```
-
-### Data Fetching
+Functions that run on the server, callable from the client (forms, buttons).
 
 ```tsx
-// Static data (cached)
-async function getPost(slug: string) {
-  return fetch(`/api/posts/${slug}`, { cache: "force-cache" });
-}
-
-// Dynamic data (no cache)
-async function getUser() {
-  return fetch("/api/user", { cache: "no-store" });
-}
-
-// Revalidate periodically
-async function getPosts() {
-  return fetch("/api/posts", { next: { revalidate: 60 } });
+// actions.ts
+'use server'
+export async function create(formData) {
+  await db.post.create({ data: ... });
 }
 ```
 
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use Server Components by default
-- Use Server Actions for mutations
-- Implement proper loading states
-- Use `generateMetadata` for SEO
+- **Fetch in Server Components**: Fetch data directly in your content (async components). No `useEffect`.
+- **Use `revalidatePath`**: Revalidate cache on-demand after mutations (Server Actions).
+- **Partial Prerendering (PPR)**: (Experimental in '24, Stable in '25) Mix static shell with dynamic holes.
 
 **Don't**:
 
-- Add 'use client' unnecessarily
-- Fetch in Client Components (use Server)
-- Ignore error boundaries
-- Block rendering with large fetches
-
-## Troubleshooting
-
-| Issue              | Cause                      | Solution               |
-| ------------------ | -------------------------- | ---------------------- |
-| Stale data         | Aggressive caching         | Use revalidatePath/Tag |
-| Hydration mismatch | Server/client diff         | Check dynamic content  |
-| Large bundle       | Too many client components | Move logic to server   |
+- **Don't leak secrets**: Ensure `'use server'` files don't export sensitive data.
+- **Don't `use client` everything**: Only put `'use client'` at the leaves of your tree (buttons, inputs). Keep high-level layouts as Server Components.
 
 ## References
 
 - [Next.js Documentation](https://nextjs.org/docs)
-- [Vercel Blog](https://vercel.com/blog)

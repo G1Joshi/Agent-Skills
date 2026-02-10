@@ -1,148 +1,88 @@
 ---
 name: websockets
-description: WebSocket real-time communication with Socket.IO and ws. Use for real-time features.
+description: WebSockets real-time bidirectional communication. Use for real-time features.
 ---
 
 # WebSockets
 
-Real-time bidirectional communication.
+WebSockets provide a persistent connection between a client and server that both parties can use to start sending data at any time.
 
 ## When to Use
 
-- Real-time updates
-- Chat applications
-- Live notifications
-- Collaborative features
+- **Chat Apps**: Real-time messaging.
+- **Gaming**: Multiplayer state synchronization (low latency).
+- **Collaborative Editing**: Google Docs style co-authoring.
+- **Financial Dashboards**: High-frequency trading updates.
 
 ## Quick Start
 
-```typescript
-// Server (Socket.IO)
-import { Server } from "socket.io";
+```javascript
+// Server (Node.js with 'ws')
+import { WebSocketServer } from "ws";
 
-const io = new Server(httpServer, {
-  cors: { origin: "*" },
+const wss = new WebSocketServer({ port: 8080 });
+
+wss.on("connection", function connection(ws) {
+  ws.on("message", function message(data) {
+    console.log("received: %s", data);
+    // Echo back
+    ws.send(`Echo: ${data}`);
+  });
+
+  ws.send("Welcome!");
 });
+```
 
-io.on("connection", (socket) => {
-  console.log("Client connected:", socket.id);
+```javascript
+// Client (Browser)
+const socket = new WebSocket("ws://localhost:8080");
 
-  socket.on("message", (data) => {
-    io.emit("message", data);
-  });
-
-  socket.on("disconnect", () => {
-    console.log("Client disconnected:", socket.id);
-  });
+socket.addEventListener("message", (event) => {
+  console.log("Server says:", event.data);
 });
 ```
 
 ## Core Concepts
 
-### Rooms and Namespaces
+### Handshake
 
-```typescript
-// Namespaces
-const chatNamespace = io.of("/chat");
-const notificationsNamespace = io.of("/notifications");
+Starts as an HTTP Request (`Upgrade: websocket`). If server accepts (`101 Switching Protocols`), the specific TCP connection becomes a WebSocket connection.
 
-chatNamespace.on("connection", (socket) => {
-  // Join room
-  socket.join(`room:${roomId}`);
+### Heartbeat (Ping/Pong)
 
-  // Send to room
-  socket.to(`room:${roomId}`).emit("user-joined", { userId: socket.id });
-
-  // Leave room
-  socket.leave(`room:${roomId}`);
-});
-```
-
-### Broadcasting
-
-```typescript
-// To all clients
-io.emit("announcement", { message: "Server restart" });
-
-// To all except sender
-socket.broadcast.emit("user-typing", { userId });
-
-// To specific room
-io.to("room:123").emit("message", data);
-
-// To multiple rooms
-io.to("room:1").to("room:2").emit("event", data);
-```
+Essential to keep connections alive through proxies/firewalls that drop idle TCP connections.
 
 ## Common Patterns
 
-### Authentication
+### Socket.IO
 
-```typescript
-io.use((socket, next) => {
-  const token = socket.handshake.auth.token;
+A library that adds features on top of raw WebSockets: Auto-reconnection, Rooms, Fallback to HTTP Long-Polling.
 
-  try {
-    const user = verifyToken(token);
-    socket.data.user = user;
-    next();
-  } catch (error) {
-    next(new Error("Authentication failed"));
-  }
-});
+### Pub/Sub
 
-io.on("connection", (socket) => {
-  console.log("User connected:", socket.data.user.name);
-});
-```
-
-### Error Handling
-
-```typescript
-socket.on("action", async (data, callback) => {
-  try {
-    const result = await processAction(data);
-    callback({ success: true, data: result });
-  } catch (error) {
-    callback({ success: false, error: error.message });
-  }
-});
-
-// Client
-socket.emit("action", data, (response) => {
-  if (response.success) {
-    console.log("Result:", response.data);
-  } else {
-    console.error("Error:", response.error);
-  }
-});
-```
+Users subscribe to channels (e.g., `chat_room_1`). The server routes messages only to sockets in that channel (using Redis for scaling across multiple servers).
 
 ## Best Practices
 
 **Do**:
 
-- Implement reconnection logic
-- Use rooms for grouping
-- Add authentication middleware
-- Handle disconnections gracefully
+- Handle **Scaling** early. Sticky Sessions (if using Socket.IO) or a Redis Adapter are needed for multi-server setups.
+- Secure with **WSS** (WebSocket Secure) always.
+- Authenticate via a Token in the Query Parameter or initial handshake message (Headers are limited in JS WebSocket API).
 
 **Don't**:
 
-- Send large payloads
-- Ignore connection errors
-- Skip heartbeat/ping
-- Trust client data
+- Don't use WebSockets for simple notifications (Use SSE/Push API).
+- Don't assume the connection is infinite. Handle disconnects gracefully.
 
 ## Troubleshooting
 
-| Issue                | Cause               | Solution               |
-| -------------------- | ------------------- | ---------------------- |
-| Connection fails     | CORS/firewall       | Check CORS settings    |
-| Message not received | Wrong room          | Verify room membership |
-| Memory leak          | Uncleaned listeners | Remove on disconnect   |
+| Error                    | Cause                                             | Solution                                                                        |
+| :----------------------- | :------------------------------------------------ | :------------------------------------------------------------------------------ |
+| `Connection Closed 1006` | Abnormal closure (often network or server crash). | Implement auto-reconnect logic with backoff.                                    |
+| `Load Balancer drops`    | LB timeout.                                       | Configure Application Load Balancer (ALB) sticky sessions and timeout increase. |
 
 ## References
 
-- [Socket.IO Documentation](https://socket.io/docs/)
-- [WebSocket MDN](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
+- [MDN WebSockets API](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
+- [Socket.IO](https://socket.io/)

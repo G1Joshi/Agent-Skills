@@ -1,163 +1,98 @@
 ---
 name: kotlin-multiplatform
-description: Kotlin Multiplatform for shared code across iOS and Android. Use for cross-platform Kotlin.
+description: Kotlin Multiplatform for shared code. Use for cross-platform.
 ---
 
-# Kotlin Multiplatform
+# Kotlin Multiplatform (KMP)
 
-Shared Kotlin code across iOS, Android, and other platforms.
+Kotlin Multiplatform (KMP) allows you to share code between Android, iOS, Web, and Desktop. It emphasizes sharing logic (Business, Data, Networking) while allowing for native or shared (Compose Multiplatform) UIs.
 
 ## When to Use
 
-- Sharing business logic
-- iOS and Android codesharing
-- Multiplatform libraries
-- Native UI per platform
+- Sharing complex business logic and data layers between mobile platforms.
+- Building a "Super App" SDK to be used by other native apps.
+- Teams with strong Kotlin expertise wanting to target iOS.
+- Sharing UI code via Compose Multiplatform (stable for iOS in 2025).
 
 ## Quick Start
 
 ```kotlin
-// shared/src/commonMain/kotlin/Greeting.kt
-class Greeting {
-    private val platform = getPlatform()
-
-    fun greet(): String {
-        return "Hello, ${platform.name}!"
-    }
-}
-
-expect fun getPlatform(): Platform
-
+// commonMain/kotlin/Platform.kt
 interface Platform {
     val name: String
+}
+expect fun getPlatform(): Platform
+
+// androidMain/kotlin/Platform.kt
+actual fun getPlatform(): Platform = object : Platform {
+    override val name = "Android ${android.os.Build.VERSION.SDK_INT}"
+}
+
+// iosMain/kotlin/Platform.kt
+import platform.UIKit.UIDevice
+actual fun getPlatform(): Platform = object : Platform {
+    override val name = UIDevice.currentDevice.systemName() + " " + UIDevice.currentDevice.systemVersion
+}
+
+// commonMain/kotlin/Greeting.kt
+class Greeting {
+    fun greet(): String = "Hello, ${getPlatform().name}!"
 }
 ```
 
 ## Core Concepts
 
-### Expected/Actual
+### Expect / Actual
 
-```kotlin
-// commonMain
-expect class HttpClient() {
-    suspend fun get(url: String): String
-}
+Mechanism to define an interface in common code (`expect`) and provide platform-specific implementations (`actual`) in platform modules.
 
-// androidMain
-actual class HttpClient {
-    actual suspend fun get(url: String): String {
-        return OkHttpClient.newCall(Request.Builder().url(url).build())
-            .await().body?.string() ?: ""
-    }
-}
+### Shared Module
 
-// iosMain
-actual class HttpClient {
-    actual suspend fun get(url: String): String {
-        return NSURLSession.sharedSession.dataTaskWithURL(NSURL(string = url)!!)
-    }
-}
-```
+A Gradle module usually named `shared` or `composeApp`. This compiles to an `.aar` for Android and a `.framework` (or XCFramework) for iOS.
 
-### Architecture
+### Compose Multiplatform
 
-```kotlin
-// Shared ViewModel
-class UserViewModel(private val repository: UserRepository) {
-    private val _user = MutableStateFlow<User?>(null)
-    val user: StateFlow<User?> = _user.asStateFlow()
-
-    fun loadUser(id: String) {
-        coroutineScope.launch {
-            _user.value = repository.getUser(id)
-        }
-    }
-}
-
-// Repository
-class UserRepository(private val api: ApiClient, private val db: Database) {
-    suspend fun getUser(id: String): User {
-        return db.getUser(id) ?: api.fetchUser(id).also {
-            db.saveUser(it)
-        }
-    }
-}
-```
+Google's declarative UI framework (Jetpack Compose) ported to iOS, Web, and Desktop by JetBrains. Allows sharing UI code 100%.
 
 ## Common Patterns
 
-### Platform-Specific UI
+### Ktor + Kotlinx.Serialization
 
-```kotlin
-// Android (Compose)
-@Composable
-fun UserScreen(viewModel: UserViewModel) {
-    val user by viewModel.user.collectAsState()
-    user?.let { UserCard(it) }
-}
+Use **Ktor** for multiplatform networking and **kotlinx.serialization** for JSON parsing. Both are pure Kotlin and work on all targets.
 
-// iOS (SwiftUI)
-struct UserScreen: View {
-    @ObservedObject var viewModel: UserViewModelWrapper
+### SQLDelight / Room
 
-    var body: some View {
-        if let user = viewModel.user {
-            UserCard(user: user)
-        }
-    }
-}
-```
+Use **SQLDelight** or **Room** (KMP support active) for type-safe database access shared across platforms.
 
-### Build Configuration
+### Dependency Injection (Koin)
 
-```kotlin
-// build.gradle.kts
-kotlin {
-    androidTarget()
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
-
-    sourceSets {
-        commonMain.dependencies {
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
-            implementation("io.ktor:ktor-client-core:2.3.0")
-        }
-        androidMain.dependencies {
-            implementation("io.ktor:ktor-client-okhttp:2.3.0")
-        }
-        iosMain.dependencies {
-            implementation("io.ktor:ktor-client-darwin:2.3.0")
-        }
-    }
-}
-```
+**Koin** is a popular pure Kotlin dependency injection framework that works seamlessly in KMP to manage singletons and factories.
 
 ## Best Practices
 
 **Do**:
 
-- Share business logic, not UI
-- Use Ktor for networking
-- Use SQLDelight for database
-- Test in commonTest
+- Share **Business Logic**, **Data Models**, and **Networking Code**.
+- Use **Compose Multiplatform** for UI if pixel-perfect native compliance isn't critical or for custom branded apps.
+- Use **Coroutines** (Flow/Suspend) for all async operations.
+- Test shared code in `commonTest`.
 
 **Don't**:
 
-- Force UI sharing
-- Ignore iOS memory model
-- Skip platform testing
-- Mix paradigms
+- Don't try to share 100% of code if it degrades the user experience.
+- Don't use Java-dependent libraries in `commonMain` (only pure Kotlin).
+- Don't force `expect/actual` usage if a library (like KMP-NativeCoroutines) can solve the bridging better.
 
 ## Troubleshooting
 
-| Issue            | Cause               | Solution                 |
-| ---------------- | ------------------- | ------------------------ |
-| iOS memory issue | Freezing rules      | Check Kotlin/Native docs |
-| Build error      | Version mismatch    | Align KMP versions       |
-| Type mismatch    | Expect/actual issue | Check signature match    |
+| Error                                | Cause                                                                | Solution                                                     |
+| :----------------------------------- | :------------------------------------------------------------------- | :----------------------------------------------------------- |
+| `Unresolved reference` in commonMain | Using platform-specific API (java.util, android.\*).                 | Use KMP-compatible libraries (kotlinx-datetime).             |
+| `C-interop` build errors             | iOS build configuration or missing headers.                          | Check `cocoapods` or `framework` config in build.gradle.kts. |
+| `Memory Leaks` on iOS                | Circular references or freezing (mostly solved in new memory model). | Ensure newer Kotlin version (1.9+) is used.                  |
 
 ## References
 
-- [KMP Documentation](https://kotlinlang.org/docs/multiplatform.html)
-- [KMP Samples](https://github.com/JetBrains/kotlin-multiplatform-dev-docs)
+- [Kotlin Multiplatform Wizard](https://kmp.jetbrains.com/)
+- [Compose Multiplatform](https://www.jetbrains.com/lp/compose-multiplatform/)
+- [Ktor Documentation](https://ktor.io/)

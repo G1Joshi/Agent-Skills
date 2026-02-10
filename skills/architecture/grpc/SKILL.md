@@ -1,167 +1,91 @@
 ---
 name: grpc
-description: gRPC high-performance RPC with Protocol Buffers. Use for service-to-service communication.
+description: gRPC high-performance RPC framework with protobuf. Use for service communication.
 ---
 
 # gRPC
 
-High-performance RPC framework with Protocol Buffers.
+gRPC is a modern open-source high-performance Remote Procedure Call (RPC) framework that can run in any environment. It uses Protocol Buffers (Protobuf) as its Interface Definition Language (IDL).
 
 ## When to Use
 
-- Microservices communication
-- Low-latency requirements
-- Strong typing needs
-- Streaming data
+- **Microservices Communication**: Low latency, high throughput internal traffic.
+- **Polyglot Environments**: Service A (Go) talking to Service B (Java).
+- **Streaming**: Bidirectional streaming of data (e.g., Real-time voice/video metadata).
+- **Strict Contracts**: When you need strict type safety across services.
 
 ## Quick Start
 
 ```protobuf
-// user.proto
+// service.proto
 syntax = "proto3";
 
-service UserService {
-  rpc GetUser(GetUserRequest) returns (User);
-  rpc ListUsers(ListUsersRequest) returns (stream User);
+service Greeter {
+  rpc SayHello (HelloRequest) returns (HelloReply) {}
 }
 
-message GetUserRequest {
-  string id = 1;
+message HelloRequest {
+  string name = 1;
 }
 
-message User {
-  string id = 1;
-  string name = 2;
-  string email = 3;
+message HelloReply {
+  string message = 1;
+}
+```
+
+```go
+// Server (Go)
+func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
+    return &pb.HelloReply{Message: "Hello " + in.GetName()}, nil
 }
 ```
 
 ## Core Concepts
 
-### Server Implementation
+### Protocol Buffers
 
-```typescript
-import * as grpc from "@grpc/grpc-js";
-import * as protoLoader from "@grpc/proto-loader";
+Binary serialization format. Smaller and faster than JSON.
 
-const packageDefinition = protoLoader.loadSync("user.proto");
-const proto = grpc.loadPackageDefinition(packageDefinition);
+### HTTP/2
 
-const server = new grpc.Server();
+gRPC runs on HTTP/2 by default, enabling Multiplexing (multiple requests over one connection) and Server Push.
 
-server.addService(proto.UserService.service, {
-  getUser: async (call, callback) => {
-    const user = await db.users.findUnique({ where: { id: call.request.id } });
-    callback(null, user);
-  },
+### Code Generation
 
-  listUsers: async (call) => {
-    const users = await db.users.findMany();
-    for (const user of users) {
-      call.write(user);
-    }
-    call.end();
-  },
-});
-
-server.bindAsync(
-  "0.0.0.0:50051",
-  grpc.ServerCredentials.createInsecure(),
-  () => {
-    server.start();
-  },
-);
-```
-
-### Client Usage
-
-```typescript
-const client = new proto.UserService(
-  "localhost:50051",
-  grpc.credentials.createInsecure(),
-);
-
-// Unary call
-client.getUser({ id: "123" }, (error, user) => {
-  if (error) throw error;
-  console.log("User:", user);
-});
-
-// Stream
-const stream = client.listUsers({});
-stream.on("data", (user) => console.log("User:", user));
-stream.on("end", () => console.log("Done"));
-```
+You don't write client libraries manually. You generate them from the `.proto` file for any language (Go, Python, Java, Node, C#).
 
 ## Common Patterns
 
-### Error Handling
+### gRPC-Web
 
-```typescript
-import { status } from "@grpc/grpc-js";
+Allows browser clients to talk to gRPC services via a proxy (Envoy).
 
-server.addService(proto.UserService.service, {
-  getUser: async (call, callback) => {
-    const user = await db.users.findUnique({ where: { id: call.request.id } });
+### Interceptors
 
-    if (!user) {
-      callback({
-        code: status.NOT_FOUND,
-        message: "User not found",
-      });
-      return;
-    }
-
-    callback(null, user);
-  },
-});
-```
-
-### Interceptors (Middleware)
-
-```typescript
-function authInterceptor(options, nextCall) {
-  return new grpc.InterceptingCall(nextCall(options), {
-    start: (metadata, listener, next) => {
-      const token = extractToken(metadata);
-      if (!validateToken(token)) {
-        listener.onReceiveStatus({
-          code: status.UNAUTHENTICATED,
-          details: "Invalid token",
-        });
-        return;
-      }
-      next(metadata, listener);
-    },
-  });
-}
-```
+Middleware for gRPC. Used for Logging, Auth, and Tracing.
 
 ## Best Practices
 
 **Do**:
 
-- Use proto versioning
-- Implement proper error codes
-- Add deadline/timeout
-- Use streaming for large data
+- Use **Linting** (buf.build) for `.proto` files.
+- Manage **Backwards Compatibility** carefully (never change field numbers).
+- Use **Deadlines/Timeouts** on every call to prevent resource exhaustion.
 
 **Don't**:
 
-- Send huge messages
-- Ignore backpressure
-- Skip TLS in production
-- Use deprecated fields
+- Don't use gRPC for public browser APIs if simple REST/JSON suffices (proxying adds complexity).
+- Don't ignore the `Oneof` feature for union types.
 
 ## Troubleshooting
 
-| Issue              | Cause              | Solution            |
-| ------------------ | ------------------ | ------------------- |
-| Connection refused | Server not running | Check server status |
-| UNAVAILABLE        | Network issue      | Check connectivity  |
-| DEADLINE_EXCEEDED  | Slow response      | Increase timeout    |
+| Error                | Cause                                | Solution                                  |
+| :------------------- | :----------------------------------- | :---------------------------------------- |
+| `Unavailable (14)`   | Server down or network issue.        | Implement Exponential Backoff Retry.      |
+| `Unimplemented (12)` | Service method not found.            | Re-generate code and check `.proto` sync. |
+| `Message too large`  | Payload exceeds limit (4MB default). | Increase limit or use Streaming.          |
 
 ## References
 
-- [gRPC Documentation](https://grpc.io/docs/)
-- [Protocol Buffers](https://developers.google.com/protocol-buffers)
+- [gRPC.io](https://grpc.io/)
+- [Protocol Buffers](https://protobuf.dev/)

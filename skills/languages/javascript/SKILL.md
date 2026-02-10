@@ -1,6 +1,6 @@
 ---
 name: javascript
-description: Modern JavaScript (ES2024+) best practices including async patterns, modules, error handling, and performance optimization. Use for .js files and web development.
+description: JavaScript ES6+ programming including async/await, DOM manipulation, modules, and Node.js. Use for .js files and web development.
 ---
 
 # JavaScript

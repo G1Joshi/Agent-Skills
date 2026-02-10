@@ -1,159 +1,95 @@
 ---
 name: android-sdk
-description: Android SDK for native Android development with Activities and Services. Use for native Android.
+description: Android SDK development tools. Use for native Android.
 ---
 
 # Android SDK
 
-Native Android development with Kotlin and Java.
+The traditional Android development toolkit (Views, Activities, Fragments, XML) using Kotlin/Java. Essential for maintaining the vast ecosystem of pre-Compose applications.
 
 ## When to Use
 
-- Native Android apps
-- System-level integrations
-- Background services
-- Performance-critical features
+- Maintaining legacy Android applications (Views/XML).
+- Building features requiring low-level system interactions not yet wrapped by Compose.
+- Using libraries that strictly require Fragment/View interoperability.
 
 ## Quick Start
 
 ```kotlin
+// build.gradle.kts: viewBinding = true
+
 class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        val textView = findViewById<TextView>(R.id.text_view)
-        textView.text = "Hello Android!"
+        binding.myButton.setOnClickListener {
+            Toast.makeText(this, "Clicked!", Toast.LENGTH_SHORT).show()
+        }
     }
 }
 ```
 
 ## Core Concepts
 
-### Activity Lifecycle
+### Lifecycle
 
-```kotlin
-class MainActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        // Initialize UI
-    }
-
-    override fun onStart() {
-        super.onStart()
-        // Visible to user
-    }
-
-    override fun onResume() {
-        super.onResume()
-        // Interactive
-    }
-
-    override fun onPause() {
-        super.onPause()
-        // Save state
-    }
-
-    override fun onStop() {
-        super.onStop()
-        // Release resources
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        // Cleanup
-    }
-}
-```
+Understanding the complex lifecycle of Activities (`onCreate`, `onPause`, `onDestroy`) and Fragments is the hardest but most important part of legacy Android dev to prevent crashes and data loss.
 
 ### Intents
 
-```kotlin
-// Start activity
-val intent = Intent(this, DetailActivity::class.java).apply {
-    putExtra("USER_ID", userId)
-}
-startActivity(intent)
+The messaging object used to request an action from another app component (starting activities, services, broadcasting).
 
-// Get result
-val launcher = registerForActivityResult(
-    ActivityResultContracts.StartActivityForResult()
-) { result ->
-    if (result.resultCode == RESULT_OK) {
-        val data = result.data
-    }
-}
-```
+### XML Layouts
+
+Defining UI structure in XML files (`res/layout/activity_main.xml`).
 
 ## Common Patterns
 
-### ViewModel
+### View Binding
 
-```kotlin
-class UserViewModel(
-    private val repository: UserRepository
-) : ViewModel() {
+Replaces `findViewById`. Generates type-safe binding classes for XML layouts.
 
-    private val _user = MutableStateFlow<User?>(null)
-    val user: StateFlow<User?> = _user.asStateFlow()
+- **Null Safety**: View references are nullable if they verify across configs.
+- **Type Safety**: No casting required.
 
-    fun loadUser(id: String) {
-        viewModelScope.launch {
-            _user.value = repository.getUser(id)
-        }
-    }
-}
-```
+### Repository Pattern (Clean Architecture)
 
-### Permissions
+separating data sources (Room, Retrofit) from UI logic (ViewModel).
 
-```kotlin
-private val permissionLauncher = registerForActivityResult(
-    ActivityResultContracts.RequestPermission()
-) { isGranted ->
-    if (isGranted) {
-        // Permission granted
-    }
-}
+### Coroutines (Structured Concurrency)
 
-fun requestCameraPermission() {
-    when {
-        ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-            == PackageManager.PERMISSION_GRANTED -> {
-            // Already granted
-        }
-        else -> {
-            permissionLauncher.launch(Manifest.permission.CAMERA)
-        }
-    }
-}
-```
+Replacing `AsyncTask` and `Threads`.
+
+- Use `lifecycleScope` and `viewModelScope` to automatically cancel tasks when the UI is destroyed.
 
 ## Best Practices
 
 **Do**:
 
-- Use ViewModel for UI state
-- Handle configuration changes
-- Request permissions at runtime
-- Use Coroutines for async
+- Use **ViewBinding** instead of `findViewById` or Kotlin Synthetics (Deprecated).
+- Use **Coroutines** for background tasks.
+- Use **Dependency Injection** (Hilt) to manage complex graphs.
+- Handle **Configuration Changes** (Rotation) using ViewModels.
 
 **Don't**:
 
-- Block the main thread
-- Hardcode strings
-- Ignore lifecycle
-- Skip null checks
+- Don't block the **Main Thread** (ANR Risk).
+- Don't put business logic in Activities/Fragments (God Class anti-pattern).
+- Don't ignore Fragment lifecycle (don't access views in `onDestroyView`).
 
 ## Troubleshooting
 
-| Issue             | Cause               | Solution            |
-| ----------------- | ------------------- | ------------------- |
-| ANR               | Main thread blocked | Move to background  |
-| Memory leak       | Context reference   | Use lifecycle-aware |
-| Crash on rotation | State not saved     | Use ViewModel       |
+| Error                                          | Cause                                               | Solution                                    |
+| :--------------------------------------------- | :-------------------------------------------------- | :------------------------------------------ |
+| `ANR (App Not Responding)`                     | Blocking main thread for >5s.                       | Move work to `Dispatchers.IO` (Coroutines). |
+| `IllegalStateException: Fragment not attached` | Accessing context after detachment.                 | Check `isAdded` or use `MainScope` safely.  |
+| `Memory Leak`                                  | Holding Activity reference in Singleton/Background. | Use `WeakReference` or Application Context. |
 
 ## References
 
-- [Android Developer Docs](https://developer.android.com/docs)
-- [Android Architecture](https://developer.android.com/topic/architecture)
+- [Android Developer Guides](https://developer.android.com/guide)
+- [Guide to App Architecture](https://developer.android.com/topic/architecture)

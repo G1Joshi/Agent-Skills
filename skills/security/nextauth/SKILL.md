@@ -1,79 +1,66 @@
 ---
 name: nextauth
-description: NextAuth.js (Auth.js) for Next.js authentication. Use for Next.js auth.
+description: NextAuth.js authentication for Next.js. Use for Next.js auth.
 ---
 
 # NextAuth.js (Auth.js)
 
-Authentication for Next.js applications.
+NextAuth (evolving into **Auth.js**) is a complete open-source authentication solution. It is designed to work with any OAuth service, supports email/passwordless, and owns your data (Database Adapters).
 
 ## When to Use
 
-- Next.js applications
-- OAuth provider integration
-- Session-based auth
-- Database-backed sessions
+- **Data Ownership**: You want to own the User/Session data in your own Database (Postgres, Prisma) rather than an external provider.
+- **Cost**: It's free/open-source. No MAU limits.
+- **Flexibility**: You need custom providers or complex session strategies.
 
-## Quick Start
+## Quick Start (Next.js App Router - v5 Beta)
 
 ```typescript
-// app/api/auth/[...nextauth]/route.ts
+// auth.ts
 import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: [
-    GitHub({
-      clientId: process.env.GITHUB_ID!,
-      clientSecret: process.env.GITHUB_SECRET!,
-    }),
-  ],
+  providers: [GitHub],
 });
 
+// app/api/auth/[...nextauth]/route.ts
+import { handlers } from "@/auth";
 export const { GET, POST } = handlers;
 ```
 
 ## Core Concepts
 
-### Session Access
+### Database Adapters
 
-```typescript
-// Server Component
-import { auth } from '@/auth';
+NextAuth can persist users and sessions to your DB using adapters (Prisma, Drizzle, MongoDB).
 
-export default async function Page() {
-  const session = await auth();
-  if (!session) redirect('/api/auth/signin');
-  return <h1>Hello {session.user?.name}</h1>;
-}
+### Strategies
 
-// Client Component
-'use client';
-import { useSession } from 'next-auth/react';
+- **JWT (Stateless)**: Default. Session data stored in an encrypted cookie. Good for scale.
+- **Database (Stateful)**: Session stored in DB. Good if you need to revoke sessions server-side immediately.
 
-export function Profile() {
-  const { data: session, status } = useSession();
-  if (status === 'loading') return <p>Loading...</p>;
-  return <p>{session?.user?.name}</p>;
-}
-```
+## Best Practices (2025)
 
-### Middleware
+**Do**:
 
-```typescript
-// middleware.ts
-export { auth as middleware } from "@/auth";
+- Use the **Prisma Adapter** (or Drizzle) if you have a database.
+- Set a strong `AUTH_SECRET` (auto-generated in Vercel, manual elsewhere).
+- Use **Middleware** to protect routes at the edge.
 
-export const config = {
-  matcher: ["/dashboard/:path*"],
-};
-```
+**Don't**:
 
-## Best Practices
+- Don't store large objects in the Session (The JWT cookie has a 4kb limit).
+- Don't commit provider secrets (Client ID/Secret) to Git.
 
-**Do**: Use middleware for protection, extend session with callbacks
-**Don't**: Expose sensitive data in session
+## Troubleshooting
+
+| Error                 | Cause                     | Solution                                                 |
+| :-------------------- | :------------------------ | :------------------------------------------------------- |
+| `JWEDecryptionFailed` | Wrong `AUTH_SECRET`.      | Ensure `AUTH_SECRET` is set and consistent.              |
+| `OAuthCallbackError`  | Provider config mismatch. | Check Authorised Redirect URIs in GitHub/Google console. |
 
 ## References
 
 - [Auth.js Documentation](https://authjs.dev/)
+- [NextAuth v4 vs v5](https://authjs.dev/guides/upgrade-to-v5)

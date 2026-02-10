@@ -1,135 +1,44 @@
 ---
 name: xcode
-description: Xcode IDE for iOS/macOS development with SwiftUI and testing. Use for Apple platform development.
+description: Xcode Apple development IDE with simulators. Use for iOS/macOS development.
 ---
 
 # Xcode
 
-IDE for developing apps for Apple platforms.
+Xcode is the only IDE for native Apple platforms. 2025 (Xcode 17) brings **Swift Assist** and **Predictive Code Completion** running locally on Apple Silicon.
 
 ## When to Use
 
-- iOS/iPadOS app development
-- macOS app development
-- watchOS/tvOS development
-- Swift Package development
-
-## Quick Start
-
-```swift
-// App.swift
-@main
-struct MyApp: App {
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
-    }
-}
-
-// ContentView.swift
-struct ContentView: View {
-    var body: some View {
-        Text("Hello, World!")
-    }
-}
-```
+- **iOS/macOS**: Building native apps.
+- **SwiftUI**: "Previws" canvas is essential.
+- **Instruments**: Deep performance profiling of Apple apps.
 
 ## Core Concepts
 
-### Project Configuration
+### Project/Workspace
 
-```swift
-// Build Settings
-// - Deployment Target: iOS 17.0
-// - Swift Language Version: 6.0
-// - Build Configuration: Debug/Release
+`.xcodeproj` and `.xcworkspace`. Use Workspaces if using CocoaPods or multiple projects.
 
-// Info.plist keys
-/*
-<key>CFBundleDisplayName</key>
-<string>My App</string>
-<key>NSCameraUsageDescription</key>
-<string>Camera access needed for photos</string>
-*/
-```
+### SwiftUI Previews
 
-### Debugging
+`#Preview` macro (Swift 5.9+) allows instant rendering of views.
 
-```swift
-// LLDB commands
-// po variableName
-// expr variableName = newValue
-// bt (backtrace)
+### Simulators
 
-// Breakpoint actions
-// Log message: "Value: @value@"
-// Shell command: say "breakpoint hit"
+Run iOS on your Mac.
 
-// View debugging
-// Debug > View Debugging > Capture View Hierarchy
-```
-
-## Common Patterns
-
-### Schemes & Configurations
-
-```
-Project Settings:
-├── Configurations
-│   ├── Debug
-│   ├── Release
-│   └── Staging (custom)
-└── Schemes
-    ├── MyApp (Debug)
-    ├── MyApp (Release)
-    └── MyApp (Staging)
-```
-
-### Code Signing
-
-```bash
-# Automatic signing
-# - Team: Select your team
-# - Automatically manage signing: ON
-
-# Manual signing (CI)
-# - Provisioning Profile: Select manually
-# - Signing Certificate: Select manually
-
-# Build from command line
-xcodebuild -project MyApp.xcodeproj \
-  -scheme MyApp \
-  -configuration Release \
-  -archivePath build/MyApp.xcarchive \
-  archive
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use SwiftUI previews
-- Enable strict concurrency checking
-- Configure proper entitlements
-- Use Instruments for profiling
+- **Use Swift Testing**: The new `Testing` framework (macro-based) replaces XCTest.
+- **Use `.xcstrings`**: The new String Catalog format for localization (replaces `.strings`).
+- **Use CloudKit Console**: Debug database data directly from the IDE/Web.
 
 **Don't**:
 
-- Commit derived data
-- Ignore deprecation warnings
-- Skip accessibility testing
-- Use force unwrapping
-
-## Troubleshooting
-
-| Issue          | Cause               | Solution                  |
-| -------------- | ------------------- | ------------------------- |
-| Signing error  | Certificate expired | Renew in developer portal |
-| Preview crash  | Build error         | Check Preview canvas logs |
-| Simulator slow | Resource constraint | Reset simulator           |
+- **Don't fight the build system**: If weird errors occur, `Product > Clean Build Folder` (Cmd+Shift+K) is the first troubleshooting step.
 
 ## References
 
-- [Apple Developer Docs](https://developer.apple.com/documentation/)
-- [Xcode Help](https://help.apple.com/xcode/)
+- [Xcode Documentation](https://developer.apple.com/xcode/)

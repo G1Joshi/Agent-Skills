@@ -1,149 +1,44 @@
 ---
 name: android-studio
-description: Android Studio IDE for Android development with Gradle and emulator. Use for Android projects.
+description: Android Studio IDE with emulator and profiler. Use for Android development.
 ---
 
 # Android Studio
 
-IDE for Android app development based on IntelliJ IDEA.
+Android Studio is built on IntelliJ IDEA. 2025 versions (Narwhal/Otter) feature **Gemini** for code generation and crash analysis.
 
 ## When to Use
 
-- Android app development
-- Kotlin/Java mobile projects
-- Jetpack Compose development
-- APK building and debugging
-
-## Quick Start
-
-```kotlin
-// MainActivity.kt
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            MyApp()
-        }
-    }
-}
-```
+- **Android Apps**: Native Android development (Kotlin/Java).
+- **Compose**: "Live Edit" allows UI updates in real-time on devices/emulators.
+- **Profiling**: Inspecting memory leaks and battery usage.
 
 ## Core Concepts
 
-### Gradle Configuration
+### Gradle
 
-```kotlin
-// build.gradle.kts (app)
-plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-}
+The build system. `build.gradle.kts` (Kotlin DSL) is the standard in 2025.
 
-android {
-    namespace = "com.example.myapp"
-    compileSdk = 34
+### Emulator
 
-    defaultConfig {
-        applicationId = "com.example.myapp"
-        minSdk = 24
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
-    }
+Virtual Android device. 2025 emulators are resizable and support foldable postures.
 
-    buildTypes {
-        release {
-            isMinifyEnabled = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
+### Logcat v2
 
-    buildFeatures {
-        compose = true
-    }
-}
+The logging window. Colored, filterable, and queryable logic.
 
-dependencies {
-    implementation(platform("androidx.compose:compose-bom:2024.01.00"))
-    implementation("androidx.compose.material3:material3")
-}
-```
-
-### Debugging
-
-```kotlin
-// Logcat filtering
-// Tag: MyActivity Level: Debug
-
-Log.d("MyActivity", "Debug message")
-Log.e("MyActivity", "Error message", exception)
-
-// Breakpoint conditions
-// Right-click breakpoint -> Condition: userId == "123"
-```
-
-## Common Patterns
-
-### Device Management
-
-```bash
-# ADB commands
-adb devices
-adb install app-debug.apk
-adb logcat | grep MyApp
-adb shell am start -n com.example.myapp/.MainActivity
-
-# Emulator
-emulator -list-avds
-emulator -avd Pixel_6_API_34
-```
-
-### Build Variants
-
-```kotlin
-android {
-    flavorDimensions += "version"
-    productFlavors {
-        create("free") {
-            dimension = "version"
-            applicationIdSuffix = ".free"
-        }
-        create("paid") {
-            dimension = "version"
-            applicationIdSuffix = ".paid"
-        }
-    }
-}
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use version catalogs for dependencies
-- Enable R8 for release builds
-- Configure ProGuard rules
-- Test on multiple API levels
+- **Use Gemini**: "Explain this crash" in Logcat sends the stack trace to Gemini for analysis.
+- **Use Baseline Profiles**: Generate profiles to improve app startup time.
+- **Use App Quality Insights**: View Crashlytics issues directly in the IDE code editor.
 
 **Don't**:
 
-- Commit local.properties
-- Ignore lint warnings
-- Skip signed release builds
-- Use deprecated APIs
-
-## Troubleshooting
-
-| Issue              | Cause            | Solution                    |
-| ------------------ | ---------------- | --------------------------- |
-| Gradle sync failed | Dependency issue | Check version compatibility |
-| Emulator slow      | Low memory       | Increase RAM allocation     |
-| Build error        | SDK missing      | Install via SDK Manager     |
+- **Don't hardcode Strings**: Use `strings.xml`. The IDE warns you for a reason.
 
 ## References
 
-- [Android Developers](https://developer.android.com/)
-- [Android Studio Guide](https://developer.android.com/studio)
+- [Android Studio User Guide](https://developer.android.com/studio/intro)

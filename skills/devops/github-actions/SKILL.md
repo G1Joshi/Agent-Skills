@@ -1,169 +1,64 @@
 ---
 name: github-actions
-description: GitHub Actions CI/CD workflows, reusable actions, and deployment automation. Use for GitHub automation.
+description: GitHub Actions CI/CD workflows with reusable actions. Use for GitHub automation.
 ---
 
 # GitHub Actions
 
-CI/CD automation integrated with GitHub repositories.
+GitHub Actions is the CI/CD platform native to GitHub. In 2025, it is the dominant CI/CD tool, characterized by **Reusable Workflows** and **OIDC** integration for passwordless deployments.
 
 ## When to Use
 
-- Continuous integration testing
-- Automated deployments
-- Code quality checks
-- Workflow automation
+- **GitHub-Hosted**: Your code is already on GitHub. Deep integration with Issues/PRs.
+- **Simplicity**: No servers to manage (unlike Jenkins).
+- **Marketplace**: Thousands of pre-built actions (setup-node, docker-build-push).
 
 ## Quick Start
 
 ```yaml
 # .github/workflows/ci.yml
 name: CI
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+on: [push, pull_request]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: "npm"
+          node-version: "20"
       - run: npm ci
       - run: npm test
 ```
 
 ## Core Concepts
 
-### Workflow Structure
+### Workflows
 
-```yaml
-name: Deploy
+Defined in `.github/workflows/*.yml`. Triggered by events (`push`, `release`, `schedule`).
 
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: "Target environment"
-        required: true
-        default: "staging"
-        type: choice
-        options: [staging, production]
+### Runners
 
-env:
-  NODE_VERSION: 20
+Virtual machines (Ubuntu/Windows/MacOS) that run your jobs. You can also host **Self-Hosted Runners** for cheaper/faster builds in your VPC.
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.version.outputs.version }}
-    steps:
-      - uses: actions/checkout@v4
+### Actions
 
-      - name: Get version
-        id: version
-        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+Reusable steps. `actions/checkout` is an action. You can write your own in JS or Docker.
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: dist/
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment: ${{ inputs.environment || 'staging' }}
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: dist
-```
-
-### Matrix Strategy
-
-```yaml
-jobs:
-  test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-        node: [18, 20, 22]
-    steps:
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node }}
-```
-
-## Common Patterns
-
-### Reusable Workflow
-
-```yaml
-# .github/workflows/reusable-deploy.yml
-on:
-  workflow_call:
-    inputs:
-      environment:
-        required: true
-        type: string
-    secrets:
-      deploy_token:
-        required: true
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
-    steps:
-      - run: echo "Deploying to ${{ inputs.environment }}"
-        env:
-          TOKEN: ${{ secrets.deploy_token }}
-
-# Calling workflow
-jobs:
-  deploy:
-    uses: ./.github/workflows/reusable-deploy.yml
-    with:
-      environment: production
-    secrets:
-      deploy_token: ${{ secrets.DEPLOY_TOKEN }}
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Pin action versions with SHA
-- Use environments for deployments
-- Cache dependencies
-- Use concurrency controls
+- **Use Reusable Workflows**: Define a standard "Deploy to Prod" workflow in one repo, and call it from 50 microservices.
+- **Use OIDC**: Authenticate to AWS/Azure/GCP using `permissions: id-token: write` instead of long-lived secrets.
+- **Pin Actions**: Use `actions/checkout@v4` or a specific SHA for immutability.
 
 **Don't**:
 
-- Expose secrets in logs
-- Use `pull_request_target` carelessly
-- Skip security scanning
-- Ignore workflow permissions
-
-## Troubleshooting
-
-| Issue             | Cause               | Solution                  |
-| ----------------- | ------------------- | ------------------------- |
-| Permission denied | Missing permissions | Add permissions block     |
-| Cache miss        | Wrong key           | Check cache key pattern   |
-| Secret empty      | Wrong scope         | Check secret availability |
+- **Don't hardcode secrets**: Use Repository Secrets or Environment Secrets.
+- **Don't write huge shell scripts**: If a step is >10 lines of bash, move it to a script file or a custom Action.
 
 ## References
 
-- [GitHub Actions Docs](https://docs.github.com/actions)
-- [Actions Marketplace](https://github.com/marketplace?type=actions)
+- [GitHub Actions Documentation](https://docs.github.com/en/actions)

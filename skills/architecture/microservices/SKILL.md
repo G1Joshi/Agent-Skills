@@ -1,147 +1,94 @@
 ---
 name: microservices
-description: Microservices architecture with service mesh and communication patterns. Use for distributed systems.
+description: Microservices distributed architecture pattern. Use for scalable systems.
 ---
 
 # Microservices
 
-Distributed architecture with independent services.
+Microservices architecture structures an application as a collection of loosely coupled, independently deployable services. Ideally, each service corresponds to a **Bounded Context** (DDD).
 
 ## When to Use
 
-- Large-scale applications
-- Independent team scaling
-- Polyglot development
-- Fault isolation
+- Large teams (50+ devs) where coordination on a monolith slows down deployment.
+- Modules have conflicting resource requirements (e.g., one needs huge RAM, another needs GPU).
+- Need to scale specific parts of the system independently.
+- **2025 Reality check**: Don't start with Microservices. Start with a Modular Monolith.
 
 ## Quick Start
 
 ```yaml
-# docker-compose.yml
+# docker-compose.yml (Simulated Microservices)
 services:
-  api-gateway:
-    build: ./gateway
-    ports: ["3000:3000"]
-
-  user-service:
-    build: ./services/user
-
   order-service:
     build: ./services/order
+    ports: ["3001:3000"]
+    environment:
+      - DB_HOST=order-db
 
-  notification-service:
-    build: ./services/notification
+  inventory-service:
+    build: ./services/inventory
+    ports: ["3002:3000"]
+
+  api-gateway:
+    image: nginx
+    ports: ["80:80"]
+    depends_on:
+      - order-service
+      - inventory-service
 ```
 
 ## Core Concepts
 
-### Service Communication
+### Independence
 
-```typescript
-// REST communication
-async function getUser(userId: string): Promise<User> {
-  const response = await fetch(`${USER_SERVICE_URL}/users/${userId}`);
-  return response.json();
-}
+Each service owns its own data. Service A cannot query Service B's database directly; it must ask Service B via API.
 
-// gRPC client
-const client = new UserServiceClient(
-  "user-service:50051",
-  grpc.credentials.createInsecure(),
-);
+### Inter-Service Communication
 
-// Message queue
-import { Queue } from "bullmq";
+- **Synchronous**: HTTP/REST or gRPC (Request/Response). Tightly coupled in time.
+- **Asynchronous**: Message Queues (RabbitMQ, Kafka, SQS). Decoupled in time.
 
-const orderQueue = new Queue("orders");
-await orderQueue.add("process", { orderId: "123" });
-```
+### Database per Service
 
-### Event-Driven Architecture
-
-```typescript
-// Producer
-await kafka.producer.send({
-  topic: "user-events",
-  messages: [
-    {
-      key: userId,
-      value: JSON.stringify({ type: "USER_CREATED", data: user }),
-    },
-  ],
-});
-
-// Consumer
-await kafka.consumer.subscribe({ topic: "user-events" });
-await kafka.consumer.run({
-  eachMessage: async ({ message }) => {
-    const event = JSON.parse(message.value.toString());
-    if (event.type === "USER_CREATED") {
-      await sendWelcomeEmail(event.data);
-    }
-  },
-});
-```
+Ensures loose coupling. If a service needs data from another, use data replication (Events) or API composition.
 
 ## Common Patterns
 
+### API Gateway
+
+A single entry point for all clients. Handles routing, auth, rate limiting, and aggregation.
+
 ### Circuit Breaker
 
-```typescript
-import CircuitBreaker from "opossum";
+Detects failures and prevents the application from trying to perform the action that is doomed to fail (e.g., external service down), protecting the system.
 
-const breaker = new CircuitBreaker(fetchUser, {
-  timeout: 3000,
-  errorThresholdPercentage: 50,
-  resetTimeout: 30000,
-});
+### Saga Pattern
 
-breaker.fallback(() => ({ id: "unknown", name: "Guest" }));
-
-const user = await breaker.fire(userId);
-```
-
-### Service Discovery
-
-```yaml
-# Kubernetes service
-apiVersion: v1
-kind: Service
-metadata:
-  name: user-service
-spec:
-  selector:
-    app: user-service
-  ports:
-    - port: 80
-      targetPort: 3000
-```
+Managing distributed transactions. Since you can't have ACID across services, use Sagas (sequence of local transactions) with compensating actions for rollbacks.
 
 ## Best Practices
 
 **Do**:
 
-- Design for failure
-- Implement retry logic
-- Use async communication
-- Monitor all services
+- Automate **CI/CD** and **Infrastructure as Code** (Terraform/K8s). You can't manage 50 services manually.
+- Implement **Distributed Tracing** (OpenTelemetry) immediately.
+- Define clear **Service Boundaries** (use DDD).
 
 **Don't**:
 
-- Share databases
-- Create tight coupling
-- Ignore distributed transactions
-- Skip health checks
+- Don't share code libraries for domain logic (leads to "Distributed Monolith"). Share utils only.
+- Don't use synchronous calls for everything (cascading failures).
+- Don't underestimate the **Operational Complexity** (Logging, Monitoring, Auth).
 
 ## Troubleshooting
 
-| Issue              | Cause             | Solution            |
-| ------------------ | ----------------- | ------------------- |
-| Service timeout    | Network/load      | Add circuit breaker |
-| Data inconsistency | Distributed state | Use saga pattern    |
-| Cascading failure  | No isolation      | Implement bulkhead  |
+| Error                | Cause                                          | Solution                                                               |
+| :------------------- | :--------------------------------------------- | :--------------------------------------------------------------------- |
+| `Cascading Failure`  | One service down takes down others.            | Use Circuit Breakers and Timeouts.                                     |
+| `Data inconsistency` | Async updates failed.                          | Implement Sagas and Idempotent consumers.                              |
+| `Latency`            | Too many hops (service -> service -> service). | Use Caching, Aggregation at Gateway, or Event-Driven data replication. |
 
 ## References
 
-- [Microservices.io](https://microservices.io/)
-- [12-Factor App](https://12factor.net/)
+- [Building Microservices (Sam Newman)](https://samnewman.io/books/building_microservices/)
+- [Microservices Patterns (Chris Richardson)](https://microservices.io/)

@@ -1,146 +1,61 @@
 ---
 name: elasticsearch
-description: Elasticsearch search and analytics engine with full-text search, aggregations, and logging. Use for search and logging.
+description: Elasticsearch search and analytics engine with full-text search. Use for search and logging.
 ---
 
 # Elasticsearch
 
-Distributed search and analytics engine for full-text search and logging.
+Elasticsearch is a distributed search and analytics engine built on Apache Lucene. It is the heart of the ELK Stack (Elastic, Logstash, Kibana) and a leading Vector Database for AI.
 
 ## When to Use
 
-- Full-text search implementation
-- Log aggregation and analysis
-- Real-time analytics
-- Geospatial search
+- **Full-Text Search**: "Did you mean?" suggestions, fuzzy search, relevance scoring.
+- **Log Analytics**: Storing terabytes of logs (Observability).
+- **Vector Search (2025)**: Storing embeddings for Semantic Search / RAG.
 
 ## Quick Start
 
-```javascript
-// Index a document
-await client.index({
-  index: "products",
-  id: "1",
-  body: {
-    name: "Laptop",
-    description: "High-performance laptop",
-    price: 999.99,
-    category: "electronics",
-  },
-});
-
-// Search
-const { hits } = await client.search({
-  index: "products",
-  body: {
-    query: { match: { description: "laptop" } },
-  },
-});
+```bash
+# REST API - Search for "bike"
+GET /products/_search
+{
+  "query": {
+    "match": {
+      "description": "bike"
+    }
+  }
+}
 ```
 
 ## Core Concepts
 
-### Mappings
+### Inverted Index
 
-```javascript
-await client.indices.create({
-  index: "products",
-  body: {
-    mappings: {
-      properties: {
-        name: { type: "text", analyzer: "standard" },
-        description: { type: "text" },
-        price: { type: "float" },
-        category: { type: "keyword" },
-        tags: { type: "keyword" },
-        created_at: { type: "date" },
-      },
-    },
-  },
-});
-```
+Maps words to documents. "Bike" -> [Doc1, Doc5]. Makes text search nearly instant.
 
-### Search Queries
+### Shards & Replicas
 
-```javascript
-// Boolean query
-const query = {
-  bool: {
-    must: [{ match: { description: "laptop" } }],
-    filter: [
-      { term: { category: "electronics" } },
-      { range: { price: { lte: 1000 } } },
-    ],
-    should: [{ term: { featured: true } }],
-  },
-};
+- **Shard**: A slice of the index. Distributes data across nodes.
+- **Replica**: Copy of a shard for High Availability.
 
-// Full-text with highlighting
-const result = await client.search({
-  index: "products",
-  body: {
-    query: { match: { description: "laptop computer" } },
-    highlight: { fields: { description: {} } },
-    sort: [{ price: "asc" }],
-    from: 0,
-    size: 10,
-  },
-});
-```
+### ES|QL (2024+)
 
-## Common Patterns
+Elasticsearch Query Language. A piped language (like SQL/Splunk) to simplify querying.
+`FROM logs | WHERE status == 500 | LIMIT 10`
 
-### Aggregations
-
-```javascript
-const result = await client.search({
-  index: "orders",
-  body: {
-    size: 0,
-    aggs: {
-      sales_by_category: {
-        terms: { field: "category" },
-        aggs: {
-          total_revenue: { sum: { field: "amount" } },
-          avg_order: { avg: { field: "amount" } },
-        },
-      },
-      monthly_sales: {
-        date_histogram: {
-          field: "created_at",
-          calendar_interval: "month",
-        },
-      },
-    },
-  },
-});
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use keyword type for exact matches
-- Set appropriate shard count
-- Use bulk operations for indexing
-- Implement proper mappings upfront
+- **Use `kNN` Search**: Native vector search support for AI applications.
+- **Use ILM (Index Lifecycle Management)**: Move old logs to cheaper cold storage automatically.
+- **Use Datastreams**: Optimized abstraction for time-series/logs (append-only).
 
 **Don't**:
 
-- Use text type for filtering
-- Create too many shards
-- Skip index lifecycle management
-- Store large documents
-
-## Troubleshooting
-
-| Issue            | Cause                | Solution                    |
-| ---------------- | -------------------- | --------------------------- |
-| Slow search      | Missing optimization | Check mappings, add filters |
-| Mapping conflict | Type mismatch        | Use dynamic templates       |
-| Cluster red      | Unassigned shards    | Check disk space, replicas  |
+- **Don't use as primary source of truth**: It is eventually consistent and partition-tolerant, but relational DBs are safer for "money" data.
+- **Don't oversight mapping explosion**: Too many unique fields map crash the cluster.
 
 ## References
 
-- [Elasticsearch Documentation](https://www.elastic.co/guide/)
-- [Elasticsearch Best Practices](https://www.elastic.co/blog/)
+- [Elasticsearch Guide](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html)

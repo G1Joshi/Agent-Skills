@@ -1,167 +1,100 @@
 ---
 name: clean-architecture
-description: Clean Architecture with layers, dependency injection, and SOLID principles. Use for maintainable code.
+description: Clean Architecture layered design. Use for maintainable code.
 ---
 
 # Clean Architecture
 
-Layered architecture for maintainable, testable applications.
+Clean Architecture, popularized by Robert C. Martin (Uncle Bob), separates software into layers to ensure independence from frameworks, databases, and UIs. The core principle is the **Dependency Rule**: source code dependencies can only point inwards.
 
 ## When to Use
 
-- Long-lived applications
-- Complex business logic
-- Testable codebase
-- Framework independence
+- Building enterprise applications with complex business logic.
+- Long-lived projects where frameworks/databases might change over time.
+- Large teams requiring clear separation of concerns to work in parallel.
 
 ## Quick Start
 
-```
-src/
-├── domain/           # Entities, value objects
-├── application/      # Use cases, DTOs
-├── infrastructure/   # Database, external APIs
-└── presentation/     # Controllers, routes
-```
-
-## Core Concepts
-
-### Layers
-
 ```typescript
-// Domain - Entities
+// 1. Entity (Enterprise Logic) - Inner Layer
 class User {
   constructor(
-    public readonly id: string,
-    public readonly email: Email,
-    public readonly name: string,
-  ) {}
-
-  changeEmail(newEmail: Email): User {
-    return new User(this.id, newEmail, this.name);
+    public id: string,
+    public name: string,
+  ) {
+    if (name.length < 2) throw new Error("Name too short");
   }
 }
 
-// Application - Use Cases
+// 2. Use Case (Application Logic)
 class CreateUserUseCase {
-  constructor(private userRepository: UserRepository) {}
+  constructor(private userRepository: UserRepository) {} // Depends on interface
 
-  async execute(input: CreateUserInput): Promise<User> {
-    const email = new Email(input.email);
-    const user = new User(generateId(), email, input.name);
+  async execute(name: string): Promise<User> {
+    const user = new User(crypto.randomUUID(), name);
     await this.userRepository.save(user);
     return user;
   }
 }
 
-// Infrastructure - Repository Implementation
-class PrismaUserRepository implements UserRepository {
-  async save(user: User): Promise<void> {
-    await prisma.user.create({
-      data: {
-        id: user.id,
-        email: user.email.value,
-        name: user.name,
-      },
-    });
-  }
-}
-```
-
-### Dependency Injection
-
-```typescript
-// Interfaces in domain
+// 3. Interface Adapter (Repository Interface)
 interface UserRepository {
   save(user: User): Promise<void>;
-  findById(id: string): Promise<User | null>;
 }
 
-// Container setup
-const container = {
-  userRepository: new PrismaUserRepository(),
-  createUser: new CreateUserUseCase(this.userRepository),
-};
-
-// Controller uses use case
-class UserController {
-  constructor(private createUser: CreateUserUseCase) {}
-
-  async create(req: Request, res: Response) {
-    const user = await this.createUser.execute(req.body);
-    res.status(201).json(user);
+// 4. Frameworks & Drivers (Implementation) - Outer Layer
+class SqlUserRepository implements UserRepository {
+  async save(user: User): Promise<void> {
+    await db.query("INSERT INTO users ...", [user.id, user.name]);
   }
 }
 ```
+
+## Core Concepts
+
+### The Dependency Rule
+
+Inner layers (Entities) know nothing about outer layers (Controllers, Presenters). Outer layers depend on inner layers.
+
+### Entities
+
+Enterprise-wide business rules. These are the least likely to change when something external changes (e.g., page navigation security).
+
+### Application Business Rules (Use Cases)
+
+Orchestrate the flow of data to and from the entities. They contain the specific business rules of the application (e.g., "Create Order").
 
 ## Common Patterns
 
-### Value Objects
+### Dependency Injection
 
-```typescript
-class Email {
-  constructor(public readonly value: string) {
-    if (!this.isValid(value)) {
-      throw new Error("Invalid email");
-    }
-  }
+The glue that makes Clean Architecture possible. Outer layers inject concrete implementations (e.g., `SqlUserRepository`) into inner layers (which expect `UserRepository` interface).
 
-  private isValid(email: string): boolean {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  }
+### DTOs (Data Transfer Objects)
 
-  equals(other: Email): boolean {
-    return this.value === other.value;
-  }
-}
-```
-
-### Result Pattern
-
-```typescript
-type Result<T, E = Error> =
-  | { success: true; value: T }
-  | { success: false; error: E };
-
-class CreateUserUseCase {
-  async execute(input: CreateUserInput): Promise<Result<User>> {
-    try {
-      const email = new Email(input.email);
-      const user = new User(generateId(), email, input.name);
-      await this.userRepository.save(user);
-      return { success: true, value: user };
-    } catch (error) {
-      return { success: false, error: error as Error };
-    }
-  }
-}
-```
+Use simple objects (DTOs) to cross boundaries. Do not pass Entities to the UI or Database rows to the Use Case.
 
 ## Best Practices
 
 **Do**:
 
-- Depend on abstractions
-- Keep domain pure
-- Use constructor injection
-- Test use cases in isolation
+- Define **Interfaces** in the layer that uses them (Interface Segregation).
+- Test **Use Cases** in isolation using mocks for repositories.
+- Keep **Frameworks** (React, NestJS, Spring) at the outermost layer.
 
 **Don't**:
 
-- Reference infrastructure from domain
-- Put business logic in controllers
-- Skip value object validation
-- Tightly couple to frameworks
+- Don't let **database entities** (ORM models) leak into the inner layers. Map them to domain Entities.
+- Don't skip layers "for speed" (e.g., Controller calling DB directly) in complex apps.
 
 ## Troubleshooting
 
-| Issue               | Cause                 | Solution                   |
-| ------------------- | --------------------- | -------------------------- |
-| Circular dependency | Wrong layer           | Check dependency direction |
-| Hard to test        | Concrete dependencies | Use interfaces             |
-| Anemic domain       | Logic in services     | Move to entities           |
+| Error                  | Cause                                   | Solution                                                                        |
+| :--------------------- | :-------------------------------------- | :------------------------------------------------------------------------------ |
+| `Circular Dependency`  | Violating the dependency rule.          | Use Dependency Inversion (Interfaces) to break the cycle.                       |
+| `Boilerplate Overload` | Creating strict layers for simple CRUD. | Consider "Vertical Slice Architecture" or Modular Monolith for simpler domains. |
 
 ## References
 
-- [Clean Architecture Book](https://www.amazon.com/Clean-Architecture-Craftsmans-Software-Structure/dp/0134494164)
-- [DDD Reference](https://www.domainlanguage.com/ddd/reference/)
+- [The Clean Architecture Blog](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+- [Clean Architecture vs. Hexagonal](https://herbertograca.com/2017/11/16/explicit-architecture-01-ddd-hexagonal-onion-clean-cqrs-how-i-put-it-all-together/)

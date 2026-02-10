@@ -1,33 +1,32 @@
 ---
 name: jest
-description: Jest testing framework with mocking and snapshot testing. Use for JavaScript/TypeScript tests.
+description: Jest JavaScript testing framework with snapshots. Use for JS testing.
 ---
 
 # Jest
 
-JavaScript testing framework with built-in mocking.
+Jest is a delightful JavaScript Testing Framework with a focus on simplicity. It works with projects using: Babel, TypeScript, Node, React, Angular, Vue, and more.
 
 ## When to Use
 
-- Unit testing JavaScript/TypeScript
-- React component testing
-- Snapshot testing
-- Mocking dependencies
+- **React Apps**: The default and most supported runner for Create React App / Next.js (historically).
+- **Snapshot Testing**: When you want to ensure UI or JSON structures haven't changed unexpectedly.
+- **Legacy/Standard**: Extensive community plugins and support.
 
 ## Quick Start
 
-```typescript
-// sum.test.ts
-import { sum } from "./sum";
+```javascript
+// sum.js
+function sum(a, b) {
+  return a + b;
+}
+module.exports = sum;
 
-describe("sum", () => {
-  it("adds two numbers", () => {
-    expect(sum(1, 2)).toBe(3);
-  });
+// sum.test.js
+const sum = require("./sum");
 
-  it("handles negative numbers", () => {
-    expect(sum(-1, 1)).toBe(0);
-  });
+test("adds 1 + 2 to equal 3", () => {
+  expect(sum(1, 2)).toBe(3);
 });
 ```
 
@@ -35,107 +34,46 @@ describe("sum", () => {
 
 ### Matchers
 
-```typescript
-// Common matchers
-expect(value).toBe(expected); // Strict equality
-expect(value).toEqual(expected); // Deep equality
-expect(value).toBeTruthy();
-expect(value).toBeFalsy();
-expect(value).toBeNull();
-expect(value).toBeUndefined();
-expect(array).toContain(item);
-expect(string).toMatch(/regex/);
-expect(fn).toThrow(Error);
-expect(promise).resolves.toBe(value);
-expect(promise).rejects.toThrow();
+Jest uses "matchers" to test values.
+
+- `toBe(value)`: Exact equality (Object.is).
+- `toEqual(value)`: Recursive equality (great for Objects/Arrays).
+- `toContain(item)`: Checks if an array contains an item.
+
+### Mock Functions
+
+`jest.fn()` creates a mock function. You can track calls, arguments, and instances.
+
+```javascript
+const mockCallback = jest.fn((x) => 42 + x);
+forEach([0, 1], mockCallback);
+expect(mockCallback.mock.calls.length).toBe(2);
 ```
-
-### Mocking
-
-```typescript
-import { fetchUser } from "./api";
-import { UserService } from "./UserService";
-
-jest.mock("./api");
-
-const mockedFetchUser = fetchUser as jest.MockedFunction<typeof fetchUser>;
-
-describe("UserService", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("fetches user data", async () => {
-    mockedFetchUser.mockResolvedValue({ id: "1", name: "John" });
-
-    const service = new UserService();
-    const user = await service.getUser("1");
-
-    expect(user.name).toBe("John");
-    expect(mockedFetchUser).toHaveBeenCalledWith("1");
-  });
-});
-```
-
-## Common Patterns
 
 ### Async Testing
 
-```typescript
-it("handles async operations", async () => {
-  const result = await fetchData();
-  expect(result).toBeDefined();
-});
+Jest supports `async/await`.
 
-it("handles promises", () => {
-  return expect(asyncFn()).resolves.toBe("value");
-});
-
-it("handles callbacks", (done) => {
-  callback((result) => {
-    expect(result).toBe("value");
-    done();
-  });
+```javascript
+test("data is peanut butter", async () => {
+  const data = await fetchData();
+  expect(data).toBe("peanut butter");
 });
 ```
 
-### Snapshot Testing
-
-```typescript
-import { render } from '@testing-library/react';
-import { Button } from './Button';
-
-it('matches snapshot', () => {
-  const { container } = render(<Button label="Click me" />);
-  expect(container).toMatchSnapshot();
-});
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use descriptive test names
-- Mock external dependencies
-- Test edge cases
-- Keep tests isolated
+- **Use `test.each`**: For data-driven tests. Avoid writing valid/invalid test cases manually 10 times.
+- **Isolate Tests**: Tests should not depend on each other. Jest runs them in parallel.
+- **Mock External APIs**: Never hit real APIs in unit tests. Use `jest.mock`.
 
 **Don't**:
 
-- Test implementation details
-- Share state between tests
-- Use too many snapshots
-- Skip cleanup
-
-## Troubleshooting
-
-| Issue            | Cause             | Solution               |
-| ---------------- | ----------------- | ---------------------- |
-| Test timeout     | Async not awaited | Add await or done()    |
-| Mock not working | Wrong path        | Check module path      |
-| Flaky tests      | Shared state      | Use beforeEach cleanup |
+- **Don't overuse Snapshots**: Large snapshots are impossible to review. Use them for small, critical structures.
+- **Don't ignore "Unhandled Promise Rejection"**: It usually means a test finished before an async operation completed.
 
 ## References
 
-- [Jest Documentation](https://jestjs.io/docs/)
-- [Testing Library](https://testing-library.com/)
+- [Jest Documentation](https://jestjs.io/)

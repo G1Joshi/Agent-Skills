@@ -1,151 +1,44 @@
 ---
 name: postman
-description: Postman API testing with collections, environments, and automation. Use for API development.
+description: Postman API platform for testing and documentation. Use for API testing.
 ---
 
 # Postman
 
-API development and testing platform.
+Postman is the complete API lifecycle platform. 2025 features **AI Agent Builder** (orchestrating multi-step workflows) and **Postbot** (AI driven testing).
 
 ## When to Use
 
-- Testing REST APIs
-- API documentation
-- Automated testing
-- Team API collaboration
-
-## Quick Start
-
-```javascript
-// GET request with params
-// URL: {{baseUrl}}/users?status=active
-
-// POST request body (JSON)
-{
-  "name": "John Doe",
-  "email": "john@example.com"
-}
-```
+- **API Development**: Documentation, Mock Servers, and Monitors.
+- **Testing**: Automated testing in CI via `newman` CLI.
+- **Collaboration**: Workspaces and "Forks" of collections.
 
 ## Core Concepts
 
-### Environment Variables
+### Collections
 
-```javascript
-// Environments: Development, Staging, Production
+Groups of requests. Can be run as a suite.
 
-// Variables
-{
-  {
-    baseUrl;
-  }
-} // https://api.example.com
-{
-  {
-    apiKey;
-  }
-} // your-api-key
-{
-  {
-    userId;
-  }
-} // 123
+### Environments
 
-// Pre-request Script
-pm.environment.set("timestamp", Date.now());
-```
+Variables (`{{base_url}}`) that change between Dev, Staging, and Prod.
 
-### Tests & Assertions
+### Pre-request Scripts
 
-```javascript
-// Response status
-pm.test("Status is 200", () => {
-  pm.response.to.have.status(200);
-});
+JavaScript code that runs before a request (e.g. generating an HMAC signature).
 
-// Response JSON
-pm.test("User has correct email", () => {
-  const json = pm.response.json();
-  pm.expect(json.email).to.equal("test@example.com");
-});
-
-// Response time
-pm.test("Response time < 500ms", () => {
-  pm.expect(pm.response.responseTime).to.be.below(500);
-});
-
-// Save data for next request
-const token = pm.response.json().token;
-pm.environment.set("authToken", token);
-```
-
-## Common Patterns
-
-### Authentication
-
-```javascript
-// Pre-request Script for OAuth
-const tokenUrl = pm.environment.get("tokenUrl");
-const clientId = pm.environment.get("clientId");
-const clientSecret = pm.environment.get("clientSecret");
-
-pm.sendRequest(
-  {
-    url: tokenUrl,
-    method: "POST",
-    header: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: {
-      mode: "urlencoded",
-      urlencoded: [
-        { key: "grant_type", value: "client_credentials" },
-        { key: "client_id", value: clientId },
-        { key: "client_secret", value: clientSecret },
-      ],
-    },
-  },
-  (err, res) => {
-    pm.environment.set("accessToken", res.json().access_token);
-  },
-);
-```
-
-### Collection Runner
-
-```javascript
-// Run collection with Newman (CLI)
-npx newman run collection.json \
-  -e environment.json \
-  --reporters cli,htmlextra \
-  --iteration-count 5
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use environments for different stages
-- Write tests for critical responses
-- Version control collections
-- Use collection variables
+- **Use AI Agents**: Build workflows that chain requests intelligently using natural language.
+- **Use Mock Servers**: Design the API first, create a mock, and let frontend devs build against it before backend is ready.
+- **Use `newman`**: Run collections in GitHub Actions.
 
 **Don't**:
 
-- Hardcode secrets
-- Skip response validation
-- Create duplicate requests
-- Ignore collection organization
-
-## Troubleshooting
-
-| Issue                 | Cause               | Solution                            |
-| --------------------- | ------------------- | ----------------------------------- |
-| Variable not resolved | Wrong scope         | Check environment selection         |
-| SSL error             | Certificate issue   | Disable SSL verification (dev only) |
-| CORS error            | Browser restriction | Use Postman desktop app             |
+- **Don't hardcode auth**: Use "Auth" tab variables.
 
 ## References
 
-- [Postman Documentation](https://learning.postman.com/)
-- [Newman CLI](https://www.npmjs.com/package/newman)
+- [Postman Documentation](https://learning.postman.com/docs/introduction/overview/)

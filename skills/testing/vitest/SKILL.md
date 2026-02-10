@@ -1,141 +1,72 @@
 ---
 name: vitest
-description: Vitest Vite-native testing with ESM and TypeScript. Use for modern frontend tests.
+description: Vitest fast Vite-native testing. Use for Vite projects.
 ---
 
 # Vitest
 
-Vite-native testing framework for modern JavaScript.
+Vitest is a next-generation testing framework powered by Vite. It uses the same configuration (vite.config.ts), transforms, and plugins as your app, making it incredibly fast and creating a unified dev/test environment.
 
 ## When to Use
 
-- Vite-based projects
-- ESM-first testing
-- TypeScript testing
-- Fast unit testing
+- **Vite Projects**: If you use Vite, Vitest is the no-brainer choice. It reuses your plugins/config.
+- **Performance**: It is significantly faster than Jest because it uses native ESM and doesn't bundle the app.
+- **Watch Mode**: Instant HMR-style updates for tests.
 
 ## Quick Start
 
 ```typescript
-// sum.test.ts
-import { describe, it, expect } from "vitest";
-import { sum } from "./sum";
+// vite.config.ts
+/// <reference types="vitest" />
+import { defineConfig } from "vite";
 
-describe("sum", () => {
-  it("adds two numbers", () => {
-    expect(sum(1, 2)).toBe(3);
-  });
+export default defineConfig({
+  test: {
+    globals: true, // enables 'describe', 'test', 'expect' globally
+    environment: "jsdom",
+  },
+});
+
+// basic.test.ts
+import { expect, test } from "vitest";
+
+test("math", () => {
+  expect(1 + 1).toBe(2);
 });
 ```
 
 ## Core Concepts
 
-### Configuration
+### Jest Compatible
+
+Vitest's API (`describe`, `it`, `expect`, `vi.fn`) is designed to be compatible with Jest. Migration is often just changing imports.
+
+### In-Source Testing
+
+Vitest allows running tests within your source code blocks (Rust-style), though separating them is still common practice.
 
 ```typescript
-// vitest.config.ts
-import { defineConfig } from "vitest/config";
-
-export default defineConfig({
-  test: {
-    globals: true,
-    environment: "jsdom",
-    setupFiles: ["./tests/setup.ts"],
-    coverage: {
-      provider: "v8",
-      reporter: ["text", "html"],
-    },
-  },
-});
-```
-
-### Mocking
-
-```typescript
-import { vi, describe, it, expect } from "vitest";
-import { fetchUser } from "./api";
-import { UserService } from "./UserService";
-
-vi.mock("./api");
-
-describe("UserService", () => {
-  it("fetches user data", async () => {
-    vi.mocked(fetchUser).mockResolvedValue({ id: "1", name: "John" });
-
-    const service = new UserService();
-    const user = await service.getUser("1");
-
-    expect(user.name).toBe("John");
-    expect(fetchUser).toHaveBeenCalledWith("1");
-  });
-});
-```
-
-## Common Patterns
-
-### Component Testing
-
-```typescript
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { Counter } from './Counter';
-
-describe('Counter', () => {
-  it('increments count', async () => {
-    render(<Counter />);
-
-    await userEvent.click(screen.getByRole('button', { name: 'Increment' }));
-
-    expect(screen.getByText('Count: 1')).toBeInTheDocument();
-  });
-});
-```
-
-### In-source Testing
-
-```typescript
-// math.ts
-export function add(a: number, b: number): number {
-  return a + b;
-}
-
 if (import.meta.vitest) {
-  const { describe, it, expect } = import.meta.vitest;
-
-  describe("add", () => {
-    it("adds numbers", () => {
-      expect(add(1, 2)).toBe(3);
-    });
+  const { it, expect } = import.meta.vitest;
+  it("add", () => {
+    expect(add()).toBe(0);
   });
 }
 ```
 
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use v8 coverage provider
-- Enable globals for cleaner tests
-- Use in-source testing for utils
-- Configure proper environment
+- **Use Native ESM**: Stop fighting with Babel/ts-jest. Vitest handles ESM natively.
+- **Use Workspace Mode**: For monorepos, Vitest works beautifully with workspace packages.
+- **Switch from Jest**: If you are starting a new project, choose Vitest.
 
 **Don't**:
 
-- Mix with Jest unnecessarily
-- Skip TypeScript config
-- Ignore test isolation
-- Use require() in tests
-
-## Troubleshooting
-
-| Issue            | Cause         | Solution       |
-| ---------------- | ------------- | -------------- |
-| Import error     | ESM issue     | Check config   |
-| Mock not working | Wrong vi.mock | Check path     |
-| Slow tests       | No pooling    | Enable threads |
+- **Don't rely on global state**: Vitest runs tests in parallel.
+- **Don't import Jest types**: Ensure `types` in `tsconfig.json` points to `vitest/globals` if using globals.
 
 ## References
 
 - [Vitest Documentation](https://vitest.dev/)
-- [Vitest Config](https://vitest.dev/config/)

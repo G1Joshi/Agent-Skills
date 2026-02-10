@@ -1,149 +1,71 @@
 ---
 name: supabase
-description: Supabase PostgreSQL backend-as-a-service with realtime, auth, and edge functions. Use for serverless PostgreSQL.
+description: Supabase PostgreSQL backend-as-a-service with realtime. Use for serverless PostgreSQL.
 ---
 
 # Supabase
 
-Open-source Firebase alternative with PostgreSQL, realtime, and authentication.
+Supabase is an open source Firebase alternative. It provides a dedicated PostgreSQL database, packaged with Authentication, Realtime subscriptions, Storage, and Edge Functions.
 
 ## When to Use
 
-- PostgreSQL with real-time capabilities
-- Serverless backend for web/mobile
-- Authentication and authorization
-- Edge functions and storage
+- **Rapid Application Development**: Get Auth + DB + APIs in 5 minutes.
+- **Postgres Power**: Unlike Firebase, you have full SQL power (JOINs, aggregation).
+- **Realtime**: Subscribe to DB changes via WebSockets.
+- **Vector/AI**: Highly integrated `pgvector` support for AI apps.
 
-## Quick Start
+## Quick Start (JS)
 
 ```javascript
 import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = createClient("https://xyz.supabase.co", "public-anon-key");
 
-// Query data
-const { data, error } = await supabase
-  .from("users")
-  .select("*")
-  .eq("status", "active")
-  .order("created_at", { ascending: false })
-  .limit(10);
+// Listen to changes
+const subscription = supabase
+  .channel("public:messages")
+  .on(
+    "postgres_changes",
+    { event: "INSERT", schema: "public", table: "messages" },
+    (payload) => {
+      console.log("New message:", payload);
+    },
+  )
+  .subscribe();
 ```
 
 ## Core Concepts
 
-### Queries with Relationships
+### Row Level Security (RLS)
 
-```javascript
-// Query with joins
-const { data } = await supabase
-  .from("posts")
-  .select(
-    `
-    id,
-    title,
-    author:users(name, email),
-    comments(id, content, user:users(name))
-  `,
-  )
-  .eq("status", "published");
-
-// Insert with returning
-const { data: user } = await supabase
-  .from("users")
-  .insert({ name: "John", email: "john@example.com" })
-  .select()
-  .single();
-
-// Upsert
-await supabase.from("profiles").upsert({ id: userId, bio: "Updated bio" });
-```
-
-### Real-time Subscriptions
-
-```javascript
-// Subscribe to changes
-const channel = supabase
-  .channel("posts")
-  .on(
-    "postgres_changes",
-    { event: "*", schema: "public", table: "posts" },
-    (payload) => {
-      console.log("Change:", payload);
-    },
-  )
-  .subscribe();
-
-// Cleanup
-channel.unsubscribe();
-```
-
-## Common Patterns
-
-### Row Level Security
+Supabase exposes the DB directly to the frontend (via PostgREST). RLS is **critical** to secure data.
 
 ```sql
--- Enable RLS
-ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
-
--- Users can only see their own posts
-CREATE POLICY "Users own posts" ON posts
-FOR ALL USING (auth.uid() = user_id);
-
--- Public read, authenticated write
-CREATE POLICY "Public read" ON posts
-FOR SELECT USING (true);
-
-CREATE POLICY "Auth insert" ON posts
-FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "Users can see own data" ON "profiles"
+FOR SELECT USING (auth.uid() = user_id);
 ```
 
-### Authentication
+### PostgREST
 
-```javascript
-// Sign up
-const { data, error } = await supabase.auth.signUp({
-  email: "user@example.com",
-  password: "password123",
-});
+Automatically turns your Database Tables into RESTful APIs.
 
-// Sign in
-const { data } = await supabase.auth.signInWithPassword({
-  email: "user@example.com",
-  password: "password123",
-});
+### Extensions
 
-// Get current user
-const {
-  data: { user },
-} = await supabase.auth.getUser();
-```
+Supabase makes enabling Postgres extensions easy (PostGIS, pgvector, pg_cron).
 
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Enable Row Level Security on all tables
-- Use TypeScript for type safety
-- Use Edge Functions for server logic
-- Set up proper indexes
+- **Enable RLS immediately**: Never launch without RLS policies.
+- **Use Supabase CLI**: For local development and migrations. Develop locally, push to prod.
+- **Use Generated Types**: `supabase gen types typescript` generates accurate TS definitions from your DB schema.
 
 **Don't**:
 
-- Expose service role key to client
-- Skip RLS policies
-- Over-fetch with `select('*')`
-- Ignore connection pooling
-
-## Troubleshooting
-
-| Issue             | Cause                | Solution             |
-| ----------------- | -------------------- | -------------------- |
-| Permission denied | RLS policy           | Check policies, auth |
-| Slow query        | Missing index        | Add via SQL editor   |
-| Connection limit  | Too many connections | Use pooler mode      |
+- **Don't access `service_role` key in client**: Allows bypassing RLS. Server-side only.
+- **Don't put business logic in triggers**: Hard to debug. Use Database Webhooks or Edge Functions.
 
 ## References
 
-- [Supabase Documentation](https://supabase.com/docs)
-- [Supabase GitHub](https://github.com/supabase/supabase)
+- [Supabase Docs](https://supabase.com/docs)

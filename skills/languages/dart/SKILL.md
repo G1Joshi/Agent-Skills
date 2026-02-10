@@ -1,6 +1,6 @@
 ---
 name: dart
-description: Dart programming for Flutter development with null safety, async patterns, and modern Dart 3 features. Use for .dart files.
+description: Dart programming for Flutter mobile and web development. Use for .dart files.
 ---
 
 # Dart

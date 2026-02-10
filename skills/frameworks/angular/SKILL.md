@@ -1,48 +1,22 @@
 ---
 name: angular
-description: Angular TypeScript framework with dependency injection, RxJS, and components. Use for enterprise SPAs.
+description: Angular TypeScript framework with dependency injection and RxJS. Use for enterprise SPAs.
 ---
 
 # Angular
 
-Full-featured TypeScript framework for enterprise applications.
+Angular is a platform for building mobile and desktop web applications. Angular 19 (2025) has completely reinvented itself with Signals, Standalone Components, and optional Zone.js.
 
 ## When to Use
 
-- Enterprise single-page applications
-- Complex forms and validation
-- Large team projects
-- Applications requiring strong typing
+- **Enterprise Applications**: Strict structure, opinionated, and "batteries-included" (Router, Forms, HTTP).
+- **Large Teams**: TypeScript and strict patterns make it easier for large teams to collaborate.
+- **Long-term Maintenance**: Angular's update story is excellent (CLI automates migrations).
 
-## Quick Start
-
-```typescript
-import { Component } from "@angular/core";
-
-@Component({
-  selector: "app-root",
-  standalone: true,
-  template: `
-    <h1>{{ title }}</h1>
-    <button (click)="increment()">Count: {{ count }}</button>
-  `,
-})
-export class AppComponent {
-  title = "My App";
-  count = 0;
-
-  increment() {
-    this.count++;
-  }
-}
-```
-
-## Core Concepts
-
-### Components & Signals
+## Quick Start (Signals)
 
 ```typescript
-import { Component, signal, computed, effect } from "@angular/core";
+import { Component, signal, computed } from "@angular/core";
 
 @Component({
   selector: "app-counter",
@@ -50,16 +24,12 @@ import { Component, signal, computed, effect } from "@angular/core";
   template: `
     <p>Count: {{ count() }}</p>
     <p>Double: {{ double() }}</p>
-    <button (click)="increment()">+</button>
+    <button (click)="increment()">Increment</button>
   `,
 })
 export class CounterComponent {
   count = signal(0);
   double = computed(() => this.count() * 2);
-
-  constructor() {
-    effect(() => console.log("Count changed:", this.count()));
-  }
 
   increment() {
     this.count.update((c) => c + 1);
@@ -67,85 +37,41 @@ export class CounterComponent {
 }
 ```
 
-### Services & DI
+## Core Concepts
 
-```typescript
-import { Injectable, inject } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
+### Signals
 
-@Injectable({ providedIn: "root" })
-export class UserService {
-  private http = inject(HttpClient);
+The new reactivity primitive. Fine-grained reactivity that allows Angular to drop `Zone.js` and only update the exact text node that changed.
 
-  getUsers() {
-    return this.http.get<User[]>("/api/users");
-  }
+### Standalone Components
 
-  getUser(id: string) {
-    return this.http.get<User>(`/api/users/${id}`);
-  }
+No more `NgModule`. Components import their dependencies directly.
+
+### Deferrable Views (`@defer`)
+
+Built-in syntax to lazy-load parts of templates.
+
+```html
+@defer (on viewport) {
+<heavy-chart />
+} @placeholder {
+<p>Loading...</p>
 }
 ```
 
-## Common Patterns
-
-### Reactive Forms
-
-```typescript
-import { ReactiveFormsModule, FormBuilder, Validators } from "@angular/forms";
-
-@Component({
-  standalone: true,
-  imports: [ReactiveFormsModule],
-  template: `
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-      <input formControlName="email" />
-      <input formControlName="password" type="password" />
-      <button [disabled]="form.invalid">Submit</button>
-    </form>
-  `,
-})
-export class LoginComponent {
-  private fb = inject(FormBuilder);
-
-  form = this.fb.group({
-    email: ["", [Validators.required, Validators.email]],
-    password: ["", [Validators.required, Validators.minLength(8)]],
-  });
-
-  onSubmit() {
-    if (this.form.valid) {
-      console.log(this.form.value);
-    }
-  }
-}
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use standalone components
-- Use signals for state
-- Use inject() function
-- Implement OnPush change detection
+- **Use Signals**: Prefer `signal()` over `BehaviorSubject` for component state.
+- **Use `inject()`**: Prefer the `inject(Service)` function over constructor dependency injection.
+- **Go Zoneless**: Enable `provideExperimentalZonelessChangeDetection()` for better performance.
 
 **Don't**:
 
-- Subscribe without unsubscribing
-- Use any type
-- Mutate inputs directly
-- Put logic in templates
-
-## Troubleshooting
-
-| Issue               | Cause                   | Solution                    |
-| ------------------- | ----------------------- | --------------------------- |
-| Change not detected | OnPush with mutation    | Use signals or markForCheck |
-| Memory leak         | Unsubscribed observable | Use takeUntilDestroyed      |
-| Circular dependency | Service circular ref    | Use forwardRef              |
+- **Don't use `NgModule`**: Unless maintaining legacy code.
+- **Don't use `CommonModule`**: Use new control flow syntax (`@if`, `@for`) instead of `*ngIf`, `*ngFor`.
 
 ## References
 
 - [Angular Documentation](https://angular.dev/)
-- [Angular Blog](https://blog.angular.io/)

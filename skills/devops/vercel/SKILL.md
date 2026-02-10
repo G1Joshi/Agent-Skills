@@ -1,132 +1,60 @@
 ---
 name: vercel
-description: Vercel deployment platform for Next.js and frontend with serverless functions. Use for frontend hosting.
+description: Vercel frontend deployment with edge functions. Use for frontend hosting.
 ---
 
 # Vercel
 
-Frontend deployment platform optimized for Next.js and serverless.
+Vercel is the platform for the frontend cloud. In 2025, it has expanded beyond hosting to become a full AI and Storage platform (Vercel Blob/Postgres).
 
 ## When to Use
 
-- Next.js deployments
-- Static site hosting
-- Serverless functions
-- Edge functions
+- **Next.js**: The best place to deploy Next.js apps.
+- **Frontend-First**: Deploys from Git, automatic preview URLs for every PR.
+- **AI Apps**: Native integration with Vercel AI SDK for streaming LLM responses.
 
-## Quick Start
+## Quick Start (CLI)
 
-```json
-// vercel.json
-{
-  "framework": "nextjs",
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "env": {
-    "DATABASE_URL": "@database-url"
-  }
-}
+```bash
+npm i -g vercel
+
+# Deploy (Preview)
+vercel
+
+# Deploy (Production)
+vercel --prod
 ```
 
 ## Core Concepts
 
-### Serverless Functions
+### Infrastructure as Code (Implicit)
 
-```typescript
-// api/users/[id].ts
-import type { VercelRequest, VercelResponse } from "@vercel/node";
+`vercel.json` or framework defaults. Minimal config required.
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const { id } = req.query;
+### Serverless & Edge Functions
 
-  if (req.method === "GET") {
-    const user = await db.users.findUnique({ where: { id: String(id) } });
-    return res.json(user);
-  }
+API routes in `app/api` are deployed as Serverless (Node.js) or Edge (WinterCG) functions automatically.
 
-  res.status(405).json({ error: "Method not allowed" });
-}
-```
+### Storage
 
-### Edge Functions
+Vercel now provides:
 
-```typescript
-// middleware.ts
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+- **KV**: Redis (Upstash)
+- **Postgres**: SQL (Neon)
+- **Blob**: Object Storage (R2)
 
-export const config = {
-  matcher: "/api/:path*",
-};
-
-export function middleware(request: NextRequest) {
-  const authHeader = request.headers.get("authorization");
-
-  if (!authHeader) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  return NextResponse.next();
-}
-```
-
-## Common Patterns
-
-### Environment Variables
-
-```bash
-# Link project
-vercel link
-
-# Add secret
-vercel env add DATABASE_URL production
-
-# Pull env locally
-vercel env pull .env.local
-```
-
-### Preview Deployments
-
-```yaml
-# vercel.json
-{
-  "git": { "deploymentEnabled": { "main": true, "feature/*": true } },
-  "redirects": [{ "source": "/old", "destination": "/new" }],
-  "headers":
-    [
-      {
-        "source": "/api/(.*)",
-        "headers": [{ "key": "Cache-Control", "value": "no-store" }],
-      },
-    ],
-}
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use Edge Functions for low-latency
-- Configure proper caching headers
-- Use preview deployments for PRs
-- Set up environment per branch
+- **Use Comments for Preview**: Vercel Toolbar allows stakeholders to comment directly on the Preview UI.
+- **Use Vercel Postgres**: For new side projects, the tight integration is unbeatable.
+- **Use `vercel env pull`**: Sync production env vars to local `.env`.
 
 **Don't**:
 
-- Expose secrets in client bundles
-- Skip function timeout configuration
-- Ignore build output size
-- Deploy without preview testing
-
-## Troubleshooting
-
-| Issue            | Cause            | Solution                           |
-| ---------------- | ---------------- | ---------------------------------- |
-| Build failed     | Missing env      | Check env variables                |
-| Function timeout | Slow execution   | Optimize or increase limit         |
-| Large bundle     | Unoptimized code | Analyze with @next/bundle-analyzer |
+- **Don't ignore region**: Ensure your Database and Function regions match (e.g., both `iad1`), otherwise latency kills performance.
 
 ## References
 
 - [Vercel Documentation](https://vercel.com/docs)
-- [Next.js on Vercel](https://vercel.com/docs/frameworks/nextjs)

@@ -3,180 +3,77 @@ name: kubernetes
 description: Kubernetes container orchestration with Helm, operators, and service mesh. Use for cluster management.
 ---
 
-# Kubernetes
+# Kubernetes (K8s)
 
-Container orchestration for deploying and managing applications at scale.
+Kubernetes is the standard for orchestrating containerized applications. In 2025, the **Gateway API** has replaced Ingress as the standard for traffic routing, and **Sidecars** are native.
 
 ## When to Use
 
-- Container orchestration
-- Microservices deployment
-- Auto-scaling applications
-- High-availability setups
+- **Scale**: You have hundreds of microservices.
+- **Resilience**: You need self-healing, auto-restart, and multi-zone availability.
+- **Platform Building**: You are building an internal platform (IDP) for developers.
 
-## Quick Start
+## Quick Start (Gateway API)
 
 ```yaml
-# deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
+# Gateway (The Load Balancer)
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
 metadata:
-  name: myapp
+  name: my-gateway
 spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: myapp
-  template:
-    metadata:
-      labels:
-        app: myapp
-    spec:
-      containers:
-        - name: myapp
-          image: myapp:1.0.0
-          ports:
-            - containerPort: 3000
-          resources:
-            requests:
-              memory: "128Mi"
-              cpu: "250m"
-            limits:
-              memory: "256Mi"
-              cpu: "500m"
+  gatewayClassName: nginx
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+
+---
+# HTTPRoute (The Routing Rule)
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: my-app
+spec:
+  parentRefs:
+    - name: my-gateway
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api
+      backendRefs:
+        - name: my-service
+          port: 8080
 ```
 
 ## Core Concepts
 
-### Service & Ingress
+### Control Plane
 
-```yaml
-# service.yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: myapp
-spec:
-  selector:
-    app: myapp
-  ports:
-    - port: 80
-      targetPort: 3000
----
-# ingress.yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: myapp
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
-spec:
-  ingressClassName: nginx
-  rules:
-    - host: myapp.example.com
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: myapp
-                port:
-                  number: 80
-```
+API Server, etcd, Scheduler. The brain of the cluster.
 
-### ConfigMap & Secrets
+### Gateway API
 
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: myapp-config
-data:
-  DATABASE_HOST: postgres.default.svc.cluster.local
-  LOG_LEVEL: info
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: myapp-secrets
-type: Opaque
-stringData:
-  DATABASE_PASSWORD: supersecret
-  API_KEY: myapikey
-```
+The successor to Ingress. Split roles between **Infrastructure Provider** (GatewayClass), **Cluster Operator** (Gateway), and **Developer** (HTTPRoute/GRPCRoute).
 
-## Common Patterns
+### Custom Resource Definitions (CRDs)
 
-### Horizontal Pod Autoscaler
+Extend K8s API. Used by Operators (e.g., Prometheus Operator, Postgres Operator) to manage complex stateful apps.
 
-```yaml
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: myapp
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: myapp
-  minReplicas: 2
-  maxReplicas: 10
-  metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: 70
-```
-
-### Common Commands
-
-```bash
-# Cluster info
-kubectl cluster-info
-kubectl get nodes
-
-# Resources
-kubectl get pods -A
-kubectl get deployments
-kubectl describe pod myapp-xxx
-
-# Debugging
-kubectl logs myapp-xxx -f
-kubectl exec -it myapp-xxx -- sh
-
-# Apply/Delete
-kubectl apply -f deployment.yaml
-kubectl delete -f deployment.yaml
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Set resource requests/limits
-- Use liveness/readiness probes
-- Use namespaces for isolation
-- Use Helm for templating
+- **Use Gateway API**: Stop writing new `Ingress` resources.
+- **Use GitOps**: ArgoCD or Flux to manage cluster state.
+- **Set Requests/Limits**: The scheduler needs them to bin-pack nodes efficiently.
+- **Use Native Sidecars**: K8s 1.29+ supports `restartPolicy: Always` for init containers, making sidecars first-class.
 
 **Don't**:
 
-- Run as root in containers
-- Use `latest` tag
-- Skip resource limits
-- Store secrets in ConfigMaps
-
-## Troubleshooting
-
-| Issue            | Cause            | Solution                   |
-| ---------------- | ---------------- | -------------------------- |
-| Pod pending      | No resources     | Check node capacity        |
-| CrashLoopBackOff | App crashing     | Check logs                 |
-| ImagePullBackOff | Can't pull image | Check registry/credentials |
+- **Don't use `latest` tag**: Always pin image versions (SHA or specific tag) for reproducibility.
 
 ## References
 
-- [Kubernetes Documentation](https://kubernetes.io/docs/)
-- [Helm Documentation](https://helm.sh/docs/)
+- [Kubernetes Documentation](https://kubernetes.io/)

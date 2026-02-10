@@ -1,6 +1,6 @@
 ---
 name: java
-description: Java development best practices including modern Java features (17+), records, sealed classes, pattern matching, streams, and Spring Boot patterns. Use for .java files.
+description: Java OOP with Spring ecosystem, Maven/Gradle, streams, and JVM optimization. Use for .java files.
 ---
 
 # Java

@@ -1,90 +1,75 @@
 ---
 name: clerk
-description: Clerk authentication with React components and session management. Use for modern auth.
+description: Clerk authentication for modern apps. Use for user management.
 ---
 
 # Clerk
 
-Drop-in authentication for React and Next.js.
+Clerk is a comprehensive user management and authentication service built specifically for the modern web (React, Next.js, Remix). It focuses on providing "Drop-in" UI components (`<SignIn />`, `<UserProfile />`) rather than just APIs.
 
 ## When to Use
 
-- Next.js applications
-- React SPA authentication
-- Social login integration
-- User management UI
+- **Next.js / React Apps**: Best-in-class integration with App Router and Server Components.
+- **SaaS B2B/B2C**: Built-in Organization (Multi-tenancy) management.
+- **Speed**: You want the User Profile, Avatar upload, and Email management UI done for you.
 
-## Quick Start
+## Quick Start (Next.js App Router)
 
-```tsx
-// app/layout.tsx
-import { ClerkProvider } from "@clerk/nextjs";
+```typescript
+// middleware.ts
+import { authMiddleware } from "@clerk/nextjs";
+export default authMiddleware({});
 
+// layout.tsx
+import { ClerkProvider } from '@clerk/nextjs'
 export default function RootLayout({ children }) {
   return (
     <ClerkProvider>
-      <html>
-        <body>{children}</body>
-      </html>
+      <html><body>{children}</body></html>
     </ClerkProvider>
-  );
+  )
 }
 
-// Protected page
-import { auth } from "@clerk/nextjs/server";
-
-export default async function Dashboard() {
-  const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
-  return <h1>Dashboard</h1>;
+// page.tsx (Protected)
+import { UserButton, currentUser } from "@clerk/nextjs";
+export default async function Page() {
+  const user = await currentUser();
+  if (!user) return <div>Not signed in</div>;
+  return <header>Welcome {user.firstName} <UserButton /></header>;
 }
 ```
 
 ## Core Concepts
 
-### Components
+### Pre-built Components
 
-```tsx
-import {
-  SignInButton,
-  SignOutButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
+Clerk provides the full UI: Login, Register, Forgot Password, Managed MFA, User Profile (Change Password, 2FA, Sessions).
 
-function Header() {
-  return (
-    <header>
-      <SignedOut>
-        <SignInButton />
-      </SignedOut>
-      <SignedIn>
-        <UserButton />
-      </SignedIn>
-    </header>
-  );
-}
-```
+### Sessions vs Tokens
 
-### Middleware
+Clerk handles the complexity of short-lived JWTs (`__session` cookie) and keeps them fresh automatically via frontend SDKs.
 
-```typescript
-// middleware.ts
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+## Best Practices (2025)
 
-const isProtectedRoute = createRouteMatcher(["/dashboard(.*)"]);
+**Do**:
 
-export default clerkMiddleware((auth, req) => {
-  if (isProtectedRoute(req)) auth().protect();
-});
-```
+- Use **Server Components** (`currentUser()`) to fetch user data on the backend.
+- Use **Organizations** feature for B2B SaaS apps (Tenant isolation).
+- Enable **Passkeys** (Passwordless) in the dashboard (Clerk supports this natively).
 
-## Best Practices
+**Don't**:
 
-**Do**: Use middleware for protection, leverage built-in components
-**Don't**: Store sensitive data in user metadata
+- Don't try to build custom UI unless necessary. The pre-built components handle edge cases (MFA, Captcha, Error states) perfectly.
+- Don't expose Secret Keys in client-side env vars.
+
+## Troubleshooting
+
+| Error              | Cause                      | Solution                                                  |
+| :----------------- | :------------------------- | :-------------------------------------------------------- |
+| `401 Unauthorized` | Middleware not configured. | Ensure `middleware.ts` matches all routes (`/((?!...))`). |
+| `Hydration Error`  | HTML mismatch.             | Wrap app in `<ClerkProvider>`.                            |
 
 ## References
 
 - [Clerk Documentation](https://clerk.com/docs)
+- [Clerk vs Auth0](https://clerk.com/vs/auth0)

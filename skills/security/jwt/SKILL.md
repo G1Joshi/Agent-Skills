@@ -1,153 +1,78 @@
 ---
 name: jwt
-description: JSON Web Tokens for stateless authentication and claims. Use for token-based auth.
+description: JSON Web Tokens for secure transmission. Use for authentication.
 ---
 
-# JWT
+# JSON Web Token (JWT)
 
-JSON Web Tokens for stateless authentication.
+JWT is a compact, URL-safe means of representing claims to be transferred between two parties. The claims are encoded as a JSON object that is used as the payload of a JSON Web Signature (JWS) or JSON Web Encryption (JWE).
 
 ## When to Use
 
-- API authentication
-- Stateless sessions
-- Claims-based authorization
-- Cross-service authentication
+- **Stateless Authentication**: API doesn't need to check a database session for every request.
+- **Information Exchange**: Securely transmitting information (like User ID + Roles) between microservices.
 
-## Quick Start
+## Quick Start (Structure)
 
-```typescript
-import jwt from "jsonwebtoken";
+`Header.Payload.Signature`
 
-// Create token
-const token = jwt.sign(
-  { userId: "123", role: "admin" },
-  process.env.JWT_SECRET!,
-  { expiresIn: "1h" },
-);
+```json
+// Header
+{
+  "alg": "RS256",
+  "typ": "JWT"
+}
 
-// Verify token
-const payload = jwt.verify(token, process.env.JWT_SECRET!);
+// Payload (Claims)
+{
+  "sub": "1234567890", // Subject (User ID)
+  "name": "John Doe",
+  "iat": 1516239022,    // Issued At
+  "exp": 1516242622,    // Expiration
+  "role": "admin"
+}
+
+// Signature
+HMACSHA256(
+  base64UrlEncode(header) + "." +
+  base64UrlEncode(payload),
+  secret)
 ```
 
 ## Core Concepts
 
-### Token Structure
+### Signing Algorithms
 
-```javascript
-// Header.Payload.Signature
-// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
-// eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4ifQ.
-// Signature
+- **HS256** (HMAC): Shared secret. Fast, simple. Good for internal microservices.
+- **RS256 / ES256** (RSA/ECDSA): Public/Private key pair. The ID Provider signs with Private; APIs verify with Public. **Preferred for 2025**.
 
-// Decoded payload
-{
-  "sub": "1234567890",       // Subject (user ID)
-  "name": "John Doe",        // Custom claim
-  "iat": 1516239022,         // Issued at
-  "exp": 1516242622,         // Expiration
-  "iss": "https://auth.example.com",  // Issuer
-  "aud": "https://api.example.com"    // Audience
-}
-```
+### Claims
 
-### Token Generation
+- **Registered**: `iss` (issuer), `exp` (expiration), `sub` (subject), `aud` (audience).
+- **Public/Private**: Custom data (`role`, `tenant_id`).
 
-```typescript
-interface TokenPayload {
-  userId: string;
-  email: string;
-  role: string;
-}
-
-function generateTokens(user: User) {
-  const accessToken = jwt.sign(
-    { userId: user.id, email: user.email, role: user.role },
-    process.env.JWT_SECRET!,
-    { expiresIn: "15m", issuer: "my-app" },
-  );
-
-  const refreshToken = jwt.sign(
-    { userId: user.id, tokenVersion: user.tokenVersion },
-    process.env.JWT_REFRESH_SECRET!,
-    { expiresIn: "7d" },
-  );
-
-  return { accessToken, refreshToken };
-}
-```
-
-## Common Patterns
-
-### Middleware Verification
-
-```typescript
-import { Request, Response, NextFunction } from "express";
-
-interface AuthRequest extends Request {
-  user?: TokenPayload;
-}
-
-function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader?.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "No token provided" });
-  }
-
-  const token = authHeader.slice(7);
-
-  try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET!) as TokenPayload;
-    req.user = payload;
-    next();
-  } catch (error) {
-    return res.status(401).json({ error: "Invalid token" });
-  }
-}
-```
-
-### Role-Based Access
-
-```typescript
-function requireRole(...roles: string[]) {
-  return (req: AuthRequest, res: Response, next: NextFunction) => {
-    if (!req.user || !roles.includes(req.user.role)) {
-      return res.status(403).json({ error: "Forbidden" });
-    }
-    next();
-  };
-}
-
-// Usage
-app.get("/admin", authMiddleware, requireRole("admin"), adminHandler);
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use short expiration for access tokens
-- Implement refresh token rotation
-- Store secrets securely
-- Validate all claims
+- **Short Expiration**: 5-15 minutes max. Use Refresh Tokens for long-lived sessions.
+- **Algorithm Verification**: Hardcode the expected algorithm (e.g., `algorithms=['RS256']`) in your verifier to prevent `None` alg attacks.
+- **Use RS256/ES256**: Avoid sharing secrets if possible.
 
 **Don't**:
 
-- Store sensitive data in payload
-- Use weak secrets
-- Skip expiration validation
-- Store tokens in localStorage
+- **No PII**: Don't put GDPR/PII data (email, address) in the JWT unless encrypted (JWE). It can be decoded by anyone.
+- **No Sensitive Data**: Don't put "password" or "credit card" in claims.
+- **Don't store in LocalStorage**: Susceptible to XSS. Use **HttpOnly / Secure Cookies**.
 
 ## Troubleshooting
 
-| Issue             | Cause           | Solution           |
-| ----------------- | --------------- | ------------------ |
-| Invalid signature | Wrong secret    | Check secret match |
-| Token expired     | Clock skew      | Allow tolerance    |
-| jwt malformed     | Corrupted token | Regenerate token   |
+| Error               | Cause                            | Solution                                     |
+| :------------------ | :------------------------------- | :------------------------------------------- |
+| `TokenExpiredError` | `exp` time passed.               | Refresh the token using a Refresh Token.     |
+| `JsonWebTokenError` | Malformed or Signature mismatch. | Check secret/public key and token integrity. |
 
 ## References
 
-- [JWT.io](https://jwt.io/)
-- [JWT RFC](https://datatracker.ietf.org/doc/html/rfc7519)
+- [jwt.io](https://jwt.io/)
+- [RFC 7519](https://tools.ietf.org/html/rfc7519)

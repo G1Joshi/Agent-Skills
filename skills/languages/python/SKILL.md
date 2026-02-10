@@ -1,6 +1,6 @@
 ---
 name: python
-description: Python development best practices including type hints, async patterns, project structure, testing, and modern idioms. Use for .py files and data science.
+description: Python programming with type hints, async/await, decorators, and package management. Use for .py files and data science.
 ---
 
 # Python

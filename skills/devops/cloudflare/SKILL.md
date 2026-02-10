@@ -1,136 +1,44 @@
 ---
 name: cloudflare
-description: Cloudflare CDN, Workers, Pages, and security features. Use for edge computing and CDN.
+description: Cloudflare CDN, Workers, and edge services. Use for CDN and edge.
 ---
 
 # Cloudflare
 
-Edge computing platform with CDN, Workers, and security.
+Cloudflare is more than a CDN; it is a global super-cloud. In 2025, **Workers AI** (Edge GPU inference) and **R2** (Egress-free storage) are compelling reasons to build here.
 
 ## When to Use
 
-- CDN and caching
-- Edge computing (Workers)
-- Static site hosting (Pages)
-- DDoS protection and WAF
-
-## Quick Start
-
-```typescript
-// Cloudflare Worker
-export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
-    const url = new URL(request.url);
-
-    if (url.pathname === "/api/hello") {
-      return Response.json({ message: "Hello from the edge!" });
-    }
-
-    return new Response("Not found", { status: 404 });
-  },
-};
-```
+- **Edge Compute**: Cloudflare Workers start in <5ms globally. Perfect for APIs and Middleware.
+- **Storage**: R2 is S3-compatible but has **zero egress fees**. Massive cost savings for data-heavy apps.
+- **Security**: Zero Trust (Access) replaces corporate VPNs.
 
 ## Core Concepts
 
-### Workers with KV
+### Workers
 
-```typescript
-export interface Env {
-  MY_KV: KVNamespace;
-  MY_DO: DurableObjectNamespace;
-}
-
-export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
-    // Read from KV
-    const cached = await env.MY_KV.get("key", "json");
-    if (cached) return Response.json(cached);
-
-    // Fetch and cache
-    const data = await fetchData();
-    await env.MY_KV.put("key", JSON.stringify(data), {
-      expirationTtl: 3600,
-    });
-
-    return Response.json(data);
-  },
-};
-```
+V8 Isolate-based serverless functions. No cold starts. Write code in TS/JS/Rust/Python.
 
 ### Durable Objects
 
-```typescript
-export class Counter implements DurableObject {
-  state: DurableObjectState;
+Stateful storage at the edge. Allows coordination (e.g., waiting lists, chat rooms) globally without a central DB.
 
-  constructor(state: DurableObjectState) {
-    this.state = state;
-  }
+### Workers AI
 
-  async fetch(request: Request): Promise<Response> {
-    let count = (await this.state.storage.get<number>("count")) || 0;
+Run open-source models (Llama 3, Whisper) on Cloudflare's network of GPUs with a simple API call.
 
-    if (request.method === "POST") {
-      count++;
-      await this.state.storage.put("count", count);
-    }
-
-    return Response.json({ count });
-  }
-}
-```
-
-## Common Patterns
-
-### Pages Deployment
-
-```yaml
-# wrangler.toml
-name = "my-app"
-compatibility_date = "2024-01-01"
-
-[site]
-bucket = "./dist"
-
-[[kv_namespaces]]
-binding = "CACHE"
-id = "abc123"
-```
-
-```bash
-# Deploy
-npx wrangler deploy
-
-# Pages
-npx wrangler pages deploy dist
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use KV for caching
-- Implement proper error handling
-- Use Durable Objects for state
-- Configure proper cache headers
+- **Use Wrangler**: The CLI is fantastic for local dev and deploy (`npx wrangler dev`).
+- **Use R2**: Move high-bandwidth assets from AWS S3 to R2 to kill egress bills.
+- **Use Pages**: For hosting static sites + functions (full stack JAMstack).
 
 **Don't**:
 
-- Block the event loop
-- Make too many subrequests
-- Store large data in KV values
-- Ignore execution time limits
-
-## Troubleshooting
-
-| Issue             | Cause                | Solution                   |
-| ----------------- | -------------------- | -------------------------- |
-| CPU time exceeded | Long computation     | Optimize or use DO         |
-| KV stale          | Eventual consistency | Use metadata for freshness |
-| CORS error        | Missing headers      | Add CORS headers           |
+- **Don't block good bots**: Configure WAF carefully. Use "Managed Rulesets" rather than writing brittle regex rules securely.
 
 ## References
 
-- [Cloudflare Workers Docs](https://developers.cloudflare.com/workers/)
-- [Cloudflare Pages](https://pages.cloudflare.com/)
+- [Cloudflare Developers](https://developers.cloudflare.com/)

@@ -5,148 +5,42 @@ description: Amazon Web Services cloud platform with Lambda, EC2, S3, and RDS. U
 
 # AWS
 
-Amazon Web Services cloud platform for building scalable infrastructure.
+Amazon Web Services (AWS) is the dominant cloud platform. In 2025, the focus is heavily on **Generative AI** (Bedrock, Q, Trainium chips) and **Serverless Data** (Aurora Limitless).
 
 ## When to Use
 
-- Cloud infrastructure deployment
-- Serverless applications (Lambda)
-- Managed databases (RDS)
-- Object storage (S3)
-
-## Quick Start
-
-```typescript
-// Lambda function
-import { APIGatewayProxyHandler } from "aws-lambda";
-
-export const handler: APIGatewayProxyHandler = async (event) => {
-  const body = JSON.parse(event.body || "{}");
-
-  return {
-    statusCode: 200,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: "Hello", data: body }),
-  };
-};
-```
+- **Enterprise**: The default choice for large-scale, compliant infrastructure.
+- **AI/ML**: Amazon SageMaker and Bedrock provide the deepest toolset for training and inference.
+- **Serverless**: Lambda + DynamoDB + API Gateway is the canonical serverless stack.
 
 ## Core Concepts
 
-### S3 Operations
+### VPC (Virtual Private Cloud)
 
-```typescript
-import {
-  S3Client,
-  PutObjectCommand,
-  GetObjectCommand,
-} from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+Your isolated network. Subnets, Route Tables, Internet Gateways. Understanding networking is mandatory.
 
-const s3 = new S3Client({ region: "us-east-1" });
+### IAM (Identity and Access Management)
 
-// Upload
-await s3.send(
-  new PutObjectCommand({
-    Bucket: "my-bucket",
-    Key: "files/document.pdf",
-    Body: buffer,
-    ContentType: "application/pdf",
-  }),
-);
+Global service for permissions. "Deny by default". Use **Roles** for services, not access keys.
 
-// Generate presigned URL
-const url = await getSignedUrl(
-  s3,
-  new GetObjectCommand({
-    Bucket: "my-bucket",
-    Key: "files/document.pdf",
-  }),
-  { expiresIn: 3600 },
-);
-```
+### Compute
 
-### DynamoDB
+- **EC2**: Virtual Machines.
+- **ECS/EKS**: Containers (Docker/K8s).
+- **Lambda**: Function-as-a-Service.
 
-```typescript
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import {
-  DynamoDBDocumentClient,
-  PutCommand,
-  QueryCommand,
-} from "@aws-sdk/lib-dynamodb";
-
-const client = DynamoDBDocumentClient.from(new DynamoDBClient({}));
-
-// Write
-await client.send(
-  new PutCommand({
-    TableName: "Users",
-    Item: { pk: "USER#123", sk: "PROFILE", name: "John" },
-  }),
-);
-
-// Query
-const { Items } = await client.send(
-  new QueryCommand({
-    TableName: "Users",
-    KeyConditionExpression: "pk = :pk",
-    ExpressionAttributeValues: { ":pk": "USER#123" },
-  }),
-);
-```
-
-## Common Patterns
-
-### Infrastructure as Code (CDK)
-
-```typescript
-import * as cdk from "aws-cdk-lib";
-import * as lambda from "aws-cdk-lib/aws-lambda";
-import * as apigateway from "aws-cdk-lib/aws-apigateway";
-
-export class ApiStack extends cdk.Stack {
-  constructor(scope: cdk.App, id: string) {
-    super(scope, id);
-
-    const fn = new lambda.Function(this, "Handler", {
-      runtime: lambda.Runtime.NODEJS_20_X,
-      handler: "index.handler",
-      code: lambda.Code.fromAsset("lambda"),
-    });
-
-    new apigateway.LambdaRestApi(this, "Api", {
-      handler: fn,
-    });
-  }
-}
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use IAM roles with least privilege
-- Enable CloudTrail logging
-- Use VPC for network isolation
-- Implement proper tagging
+- **Use AWS Organizations**: Separate Prod, Staging, and Dev into different _Accounts_, not just VPCs. Limits blast radius.
+- **Use CDK / Terraform**: Never click in the console for production resources.
+- **Cost Control**: Enable Cost Explorer and set up Budgets/Alerts on day one.
 
 **Don't**:
 
-- Hardcode credentials
-- Use root account for daily tasks
-- Leave S3 buckets public
-- Skip encryption at rest
-
-## Troubleshooting
-
-| Issue              | Cause           | Solution                  |
-| ------------------ | --------------- | ------------------------- |
-| Access Denied      | IAM permissions | Check IAM policy          |
-| Lambda timeout     | Long execution  | Increase timeout/optimize |
-| Connection timeout | VPC/SG issue    | Check security groups     |
+- **Don't use Public Subnets for Apps**: Put your EC2s/RDS in Private Subnets. Only Load Balancers go in Public Subnets.
 
 ## References
 
 - [AWS Documentation](https://docs.aws.amazon.com/)
-- [AWS CDK](https://docs.aws.amazon.com/cdk/)

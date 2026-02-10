@@ -1,31 +1,61 @@
 ---
 name: swiftui
-description: SwiftUI declarative UI framework for Apple platforms. Use for iOS/macOS development.
+description: SwiftUI declarative Apple UI framework. Use for iOS/macOS.
 ---
 
 # SwiftUI
 
-Declarative UI framework for Apple platforms.
+SwiftUI is Apple's declarative framework for building user interfaces across all Apple platforms (iOS, macOS, watchOS, tvOS, visionOS) with the power of Swift.
 
 ## When to Use
 
-- iOS/iPadOS/macOS development
-- Declarative UI patterns
-- Cross-Apple platform apps
-- Modern Swift development
+- Building modern iOS and macOS applications.
+- Targeting multiple Apple platforms with shared UI code.
+- Implementing complex animations and transitions with less code.
+- Utilizing live previews for rapid UI iteration.
 
 ## Quick Start
 
 ```swift
 import SwiftUI
 
+@main
+struct MyApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+    }
+}
+
+// Observation Framework (iOS 17+)
+@Observable
+class UserSettings {
+    var username = "Guest"
+    var isLoggedIn = false
+}
+
 struct ContentView: View {
+    @State private var settings = UserSettings()
+
     var body: some View {
-        VStack {
-            Text("Hello, SwiftUI!")
-                .font(.largeTitle)
-            Button("Tap me") {
-                print("Tapped!")
+        NavigationStack {
+            VStack(spacing: 20) {
+                Text("Hello, \(settings.username)!")
+                    .font(.largeTitle)
+
+                Button("Log In") {
+                    settings.username = "User"
+                    settings.isLoggedIn = true
+                }
+                .buttonStyle(.borderedProminent)
+
+                NavigationLink("Settings", value: "settings")
+            }
+            .navigationDestination(for: String.self) { path in
+                if path == "settings" {
+                    Text("Settings Page")
+                }
             }
         }
     }
@@ -34,106 +64,38 @@ struct ContentView: View {
 
 ## Core Concepts
 
-### State Management
+### Declarative Syntax
 
-```swift
-struct Counter: View {
-    @State private var count = 0
+Instead of imperatively mutating UI views (like UIKit), you describe **what** the UI should look like for a given state. The system handles the updates.
 
-    var body: some View {
-        VStack {
-            Text("Count: \(count)")
-            Button("Increment") {
-                count += 1
-            }
-        }
-    }
-}
+### State & Data Flow (Modern)
 
-// Observable model (iOS 17+)
-@Observable class UserModel {
-    var name: String = ""
-    var isLoggedIn: Bool = false
-}
+- **@State**: Source of truth for simple, view-local value types.
+- **@Binding**: Two-way connection to a value owned by another view.
+- **@Observable**: (iOS 17+) Macro for creating observable reference types. Replaces `@StateObject` and `@ObservedObject` for cleaner data flow.
 
-struct ProfileView: View {
-    @Environment(UserModel.self) var user
+### Modifiers
 
-    var body: some View {
-        Text("Hello, \(user.name)")
-    }
-}
-```
-
-### Navigation
-
-```swift
-import SwiftUI
-
-struct ContentView: View {
-    var body: some View {
-        NavigationStack {
-            List(users) { user in
-                NavigationLink(value: user) {
-                    Text(user.name)
-                }
-            }
-            .navigationTitle("Users")
-            .navigationDestination(for: User.self) { user in
-                UserDetailView(user: user)
-            }
-        }
-    }
-}
-```
+Methods called on views that wrap the view and return a new view with the modification applied (e.g., `.padding()`, `.background()`). Order matters.
 
 ## Common Patterns
 
-### Lists & Data
+### NavigationStack (Path-based)
+
+Replace `NavigationView` with `NavigationStack` for robust programmatic navigation.
+
+- Use `.navigationDestination(for:)` to decouple navigation logic from views.
+- Manage navigation state (`NavigationPath`) in a model for deep linking support.
+
+### MVVM with Observation
+
+Bind Views to ViewModels marked with `@Observable`. The View purely renders the state exposed by the ViewModel.
 
 ```swift
-struct UserList: View {
-    let users: [User]
+@Observable class ProfileViewModel {
+    var profile: Profile?
 
-    var body: some View {
-        List(users) { user in
-            HStack {
-                AsyncImage(url: user.avatarURL) { image in
-                    image.resizable().frame(width: 40, height: 40)
-                } placeholder: {
-                    ProgressView()
-                }
-                VStack(alignment: .leading) {
-                    Text(user.name).font(.headline)
-                    Text(user.email).font(.caption)
-                }
-            }
-        }
-    }
-}
-```
-
-### Async Data
-
-```swift
-struct UserView: View {
-    let userId: String
-    @State private var user: User?
-    @State private var isLoading = true
-
-    var body: some View {
-        Group {
-            if isLoading {
-                ProgressView()
-            } else if let user {
-                UserCard(user: user)
-            }
-        }
-        .task {
-            user = try? await fetchUser(id: userId)
-            isLoading = false
-        }
-    }
+    func loadProfile() async { /* ... */ }
 }
 ```
 
@@ -141,27 +103,27 @@ struct UserView: View {
 
 **Do**:
 
-- Use @Observable for models (iOS 17+)
-- Prefer small, composable views
-- Use environment for dependency injection
-- Test with PreviewProvider
+- Use **@Observable** for data models in iOS 17+ targets.
+- Break down large views into smaller, reusable subviews (`Extract Subview`).
+- Use **Previews** with different configurations (Dark Mode, Dynamic Type) to catch UI issues early.
+- Use `Environment` for global dependencies (like themes or user session).
 
 **Don't**:
 
-- Put complex logic in views
-- Use force unwrapping
-- Ignore accessibility
-- Skip dark mode support
+- Don't perform heavy work in the `body` property (it's computed frequently).
+- Don't use `AnyView` unless absolutely necessary (kills performance/diffing).
+- Don't force imperative patterns (like trying to "refresh" a view manually); change the state instead.
 
 ## Troubleshooting
 
-| Issue             | Cause        | Solution                |
-| ----------------- | ------------ | ----------------------- |
-| View not updating | State issue  | Check property wrappers |
-| Preview crash     | Missing data | Add mock data           |
-| Navigation broken | Stack issue  | Check NavigationStack   |
+| Error                                             | Cause                                                         | Solution                                                     |
+| :------------------------------------------------ | :------------------------------------------------------------ | :----------------------------------------------------------- |
+| `Type '...' does not conform to protocol 'View'`  | The `body` property is missing or doesn't return `some View`. | Ensure `var body: some View` returns a valid view hierarchy. |
+| `Modifying state during view update`              | Changing `@State` directly inside the `body` calculation.     | Move side effects to `.onAppear` or buttons/actions.         |
+| `Trailing closure passed to parameter of type...` | Syntax error in view builder structure.                       | Check braces `{}` and modifier placement.                    |
 
 ## References
 
-- [SwiftUI Documentation](https://developer.apple.com/documentation/swiftui)
-- [Hacking with Swift](https://www.hackingwithswift.com/quick-start/swiftui)
+- [Apple SwiftUI Documentation](https://developer.apple.com/documentation/swiftui)
+- [WWDC23: Discover Observation](https://developer.apple.com/videos/play/wwdc2023/10149/)
+- [Hacking with Swift - SwiftUI](https://www.hackingwithswift.com/quick-start/swiftui)

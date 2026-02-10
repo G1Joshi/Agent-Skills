@@ -1,144 +1,46 @@
 ---
 name: eslint
-description: ESLint JavaScript/TypeScript linting with rules and plugins. Use for code quality.
+description: ESLint JavaScript linter with plugins. Use for code quality.
 ---
 
 # ESLint
 
-Pluggable linting for JavaScript and TypeScript.
+ESLint is the standard linter for JS/TS. v9 (2024/2025) moved to **Flat Config** (`eslint.config.js`), a major breaking change that simplifies configuration.
 
 ## When to Use
 
-- Enforcing code style
-- Catching bugs early
-- TypeScript type checking
-- CI/CD quality gates
-
-## Quick Start
-
-```bash
-# Install
-npm init @eslint/config@latest
-
-# Run
-npx eslint .
-npx eslint --fix .
-```
+- **Enforcing Rules**: `no-unused-vars`, `react-hooks/rules-of-hooks`.
+- **Code Quality**: Catching bugs before they run.
 
 ## Core Concepts
 
-### Flat Config (ESLint 9+)
+### Flat Config (`eslint.config.js`)
 
-```javascript
-// eslint.config.js
-import js from "@eslint/js";
-import typescript from "@typescript-eslint/eslint-plugin";
-import tsParser from "@typescript-eslint/parser";
-import react from "eslint-plugin-react";
+An array of objects. No more `extends` string hell.
 
-export default [
-  js.configs.recommended,
-  {
-    files: ["**/*.{ts,tsx}"],
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: {
-        project: "./tsconfig.json",
-      },
-    },
-    plugins: {
-      "@typescript-eslint": typescript,
-      react,
-    },
-    rules: {
-      "@typescript-eslint/no-unused-vars": "error",
-      "@typescript-eslint/no-explicit-any": "warn",
-      "react/prop-types": "off",
-    },
-  },
-  {
-    ignores: ["dist/**", "node_modules/**"],
-  },
-];
+```js
+export default [js.configs.recommended, { rules: { semi: "error" } }];
 ```
 
-### Custom Rules
+### Plugins
 
-```javascript
-// Common rule configurations
-{
-  rules: {
-    // Errors
-    'no-console': ['error', { allow: ['warn', 'error'] }],
-    'no-unused-vars': 'off',
-    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+NPM packages that add rules. `eslint-plugin-react`.
 
-    // Warnings
-    'max-lines': ['warn', { max: 300 }],
-    'complexity': ['warn', { max: 10 }],
+### Parsers
 
-    // Style
-    'quotes': ['error', 'single'],
-    'semi': ['error', 'always'],
-  }
-}
-```
+`@typescript-eslint/parser` allows ESLint to understand TS.
 
-## Common Patterns
-
-### VS Code Integration
-
-```json
-// .vscode/settings.json
-{
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact"
-  ],
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
-  }
-}
-```
-
-### Pre-commit Hook
-
-```json
-// package.json
-{
-  "lint-staged": {
-    "*.{js,ts,tsx}": ["eslint --fix", "prettier --write"]
-  }
-}
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use TypeScript-aware rules
-- Configure per-project
-- Integrate with CI/CD
-- Use format on save
+- **Use Flat Config**: Use the new format.
+- **Use `typescript-eslint`**: The typed linting rules are powerful (e.g. `no-floating-promises`).
 
 **Don't**:
 
-- Disable rules globally
-- Ignore all errors
-- Mix legacy and flat config
-- Skip TypeScript plugin for TS
-
-## Troubleshooting
-
-| Issue          | Cause            | Solution                      |
-| -------------- | ---------------- | ----------------------------- |
-| Parser error   | Wrong parser     | Use @typescript-eslint/parser |
-| Rule not found | Missing plugin   | Install plugin package        |
-| Slow linting   | Type-aware rules | Limit project scope           |
+- **Don't configure formatting rules**: Disable all formatting rules (use Prettier or Biome for that). use `eslint-config-prettier`.
 
 ## References
 
-- [ESLint Documentation](https://eslint.org/docs/)
-- [TypeScript ESLint](https://typescript-eslint.io/)
+- [ESLint Documentation](https://eslint.org/)

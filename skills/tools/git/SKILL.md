@@ -1,154 +1,44 @@
 ---
 name: git
-description: Git version control with branching, rebasing, and advanced workflows. Use for version control.
+description: Git version control with branching, merging, and rebasing. Use for source control.
 ---
 
 # Git
 
-Distributed version control for source code management.
+Git is the foundation of modern software. In 2025, features like **Sparse Checkout** and **Scalar** (for monorepos) are becoming mainstream.
 
 ## When to Use
 
-- Version control for any project
-- Collaboration on code
-- Code review workflows
-- Release management
-
-## Quick Start
-
-```bash
-# Initialize and first commit
-git init
-git add .
-git commit -m "Initial commit"
-
-# Clone existing
-git clone https://github.com/user/repo.git
-cd repo
-
-# Basic workflow
-git checkout -b feature/my-feature
-git add .
-git commit -m "Add feature"
-git push -u origin feature/my-feature
-```
+- **Always**: Use it for everything. Text files, config, code.
+- **Bisect**: Finding bugs by binary search.
 
 ## Core Concepts
 
-### Branching & Merging
+### Graph
 
-```bash
-# Create and switch branch
-git checkout -b feature/new-feature
-# or
-git switch -c feature/new-feature
+Commits form a DAG (Directed Acyclic Graph).
 
-# Update from main
-git fetch origin
-git rebase origin/main
+### Rebase vs Merge
 
-# Merge
-git checkout main
-git merge feature/new-feature
+- **Merge**: Preserves history, creates bubbles.
+- **Rebase**: Rewrites history, linearizes.
 
-# Delete branch
-git branch -d feature/new-feature
-git push origin --delete feature/new-feature
-```
+### Worktrees
 
-### Interactive Rebase
+Checkout multiple branches of the same repo in different folders simultaneously.
 
-```bash
-# Rebase last 3 commits
-git rebase -i HEAD~3
-
-# In editor:
-# pick abc123 First commit
-# squash def456 Fix typo
-# reword ghi789 Add feature
-
-# Abort if needed
-git rebase --abort
-```
-
-## Common Patterns
-
-### Stashing
-
-```bash
-# Save work in progress
-git stash
-git stash push -m "WIP: feature"
-
-# List stashes
-git stash list
-
-# Apply and drop
-git stash pop
-
-# Apply specific
-git stash apply stash@{1}
-```
-
-### Undoing Changes
-
-```bash
-# Unstage file
-git reset HEAD file.txt
-
-# Discard changes
-git checkout -- file.txt
-git restore file.txt  # modern
-
-# Amend last commit
-git commit --amend -m "New message"
-
-# Reset to commit
-git reset --soft HEAD~1  # keep changes staged
-git reset --hard HEAD~1  # discard changes
-```
-
-### Git Hooks
-
-```bash
-# .git/hooks/pre-commit
-#!/bin/sh
-npm run lint
-npm test
-
-# .git/hooks/commit-msg
-#!/bin/sh
-if ! grep -qE "^(feat|fix|docs|style|refactor|test|chore):" "$1"; then
-    echo "Invalid commit message format"
-    exit 1
-fi
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Write meaningful commit messages
-- Keep commits atomic and focused
-- Use feature branches
-- Rebase before merging
+- **Use `git switch` / `git restore`**: The modern alternatives to the overloaded `git checkout`.
+- **Use `git maintenance`**: Speed up fetch/clone in the background.
+- **Sign Commits**: Use SSH keys to sign commits (`Commit Signing`).
 
 **Don't**:
 
-- Commit secrets or credentials
-- Force push to shared branches
-- Create giant commits
-- Ignore .gitignore
-
-## Troubleshooting
-
-| Issue          | Cause             | Solution                         |
-| -------------- | ----------------- | -------------------------------- |
-| Merge conflict | Divergent changes | Resolve manually                 |
-| Detached HEAD  | Checkout commit   | Create branch or checkout branch |
-| Lost commits   | Hard reset        | Use git reflog                   |
+- **Don't force push to shared branches**: `git push --force-with-lease` is the safer alternative.
 
 ## References
 
-- [Pro Git Book](https://git-scm.com/book)
-- [Git Documentation](https://git-scm.com/docs)
+- [Git Documentation](https://git-scm.com/doc)

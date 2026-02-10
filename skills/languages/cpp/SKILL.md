@@ -1,6 +1,6 @@
 ---
 name: cpp
-description: Modern C++17/20/23 programming with STL, smart pointers, RAII, and performance optimization. Use for .cpp files.
+description: C++ modern C++17/20/23 with STL, smart pointers, and performance optimization. Use for .cpp files.
 ---
 
 # C++

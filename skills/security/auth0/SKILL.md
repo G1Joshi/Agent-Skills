@@ -1,148 +1,74 @@
 ---
 name: auth0
-description: Auth0 identity platform for authentication and authorization. Use for managed auth.
+description: Auth0 identity platform. Use for authentication.
 ---
 
 # Auth0
 
-Identity platform for authentication and authorization.
+Auth0 is a platform for authentication and authorization. It provides a Universal Login page that handles the complexity of authentication protocols (SAML, OIDC, OAuth) and identity providers (Google, Enterprise, Database).
 
 ## When to Use
 
-- Managed authentication
-- Social login integration
-- Enterprise SSO
-- Multi-factor authentication
+- **Enterprise Apps**: Application requiring intricate B2B Identity (SSO, SAML, AD).
+- **Complex Rules**: When you need programmable pipelines (Actions) during login (e.g., "Add Role to ID Token if email ends in @corp.com").
+- **Speed**: Wanting a login page working in 5 minutes.
 
-## Quick Start
+## Quick Start (Next.js)
 
-```typescript
-import { Auth0Client } from "@auth0/auth0-spa-js";
+```bash
+npm install @auth0/nextjs-auth0
+```
 
-const auth0 = new Auth0Client({
-  domain: "your-tenant.auth0.com",
-  clientId: "your-client-id",
-  authorizationParams: {
-    redirect_uri: window.location.origin,
-  },
-});
+```javascript
+// page/api/auth/[...auth0].js
+import { handleAuth } from '@auth0/nextjs-auth0';
+export default handleAuth();
 
-await auth0.loginWithRedirect();
+// Component
+import { useUser } from '@auth0/nextjs-auth0/client';
+
+export default function Profile() {
+  const { user, error, isLoading } = useUser();
+  if (isLoading) return <div>Loading...</div>;
+  if (user) return <div>Welcome {user.name}</div>;
+  return <a href="/api/auth/login">Login</a>;
+}
 ```
 
 ## Core Concepts
 
-### React Integration
+### Universal Login
 
-```tsx
-import { Auth0Provider, useAuth0 } from "@auth0/auth0-react";
+Redirects user to `your-tenant.auth0.com`. Secure, centralized, and hosted by Auth0. Avoids "Embedded Login" (inputs on your own page) for better security against credential stuffing.
 
-function App() {
-  return (
-    <Auth0Provider
-      domain="your-tenant.auth0.com"
-      clientId="your-client-id"
-      authorizationParams={{
-        redirect_uri: window.location.origin,
-        audience: "https://api.example.com",
-      }}
-    >
-      <MainApp />
-    </Auth0Provider>
-  );
-}
+### Actions (formerly Rules/Hooks)
 
-function Profile() {
-  const { user, isAuthenticated, loginWithRedirect, logout } = useAuth0();
+Serverless functions that execute during the auth pipeline.
 
-  if (!isAuthenticated) {
-    return <button onClick={loginWithRedirect}>Log In</button>;
-  }
+- _Post-Login_: Add claims, Call external API, Deny access.
+- _Machine-to-Machine_: Enrich tokens.
 
-  return (
-    <div>
-      <img src={user?.picture} alt={user?.name} />
-      <p>{user?.name}</p>
-      <button onClick={() => logout()}>Log Out</button>
-    </div>
-  );
-}
-```
-
-### API Protection
-
-```typescript
-import { auth } from "express-oauth2-jwt-bearer";
-
-const checkJwt = auth({
-  audience: "https://api.example.com",
-  issuerBaseURL: "https://your-tenant.auth0.com/",
-});
-
-app.get("/api/protected", checkJwt, (req, res) => {
-  res.json({ message: "Protected data", user: req.auth?.payload });
-});
-```
-
-## Common Patterns
-
-### Get Access Token
-
-```typescript
-const { getAccessTokenSilently } = useAuth0();
-
-async function callApi() {
-  const token = await getAccessTokenSilently({
-    authorizationParams: {
-      audience: "https://api.example.com",
-    },
-  });
-
-  const response = await fetch("/api/data", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  return response.json();
-}
-```
-
-### Role-Based Access
-
-```typescript
-// Check user roles from ID token
-const { user } = useAuth0();
-const roles = user?.["https://example.com/roles"] as string[];
-
-if (roles?.includes("admin")) {
-  // Show admin features
-}
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use refresh token rotation
-- Configure MFA
-- Set up rules for custom claims
-- Use correct audience for APIs
+- Use **Universal Login**.
+- Enable **Brute Force Protection** and **Breach Password Detection** (built-in).
+- Use **Custom Domains** (`auth.myapp.com`) to avoid 3rd party cookie issues.
 
 **Don't**:
 
-- Store tokens in localStorage
-- Skip token validation
-- Use implicit flow
-- Ignore session management
+- Don't use the Management API tokens in the frontend.
+- Don't skip **MFA**. Enable Adaptive MFA for high-risk logins.
 
 ## Troubleshooting
 
-| Issue         | Cause              | Solution               |
-| ------------- | ------------------ | ---------------------- |
-| Login loop    | Callback URL       | Check allowed URLs     |
-| Token expired | Silent auth failed | Use refresh tokens     |
-| CORS error    | Wrong origin       | Add to allowed origins |
+| Error                   | Cause                          | Solution                                                                |
+| :---------------------- | :----------------------------- | :---------------------------------------------------------------------- |
+| `Callback URL mismatch` | Redirect URI not in dashboard. | Add `http://localhost:3000/api/auth/callback` to Allowed Callback URLs. |
+| `CORS`                  | Calling API from SPA.          | Configure Allowed Origins and Web Origins.                              |
 
 ## References
 
 - [Auth0 Documentation](https://auth0.com/docs)
-- [Auth0 React SDK](https://auth0.com/docs/libraries/auth0-react)
+- [Auth0 Next.js SDK](https://github.com/auth0/nextjs-auth0)

@@ -1,156 +1,90 @@
 ---
 name: rest-api
-description: RESTful API design with HTTP methods and status codes. Use for HTTP API design.
+description: REST API design with HTTP methods and status codes. Use for web APIs.
 ---
 
 # REST API
 
-RESTful API design for web services.
+Representational State Transfer (REST) is the architectural style for distributed hypermedia systems. It relies on stateless, client-server, cacheable communications protocols (mostly HTTP).
 
 ## When to Use
 
-- Web service APIs
-- CRUD operations
-- Resource-based endpoints
-- Stateless communication
+- **Public APIs**: The universal standard; easiest for 3rd parties to consume.
+- **Simple Resource Access**: Perfect for CRUD (Create, Read, Update, Delete) operations.
+- **Caching**: When you need to leverage HTTP caching (CDNs, Browsers).
 
 ## Quick Start
 
 ```typescript
-// Express REST endpoints
-app.get("/api/users", getAllUsers);
-app.get("/api/users/:id", getUserById);
-app.post("/api/users", createUser);
-app.put("/api/users/:id", updateUser);
-app.delete("/api/users/:id", deleteUser);
-```
+// Express.js Example
+app.get("/users/:id", async (req, res) => {
+  const user = await db.find(req.params.id);
+  if (!user) return res.status(404).json({ error: "Not Found" });
 
-## Core Concepts
-
-### HTTP Methods
-
-```typescript
-// GET - Retrieve resource
-app.get("/api/users/:id", async (req, res) => {
-  const user = await db.users.findUnique({ where: { id: req.params.id } });
-  if (!user) return res.status(404).json({ error: "User not found" });
-  res.json(user);
-});
-
-// POST - Create resource
-app.post("/api/users", async (req, res) => {
-  const user = await db.users.create({ data: req.body });
-  res.status(201).json(user);
-});
-
-// PUT - Replace resource
-app.put("/api/users/:id", async (req, res) => {
-  const user = await db.users.update({
-    where: { id: req.params.id },
-    data: req.body,
-  });
-  res.json(user);
-});
-
-// PATCH - Partial update
-app.patch("/api/users/:id", async (req, res) => {
-  const user = await db.users.update({
-    where: { id: req.params.id },
-    data: req.body,
-  });
-  res.json(user);
-});
-
-// DELETE - Remove resource
-app.delete("/api/users/:id", async (req, res) => {
-  await db.users.delete({ where: { id: req.params.id } });
-  res.status(204).send();
-});
-```
-
-### Status Codes
-
-```typescript
-// 2xx Success
-res.status(200).json(data); // OK
-res.status(201).json(created); // Created
-res.status(204).send(); // No Content
-
-// 4xx Client Error
-res.status(400).json({ error: "Bad request" }); // Bad Request
-res.status(401).json({ error: "Unauthorized" }); // Unauthorized
-res.status(403).json({ error: "Forbidden" }); // Forbidden
-res.status(404).json({ error: "Not found" }); // Not Found
-res.status(422).json({ error: "Validation failed" }); // Unprocessable
-
-// 5xx Server Error
-res.status(500).json({ error: "Internal error" }); // Internal Error
-```
-
-## Common Patterns
-
-### Pagination
-
-```typescript
-app.get("/api/users", async (req, res) => {
-  const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 20;
-  const skip = (page - 1) * limit;
-
-  const [users, total] = await Promise.all([
-    db.users.findMany({ skip, take: limit }),
-    db.users.count(),
-  ]);
-
+  // HATEOAS (Hypermedia As The Engine Of Application State) - optional but "True REST"
   res.json({
-    data: users,
-    meta: {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
+    ...user,
+    links: {
+      self: `/users/${user.id}`,
+      orders: `/users/${user.id}/orders`,
     },
   });
 });
 ```
 
-### Error Handling
+## Core Concepts
 
-```typescript
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error(err);
-  res.status(500).json({
-    error: "Internal server error",
-    message: process.env.NODE_ENV === "development" ? err.message : undefined,
-  });
-});
-```
+### Resources
+
+Everything is a resource identified by a URI (`/users/123`).
+
+### HTTP Verbs
+
+Use verbs to define actions, not URIs.
+
+- `GET /orders` (List)
+- `POST /orders` (Create)
+- `PATCH /orders/1` (Update partial)
+- `DELETE /orders/1` (Remove)
+
+### Statelessness
+
+Each request must contain all information necessary to understand the request. The server accepts no session state.
+
+## Common Patterns
+
+### Filtering, Sorting, Pagination
+
+Standard query params: `?sort=-created_at&limit=10&page=2&status=active`.
+
+### Versioning
+
+- URI Versioning: `/v1/users` (Most common).
+- Header Versioning: `Accept: application/vnd.myapi.v1+json`.
 
 ## Best Practices
 
 **Do**:
 
-- Use nouns for resources
-- Return proper status codes
-- Implement pagination
-- Version your API
+- Use proper **HTTP Status Codes** (200 OK, 201 Created, 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 500 Server Error).
+- Use **Snake Case** (`user_id`) in JSON responses (standard convention) or camelCase if consistent with JS ecosystem.
+- Implement **Rate Limiting** to protect resources.
 
 **Don't**:
 
-- Use verbs in URLs
-- Return 200 for errors
-- Expose internal errors
-- Skip input validation
+- Don't use GET for state-changing operations.
+- Don't return 200 OK for errors (e.g., `{ "error": "failed" }` with status 200).
+- Don't expose database IDs if possible (use UUIDs).
 
 ## Troubleshooting
 
-| Issue              | Cause               | Solution          |
-| ------------------ | ------------------- | ----------------- |
-| 404 on valid route | Wrong method        | Check HTTP method |
-| CORS error         | Missing headers     | Configure CORS    |
-| 500 error          | Unhandled exception | Add error handler |
+| Error                        | Cause                                  | Solution                                             |
+| :--------------------------- | :------------------------------------- | :--------------------------------------------------- |
+| `405 Method Not Allowed`     | Sending POST to a GET-only endpoint.   | Check HTTP verb.                                     |
+| `415 Unsupported Media Type` | Sending XML when JSON expected.        | Set `Content-Type: application/json`.                |
+| `CORS Error`                 | Browser blocking cross-origin request. | Set `Access-Control-Allow-Origin` headers on server. |
 
 ## References
 
-- [REST API Tutorial](https://restfulapi.net/)
-- [HTTP Status Codes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status)
+- [Restful API Design (Microsoft)](https://learn.microsoft.com/en-us/azure/architecture/best-practices/api-design)
+- [Richardson Maturity Model](https://martinfowler.com/articles/richardsonMaturityModel.html)

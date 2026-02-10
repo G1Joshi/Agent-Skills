@@ -1,139 +1,46 @@
 ---
 name: openai-gpt
-description: OpenAI GPT API for chat completions, embeddings, and function calling. Use for AI-powered features.
+description: OpenAI GPT models API for chat, completion, and embeddings. Use for AI integration.
 ---
 
 # OpenAI GPT
 
-Large language model API for text generation and AI features.
+GPT (Generative Pre-trained Transformer) is the foundation of the modern AI revolution. In 2025, **GPT-5** offers agentic capabilities, deep reasoning, and native multimodal integration.
 
 ## When to Use
 
-- Chat and conversational AI
-- Text generation and completion
-- Code generation
-- Embeddings and semantic search
-
-## Quick Start
-
-```typescript
-import OpenAI from "openai";
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-const completion = await openai.chat.completions.create({
-  model: "gpt-4o",
-  messages: [
-    { role: "system", content: "You are a helpful assistant." },
-    { role: "user", content: "Hello!" },
-  ],
-});
-
-console.log(completion.choices[0].message.content);
-```
+- **General Purpose**: It is the baseline for all AI tasks.
+- **Complex Reasoning**: GPT-5 excels at multi-step logic and planning.
+- **Vision/Voice**: Native "Omni" capabilities (GPT-4o/5) process audio and video with <300ms latency.
 
 ## Core Concepts
 
-### Chat Completions
+### Models
 
-```typescript
-const response = await openai.chat.completions.create({
-  model: "gpt-4o",
-  messages: [
-    { role: "system", content: "You are a coding assistant." },
-    { role: "user", content: "Write a Python function to sort a list" },
-  ],
-  temperature: 0.7,
-  max_tokens: 1000,
-});
-```
+- **GPT-5**: The frontier model. Slow but smartest.
+- **GPT-4o**: "Omni". Fast, multimodal, cheaper.
+- **o1 / o3**: "Reasoning" models that "think" before answering (Chain of Thought).
 
-### Function Calling
+### Assistants API
 
-```typescript
-const response = await openai.chat.completions.create({
-  model: "gpt-4o",
-  messages: [{ role: "user", content: "What is the weather in Tokyo?" }],
-  tools: [
-    {
-      type: "function",
-      function: {
-        name: "get_weather",
-        description: "Get weather for a location",
-        parameters: {
-          type: "object",
-          properties: {
-            location: { type: "string", description: "City name" },
-          },
-          required: ["location"],
-        },
-      },
-    },
-  ],
-});
+Stateful API for building agents. Manages threads, retrieval (RAG), and code interpreter.
 
-// Handle tool call
-const toolCall = response.choices[0].message.tool_calls?.[0];
-if (toolCall) {
-  const args = JSON.parse(toolCall.function.arguments);
-  const weather = await getWeather(args.location);
-  // Continue conversation with tool result
-}
-```
+### Structured Outputs
 
-## Common Patterns
+Guarantees JSON schema compliance for API responses.
 
-### Streaming
-
-```typescript
-const stream = await openai.chat.completions.create({
-  model: "gpt-4o",
-  messages: [{ role: "user", content: "Tell me a story" }],
-  stream: true,
-});
-
-for await (const chunk of stream) {
-  process.stdout.write(chunk.choices[0]?.delta?.content || "");
-}
-```
-
-### Embeddings
-
-```typescript
-const embedding = await openai.embeddings.create({
-  model: "text-embedding-3-small",
-  input: "Search query text",
-});
-
-const vector = embedding.data[0].embedding;
-// Store in vector database for semantic search
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use structured outputs for reliable parsing
-- Implement retry logic with exponential backoff
-- Monitor token usage and costs
-- Use streaming for long responses
+- **Use Structured Outputs**: Always define a Zod/JSON schema for production apps.
+- **Use `o3-mini` for Code**: It is cheaper and often better at coding than GPT-4o.
+- **Batch Requests**: Use the Batch API for 50% discount on non-urgent tasks.
 
 **Don't**:
 
-- Expose API keys in client code
-- Skip input validation
-- Ignore rate limits
-- Use high temperatures for factual tasks
-
-## Troubleshooting
-
-| Issue          | Cause             | Solution              |
-| -------------- | ----------------- | --------------------- |
-| Rate limit     | Too many requests | Implement backoff     |
-| Context length | Too many tokens   | Truncate or summarize |
-| Hallucinations | Model limitation  | Add grounding/RAG     |
+- **Don't use GPT-3.5**: It is obsolete. Use GPT-4o-mini for cheap tasks.
 
 ## References
 
-- [OpenAI API Docs](https://platform.openai.com/docs)
-- [OpenAI Cookbook](https://cookbook.openai.com/)
+- [OpenAI API Documentation](https://platform.openai.com/docs/introduction)

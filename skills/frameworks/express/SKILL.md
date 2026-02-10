@@ -3,31 +3,26 @@ name: express
 description: Express.js Node.js web framework for REST APIs and middleware. Use for Node.js backends.
 ---
 
-# Express.js
+# Express
 
-Minimal and flexible Node.js web framework for building APIs.
+Express is the standard web framework for Node.js. Express 5 (2025) finally stabilizes modern features like Promise support in middleware, removing the need for `express-async-errors`.
 
 ## When to Use
 
-- Building REST APIs
-- Middleware-based request processing
-- Backend for SPAs
-- Microservices
+- **Microservices**: Lightweight and fast.
+- **REST APIs**: The standard for building JSON APIs in Node.
+- **Learning**: The best way to learn how HTTP works in Node.
 
-## Quick Start
+## Quick Start (Express 5)
 
 ```javascript
 import express from "express";
-import cors from "cors";
-
 const app = express();
 
-app.use(cors());
-app.use(express.json());
-
-app.get("/api/users", async (req, res) => {
-  const users = await db.users.findAll();
-  res.json(users);
+// Express 5 handles async errors automatically!
+app.get("/", async (req, res) => {
+  const user = await db.getUser(); // If this throws, Express catches it.
+  res.json(user);
 });
 
 app.listen(3000);
@@ -37,119 +32,26 @@ app.listen(3000);
 
 ### Middleware
 
-```javascript
-// Logger middleware
-const logger = (req, res, next) => {
-  console.log(`${req.method} ${req.path}`);
-  next();
-};
+Functions that have access to `req`, `res`, and `next`. They form a pipeline.
+`Log -> Auth -> BodyParse -> RouteHandler`.
 
-// Auth middleware
-const auth = async (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) return res.status(401).json({ error: "Unauthorized" });
+### Routing
 
-  try {
-    req.user = await verifyToken(token);
-    next();
-  } catch {
-    res.status(401).json({ error: "Invalid token" });
-  }
-};
+`app.get()`, `app.post()`. Simple regex-based routing.
 
-app.use(logger);
-app.use("/api/protected", auth);
-```
-
-### Route Organization
-
-```javascript
-// routes/users.js
-import { Router } from "express";
-const router = Router();
-
-router.get("/", async (req, res) => {
-  res.json(await User.findAll());
-});
-
-router.get("/:id", async (req, res) => {
-  const user = await User.findById(req.params.id);
-  if (!user) return res.status(404).json({ error: "Not found" });
-  res.json(user);
-});
-
-router.post("/", async (req, res) => {
-  const user = await User.create(req.body);
-  res.status(201).json(user);
-});
-
-export default router;
-
-// app.js
-app.use("/api/users", usersRouter);
-```
-
-## Common Patterns
-
-### Error Handling
-
-```javascript
-// Custom error class
-class ApiError extends Error {
-  constructor(message, statusCode = 500) {
-    super(message);
-    this.statusCode = statusCode;
-  }
-}
-
-// Async wrapper
-const asyncHandler = (fn) => (req, res, next) =>
-  Promise.resolve(fn(req, res, next)).catch(next);
-
-// Global error handler (must be last)
-app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(err.statusCode || 500).json({
-    error: err.message || "Internal server error",
-  });
-});
-
-// Usage
-app.get(
-  "/users/:id",
-  asyncHandler(async (req, res) => {
-    const user = await User.findById(req.params.id);
-    if (!user) throw new ApiError("User not found", 404);
-    res.json(user);
-  }),
-);
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use helmet for security headers
-- Validate input with Zod/Joi
-- Use async error handler wrapper
-- Structure routes in separate files
+- **Upgrade to Express 5**: Native Promise support is a game changer for cleaner code.
+- **Use `helmet`**: Security headers are mandatory.
+- **Structure properly**: Don't put everything in `app.js`. Use `express.Router()`.
 
 **Don't**:
 
-- Trust user input without validation
-- Expose stack traces in production
-- Mix business logic in routes
-- Forget to handle async errors
-
-## Troubleshooting
-
-| Issue               | Cause                   | Solution               |
-| ------------------- | ----------------------- | ---------------------- |
-| 404 for all routes  | Router order            | Check middleware order |
-| Unhandled rejection | Missing error handler   | Add async wrapper      |
-| CORS error          | Missing CORS middleware | Add cors() middleware  |
+- **Don't stick to CommonJS**: Express 5 supports ESM. Use `import`.
+- **Don't use `body-parser` separate package**: Use `express.json()` (included since v4, standard in v5).
 
 ## References
 
-- [Express.js Documentation](https://expressjs.com/)
-- [Express Best Practices](https://expressjs.com/en/advanced/best-practice-security.html)
+- [Express 5 Migration Guide](https://expressjs.com/en/guide/migrating-5.html)

@@ -1,137 +1,88 @@
 ---
 name: oauth
-description: OAuth 2.0 and OpenID Connect for authentication flows. Use for secure authentication.
+description: OAuth 2.0 authorization framework. Use for authorization.
 ---
 
-# OAuth 2.0
+# OAuth 2.1
 
-Authorization framework for secure delegated access.
+OAuth 2.1 is the consolidation of OAuth 2.0 and its best practices into a single standard. It allows third-party applications to grant limited access to an HTTP service through an authorization server.
 
 ## When to Use
 
-- Third-party authentication
-- API authorization
-- Single sign-on (SSO)
-- Social login integration
+- **Social Login**: "Log in with Google/Facebook".
+- **Third-Party Access**: Giving a budgeting app access to your bank APIs.
+- **Microservices**: Service A accessing Service B on behalf of a user.
 
-## Quick Start
+## Quick Start (Authorization Code Flow with PKCE)
 
-```typescript
-// Authorization Code Flow
-const authUrl = new URL("https://auth.example.com/authorize");
-authUrl.searchParams.set("client_id", CLIENT_ID);
-authUrl.searchParams.set("redirect_uri", REDIRECT_URI);
-authUrl.searchParams.set("response_type", "code");
-authUrl.searchParams.set("scope", "openid profile email");
-authUrl.searchParams.set("state", generateState());
-authUrl.searchParams.set("code_challenge", generateCodeChallenge());
-authUrl.searchParams.set("code_challenge_method", "S256");
+```javascript
+// Client (Frontend) - redirect to Auth Server
+const authUrl = `https://auth.example.com/authorize?
+  response_type=code&
+  client_id=${CLIENT_ID}&
+  redirect_uri=${REDIRECT_URI}&
+  scope=read:profile&
+  code_challenge=${pkceChallenge}&
+  code_challenge_method=S256`;
 
-window.location.href = authUrl.toString();
+window.location.href = authUrl;
+
+// Callback (Handling the redirect)
+const code = new URLSearchParams(window.location.search).get("code");
+const tokenResponse = await fetch("https://auth.example.com/token", {
+  method: "POST",
+  body: JSON.stringify({
+    grant_type: "authorization_code",
+    code,
+    client_id: CLIENT_ID,
+    redirect_uri: REDIRECT_URI,
+    code_verifier: pkceVerifier, // Proof Key
+  }),
+});
 ```
 
 ## Core Concepts
 
-### Authorization Code with PKCE
+### Roles
 
-```typescript
-// 1. Generate PKCE verifier and challenge
-function generateCodeVerifier(): string {
-  const array = new Uint8Array(32);
-  crypto.getRandomValues(array);
-  return base64UrlEncode(array);
-}
+- **Resource Owner**: The User.
+- **Client**: The App (Web, Mobile, Server).
+- **Authorization Server**: The Identity Provider (Auth0, Okta, Google).
+- **Resource Server**: The API holding the data.
 
-async function generateCodeChallenge(verifier: string): Promise<string> {
-  const hash = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(verifier),
-  );
-  return base64UrlEncode(new Uint8Array(hash));
-}
+### PKCE (Proof Key for Code Exchange)
 
-// 2. Exchange code for tokens
-async function exchangeCodeForTokens(code: string, verifier: string) {
-  const response = await fetch("https://auth.example.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      grant_type: "authorization_code",
-      code,
-      redirect_uri: REDIRECT_URI,
-      client_id: CLIENT_ID,
-      code_verifier: verifier,
-    }),
-  });
-  return response.json();
-}
-```
+Now **Mandatory** in OAuth 2.1 for all clients (public and confidential). Prevents authorization code interception attacks.
 
-### Token Refresh
+### Grants (Flows)
 
-```typescript
-async function refreshTokens(refreshToken: string) {
-  const response = await fetch("https://auth.example.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      grant_type: "refresh_token",
-      refresh_token: refreshToken,
-      client_id: CLIENT_ID,
-    }),
-  });
-  return response.json();
-}
-```
+- **Authorization Code**: The standard flow (Web/Mobile).
+- **Client Credentials**: Machine-to-Machine (No user).
+- **Device Code**: TV/Input-constrained devices.
+- **Implicit Grant**: **REMOVED** (Insecure). Do not use.
+- **Password Grant**: **REMOVED** (Insecure). Do not use.
 
-## Common Patterns
-
-### Protected API Calls
-
-```typescript
-async function fetchWithAuth(url: string, accessToken: string) {
-  const response = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-
-  if (response.status === 401) {
-    // Token expired, refresh and retry
-    const newTokens = await refreshTokens(getRefreshToken());
-    saveTokens(newTokens);
-    return fetchWithAuth(url, newTokens.access_token);
-  }
-
-  return response.json();
-}
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use PKCE for all public clients
-- Store tokens securely
-- Implement token refresh
-- Validate state parameter
+- Use **Authorization Code Flow with PKCE** for everything.
+- Validate **Exact Redirect URIs** (No wildcards).
+- Use **Sender-Constrained Tokens** (DPoP or mTLS) to prevent token replay/theft.
 
 **Don't**:
 
-- Store tokens in localStorage
-- Use implicit flow
-- Skip HTTPS
-- Ignore token expiration
+- Don't use the Implicit Grant (access token in URL fragment).
+- Don't store Access Tokens in `localStorage` (XSS risk). Use HttpOnly cookies or memory.
 
 ## Troubleshooting
 
-| Issue          | Cause          | Solution              |
-| -------------- | -------------- | --------------------- |
-| Invalid grant  | Code expired   | Retry auth flow       |
-| CORS error     | Wrong redirect | Check allowed origins |
-| Token rejected | Clock skew     | Sync server time      |
+| Error                   | Cause                        | Solution                          |
+| :---------------------- | :--------------------------- | :-------------------------------- |
+| `invalid_grant`         | Code expired or reused.      | Get a new authorization code.     |
+| `redirect_uri_mismatch` | URI doesn't match allowlist. | Check dashboard settings exactly. |
 
 ## References
 
-- [OAuth 2.0 RFC](https://datatracker.ietf.org/doc/html/rfc6749)
-- [PKCE RFC](https://datatracker.ietf.org/doc/html/rfc7636)
+- [OAuth 2.1 Draft](https://oauth.net/2.1/)
+- [OAuth 2.0 Simplified](https://aaronparecki.com/oauth-2-simplified/)

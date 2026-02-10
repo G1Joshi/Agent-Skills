@@ -1,162 +1,46 @@
 ---
 name: claude
-description: Anthropic Claude API for chat, analysis, and tool use. Use for advanced AI reasoning.
+description: Anthropic Claude AI models for analysis and coding. Use for AI assistants.
 ---
 
 # Claude
 
-Anthropic's Claude API for conversational AI and complex reasoning.
+Claude (by Anthropic) is OpenAI's main competitor. It is famous for its **large context window** (200k+), low hallucination rates, and "Artifacts" UI.
 
 ## When to Use
 
-- Long-form content analysis
-- Complex reasoning tasks
-- Code generation and review
-- Document understanding
-
-## Quick Start
-
-```typescript
-import Anthropic from "@anthropic-ai/sdk";
-
-const anthropic = new Anthropic();
-
-const message = await anthropic.messages.create({
-  model: "claude-sonnet-4-20250514",
-  max_tokens: 1024,
-  messages: [{ role: "user", content: "Hello, Claude!" }],
-});
-
-console.log(message.content[0].text);
-```
+- **Coding**: Claude 3.5 Sonnet is widely considered the best coding model in 2025.
+- **Long Context**: Analyzing massive PDFs or codebases.
+- **Safety**: Enterprise-grade safety guardrails.
 
 ## Core Concepts
 
-### Messages API
+### Models
 
-```typescript
-const response = await anthropic.messages.create({
-  model: "claude-sonnet-4-20250514",
-  max_tokens: 4096,
-  system: "You are a helpful coding assistant.",
-  messages: [{ role: "user", content: "Explain async/await in JavaScript" }],
-  temperature: 0.7,
-});
-```
+- **Opus**: The smartest, largest model.
+- **Sonnet**: The sweet spot. Fast and incredibly capable.
+- **Haiku**: Fast and cheap.
 
-### Tool Use
+### Artifacts
 
-```typescript
-const response = await anthropic.messages.create({
-  model: "claude-sonnet-4-20250514",
-  max_tokens: 1024,
-  tools: [
-    {
-      name: "get_weather",
-      description: "Get current weather for a location",
-      input_schema: {
-        type: "object",
-        properties: {
-          location: { type: "string", description: "City name" },
-        },
-        required: ["location"],
-      },
-    },
-  ],
-  messages: [{ role: "user", content: "What is the weather in Paris?" }],
-});
+A UI feature (now an API pattern) where the model generates standalone content (React components, SVGs) in a side window.
 
-// Handle tool use
-if (response.stop_reason === "tool_use") {
-  const toolUse = response.content.find((c) => c.type === "tool_use");
-  const result = await getWeather(toolUse.input.location);
+### Computer Use
 
-  // Continue with tool result
-  const followUp = await anthropic.messages.create({
-    model: "claude-sonnet-4-20250514",
-    max_tokens: 1024,
-    messages: [
-      { role: "user", content: "What is the weather in Paris?" },
-      { role: "assistant", content: response.content },
-      {
-        role: "user",
-        content: [
-          { type: "tool_result", tool_use_id: toolUse.id, content: result },
-        ],
-      },
-    ],
-  });
-}
-```
+Claude can interact with a computer GUI (moving mouse, clicking) via API.
 
-## Common Patterns
-
-### Streaming
-
-```typescript
-const stream = await anthropic.messages.stream({
-  model: "claude-sonnet-4-20250514",
-  max_tokens: 1024,
-  messages: [{ role: "user", content: "Write a story" }],
-});
-
-for await (const event of stream) {
-  if (event.type === "content_block_delta") {
-    process.stdout.write(event.delta.text);
-  }
-}
-```
-
-### Vision
-
-```typescript
-const response = await anthropic.messages.create({
-  model: "claude-sonnet-4-20250514",
-  max_tokens: 1024,
-  messages: [
-    {
-      role: "user",
-      content: [
-        {
-          type: "image",
-          source: {
-            type: "base64",
-            media_type: "image/png",
-            data: base64Image,
-          },
-        },
-        { type: "text", text: "What is in this image?" },
-      ],
-    },
-  ],
-});
-```
-
-## Best Practices
+## Best Practices (2025)
 
 **Do**:
 
-- Use system prompts for consistent behavior
-- Leverage extended thinking for complex tasks
-- Implement proper error handling
-- Stream for better UX
+- **Use Sonnet for Dev**: It beats GPT-4o in many coding benchmarks.
+- **Use XML Tags**: Claude loves `<instructions>` and `<context>` tags in prompts.
+- **Prefill Responses**: Guide Claude by prefilling the `{"role": "assistant", "content": "{"}` to force JSON.
 
 **Don't**:
 
-- Ignore content moderation
-- Skip input validation
-- Use without rate limiting
-- Expose API keys
-
-## Troubleshooting
-
-| Issue            | Cause              | Solution            |
-| ---------------- | ------------------ | ------------------- |
-| Overloaded error | High demand        | Retry with backoff  |
-| Max tokens hit   | Response truncated | Increase max_tokens |
-| Tool use loop    | Missing result     | Return tool_result  |
+- **Don't ignore System Prompts**: Claude relies heavily on strong system instructions.
 
 ## References
 
-- [Anthropic Docs](https://docs.anthropic.com/)
-- [Claude API Reference](https://docs.anthropic.com/claude/reference/)
+- [Anthropic Documentation](https://docs.anthropic.com/)

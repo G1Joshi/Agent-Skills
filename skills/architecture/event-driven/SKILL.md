@@ -1,155 +1,91 @@
 ---
 name: event-driven
-description: Event-driven architecture with queues and event sourcing. Use for async systems.
+description: Event-driven architecture with pub/sub and message queues. Use for reactive systems.
 ---
 
-# Event-Driven Architecture
+# Event-Driven Architecture (EDA)
 
-Asynchronous communication through events and messages.
+EDA is a software architecture paradigm promoting the production, detection, consumption of, and reaction to events. In 2025, it is the backbone of real-time, scalable, and decoupled systems.
 
 ## When to Use
 
-- Decoupled systems
-- Async processing
-- Real-time notifications
-- Audit trails
+- When strict decoupling is required (Producer doesn't know Consumer).
+- High-volume, bursty traffic (using buffering queues).
+- Asynchronous workflows (e.g., "User Signed Up" -> Send Email, Create Wallet, Analytics).
+- Real-time updates (WebSockets/Push).
 
 ## Quick Start
 
 ```typescript
-import { EventEmitter } from "events";
-
-const eventBus = new EventEmitter();
-
-// Subscribe
-eventBus.on("user:created", (user) => {
-  sendWelcomeEmail(user);
+// Producer (Order Service)
+await messageBroker.publish("order.created", {
+  orderId: "123",
+  userId: "456",
+  timestamp: Date.now(),
 });
 
-// Publish
-eventBus.emit("user:created", { id: "123", email: "user@example.com" });
+// Consumer (Shipping Service)
+// Doesn't need to be online when order is created
+messageBroker.subscribe("order.created", async (event) => {
+  await shippingService.schedulePickup(event.orderId);
+  console.log("Shipping scheduled");
+});
+
+// Consumer (Analytics Service)
+// New feature added later? No changes to Order Service!
+messageBroker.subscribe("order.created", async (event) => {
+  await analytics.trackRevenue(event);
+});
 ```
 
 ## Core Concepts
 
-### Message Queue (RabbitMQ)
+### Event
 
-```typescript
-import amqp from "amqplib";
+A significant change in state (Immutable fact). "OrderCreated" not "CreateOrder".
 
-// Producer
-const channel = await connection.createChannel();
-await channel.assertQueue("orders");
-channel.sendToQueue("orders", Buffer.from(JSON.stringify(order)));
+### Broker (Event Bus)
 
-// Consumer
-await channel.consume("orders", async (msg) => {
-  const order = JSON.parse(msg.content.toString());
-  await processOrder(order);
-  channel.ack(msg);
-});
-```
+The middleware (Kafka, RabbitMQ, SNS/SQS) that receives, stores, and routes events.
 
-### Kafka Streams
+### Pub/Sub
 
-```typescript
-import { Kafka } from "kafkajs";
-
-const kafka = new Kafka({ brokers: ["localhost:9092"] });
-const producer = kafka.producer();
-const consumer = kafka.consumer({ groupId: "order-service" });
-
-// Produce
-await producer.send({
-  topic: "orders",
-  messages: [{ key: orderId, value: JSON.stringify(event) }],
-});
-
-// Consume
-await consumer.subscribe({ topic: "orders" });
-await consumer.run({
-  eachMessage: async ({ topic, partition, message }) => {
-    const event = JSON.parse(message.value!.toString());
-    await handleEvent(event);
-  },
-});
-```
+Pattern where publishers send messages to a topic, and multiple subscribers receive them independently.
 
 ## Common Patterns
 
 ### Event Sourcing
 
-```typescript
-interface Event {
-  type: string;
-  data: unknown;
-  timestamp: Date;
-  aggregateId: string;
-}
+Storing the state of an entity as a sequence of state-changing events rather than the current snapshot.
 
-class OrderAggregate {
-  private events: Event[] = [];
-  private state: OrderState = { status: "pending" };
+### CQRS (Command Query Responsibility Segregation)
 
-  apply(event: Event) {
-    this.events.push(event);
-    this.state = this.reducer(this.state, event);
-  }
+Separating the Read and Write models. Writes publish events; Reads update a denormalized view based on those events.
 
-  private reducer(state: OrderState, event: Event): OrderState {
-    switch (event.type) {
-      case "ORDER_PLACED":
-        return { ...state, status: "placed" };
-      case "ORDER_SHIPPED":
-        return { ...state, status: "shipped" };
-      default:
-        return state;
-    }
-  }
-}
-```
+### Transactional Outbox
 
-### Dead Letter Queue
-
-```typescript
-await channel.assertQueue("orders.dlq");
-await channel.assertQueue("orders", {
-  deadLetterExchange: "",
-  deadLetterRoutingKey: "orders.dlq",
-});
-
-// Handle failed messages
-await channel.consume("orders.dlq", async (msg) => {
-  await notifyAdmin(msg);
-  channel.ack(msg);
-});
-```
+Ensuring data consistency. Write the event to a DB table _in the same transaction_ as the business logic, then a background worker pushes it to the broker.
 
 ## Best Practices
 
 **Do**:
 
-- Use idempotent consumers
-- Implement dead letter queues
-- Add correlation IDs
-- Monitor queue depth
+- Use **Schemas** (Avro, Protobuf, JSON Schema) to govern event structure (Schema Registry).
+- Ensure **Idempotency** in consumers (handling the same message twice safely).
+- Monitor **Lag** (how far behind consumers are).
 
 **Don't**:
 
-- Rely on message order
-- Skip error handling
-- Ignore backpressure
-- Forget acknowledgments
+- Don't use events for synchronous queries (Request/Response via queues is painful).
+- Don't put huge payloads in events (Pass ID + Metadata, reference Blob Storage if needed).
 
-## Troubleshooting
+## Tools
 
-| Issue                | Cause          | Solution              |
-| -------------------- | -------------- | --------------------- |
-| Message loss         | No persistence | Enable durable queues |
-| Duplicate processing | No idempotency | Add idempotency keys  |
-| Queue buildup        | Slow consumers | Scale consumers       |
+- **Kafka / Redpanda**: High throughput, log-based (replayable).
+- **RabbitMQ / ActiveMQ**: Queue-based, complex routing.
+- **AWS SNS/SQS / Google PubSub**: Cloud native.
 
 ## References
 
-- [Event-Driven Microservices](https://www.oreilly.com/library/view/building-event-driven/9781492057888/)
-- [Kafka Documentation](https://kafka.apache.org/documentation/)
+- [Event-Driven Architecture](https://aws.amazon.com/event-driven-architecture/)
+- [AsyncAPI Specification](https://www.asyncapi.com/)
