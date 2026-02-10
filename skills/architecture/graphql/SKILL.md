@@ -1,170 +1,94 @@
 ---
 name: graphql
-description: GraphQL API design with queries, mutations, and subscriptions. Use for flexible APIs.
+description: GraphQL API query language with schema. Use for flexible APIs.
 ---
 
 # GraphQL
 
-Query language for APIs with typed schemas.
+GraphQL is a query language for APIs and a runtime for fulfilling those queries with your existing data. It gives clients the power to ask for exactly what they need and nothing more.
 
 ## When to Use
 
-- Complex data requirements
-- Multiple client types
-- Avoiding over-fetching
-- Real-time subscriptions
+- **Mobile Apps**: Minimize bandwidth by fetching only needed fields.
+- **Complex Systems**: Fetching related data (User + Orders + Products) in a single request.
+- **Rapid Iteration**: Frontend can change data requirements without Backend changes.
 
 ## Quick Start
 
-```typescript
-import { ApolloServer } from "@apollo/server";
+```graphql
+# The Schema
+type User {
+  id: ID!
+  name: String!
+  orders: [Order]
+}
 
-const typeDefs = `
-  type User {
-    id: ID!
-    name: String!
-    email: String!
-    posts: [Post!]!
-  }
-  
-  type Query {
-    user(id: ID!): User
-    users: [User!]!
-  }
-`;
+type Query {
+  user(id: ID!): User
+}
+```
 
-const resolvers = {
-  Query: {
-    user: (_, { id }) => db.users.findUnique({ where: { id } }),
-    users: () => db.users.findMany(),
-  },
-};
+```javascript
+// The Query (Client)
+query {
+  user(id: "123") {
+    name
+    orders {
+      total
+      status
+    }
+  }
+}
 ```
 
 ## Core Concepts
 
-### Schema Definition
+### Schema First
 
-```graphql
-type Query {
-  user(id: ID!): User
-  users(filter: UserFilter, limit: Int = 10): UserConnection!
-}
-
-type Mutation {
-  createUser(input: CreateUserInput!): User!
-  updateUser(id: ID!, input: UpdateUserInput!): User!
-  deleteUser(id: ID!): Boolean!
-}
-
-type Subscription {
-  userCreated: User!
-}
-
-input CreateUserInput {
-  name: String!
-  email: String!
-}
-
-type UserConnection {
-  edges: [UserEdge!]!
-  pageInfo: PageInfo!
-}
-```
+The schema (`.graphql`) is the contract. Teams agree on the schema before writing code.
 
 ### Resolvers
 
-```typescript
-const resolvers = {
-  Query: {
-    user: async (_, { id }, context) => {
-      return context.dataSources.users.getById(id);
-    },
-  },
+Functions that fetch the data for a specific field in the schema.
 
-  Mutation: {
-    createUser: async (_, { input }, context) => {
-      return context.dataSources.users.create(input);
-    },
-  },
+### Strong Typing
 
-  User: {
-    posts: async (parent, _, context) => {
-      return context.dataSources.posts.getByUserId(parent.id);
-    },
-  },
-};
-```
+Every field has a specific type (Int, String, Object). Validation happens automatically.
 
 ## Common Patterns
 
-### DataLoader
+### n+1 Problem
 
-```typescript
-import DataLoader from 'dataloader';
+Fetching a list of users and then firing a separate DB query for each user's address.
 
-const userLoader = new DataLoader(async (ids: string[]) => {
-  const users = await db.users.findMany({
-    where: { id: { in: ids } },
-  });
-  return ids.map(id => users.find(u => u.id === id) || null);
-});
+- **Solution**: **DataLoader**. Batches requests into a single query (`WHERE id IN (...)`).
 
-// Resolver
-User: {
-  author: (post) => userLoader.load(post.authorId),
-}
-```
+### Federation
 
-### Error Handling
-
-```typescript
-import { GraphQLError } from "graphql";
-
-const resolvers = {
-  Mutation: {
-    createUser: async (_, { input }) => {
-      const existing = await db.users.findUnique({
-        where: { email: input.email },
-      });
-
-      if (existing) {
-        throw new GraphQLError("Email already exists", {
-          extensions: { code: "BAD_USER_INPUT" },
-        });
-      }
-
-      return db.users.create({ data: input });
-    },
-  },
-};
-```
+Splitting a single GraphQL graph across multiple services (Microservices). Apollo Federation is the standard.
 
 ## Best Practices
 
 **Do**:
 
-- Use DataLoader for batching
-- Implement pagination
-- Add input validation
-- Use proper error codes
+- Use **Fragments** on the client to reuse query logic.
+- Limit **Query Depth** to prevent DoS attacks (e.g., `user { friends { friends { friends ... } } }`).
+- Use **Cursor-based Pagination** for infinite scrolling lists.
 
 **Don't**:
 
-- Return excessive data
-- Skip authorization
-- Ignore N+1 queries
-- Over-complicate schema
+- Don't simply wrap a REST API 1:1. Redesign for the Graph.
+- Don't utilize it for simple binary file uploads (use Signed URLs + REST/S3 for that).
 
 ## Troubleshooting
 
-| Issue        | Cause              | Solution             |
-| ------------ | ------------------ | -------------------- |
-| N+1 queries  | Missing DataLoader | Add batching         |
-| Slow queries | Deep nesting       | Add depth limiting   |
-| Type error   | Schema mismatch    | Check resolver types |
+| Error                | Cause                     | Solution                                               |
+| :------------------- | :------------------------ | :----------------------------------------------------- |
+| `Cannot query field` | Typo or field restricted. | Check Schema and Introspection.                        |
+| `N+1 Performance`    | Slow response on lists.   | Implement DataLoader.                                  |
+| `Caching`            | Hard to cache via HTTP.   | Use Normalized Caching in Client (Apollo Client/Urql). |
 
 ## References
 
-- [GraphQL Documentation](https://graphql.org/learn/)
-- [Apollo Server](https://www.apollographql.com/docs/apollo-server/)
+- [GraphQL.org](https://graphql.org/)
+- [Apollo GraphQL](https://www.apollographql.com/)
