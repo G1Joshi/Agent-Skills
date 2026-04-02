@@ -1,43 +1,53 @@
 ---
 name: actix
-description: Actix Rust web framework with actors and high performance. Use for Rust APIs.
+description: >-
+  Build REST endpoints, configure middleware, set up routing, and manage
+  application state with actix-web in Rust. Use when building Rust web
+  servers, HTTP services, REST APIs with actix-web, or when the user
+  mentions Actix, actix-web, extractors, or high-performance Rust web
+  applications.
 ---
 
 # Actix Web
 
-Actix Web is one of the fastest web frameworks in the world (TechEmpower benchmarks). It uses the **Actor Model** (though less visible in v4) for concurrency.
-
 ## When to Use
 
-- **Raw Speed**: When req/sec is the primary metric.
+- **Raw Speed**: When req/sec is the primary metric (TechEmpower benchmarks).
 - **Microservices**: Low footprint, high throughput services.
 - **WebSockets**: Efficient handling of millions of connections (actix-web-actors).
 
-## Core Concepts
+## Workflow
 
-### App Factory
+1. Create project: `cargo new my-api && cd my-api`
+2. Add `actix-web = "4"`, `serde`, `tokio` to `Cargo.toml`
+3. Write handlers with extractors (`web::Json`, `web::Path`, `web::Query`)
+4. Register routes via `App::new().route(...)` or `web::scope(...)`
+5. Wrap with middleware (`Logger`, `Compress`, `DefaultHeaders`)
+6. Run: `cargo run` and test: `curl http://127.0.0.1:8080/health`
 
-`App::new()` is a factory called for each thread. State must be wrapped in `web::Data`.
+## Quick Reference
 
-### Extractors
+| Concept | Pattern |
+|---|---|
+| Shared state | `web::Data<T>` wrapping `Mutex` or pool |
+| JSON body | `web::Json<T>` extractor (T: Deserialize) |
+| Path param | `web::Path<T>` extractor |
+| Query string | `web::Query<T>` extractor |
+| Route groups | `web::scope("/api/v1").route(...)` |
+| Blocking work | `web::block(move \|\| ...)` to offload CPU-bound tasks |
+| Custom errors | Implement `error::ResponseError` trait |
+| Entry macro | `#[actix_web::main]` on async main |
 
-Similar to Axum, but uses `web::Json`, `web::Path`.
+## Error Recovery
 
-### Actors (Actix)
-
-The underlying system for async messages (optional in simple web apps but heavily used for WebSockets).
-
-## Best Practices (2025)
-
-**Do**:
-
-- **Use `web::Data`**: For shared application state (DB pools).
-- **Use `actix_web::main`**: The macro to run the async runtime.
-
-**Don't**:
-
-- **Don't block the thread**: Actix is single-threaded per worker. Blocking operations stop the world.
+| Problem | Fix |
+|---|---|
+| Thread blocking stalls workers | Move to `web::block()` or spawn on dedicated runtime |
+| State not shared across workers | Wrap in `web::Data::new()` before `HttpServer::new` |
+| Extractor fails silently | Configure `JsonConfig::error_handler` for custom error responses |
+| Port already in use | Check for running processes or use `.bind("0.0.0.0:0")` for random port |
 
 ## References
 
-- [Actix Web Documentation](https://actix.rs/)
+- [Actix Web Documentation](https://actix.rs/docs)
+- [Actix Web API Reference](https://docs.rs/actix-web/latest/actix_web/)
