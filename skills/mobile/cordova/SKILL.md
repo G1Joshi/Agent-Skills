@@ -83,4 +83,4 @@ npx cap init
 ## References
 
 - [Apache Cordova Docs](https://cordova.apache.org/docs/en/latest/)
-- [Migrating from Cordova to Capacitor](https://capacitorjs.com/docs/cordova/migrating)
+- [Using Cordova Plugins with Capacitor](https://capacitorjs.com/docs/cordova)
