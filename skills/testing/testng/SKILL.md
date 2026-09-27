@@ -1,6 +1,6 @@
 ---
 name: testng
-description: TestNG Java testing framework. Use for Java testing.
+description: Expert TestNG testing assistance covering annotations, groups, parallel execution, and data providers. Use when writing enterprise Java tests, configuring `testng.xml`, or automating regression suites.
 ---
 
 # TestNG
@@ -9,9 +9,10 @@ TestNG is a testing framework setup inspired by JUnit and NUnit but introducing 
 
 ## When to Use
 
-- **Complex Suites**: You need granular control over which groups of tests run via XML configuration (`testing.xml`).
-- **Parallel Execution**: Historically better support for multi-threaded test execution than JUnit.
-- **Dependencies**: Tests that depend on other tests (`@Test(dependsOnMethods = { "serverStarted" })`).
+- **Enterprise Java Testing**: Powerful testing framework for Java offering advanced dependency management, grouping, and parallel execution.
+- **Complex Test Dependency Graphs**: Defining tests that depend on the successful execution of previous test methods (`dependsOnMethods`).
+- **Data-Driven Testing via DataProviders**: Passing multi-dimensional test datasets using `@DataProvider`.
+- **Large-Scale Selenium / Appium Suites**: Orchestrating multi-browser enterprise test matrices with `testng.xml` suite descriptors.
 
 ## Quick Start
 
@@ -41,37 +42,115 @@ public class TestNGExample {
 
 ## Core Concepts
 
-### Groups
+#Declarative testng.xml Suite Management
 
-Tagging tests (`@Test(groups = "smoke")`). Allows running specific subsets (Include/Exclude in XML).
+Orchestrates multi-suite, multi-thread test runs across packages:
 
-### Data Providers
-
-Native support for passing complex objects to tests.
-
-```java
-@DataProvider(name = "test1")
-public Object[][] createData1() {
- return new Object[][] {
-   { "Cedric", new Integer(36) },
-   { "Anne", new Integer(37) },
- };
-}
-
-@Test(dataProvider = "test1")
-public void verifyData1(String n1, Integer n2) { ... }
+```xml
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Enterprise Regression Suite" parallel="tests" thread-count="4">
+    <test name="Chrome Tests">
+        <parameter name="browser" value="chrome"/>
+        <classes>
+            <class name="com.example.tests.CheckoutTest"/>
+        </classes>
+    </test>
+</suite>
 ```
 
-## Best Practices (2025)
+#Method Dependencies (`dependsOnMethods`)
+
+Ensures downstream tests execute only if prerequisite tests pass:
+
+```java
+import org.testng.annotations.Test;
+import org.testng.Assert;
+
+public class UserWorkflowTest {
+    @Test
+    public void createUser() {
+        Assert.assertTrue(api.register("user@test.com"));
+    }
+
+    @Test(dependsOnMethods = {"createUser"})
+    public void loginUser() {
+        Assert.assertTrue(api.login("user@test.com"));
+    }
+}
+```
+
+#Native DataProviders
+
+Feeds parameterized data to test methods:
+
+```java
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+public class CalculationTest {
+    @DataProvider(name = "taxData")
+    public Object[][] provideTaxData() {
+        return new Object[][] {
+            { 100.0, "NY", 108.875 },
+            { 100.0, "CA", 107.25 }
+        };
+    }
+
+    @Test(dataProvider = "taxData")
+    public void testTaxCalculation(double amount, String state, double expected) {
+        Assert.assertEquals(TaxCalculator.calculate(amount, state), expected, 0.01);
+    }
+}
+```
+
+## Common Patterns
+
+### Parallel Test Execution with Groups
+
+**Problem**: Large regression test suites take hours to run sequentially in CI pipelines.
+
+**Solution**:
+Organize tests into groups and configure parallel execution in `testng.xml`:
+
+```xml
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd" >
+<suite name="RegressionSuite" parallel="methods" thread-count="4">
+  <test name="SmokeTests">
+    <groups>
+      <run>
+        <include name="smoke"/>
+      </run>
+    </groups>
+    <classes>
+      <class name="com.example.OrderTest"/>
+      <class name="com.example.UserTest"/>
+    </classes>
+  </test>
+</suite>
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Use Soft Assertions**: `SoftAssert` allows the test to continue even if one check fails, reporting all errors at the end.
-- **Parallelize**: Leverage `thread-count` in CI to speed up execution.
+- **Leverage `parallel="methods"` for Fast Execution**: Run independent tests concurrently by configuring thread counts in `testng.xml`.
+- **Use Groups for Test Categorization**: Tag tests with `@Test(groups = {"smoke", "nightly"})` for selective execution.
+- **Implement `ITestListener` for Reporting**: Create custom listeners to log failures, capture screenshots, and publish metrics.
+- **Soft Assertions for Multi-Field Validations**: Use `SoftAssert` to collect all field discrepancies before failing the test.
 
 **Don't**:
 
-- **Don't use `dependsOnMethods` for Unit Tests**: Unit tests should be independent. Use dependencies only for Integration flows.
+- **Don't overuse `dependsOnMethods`**: Keep tests independent whenever possible; method dependencies hinder parallel execution.
+- **Don't hardcode browser parameters in code**: Pass configuration parameters dynamically via `testng.xml` parameters.
+- **Don't ignore thread safety in parallel suites**: Ensure shared drivers and utilities use `ThreadLocal<WebDriver>`.
+
+## Troubleshooting
+
+| Error                                              | Cause                                                                     | Solution                                                                         |
+| :------------------------------------------------- | :------------------------------------------------------------------------ | :------------------------------------------------------------------------------- |
+| `Cannot find class in classpath`                   | Class path in `testng.xml` has typo or build didn't compile test classes. | Verify package name and run `mvn test-compile` first.                            |
+| `TestNGException: Method requires a @DataProvider` | DataProvider name does not match declared name or signature is invalid.   | Ensure `@DataProvider(name = "x")` returns `Object[][]` or `Iterator<Object[]>`. |
+| `ConcurrentModificationException in parallel run`  | Non-thread-safe state shared across test threads.                         | Use `ThreadLocal` for drivers/contexts or isolate state per test instance.       |
 
 ## References
 

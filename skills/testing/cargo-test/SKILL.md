@@ -1,6 +1,6 @@
 ---
 name: cargo-test
-description: Cargo test for Rust testing. Use for Rust testing.
+description: Expert Cargo test assistance covering Rust unit tests, integration tests, and benchmarks. Use when running `cargo test`, writing unit tests in Rust, or debugging test failures.
 ---
 
 # Cargo Test
@@ -9,8 +9,10 @@ Rust treats testing as a first-class citizen. `cargo test` runs unit tests (in t
 
 ## When to Use
 
-- **Rust Projects**: The standard.
-- **Library Design**: Doc tests ensure your examples in README/Docs actually compile and work.
+- **Rust Unit & Integration Testing**: The official, built-in test runner for Rust crates, libraries, and binaries.
+- **Doc-Tests Verification**: Compiling and testing code examples written inside `///` documentation comments automatically.
+- **Benchmark & Micro-Optimizations**: Measuring algorithmic performance and allocations using `cargo bench` and criterion.
+- **Concurrency & Parallel Test Execution**: Running hundreds of test threads safely with thread isolation by default.
 
 ## Quick Start
 
@@ -33,39 +35,101 @@ mod tests {
 
 ## Core Concepts
 
-### Unit vs Integration
+#Unit Tests vs Integration Tests Layout
 
-- **Unit**: Inside `src/lib.rs` (or same file). Can test private functions.
-- **Integration**: Inside `tests/*.rs`. Can only use the public API (like a real user).
+Unit tests live inside `src/` adjacent to source modules with `#[cfg(test)]`; integration tests live in root `tests/`:
 
-### Doc Tests
+```
+my_crate/
+  ├── src/
+  │   └── parser.rs          # Contains #[cfg(test)] mod tests { ... }
+  └── tests/
+      └── integration_test.rs # Compiles as an external crate consuming public API
+```
 
-Code blocks in `///` comments are run as tests.
+#Test Attributes & Failure Assertions
 
-````rust
-/// Adds two numbers.
-/// ```
-/// let result = my_crate::add(2, 3);
-/// assert_eq!(result, 5);
-/// ```
-pub fn add...
-````
+Rust provides idiomatic test macros and expected failure annotations:
 
-### Assertions
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-`assert!`, `assert_eq!`, `assert_ne!`. `#[should_panic]` for testing errors.
+    #[test]
+    fn test_valid_transaction() {
+        let account = Account::new("Alice", 100);
+        assert_eq!(account.balance(), 100);
+        assert!(account.is_active());
+    }
 
-## Best Practices (2025)
+    #[test]
+    #[should_panic(expected = "insufficient funds")]
+    fn test_overdraw_panics() {
+        let mut account = Account::new("Bob", 20);
+        account.withdraw(50); // triggers panic
+    }
+}
+```
+
+#Filtering & Concurrency Flags
+
+Targeting specific tests and controlling execution threads:
+
+```bash
+# Run only tests matching substring "auth"
+cargo test auth
+
+# Run tests serially to prevent database race conditions
+cargo test -- --test-threads=1
+
+# Show stdout print output from passing tests
+cargo test -- --nocapture
+```
+
+## Common Patterns
+
+### Integration Testing in Separate Directory
+
+**Problem**: Testing public crate APIs as an external consumer without access to internal private members.
+
+**Solution**:
+Place integration test suites in the top-level `tests/` directory:
+
+```rust
+// tests/integration_test.rs
+use my_crate::{add, calculate_total};
+
+#[test]
+fn test_public_api_flow() {
+    let result = add(2, 3);
+    assert_eq!(result, 5);
+    assert!(calculate_total(&[1, 2, 3]) > 0);
+}
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Use `insta`**: For snapshot testing in Rust (`cargo-insta`).
-- **Use `rstest`**: For fixture-based and parameterized testing (Pytest style).
-- **Test concurrency**: Rust's ownership model makes testing concurrent code safer, but still verify with `loom` for atomics.
+- **Annotate Test Modules with `#[cfg(test)]`**: Prevent test code and mock dependencies from being compiled into release production binaries.
+- **Use `cargo-nextest` in CI**: Adopt Nextest (`cargo install cargo-nextest`) for faster parallel test execution and cleaner failure summaries.
+- **Write Instructive Doc-Tests**: Use `/// ```rust` examples on public structs to keep documentation verified and up to date.
+- **Leverage Test Fixtures with Tempdir**: Use crates like `tempfile` for testing filesystem mutations in isolated temporary folders.
 
 **Don't**:
 
-- **Don't test implementation details in integration tests**: Keep `tests/` folder for Public API contracts only.
+- **Don't share mutable global state across parallel tests**: Tests run in parallel by default; shared static variables cause intermittent test flakiness.
+- **Don't ignore compiler warnings in tests**: Run `cargo clippy --tests` to enforce identical code quality on test suites.
+- **Don't ignore `--release` test runs**: Test critical numerical code with `cargo test --release` to catch overflow behavior.
+
+## Troubleshooting
+
+| Error                                      | Cause                                                      | Solution                                                                   |
+| :----------------------------------------- | :--------------------------------------------------------- | :------------------------------------------------------------------------- |
+| `test failed, to rerun use -- --nocapture` | Standard output swallowed during passing or failing tests. | Run `cargo test -- --nocapture` to stream stdout and tracing logs.         |
+| `cannot find module in tests/`             | Missing `pub` visibility on crate modules.                 | Expose target helper functions with `pub` or `pub(crate)` in `src/lib.rs`. |
+| `failed to link or test threads panic`     | Shared state race condition across parallel test runners.  | Run sequentially using `cargo test -- --test-threads=1`.                   |
 
 ## References
 

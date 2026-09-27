@@ -1,6 +1,6 @@
 ---
 name: xunit
-description: xUnit .NET testing framework. Use for .NET testing.
+description: Expert xUnit.net testing assistance covering .NET Fact/Theory tests, constructor fixtures, and output capture. Use when writing C# unit tests, testing ASP.NET Core applications, or running `dotnet test`.
 ---
 
 # xUnit.net
@@ -9,8 +9,10 @@ xUnit.net is the modern, open-source unit testing tool for .NET (C#, F#, VB). It
 
 ## When to Use
 
-- **.NET Core / .NET 5+**: The default template choice.
-- **Modern Practices**: Enforces good habits (Isolation, Constructor Injection for fixtures).
+- **Modern .NET Core Unit Testing**: The modern, opinionated, community-preferred testing framework for C# and ASP.NET Core applications.
+- **Isolated Clean Test Execution**: Enforcing a new class instance for every single test method to guarantee zero state contamination.
+- **Theory-Driven Parameterized Tests**: Running tests across inline data (`[InlineData]`), member data, and class data sources.
+- **Constructor-Based Test Setup**: Replacing `[SetUp]` attributes with standard C# object-oriented constructors and `IDisposable`.
 
 ## Quick Start
 
@@ -38,30 +40,115 @@ public class CalculatorTests
 
 ## Core Concepts
 
-### Facts vs Theories
+#Instance-Per-Test Lifecycle Architecture
 
-- `[Fact]`: A test that is always true. Invariant.
-- `[Theory]`: A test that is true for a particular set of data (Parameterized).
+Unlike NUnit and MSTest, xUnit instantiates a completely new instance of the test class for every `[Fact]`, preventing shared instance field state:
 
-### Fixtures (IClassFixture)
+```
+[ Test Class ] ──new()──→ Runs Fact 1 ──Dispose()
+[ Test Class ] ──new()──→ Runs Fact 2 ──Dispose()
+```
 
-xUnit creates a new instance of the Test Class for _every_ test method (High isolation). To share context (like a DB connection), implement `IClassFixture<T>`.
+#Facts vs Theories (`[Fact]` vs `[Theory]`)
 
-### Assert
+- `[Fact]`: Test that is always true and tests invariant conditions.
+- `[Theory]`: Parameterized test that executes across datasets:
 
-`Assert.Equal`, `Assert.Throws`, `Assert.Collection`.
+```csharp
+using Xunit;
 
-## Best Practices (2025)
+public class OrderValidatorTests
+{
+    [Fact]
+    public void EmptyOrder_IsInvalid()
+    {
+        var order = new Order();
+        Assert.False(order.IsValid());
+    }
+
+    [Theory]
+    [InlineData(100, "DISCOUNT10", 90)]
+    [InlineData(50, "SAVE5", 45)]
+    [InlineData(20, "", 20)]
+    public void ApplyDiscount_CalculatesCorrectTotal(decimal price, string code, decimal expected)
+    {
+        var total = OrderService.CalculateTotal(price, code);
+        Assert.Equal(expected, total);
+    }
+}
+```
+
+#Shared Context via Class Fixtures (`IClassFixture<T>`)
+
+Shares expensive setup (database, web test servers) across tests without static state:
+
+```csharp
+public class DatabaseFixture : IDisposable
+{
+    public SqlConnection Connection { get; }
+    public DatabaseFixture() { Connection = new SqlConnection("Server=localhost;..."); Connection.Open(); }
+    public void Dispose() { Connection.Dispose(); }
+}
+
+public class CustomerRepositoryTests : IClassFixture<DatabaseFixture>
+{
+    private readonly DatabaseFixture _fixture;
+    public CustomerRepositoryTests(DatabaseFixture fixture) => _fixture = fixture;
+
+    [Fact]
+    public void QueriesCustomerRecord() { /* Uses _fixture.Connection */ }
+}
+```
+
+## Common Patterns
+
+### Theory with InlineData and ClassData
+
+**Problem**: Writing duplicate test methods for multiple inputs in C# applications.
+
+**Solution**:
+Use `[Theory]` with `[InlineData]`:
+
+```csharp
+using Xunit;
+
+public class MathTests
+{
+    [Theory]
+    [InlineData(2, 3, 5)]
+    [InlineData(-1, 1, 0)]
+    [InlineData(0, 0, 0)]
+    public void Add_ValidInputs_ReturnsExpectedSum(int a, int b, int expected)
+    {
+        var calculator = new Calculator();
+        var result = calculator.Add(a, b);
+        Assert.Equal(expected, result);
+    }
+}
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Use `xunit.runner.visualstudio`**: To run tests in VS/VS Code.
-- **Use FluentAssertions**: xUnit's asserts are okay, but `value.Should().Be(4)` (FluentAssertions) is much more readable.
-- **Constructor Injection**: Use the constructor for Setup, and `Dispose()` (IDisposable) for Teardown. xUnit abolished `[SetUp]` and `[TearDown]` attributes to force cleaner design.
+- **Use Constructors for Setup and `Dispose()` for Teardown**: Implement `IDisposable` or `IAsyncLifetime` rather than looking for `[SetUp]`.
+- **Use `IClassFixture<T>` for Shared State**: Share heavy dependencies (like Testcontainers or WebApplicationFactory) cleanly.
+- **Inject `ITestOutputHelper` for Logging**: Write test logs via `ITestOutputHelper` rather than `Console.WriteLine()`.
+- **Run Tests in Parallel**: Leverage xUnit's default parallelization across test collections.
 
 **Don't**:
 
-- **Don't use `Console.WriteLine`**: Use `ITestOutputHelper` injected in the constructor to log outputs.
+- **Don't use static variables in test classes**: xUnit runs test classes in parallel; static state introduces race conditions.
+- **Don't write `Assert.True(x == y)`**: Use `Assert.Equal(expected, actual)` for informative failure diff messages.
+- **Don't create asynchronous void tests**: Always return `async Task` from test methods; `async void` exceptions crash the test runner.
+
+## Troubleshooting
+
+| Error                                             | Cause                                                     | Solution                                                                  |
+| :------------------------------------------------ | :-------------------------------------------------------- | :------------------------------------------------------------------------ |
+| `No test matches the given testcase filter`       | Filter string doesn't match namespace or class name.      | Run `dotnet test --filter FullyQualifiedName~MathTests`.                  |
+| `Console.WriteLine produces no output`            | xUnit isolates console output to prevent race conditions. | Inject `ITestOutputHelper` in constructor and call `_output.WriteLine()`. |
+| `Assert.Equal() Failure: Expected ... Actual ...` | Output mismatch in assertion.                             | Review diff and check floating-point precision with tolerance arguments.  |
 
 ## References
 
