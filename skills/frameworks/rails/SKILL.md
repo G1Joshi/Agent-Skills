@@ -1,6 +1,6 @@
 ---
 name: rails
-description: Ruby on Rails MVC framework with Active Record and conventions. Use for rapid development.
+description: Expert Ruby on Rails assistance covering ActiveRecord, MVC architecture, migrations, background jobs (Sidekiq/SolidQueue), and Hotwire. Use when building full-stack web apps with convention over configuration.
 ---
 
 # Ruby on Rails
@@ -9,9 +9,10 @@ Rails is a web application framework that includes everything needed to create w
 
 ## When to Use
 
-- **Startups**: The "One Person Framework". Build a full SaaS alone.
-- **Rapid Development**: Convention over Configuration makes you move fast.
-- **No-Build**: Rails 8 pushes hard for "no-build" setups with Propshaft and import maps.
+- **High-Velocity Full-Stack Web Development**: Building robust SaaS products with convention over configuration.
+- **Modern Monoliths with Hotwire / Turbo**: Delivering reactive, SPA-like user experiences without heavy frontend frameworks.
+- **Database-Driven Business Applications**: Leveraging Active Record associations, scopes, and validations.
+- **Background Jobs & Real-Time WebSockets**: Utilizing Solid Queue, Solid Cache, and Action Cable in Rails 7.2 / 8.
 
 ## Quick Start
 
@@ -26,35 +27,108 @@ end
 
 ## Core Concepts
 
-### The "Solid" Stack (Rails 8)
+#Active Record Models with Scopes & Validations
 
-- **Solid Cache**: DB-backed caching (replacing Redis for simple cases).
-- **Solid Queue**: DB-backed background jobs.
-- **Solid Cable**: DB-backed WebSocket handling.
-  Rails 8 aims to let you deploy with _just_ a SQLite/Postgres DB, no Redis required.
+Defining business logic and relational constraints:
 
-### Hotwire
+```ruby
+class Order < ApplicationRecord
+  belongs_to :customer
+  has_many :line_items, dependent: :destroy
 
-Build SAP-like responsiveness with HTML over the wire.
+  validates :total_amount, presence: true, numericality: { greater_than: 0 }
+  validates :status, inclusion: { in: %w[pending paid shipped canceled] }
 
-- **Turbo**: Fast navigation and partial page updates.
-- **Stimulus**: Modest JavaScript frameworks for the remaining 10% of interactivity.
+  scope :recent, -> { order(created_at: :desc) }
+  scope :paid, -> { where(status: 'paid') }
 
-### Kamal
+  after_commit :enqueue_fulfillment, on: :create
 
-The new default deploy tool. `kamal deploy` puts your app on any server using Docker.
+  private
 
-## Best Practices (2025)
+  def enqueue_fulfillment
+    FulfillmentJob.perform_later(id)
+  end
+end
+```
 
-**Do**:
+#Hotwire & Turbo Streams for Real-Time Updates
 
-- **Use `Solid` libraries**: Start with the default DB-backed queue/cache. Scale to Redis only if needed.
-- **Use Hotwire**: Avoid React/Vue complexity unless the UI is extremely interactive.
-- **Use SQLite in Production**: For small to medium apps, Rails 8 + optimized SQLite is a valid production stack.
+Server-rendered partials pushed over WebSockets or response streams:
 
-**Don't**:
+```ruby
+# app/controllers/messages_controller.rb
+class MessagesController < ApplicationController
+  def create
+    @message = Message.create!(message_params)
 
-- **Don't bloat models**: Use Concerns or Service Objects (`app/services`) for heavy business logic.
+    respond_to do |format|
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.append(
+          'messages_list',
+          partial: 'messages/message',
+          locals: { message: @message }
+        )
+      end
+      format.html { redirect_to @message.room }
+    end
+  end
+end
+```
+
+#Background Processing with Active Job
+
+Asynchronous queue job execution:
+
+```ruby
+class FulfillmentJob < ApplicationJob
+  queue_as :default
+
+  retry_on Net::OpenTimeout, wait: :exponentially_longer, attempts: 3
+
+  def perform(order_id)
+    order = Order.find(order_id)
+    OrderFulfillmentService.new(order).process!
+  end
+end
+```
+
+## Common Patterns
+
+### Turbo Stream Real-Time Dom Updates (Hotwire)
+
+**Problem**: Needing single-page app reactivity without complex React/Vue frontend builds.
+
+**Solution**:
+Broadcast model updates via Turbo Streams:
+
+```ruby
+# app/models/message.rb
+class Message < ApplicationRecord
+  belongs_to :room
+  after_create_commit -> {
+    broadcast_append_to room, target: "messages", partial: "messages/message", locals: { message: self }
+  }
+end
+```
+
+## Best Practices (2026)
+
+- **Do** target Rails 7.2 / 8 with Propshaft asset pipeline and built-in Solid Queue / Solid Cache.
+- **Do** always use strong parameters (`params.require(:order).permit(...)`) in controllers.
+- **Do** use `includes` or `strict_loading` to prevent N+1 query performance degradation.
+- **Do** encapsulate complex multi-model business logic inside Plain Old Ruby Object (PORO) service objects.
+- **Don't** put business logic or complex database queries inside view templates or controllers.
+- **Don't** run long-running tasks synchronously inside HTTP controller actions; offload to Active Job.
+- **Don't** skip database indexes on foreign keys; declare them explicitly in migrations.
+
+## Troubleshooting
+
+| Error                                           | Cause                                                 | Solution                                                          |
+| :---------------------------------------------- | :---------------------------------------------------- | :---------------------------------------------------------------- |
+| `ActiveRecord::RecordNotFound`                  | `find(id)` called with non-existent primary key.      | Use `find_by(id: ...)` or handle rescue in ApplicationController. |
+| `ActionController::InvalidAuthenticityToken`    | CSRF token missing or mismatch in POST/PATCH request. | Include `<%= csrf_meta_tags %>` in layout or verify headers.      |
+| `PendingMigrationError: Migrations are pending` | Database schema out of date with migration files.     | Run `bin/rails db:migrate`.                                       |
 
 ## References
 

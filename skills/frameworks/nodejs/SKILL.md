@@ -1,6 +1,6 @@
 ---
 name: nodejs
-description: Node.js server-side JavaScript runtime with npm ecosystem. Use for backend development.
+description: Expert Node.js assistance covering asynchronous event loop, streams, worker threads, buffer manipulation, and ESM. Use when building scalable backend services, CLI utilities, or network servers.
 ---
 
 # Node.js
@@ -9,11 +9,12 @@ Node.js is a cross-platform JavaScript runtime environment. Node.js 22 (LTS 2025
 
 ## When to Use
 
-- **Real-time Apps**: Chat, Gaming, Collaboration (WebSockets).
-- **API Servers**: High concurrency with non-blocking I/O.
-- **Tooling**: The foundation of modern frontend toolchains (Vite, Next.js).
+- **Scalable Asynchronous Microservices**: Building event-driven I/O-intensive web APIs on Node.js 22 LTS.
+- **Real-Time Data Streaming & WebSockets**: Processing streaming data using native `node:stream` and `Transform` streams.
+- **CLI Development & Build Tooling**: Building developer tools, linters, and deployment automations with npm.
+- **Worker Threads & CPU-Bound Offloading**: Offloading cryptographic hashing, compression, and image manipulation.
 
-## Quick Start (Native Features)
+## Quick Start
 
 ```javascript
 // Native Test Runner (No Jest needed)
@@ -30,30 +31,116 @@ ws.onopen = () => console.log("Connected");
 
 ## Core Concepts
 
-### Event Loop
+#Modern Native HTTP Server & Fetch
 
-Single-threaded, non-blocking I/O. Heavy CPU tasks block the loop (bad), but I/O tasks are offloaded to OS (good).
+Zero-dependency HTTP server utilizing Node.js modern standard APIs:
 
-### Streams
+```javascript
+import { createServer } from "node:http";
 
-Process huge files piece-by-piece without loading them into memory.
+const server = createServer(async (req, res) => {
+  const url = new URL(req.url, `http://${req.headers.host}`);
 
-### Native APIs (2025)
+  if (url.pathname === "/api/health" && req.method === "GET") {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ status: "ok", nodeVersion: process.version }));
+    return;
+  }
 
-Node now has `fetch`, `test`, `watch`, and `.env` support built-in. You need fewer dependencies than in 2020.
+  res.writeHead(404, { "Content-Type": "application/json" });
+  res.end(JSON.stringify({ error: "Route not found" }));
+});
 
-## Best Practices (2025)
+server.listen(3000, () => {
+  console.log("Node.js server listening on http://localhost:3000");
+});
+```
 
-**Do**:
+#Stream Pipelines with node:stream/promises
 
-- **Use `node:test`**: Drop Jest/Mocha for simple projects.
-- **Use `node --env-file`**: Drop `dotenv` dependency.
-- **Use Async/Await**: Callbacks are dead. Long live Promises.
+Safe, backpressure-managed file and network streaming:
 
-**Don't**:
+```javascript
+import { createReadStream, createWriteStream } from "node:fs";
+import { pipeline } from "node:stream/promises";
+import { createGzip } from "node:zlib";
 
-- **Don't block the Event Loop**: Don't run Crypto or Image processing on the main thread. Use Worker Threads.
-- **Don't use `require`**: New projects should use ESM (`import`).
+async function compressFile(sourcePath, destPath) {
+  try {
+    await pipeline(
+      createReadStream(sourcePath),
+      createGzip(),
+      createWriteStream(destPath),
+    );
+    console.log(`Successfully compressed ${sourcePath} -> ${destPath}`);
+  } catch (err) {
+    console.error("Pipeline compression failed:", err);
+  }
+}
+```
+
+#Native Test Runner with node:test
+
+Fast, zero-dependency testing built directly into the runtime:
+
+```javascript
+import test, { describe, it } from "node:test";
+import assert from "node:assert/strict";
+
+describe("User Authentication", () => {
+  it("validates password minimum length", () => {
+    const password = "supersecretpass";
+    assert.ok(password.length >= 8, "Password must be >= 8 chars");
+  });
+
+  it("verifies async promise resolution", async () => {
+    const token = await Promise.resolve("jwt-token-xyz");
+    assert.equal(token, "jwt-token-xyz");
+  });
+});
+```
+
+## Common Patterns
+
+### High-Throughput Stream Pipeline with Backpressure
+
+**Problem**: Reading large files directly into memory with `fs.readFile` causes OOM crashes under load.
+
+**Solution**:
+Use `stream.pipeline` for automatic backpressure management:
+
+```javascript
+import { pipeline } from "node:stream/promises";
+import fs from "node:fs";
+import zlib from "node:zlib";
+
+async function compressLogFile(inputPath, outputPath) {
+  await pipeline(
+    fs.createReadStream(inputPath),
+    zlib.createGzip(),
+    fs.createWriteStream(outputPath),
+  );
+  console.log("Compression pipeline completed successfully.");
+}
+```
+
+## Best Practices (2026)
+
+- **Do** target Node.js 22 LTS or newer with native fetch, web streams, and native test runner.
+- **Do** use the `node:` protocol prefix (`import fs from 'node:fs'`) for all built-in modules.
+- **Do** use `node:stream/promises` and `pipeline` to handle stream backpressure and error propagation.
+- **Do** handle uncaught exceptions (`process.on('uncaughtException')`) and trigger graceful shutdown.
+- **Don't** block the single-threaded Event Loop with heavy synchronous calls (`fs.readFileSync`, long regex).
+- **Don't** use CommonJS (`require()`) in greenfield applications; adopt ECMAScript Modules (`"type": "module"`).
+- **Don't** ignore unhandled promise rejections; configure `--unhandled-rejections=strict`.
+
+## Troubleshooting
+
+| Error                                                                      | Cause                                                 | Solution                                                                                    |
+| :------------------------------------------------------------------------- | :---------------------------------------------------- | :------------------------------------------------------------------------------------------ |
+| `ERR_REQUIRE_ESM: Must use import to load ES Module`                       | Using `require()` on a modern ESM-only package.       | Use `import` or dynamic `await import('...')` in CommonJS.                                  |
+| `MaxListenersExceededWarning: Possible EventEmitter memory leak`           | Adding event listeners in loop without removing them. | Remove listeners with `emitter.off()` or increase limit using `emitter.setMaxListeners(n)`. |
+| `FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed` | Node.js process exceeded default 1.4GB memory limit.  | Start with expanded heap: `node --max-old-space-size=4096 app.js`.                          |
 
 ## References
 

@@ -1,6 +1,6 @@
 ---
 name: laravel
-description: Laravel PHP framework with Eloquent ORM and Blade templates. Use for PHP applications.
+description: Expert Laravel assistance covering Eloquent ORM, Blade templating, queues, service providers, and Artisan CLI. Use when developing enterprise PHP web applications and robust REST APIs.
 ---
 
 # Laravel
@@ -9,9 +9,10 @@ Laravel is a web application framework with expressive, elegant syntax. Laravel 
 
 ## When to Use
 
-- **Solo Developers / Small Teams**: The ecosystem (Forge, Vapor, Nova) solves devops and admin needs.
-- **PHP Shops**: The gold standard for modern PHP.
-- **Real-time Apps**: The new Reverb server makes WebSockets a first-class citizen without external Node dependencies.
+- **Enterprise Full-Stack PHP Web Applications**: Building robust web portals with Eloquent ORM, Blade, and queues.
+- **Modern Monoliths with Inertia.js**: Pairing Laravel backend routes directly with React or Vue frontends without API boilerplate.
+- **High-Velocity REST APIs**: Utilizing Laravel API Resources, Sanctum authentication, and Form Requests.
+- **Real-Time Applications with Laravel Reverb**: First-party WebSocket broadcasting and real-time dashboard events.
 
 ## Quick Start
 
@@ -28,36 +29,157 @@ $users = User::where('active', 1)->get();
 
 ## Core Concepts
 
-### Slim Skeleton (v11)
+#Eloquent ORM with Relationships & Scopes
 
-Laravel 11 removed `Kernel.php` and Middleware classes. Configuration fits in `bootstrap/app.php`. Example:
+Expressive database models with type hinting:
 
 ```php
-->withMiddleware(function (Middleware $middleware) {
-    $middleware->validateCsrfTokens(except: ['stripe/*']);
-})
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Builder;
+
+class Customer extends Model
+{
+    protected $fillable = ['name', 'email', 'is_active'];
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    // Local query scope
+    public function scopeActive(Builder $query): void
+    {
+        $query->where('is_active', true);
+    }
+}
 ```
 
-### Laravel Reverb
+#Form Requests & Validated Controllers
 
-First-party WebSocket server written in PHP. Scalable and fast.
+Strict input validation separated from controller logic:
 
-### Ecosystem
+```php
+namespace App\Http\Requests;
 
-- **Livewire**: Build dynamic UIs with PHP (similar to Hotwire/Blazor).
-- **Filament**: Amazing Admin/Dashboard builder built on Livewire.
+use Illuminate\Foundation\Http\FormRequest;
 
-## Best Practices (2025)
+class StoreOrderRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return $this->user() !== null;
+    }
 
-**Do**:
+    public function rules(): array
+    {
+        return [
+            'customer_id' => 'required|exists:customers,id',
+            'amount' => 'required|numeric|min:0.01',
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|integer',
+            'items.*.qty' => 'required|integer|min:1',
+        ];
+    }
+}
 
-- **Use Filament**: For admin panels, it is vastly superior to Nova in 2025 for customizability.
-- **Use `Pest`**: The new default testing framework. It's beautiful and minimal.
-- **Use `cast()` attributes**: Define model casts using the method syntax for clear type conversions.
+// In Controller:
+namespace App\Http\Controllers;
 
-**Don't**:
+use App\Http\Requests\StoreOrderRequest;
+use App\Models\Order;
+use Illuminate\Http\JsonResponse;
 
-- **Don't over-abstract**: Laravel Facades (`Route::`, `DB::`) are fine. Don't create Repository patterns unless you actually need to swap implementations.
+class OrderController extends Controller
+{
+    public function store(StoreOrderRequest $request): JsonResponse
+    {
+        $validated = $request->validated();
+        $order = Order::create($validated);
+
+        return response()->json($order, 201);
+    }
+}
+```
+
+#Asynchronous Queue Workers & Jobs
+
+Offloading heavy processing to Redis or SQS workers:
+
+```php
+namespace App\Jobs;
+
+use App\Models\Order;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Mail;
+
+class ProcessInvoiceJob implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public function __construct(public Order $order) {}
+
+    public function handle(): void
+    {
+        // Generate PDF and send invoice email
+    }
+}
+```
+
+## Common Patterns
+
+### Eloquent Scope and Queue Dispatch
+
+**Problem**: Processing heavy invoice calculations synchronously blocks user HTTP requests.
+
+**Solution**:
+Dispatch queued jobs with Eloquent local scopes:
+
+```php
+namespace App\Http\Controllers;
+
+use App\Models\Order;
+use App\Jobs\ProcessInvoiceJob;
+use Illuminate\Http\JsonResponse;
+
+class OrderController extends Controller
+{
+    public function complete(int $id): JsonResponse
+    {
+        $order = Order::active()->findOrFail($id);
+        $order->update(['status' => 'completed']);
+
+        // Dispatch to background queue worker
+        ProcessInvoiceJob::dispatch($order)->onQueue('invoices');
+
+        return response()->json(['message' => 'Order completed, invoice queued']);
+    }
+}
+```
+
+## Best Practices (2026)
+
+- **Do** target Laravel 11/12 with streamlined application structure and minimal configuration files.
+- **Do** use Form Requests for input validation instead of validating inline inside controllers.
+- **Do** utilize Eloquent eager loading (`with(['customer', 'items'])`) to prevent N+1 queries.
+- **Do** run queue workers under supervisor with Redis for reliable background job execution.
+- **Don't** execute raw database queries in Blade views or controllers; use Eloquent or repository classes.
+- **Don't** run migrations directly in production without a verified backup and dry run.
+- **Don't** commit the `.env` file to source control.
+
+## Troubleshooting
+
+| Error                                                 | Cause                                                       | Solution                                                              |
+| :---------------------------------------------------- | :---------------------------------------------------------- | :-------------------------------------------------------------------- |
+| `No application encryption key has been specified`    | `APP_KEY` missing in `.env` configuration file.             | Run `php artisan key:generate`.                                       |
+| `Class '...' not found / Target class does not exist` | Namespace mismatch or service provider not loaded.          | Run `composer dump-autoload` and check namespace in `config/app.php`. |
+| `SQLSTATE[HY000] [2002] Connection refused`           | Database service down or `.env` DB host/port misconfigured. | Verify database credentials and host (`127.0.0.1` vs `localhost`).    |
 
 ## References
 

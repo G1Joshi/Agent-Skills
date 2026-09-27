@@ -1,6 +1,6 @@
 ---
 name: angular
-description: Angular TypeScript framework with dependency injection and RxJS. Use for enterprise SPAs.
+description: Expert Angular assistance covering Signals, Standalone Components, dependency injection, RxJS, and SSR. Use when building enterprise Single Page Applications with modern Angular.
 ---
 
 # Angular
@@ -9,11 +9,12 @@ Angular is a platform for building mobile and desktop web applications. Angular 
 
 ## When to Use
 
-- **Enterprise Applications**: Strict structure, opinionated, and "batteries-included" (Router, Forms, HTTP).
-- **Large Teams**: TypeScript and strict patterns make it easier for large teams to collaborate.
-- **Long-term Maintenance**: Angular's update story is excellent (CLI automates migrations).
+- **Enterprise-Scale Single Page Applications (SPAs)**: Large multidisciplinary teams needing strict conventions, DI, and end-to-end tooling.
+- **Modern Reactive Frontend Architecture**: Utilizing modern Angular Signals, computed values, and Zoneless change detection.
+- **Progressive Web Apps & Hybrid Mobile**: Building performant, accessible mobile-ready web apps with Angular Material.
+- **Complex Form & Validation Workflows**: Utilizing typed Reactive Forms with deep nested controls and custom async validators.
 
-## Quick Start (Signals)
+## Quick Start
 
 ```typescript
 import { Component, signal, computed } from "@angular/core";
@@ -39,38 +40,164 @@ export class CounterComponent {
 
 ## Core Concepts
 
-### Signals
+#Angular Signals & Fine-Grained Reactivity
 
-The new reactivity primitive. Fine-grained reactivity that allows Angular to drop `Zone.js` and only update the exact text node that changed.
+State management using reactive primitives without Zone.js change detection overhead:
 
-### Standalone Components
+```typescript
+import { Component, signal, computed, effect } from "@angular/core";
 
-No more `NgModule`. Components import their dependencies directly.
+@Component({
+  selector: "app-cart-summary",
+  standalone: true,
+  template: `
+    <div class="cart-box">
+      <h3>Items in Cart: {{ itemCount() }}</h3>
+      <p>Subtotal: {{ total() | currency }}</p>
+      <button (click)="addItem('Item', 29.99)">Add Product</button>
+    </div>
+  `,
+})
+export class CartSummaryComponent {
+  items = signal<{ name: string; price: number }[]>([
+    { name: "Initial License", price: 99.0 },
+  ]);
 
-### Deferrable Views (`@defer`)
+  itemCount = computed(() => this.items().length);
+  total = computed(() =>
+    this.items().reduce((sum, item) => sum + item.price, 0),
+  );
 
-Built-in syntax to lazy-load parts of templates.
+  constructor() {
+    effect(() => {
+      console.log(`Cart total changed: $${this.total()}`);
+    });
+  }
 
-```html
-@defer (on viewport) {
-<heavy-chart />
-} @placeholder {
-<p>Loading...</p>
+  addItem(name: string, price: number): void {
+    this.items.update((list) => [...list, { name, price }]);
+  }
 }
 ```
 
-## Best Practices (2025)
+#Dependency Injection & Typed HTTP Client
 
-**Do**:
+Consuming APIs with injected services and modern interceptors:
 
-- **Use Signals**: Prefer `signal()` over `BehaviorSubject` for component state.
-- **Use `inject()`**: Prefer the `inject(Service)` function over constructor dependency injection.
-- **Go Zoneless**: Enable `provideExperimentalZonelessChangeDetection()` for better performance.
+```typescript
+import { Injectable, inject } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Observable } from "rxjs";
 
-**Don't**:
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+}
 
-- **Don't use `NgModule`**: Unless maintaining legacy code.
-- **Don't use `CommonModule`**: Use new control flow syntax (`@if`, `@for`) instead of `*ngIf`, `*ngFor`.
+@Injectable({ providedIn: "root" })
+export class UserService {
+  private http = inject(HttpClient);
+  private apiUrl = "/api/v1/users";
+
+  getUsers(): Observable<User[]> {
+    return this.http.get<User[]>(this.apiUrl);
+  }
+
+  createUser(user: Omit<User, "id">): Observable<User> {
+    return this.http.post<User>(this.apiUrl, user);
+  }
+}
+```
+
+#Typed Reactive Forms with Custom Async Validators
+
+Robust form state handling with full type safety:
+
+```typescript
+import { Component, inject } from "@angular/core";
+import { FormBuilder, Validators, ReactiveFormsModule } from "@angular/forms";
+
+@Component({
+  selector: "app-signup-form",
+  standalone: true,
+  imports: [ReactiveFormsModule],
+  template: `
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <input formControlName="email" type="email" placeholder="Email" />
+      <input
+        formControlName="password"
+        type="password"
+        placeholder="Password"
+      />
+      <button type="submit" [disabled]="form.invalid">Register</button>
+    </form>
+  `,
+})
+export class SignupFormComponent {
+  private fb = inject(FormBuilder);
+
+  form = this.fb.nonNullable.group({
+    email: ["", [Validators.required, Validators.email]],
+    password: ["", [Validators.required, Validators.minLength(8)]],
+  });
+
+  onSubmit(): void {
+    if (this.form.valid) {
+      console.log("Submitted values:", this.form.getRawValue());
+    }
+  }
+}
+```
+
+## Common Patterns
+
+### Reactive State with Angular Signals
+
+**Problem**: Zone.js change detection triggers full-tree re-evaluation on every async event.
+
+**Solution**:
+Use modern Angular Signals for fine-grained reactivity:
+
+```typescript
+import { Component, signal, computed } from "@angular/core";
+
+@Component({
+  selector: "app-counter",
+  standalone: true,
+  template: `
+    <p>Count: {{ count() }}</p>
+    <p>Double: {{ doubleCount() }}</p>
+    <button (click)="increment()">Increment</button>
+  `,
+})
+export class CounterComponent {
+  count = signal(0);
+  doubleCount = computed(() => this.count() * 2);
+
+  increment() {
+    this.count.update((n) => n + 1);
+  }
+}
+```
+
+## Best Practices (2026)
+
+- **Do** build with standalone components (`standalone: true`), eliminating legacy `NgModule` boilerplate.
+- **Do** use modern Angular Signals (`signal()`, `computed()`, `input()`, `output()`) for declarative state.
+- **Do** configure `provideHttpClient(withFetch())` to enable high-performance browser fetch API.
+- **Do** enforce `ChangeDetectionStrategy.OnPush` across all components to prevent redundant render cycles.
+- **Don't** rely on Zone.js for new applications; migrate toward Zoneless change detection for lower bundle sizes.
+- **Don't** mutate signal values directly; always use `.update()` or `.set()`.
+- **Don't** forget to unsubscribe from RxJS observables or use `takeUntilDestroyed()` in component constructors.
+
+## Troubleshooting
+
+| Error                                                       | Cause                                                           | Solution                                                                    |
+| :---------------------------------------------------------- | :-------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| `NG0100: ExpressionChangedAfterItHasBeenCheckedError`       | Property mutated in lifecycle hook after change detection pass. | Move state mutation to `ngOnInit` or wrap in `Promise.resolve().then(...)`. |
+| `NG0203: inject() must be called from an injection context` | Calling `inject()` outside of constructor or field initializer. | Move `inject(Service)` to component constructor or property declaration.    |
+| `NG0300: Multiple components match tag`                     | Component selector collision or duplicate declarations.         | Ensure unique selector tags across standalone components.                   |
 
 ## References
 

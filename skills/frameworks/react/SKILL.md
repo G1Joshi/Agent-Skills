@@ -1,6 +1,6 @@
 ---
 name: react
-description: React component-based UI with hooks, context, and state management. Use for .jsx/.tsx files.
+description: Expert React assistance covering React 19, Server Components (RSC), hooks, compiler optimizations, and concurrent features. Use when building modern web user interfaces and single-page apps.
 ---
 
 # React
@@ -13,7 +13,7 @@ React is the standard library for building user interfaces. React 19 (2025) intr
 - **Complex UI**: Applications with many moving parts and state.
 - **Ecosystem**: When you need the largest library of 3rd party components.
 
-## Quick Start (React 19)
+## Quick Start
 
 ```tsx
 import { use, Suspense } from "react";
@@ -73,7 +73,34 @@ function Form() {
 }
 ```
 
-## Best Practices (2025)
+## Common Patterns
+
+### Custom Reusable Hook with Cleanup
+
+**Problem**: Duplicating event listeners or subscription lifecycles across UI components.
+
+**Solution**:
+Encapsulate logic in a typed custom hook:
+
+```typescript
+import { useState, useEffect } from "react";
+
+export function useWindowWidth() {
+  const [width, setWidth] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth : 1024,
+  );
+
+  useEffect(() => {
+    const handleResize = () => setWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return width;
+}
+```
+
+## Best Practices (2026)
 
 **Do**:
 
@@ -85,6 +112,14 @@ function Form() {
 
 - **Don't overuse `useEffect`**: Effects are for synchronization with external systems, not for data fetching or derived state.
 - **Don't spread props blindly**: Pass explicit props to make components easier to debug.
+
+## Troubleshooting
+
+| Error                                                                                 | Cause                                                                         | Solution                                                                          |
+| :------------------------------------------------------------------------------------ | :---------------------------------------------------------------------------- | :-------------------------------------------------------------------------------- |
+| `Too many re-renders. React limits the number of renders to prevent an infinite loop` | State setter invoked directly in component body instead of handler/useEffect. | Wrap setter call inside an event handler or `useEffect`: `() => setCount(c + 1)`. |
+| `Rendered fewer hooks than expected`                                                  | Hook called inside a conditional `if` statement or loop.                      | Always call React hooks at the top level of component before conditionals.        |
+| `Hydration mismatch: Text content does not match server-rendered HTML`                | Client-only values evaluated during initial server render.                    | Use `suppressHydrationWarning` on element or load after mount.                    |
 
 ## References
 

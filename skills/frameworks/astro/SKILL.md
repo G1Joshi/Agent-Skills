@@ -1,6 +1,6 @@
 ---
 name: astro
-description: Astro static site builder with islands architecture and content collections. Use for content sites.
+description: Expert Astro framework assistance covering content collections, Islands architecture, zero-JS by default, and multi-framework integration. Use when building content-focused websites, blogs, documentation, or marketing pages.
 ---
 
 # Astro
@@ -9,9 +9,10 @@ Astro is a web framework popularized for "Islands Architecture". It ships **zero
 
 ## When to Use
 
-- **Content Sites**: Blogs, Documentation, Marketing sites.
-- **Multi-Framework**: Use React, Vue, and Svelte components on the same page.
-- **Performance**: Hard to beat for static content.
+- **Content-Driven Websites & Portals**: Blogs, documentation, marketing sites, and e-commerce product catalogs.
+- **Zero-JS Default Architecture**: Delivering maximum Lighthouse performance with Islands Architecture.
+- **Multi-Framework Integrations**: Mixing React, Vue, Svelte, and Solid components in a single project.
+- **Hybrid Static & Server-Rendered Sites**: Pre-rendering static pages while utilizing SSR routes for authenticated dashboards.
 
 ## Quick Start
 
@@ -35,35 +36,133 @@ const data = await fetch('https://api.myjson.com').then(r => r.json());
 
 ## Core Concepts
 
-### Islands Architecture
+#Component Islands & Client Directives
 
-The page is static HTML. Interactive widgets are "islands" floating in it. They hydrate independently.
+Hydrating JavaScript only where interactive functionality is required:
 
-### Server Islands (Astro 5)
+```astro
+---
+// Server-side script runs only during build or request rendering
+import Header from '../components/Header.astro';
+import InteractiveCart from '../components/InteractiveCart.jsx';
+import Footer from '../components/Footer.astro';
 
-Async islands. The page loads instantly (static), and a specific island (e.g., "User Profile") loads asynchronously from the server and fades in.
+const pageTitle = "Astro 5 E-Commerce";
+---
 
-### Content Collections
+<html lang="en">
+  <head>
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <!-- 0KB JavaScript: Static HTML -->
+    <Header title={pageTitle} />
 
-Type-safe way to manage Markdown/MDX content.
+    <main>
+      <h1>Featured Catalog</h1>
+      <!-- Island hydrated only when visible in viewport -->
+      <InteractiveCart client:visible initialCount={0} />
+    </main>
 
-```ts
-const blogCollection = defineCollection({
-  schema: z.object({ title: z.string(), date: z.date() }),
-});
+    <!-- 0KB JavaScript -->
+    <Footer />
+  </body>
+</html>
 ```
 
-## Best Practices (2025)
+#Content Collections with Type-Safe Schemas
 
-**Do**:
+Validating Markdown and MDX content with Zod schemas:
 
-- **Use Server Islands**: For dynamic personalization (e.g., "Logged in as Jeevan") without forcing the whole page to be dynamic (SSR).
-- **Use `<Image />`**: Astro's optimized image component is essential for LCP.
-- **Mix Frameworks**: Don't be afraid to use React for a complex search bar and Svelte for a simple toggle on the same site.
+```typescript
+// src/content/config.ts
+import { defineCollection, z } from "astro:content";
 
-**Don't**:
+const blogCollection = defineCollection({
+  type: "content",
+  schema: z.object({
+    title: z.string(),
+    publishDate: z.date(),
+    author: z.string().default("Core Team"),
+    tags: z.array(z.string()),
+    draft: z.boolean().default(false),
+  }),
+});
 
-- **Don't use for complex dashboards**: While possible (Hybrid Rendering), Next.js or Remix are often better suited for highly dynamic, authenticated apps.
+export const collections = {
+  blog: blogCollection,
+};
+```
+
+#Server Endpoints & Dynamic API Routes
+
+Exposing REST endpoints for dynamic data fetching:
+
+```typescript
+// src/pages/api/newsletter.ts
+import type { APIRoute } from "astro";
+
+export const POST: APIRoute = async ({ request }) => {
+  const data = await request.json();
+  const email = data.email;
+
+  if (!email || !email.includes("@")) {
+    return new Response(JSON.stringify({ error: "Valid email required" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  return new Response(JSON.stringify({ message: "Subscribed successfully" }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
+};
+```
+
+## Common Patterns
+
+### Interactive Component Island with Client Directives
+
+**Problem**: Shipping unnecessary JavaScript for largely static content pages.
+
+**Solution**:
+Use Astro Islands architecture with `client:visible` or `client:idle`:
+
+```astro
+---
+// src/pages/index.astro
+import Layout from '../layouts/Layout.astro';
+import StaticHero from '../components/StaticHero.astro';
+import SearchBar from '../components/SearchBar.jsx'; // React component
+---
+
+<Layout title="Welcome">
+  <!-- Rendered to pure zero-JS HTML -->
+  <StaticHero title="Fast by default" />
+
+  <!-- Hydrated only when visible in viewport -->
+  <SearchBar client:visible />
+</Layout>
+```
+
+## Best Practices (2026)
+
+- **Do** use Astro Server Islands (`server:defer`) to defer slow, dynamic parts of static pages for instant TTFB.
+- **Do** leverage Content Collections for all Markdown and MDX files to ensure compile-time schema validation.
+- **Do** use `<Image />` component from `astro:assets` to automate WebP conversion and responsive `srcset`.
+- **Do** keep interactive islands isolated and small (`client:idle` or `client:visible`).
+- **Don't** use `client:load` on components below the fold; hydrate only when necessary.
+- **Don't** import client UI framework libraries into `.astro` frontmatter unless rendering them as islands.
+- **Don't** use client-side navigation (`ViewTransitions`) without auditing third-party script re-execution.
+
+## Troubleshooting
+
+| Error                                         | Cause                                                                      | Solution                                                                    |
+| :-------------------------------------------- | :------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| `Cannot find module '../components/...'`      | Typo in component import or missing `.astro` file extension.               | Explicitly include `.astro` extension on all Astro component imports.       |
+| `document is not defined`                     | Accessing browser DOM during static build SSR phase.                       | Guard DOM access inside `typeof document !== 'undefined'` or `client:only`. |
+| `Content collection schema validation failed` | Markdown frontmatter does not match Zod schema in `src/content/config.ts`. | Correct frontmatter fields to adhere to the defined collection schema.      |
 
 ## References
 
