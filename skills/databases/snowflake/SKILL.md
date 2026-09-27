@@ -1,6 +1,6 @@
 ---
 name: snowflake
-description: Snowflake cloud data warehouse with data sharing. Use for cloud analytics.
+description: Expert Snowflake cloud data warehouse assistance covering Virtual Warehouses, Snowpipe, zero-copy cloning, time travel, and Streamlit. Use when building enterprise analytical data warehouses or running big data analytics.
 ---
 
 # Snowflake
@@ -9,11 +9,12 @@ Snowflake is a cloud-native data warehouse. It separates compute ("Virtual Wareh
 
 ## When to Use
 
-- **Data Warehousing**: Central repository for all business data.
-- **ELT Workflows**: Load raw data (JSON/CSV) then Transform it via SQL.
-- **Data Sharing**: Securely share live data tables with other companies/accounts without copying.
+- **Cloud Data Warehousing & Data Lakes**: Consolidating enterprise data across AWS, Azure, and GCP into a single analytical platform.
+- **Separation of Compute and Storage (Virtual Warehouses)**: Scaling compute clusters up, down, or suspending instantly without copying data.
+- **Zero-Copy Data Cloning & Time Travel**: Cloning multi-terabyte production databases in seconds for dev/test without storage cost duplication.
+- **Secure Cross-Company Data Sharing**: Sharing live, governed datasets with external partners without ETL replication.
 
-## Quick Start (SQL)
+## Quick Start
 
 ```sql
 -- Create warehouse (Compute)
@@ -26,29 +27,84 @@ FROM raw_data;
 
 ## Core Concepts
 
-### Virtual Warehouses
+#Multi-Cluster Shared Data Architecture
 
-Compute clusters. You can have an XS warehouse for reporting and a 4XL warehouse for heavy ML training running simultaneously on the same data.
+Decouples centralized cloud storage from independent, autoscaling virtual compute warehouses:
 
-### Zero-Copy Cloning
+```
+[ Central Cloud Storage (AWS S3 / Azure Blob / GCS) ]
+         ├── [ Virtual Warehouse: ETL (Size: X-Large) ]
+         ├── [ Virtual Warehouse: BI Reports (Size: Medium, Autoscale) ]
+         └── [ Virtual Warehouse: Data Science (Size: Large) ]
+```
 
-Clone a Multi-Terabyte database in seconds for testing. It points to the same underlying S3 objects until changed.
+#Time Travel & Zero-Copy Cloning
 
-### Snowpark
+Restores historical data and creates instant instant clones without data duplication:
 
-Allows writing code in Python/Java/Scala that executes inside Snowflake (for ML/Data Engineering).
+```sql
+-- Query data as it existed 2 hours ago
+SELECT * FROM analytics.orders
+AT(OFFSET => -60*120)
+WHERE status = 'FAILED';
 
-## Best Practices (2025)
+-- Instant zero-copy clone for testing (takes 2 seconds, zero storage added)
+CREATE OR REPLACE DATABASE dev_clone_2026 CLONE production;
+```
+
+#Native Semi-Structured VARIANT Querying
+
+Ingests and queries nested JSON, Avro, and Parquet data directly:
+
+```sql
+SELECT
+  raw_payload:user_id::string AS user_id,
+  raw_payload:event_name::string AS event_name,
+  raw_payload:metadata.device.os::string AS os_system
+FROM raw_logs.event_stream
+WHERE raw_payload:event_name = 'checkout_completed';
+```
+
+## Common Patterns
+
+### Zero-Copy Cloning with Time Travel Recovery
+
+**Problem**: Creating staging replicas of terabyte datasets for testing consumes massive storage and time.
+
+**Solution**:
+Use metadata-only Zero-Copy Cloning with Time Travel:
+
+```sql
+-- Instantly clone production database without duplicating underlying micro-partitions
+CREATE OR REPLACE DATABASE dev_db CLONE prod_db;
+
+-- Recover accidentally dropped or updated table state from 2 hours ago
+CREATE OR REPLACE TABLE orders_restored CLONE prod_db.public.orders
+  AT (OFFSET => -60*120);
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Use auto-suspend**: Shut down warehouses after X minutes of idleness to save money.
-- **Use Variant Type**: Load semi-structured data (JSON) as-is into `VARIANT` columns, then parse on read.
-- **Use Clustering Keys**: For very large tables (>1TB), manual clustering improves query skipping.
+- **Enable Auto-Suspend and Auto-Resume**: Set warehouses to auto-suspend after 60 seconds of inactivity (`AUTO_SUSPEND = 60`) to stop billing.
+- **Cluster by Primary Query Dimensions**: Apply cluster keys (`CLUSTER BY (event_date, customer_id)`) on multi-terabyte tables to optimize micro-partition pruning.
+- **Leverage Transient Tables for Staging**: Use `CREATE TRANSIENT TABLE` for intermediate ETL steps to eliminate Time Travel storage costs.
+- **Use Dynamic Data Masking**: Protect sensitive PII columns using role-based masking policies.
 
 **Don't**:
 
-- **Don't use `INSERT INTO ... VALUES`**: For bulk loading, use `COPY INTO` from S3/Stage. It is much faster.
+- **Don't leave oversized virtual warehouses running 24/7**: Size warehouses appropriately; scale down when batch jobs complete.
+- **Don't use Snowflake for single-row transactional OLTP**: High latency per single insert makes Snowflake unsuitable for low-latency operational backends.
+- **Don't ignore micro-partition pruning**: Always filter queries by date or clustered keys to avoid full table scans.
+
+## Troubleshooting
+
+| Error                                               | Cause                                                        | Solution                                                              |
+| :-------------------------------------------------- | :----------------------------------------------------------- | :-------------------------------------------------------------------- |
+| `Warehouse '...' has exceeded maximum credit limit` | Long-running queries keeping large virtual warehouse active. | Configure `AUTO_SUSPEND = 60` and `AUTO_RESUME = TRUE` on warehouses. |
+| `Query compilation error: ambiguous column name`    | Joins referencing shared column names without table aliases. | Qualify all column references with explicit table aliases.            |
+| `Snowpipe load error: File size exceeds maximum`    | Staged file too large for streaming ingestion.               | Split input files into optimal 100MB-250MB compressed chunks.         |
 
 ## References
 

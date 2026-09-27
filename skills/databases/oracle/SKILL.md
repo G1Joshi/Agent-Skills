@@ -1,6 +1,6 @@
 ---
 name: oracle
-description: Oracle Database with PL/SQL, RAC, and enterprise features. Use for enterprise systems.
+description: Expert Oracle Database assistance covering PL/SQL, cost-based optimizer, partitioning, RAC, and Data Guard. Use when writing enterprise SQL, managing Oracle schemas, or optimizing heavy OLTP workloads.
 ---
 
 # Oracle Database
@@ -9,9 +9,10 @@ Oracle Database is a multi-model database management system. It is the de-facto 
 
 ## When to Use
 
-- **Mission Critical**: Banking, Airlines, Telecoms where 99.999% uptime is required.
-- **PL/SQL**: When you have massive business logic that needs to run close to the data.
-- **Complex Workloads**: OLTP and OLAP in the same DB.
+- **Mission-Critical Global Enterprise OLTP**: Running Tier-1 core banking, telecommunications, ERP, and supply chain workloads.
+- **Oracle Real Application Clusters (RAC)**: Achieving active-active shared-everything database clustering and transparent failover.
+- **Advanced PL/SQL Procedural Logic**: Executing complex enterprise business rules, packages, and triggers directly inside the database.
+- **Multitenant Pluggable Databases (PDB)**: Consolidating hundreds of isolated tenant databases under a single Container Database (CDB).
 
 ## Quick Start
 
@@ -28,30 +29,100 @@ END;
 
 ## Core Concepts
 
-### PL/SQL
+#Multitenant Architecture (CDB and PDBs)
 
-Procedural Language/SQL. Extremely mature and powerful language stored within the DB.
+One Container Database (CDB) manages system memory and background processes; Pluggable Databases (PDBs) run independently:
 
-### RAC (Real Application Clusters)
+```
+[ Container Database (CDB$ROOT) ]
+        ├── [ Pluggable DB: PDB_FINANCE ]
+        ├── [ Pluggable DB: PDB_HR ]
+        └── [ Pluggable DB: PDB_COMMERCE ]
+```
 
-Allows multiple servers to access the same database storage simultaneously. If one server fails, the others keep running (High Availability).
+#PL/SQL Stored Packages & Transaction Management
 
-### Multi-Tenant (CDB/PDB)
+Encapsulates procedural business logic with compiled database performance:
 
-One Container Database (CDB) hosts multiple Pluggable Databases (PDBs). Efficient resource sharing.
+```sql
+CREATE OR REPLACE PACKAGE BODY FinancialOps AS
+    PROCEDURE TransferFunds(
+        p_from_acc IN NUMBER,
+        p_to_acc   IN NUMBER,
+        p_amount   IN NUMBER
+    ) IS
+    BEGIN
+        UPDATE Accounts SET Balance = Balance - p_amount WHERE AccountId = p_from_acc;
+        UPDATE Accounts SET Balance = Balance + p_amount WHERE AccountId = p_to_acc;
+        COMMIT;
+    EXCEPTION
+        WHEN OTHERS THEN
+            ROLLBACK;
+            RAISE_APPLICATION_ERROR(-20001, 'Fund transfer failed: ' || SQLERRM);
+    END TransferFunds;
+END FinancialOps;
+/
+```
 
-## Best Practices (2025)
+#Automatic Workload Repository (AWR) & ASH
+
+Comprehensive database performance monitoring and execution profiling:
+
+```sql
+-- Generate AWR Performance Snapshot
+EXEC DBMS_WORKLOAD_REPOSITORY.CREATE_SNAPSHOT();
+```
+
+## Common Patterns
+
+### Bulk Data Processing with PL/SQL FORALL and BULK COLLECT
+
+**Problem**: Processing thousands of rows row-by-row in PL/SQL creates massive context-switch overhead between SQL and PL/SQL engines.
+
+**Solution**:
+Use `BULK COLLECT` and `FORALL` for batch processing:
+
+```sql
+DECLARE
+  TYPE t_emp_list IS TABLE OF employees%ROWTYPE;
+  v_emps t_emp_list;
+BEGIN
+  -- Batch collect into memory
+  SELECT * BULK COLLECT INTO v_emps FROM employees WHERE status = 'PENDING';
+
+  -- Batch update in a single engine context switch
+  FORALL i IN 1..v_emps.COUNT
+    UPDATE employees
+    SET status = 'PROCESSED', processed_date = SYSDATE
+    WHERE employee_id = v_emps(i).employee_id;
+
+  COMMIT;
+END;
+/
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Use Oracle 23ai**: Leverage "JSON Relational Duality" to view the same data as both Tables and JSON Documents simultaneously.
-- **Use Tuning Advisor**: Oracle's automated tuning tools are excellent.
-- **Use Flashback**: Query data "as of" a timestamp in the past to recover from accidental logical errors.
+- **Use Bind Variables Everywhere**: Bind variables (`:val`) prevent hard parsing, reduce latch contention, and stop SQL injection.
+- **Analyze AWR Reports Regularly**: Inspect the "Top 5 Timed Events" in AWR to identify I/O bottlenecks and locking contention.
+- **Implement Partitioning for Massive Tables**: Partition multi-terabyte tables by range or hash to enable partition pruning.
+- **Use Automatic Memory Management (AMM)**: Allow Oracle to balance PGA (work areas) and SGA (buffer cache/shared pool) dynamically.
 
 **Don't**:
 
-- **Don't commit in loops**: It kills IO. Commit once at the end.
-- **Don't treat it like MySQL**: Oracle's architecture (Redo, Undo, Shared Pool) is heavier and requires specific tuning.
+- **Don't hardcode literals in production queries**: Literal strings force Oracle to recompile and pollute the Shared Pool with distinct execution plans.
+- **Don't commit inside iterative row loops**: Committing row-by-row causes `ORA-01555 Snapshot Too Old` errors and redo log thrashing.
+- **Don't ignore index monitoring**: Drop unused indexes to reclaim storage and reduce write lock overhead.
+
+## Troubleshooting
+
+| Error                                                        | Cause                                                                | Solution                                                                             |
+| :----------------------------------------------------------- | :------------------------------------------------------------------- | :----------------------------------------------------------------------------------- |
+| `ORA-01555: snapshot too old`                                | Rollback segments/undo tablespace overwritten by long-running query. | Increase `UNDO_RETENTION` and resize undo tablespace.                                |
+| `ORA-00054: resource busy and acquire with NOWAIT specified` | Table locked by another active uncommitted DDL or DML transaction.   | Wait for transaction to complete or identify blocking session via `V$LOCKED_OBJECT`. |
+| `ORA-01653: unable to extend table ... in tablespace`        | Tablespace is full or max datafile size reached.                     | Add a new datafile or enable `AUTOEXTEND ON` for tablespace.                         |
 
 ## References
 

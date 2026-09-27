@@ -1,6 +1,6 @@
 ---
 name: cassandra
-description: Apache Cassandra distributed database for high availability. Use for distributed systems.
+description: Expert Apache Cassandra assistance covering CQL, partition keys, clustering columns, tombstone avoidance, and nodetool. Use when designing linear scale data stores, high-write ingestion engines, or tuning consistency levels.
 ---
 
 # Apache Cassandra
@@ -9,11 +9,12 @@ Cassandra is a wide-column store database designed for scalability and high avai
 
 ## When to Use
 
-- **High Write Throughput**: Ingests millions of writes per second.
-- **Always On**: Zero single points of failure. Updates can happen even if nodes are down (Eventual Consistency).
-- **Multi-Region**: Active-Active multi-region replication is built-in.
+- **High-Velocity Write Ingestion**: Logging millions of writes per second across IoT sensor streams, messaging systems, and time-series metrics.
+- **Zero-Downtime Multi-Datacenter Replication**: Geographically distributed systems requiring peer-to-peer active-active masterless replication.
+- **Linear Horizontal Scalability**: Scaling throughput predictably by adding commodity hardware nodes without cluster downtime.
+- **Predictable Query Latency**: Serving high-concurrency key-value and partition-key lookups under 5 milliseconds.
 
-## Quick Start (CQL)
+## Quick Start
 
 ```sql
 CREATE TABLE users (
@@ -27,35 +28,94 @@ INSERT INTO users (user_id, name) VALUES (uuid(), 'Alice');
 
 ## Core Concepts
 
-### Partition Key & Clustering Key
+#Masterless Ring Architecture & Consistent Hashing
 
-- **Partition Key**: Determines which node holds the data.
-- **Clustering Key**: Sorts data _within_ the partition on disk.
+Every node in the cluster is identical; partition tokens dictate which nodes own primary and replica data:
 
-### Tunable Consistency
+```
+[ Node 1 (Token: 0) ] ────→ [ Node 2 (Token: 33) ] ────→ [ Node 3 (Token: 66) ]
+          ▲                                                           │
+          └───────────────────────────────────────────────────────────┘
+```
 
-You choose consistency level per query.
+#Partition Keys vs Clustering Columns (CQL)
 
-- `ANY`: Fastest, least specific.
-- `QUORUM`: Majority must acknowledge. Balanced.
-- `ALL`: Slowest, safest.
+The partition key determines physical node placement; clustering columns determine on-disk sorting within the partition:
 
-### Vector Search (5.0+)
+```sql
+-- Sensor Telemetry Schema
+CREATE KEYSPACE telemetry_data
+WITH replication = {'class': 'NetworkTopologyStrategy', 'us-east': 3, 'eu-west': 3};
 
-Native support for Vector Search (ANN) allows using Cassandra as a Vector DB for AI apps.
+CREATE TABLE telemetry_data.sensor_readings (
+    sensor_id UUID,
+    recorded_date DATE,
+    recorded_at TIMESTAMP,
+    temperature DOUBLE,
+    humidity DOUBLE,
+    PRIMARY KEY ((sensor_id, recorded_date), recorded_at)
+) WITH CLUSTERING ORDER BY (recorded_at DESC);
+```
 
-## Best Practices (2025)
+#Tunable Consistency Levels (CAP Theorem)
+
+Balance latency against strict consistency on a per-query basis:
+
+```sql
+-- Read and Write Consistency Levels
+CONSISTENCY LOCAL_QUORUM; -- Strong consistency within the local datacenter
+SELECT * FROM telemetry_data.sensor_readings
+WHERE sensor_id = 8f3d1e1c-3a62-47cf-a98b-7d12a9e32049
+  AND recorded_date = '2026-09-27'
+LIMIT 50;
+```
+
+## Common Patterns
+
+### Query-First Primary Key Design
+
+**Problem**: Cassandra cannot perform relational joins or arbitrary filtering without scanning whole partitions.
+
+**Solution**:
+Design primary keys composed of partition key (distribution) and clustering columns (sorting):
+
+```sql
+CREATE KEYSPACE ecommerce WITH replication = {
+  'class': 'NetworkTopologyStrategy',
+  'us-east': 3
+};
+
+CREATE TABLE ecommerce.orders_by_user (
+  user_id uuid,
+  order_time timestamp,
+  order_id uuid,
+  total_cents bigint,
+  PRIMARY KEY ((user_id), order_time, order_id)
+) WITH CLUSTERING ORDER BY (order_time DESC);
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Query by Partition Key**: Always. Scans are prohibited in production.
-- **Use SAI (Storage Attached Indexes)**: New in 5.0. Better than old secondary indexes.
-- **Denormalize**: Optimize schema for Reads. It is okay to duplicate data into 3 tables to satisfy 3 different query patterns.
+- **Design Tables Around Queries (Query-First Modeling)**: Create dedicated denormalized tables for each specific query requirement.
+- **Keep Partition Sizes Under 100MB**: Ensure partition rows do not grow indefinitely; incorporate time buckets (date, month) into composite partition keys.
+- **Use `LOCAL_QUORUM` for Multi-DC Clusters**: Guarantee strong consistency locally without incurring cross-ocean WAN latency.
+- **Run Regular Repair Jobs with Reaper**: Run incremental repairs to reconcile tombstones and out-of-sync replicas.
 
 **Don't**:
 
-- **Don't use distributed joins**: Cassandra doesn't do joins. Join in the app.
-- **Don't use large partitions**: Keep partitions under 100MB to avoid compaction issues.
+- **Don't use `ALLOW FILTERING` in production queries**: Scanning across multiple node partitions destroys Cassandra's sub-millisecond guarantees.
+- **Don't perform bulk deletions**: Deletions create tombstone markers that degrade read performance and cause JVM garbage collection pauses.
+- **Don't use Cassandra as an analytical SQL database**: Avoid joins, aggregation queries, and ad-hoc multi-table scans.
+
+## Troubleshooting
+
+| Error                                                 | Cause                                                                  | Solution                                                                    |
+| :---------------------------------------------------- | :--------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| `ReadTimeoutException`                                | Node failed to respond within timeout under heavy load or replica lag. | Tune consistency level (e.g. `LOCAL_QUORUM`) and check GC pauses on nodes.  |
+| `Overwhelming tombstone cells count`                  | High frequency of deletes or null inserts causing read degradation.    | Avoid writing `null` columns; tune `gc_grace_seconds` and compact SSTables. |
+| `UnavailableException: Not enough replicas available` | Cluster cannot satisfy required consistency level due to node outages. | Check nodetool status and bring failed nodes online or use `LOCAL_ONE`.     |
 
 ## References
 

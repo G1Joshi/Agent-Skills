@@ -1,6 +1,6 @@
 ---
 name: supabase
-description: Supabase PostgreSQL backend-as-a-service with realtime. Use for serverless PostgreSQL.
+description: Expert Supabase assistance covering PostgreSQL, Row Level Security (RLS), Edge Functions, Auth, and pgvector. Use when building full-stack web/mobile applications with Postgres backends and instant REST/GraphQL APIs.
 ---
 
 # Supabase
@@ -9,12 +9,12 @@ Supabase is an open source Firebase alternative. It provides a dedicated Postgre
 
 ## When to Use
 
-- **Rapid Application Development**: Get Auth + DB + APIs in 5 minutes.
-- **Postgres Power**: Unlike Firebase, you have full SQL power (JOINs, aggregation).
-- **Realtime**: Subscribe to DB changes via WebSockets.
-- **Vector/AI**: Highly integrated `pgvector` support for AI apps.
+- **Open-Source Firebase Alternative**: Complete backend-as-a-service providing PostgreSQL, Auth, Realtime, Storage, and Edge Functions.
+- **Full Relational PostgreSQL Power**: Direct access to real PostgreSQL with extensions (pgvector, PostGIS, pg_cron) and zero proprietary vendor lock-in.
+- **Row-Level Security (RLS) Authorization**: Securing multi-tenant client queries directly at the database layer via SQL security policies.
+- **Real-Time Database Subscriptions**: Subscribing to PostgreSQL insert, update, and delete events over WebSockets from client apps.
 
-## Quick Start (JS)
+## Quick Start
 
 ```javascript
 import { createClient } from "@supabase/supabase-js";
@@ -36,35 +36,104 @@ const subscription = supabase
 
 ## Core Concepts
 
-### Row Level Security (RLS)
+#PostgreSQL Row-Level Security (RLS)
 
-Supabase exposes the DB directly to the frontend (via PostgREST). RLS is **critical** to secure data.
+Protects data at the database layer so clients can query the database directly from web/mobile apps safely:
 
 ```sql
-CREATE POLICY "Users can see own data" ON "profiles"
-FOR SELECT USING (auth.uid() = user_id);
+-- Enable RLS on Table
+ALTER TABLE documents ENABLE ROW LEVEL SECURITY;
+
+-- Allow users to read and update only documents they own
+CREATE POLICY "Users access own documents"
+ON documents
+FOR ALL
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
 ```
 
-### PostgREST
+#Modern Supabase JavaScript / TypeScript Client
 
-Automatically turns your Database Tables into RESTful APIs.
+Type-safe database queries, authentication, and file storage:
 
-### Extensions
+```typescript
+import { createClient } from "@supabase/supabase-js";
+import { Database } from "./types/supabase";
 
-Supabase makes enabling Postgres extensions easy (PostGIS, pgvector, pg_cron).
+const supabase = createClient<Database>(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_ANON_KEY!,
+);
 
-## Best Practices (2025)
+// Query with automated RLS enforcement
+const { data: projects, error } = await supabase
+  .from("projects")
+  .select("id, title, tasks(id, name, status)")
+  .eq("status", "active")
+  .order("created_at", { ascending: false });
+```
+
+#Real-Time WebSocket Broadcasts & Presence
+
+Streams live changes and synchronizes user presence states:
+
+```typescript
+// Subscribe to real-time database changes on orders table
+const channel = supabase
+  .channel("db-changes")
+  .on(
+    "postgres_changes",
+    { event: "INSERT", schema: "public", table: "orders" },
+    (payload) => {
+      console.log("New Order Created:", payload.new);
+    },
+  )
+  .subscribe();
+```
+
+## Common Patterns
+
+### Row Level Security (RLS) Policy for Multi-Tenant Isolation
+
+**Problem**: APIs accidentally leaking private user records when client queries lack manual tenant filtering.
+
+**Solution**:
+Enforce database-level Row Level Security using `auth.uid()`:
+
+```sql
+-- Enable RLS
+ALTER TABLE user_notes ENABLE ROW LEVEL SECURITY;
+
+-- Restrict reads and writes exclusively to the owning user
+CREATE POLICY "Users can only access own notes"
+ON user_notes
+FOR ALL
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Enable RLS immediately**: Never launch without RLS policies.
-- **Use Supabase CLI**: For local development and migrations. Develop locally, push to prod.
-- **Use Generated Types**: `supabase gen types typescript` generates accurate TS definitions from your DB schema.
+- **Always Enable Row-Level Security (RLS)**: Never expose a table to the public API without enabling and testing RLS policies.
+- **Generate Strict TypeScript Types**: Use the Supabase CLI (`supabase gen types typescript`) to keep database schemas strongly typed.
+- **Index Columns Used in RLS Policies**: Add indexes on `user_id` or `organization_id` to prevent slow table scans during policy evaluations.
+- **Use Edge Functions for Sensitive Logic**: Keep private API secrets and payment integrations inside server-side Edge Functions.
 
 **Don't**:
 
-- **Don't access `service_role` key in client**: Allows bypassing RLS. Server-side only.
-- **Don't put business logic in triggers**: Hard to debug. Use Database Webhooks or Edge Functions.
+- **Don't expose the `service_role` key in client code**: The `service_role` key bypasses all RLS policies; keep it strictly on secure servers.
+- **Don't write complex nested subqueries in RLS policies**: Slow RLS subqueries multiply latency on every single row check.
+- **Don't skip database migrations in Git**: Use `supabase migration new` and version control all database DDL changes.
+
+## Troubleshooting
+
+| Error                                       | Cause                                                                     | Solution                                                                              |
+| :------------------------------------------ | :------------------------------------------------------------------------ | :------------------------------------------------------------------------------------ |
+| `Empty array [] returned from SELECT query` | RLS is enabled on table but no policy matches current authenticated user. | Create appropriate RLS policy or verify client JWT token contains valid user session. |
+| `JWT expired / Invalid refresh token`       | User session token expired without refreshing.                            | Call `supabase.auth.refreshSession()` or handle auth state change listener.           |
+| `Database connection limit exceeded`        | Serverless edge functions exceeding direct Postgres connections.          | Use Supabase connection pooling (port 6543) via PgBouncer.                            |
 
 ## References
 

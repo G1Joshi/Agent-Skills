@@ -1,6 +1,6 @@
 ---
 name: bigquery
-description: Google BigQuery for analytics, ML, and data warehousing. Use for large-scale analytics.
+description: Expert Google Cloud BigQuery assistance covering standard SQL, partitioning, clustering, cost optimization, and ML. Use when running petabyte analytics queries, designing data warehouse schemas, or optimizing BI workloads.
 ---
 
 # Google BigQuery
@@ -9,9 +9,10 @@ BigQuery is Google's serverless, highly scalable, and cost-effective multi-cloud
 
 ## When to Use
 
-- **Serverless Analytics**: No infrastructure to manage. Just run SQL.
-- **Real-time Analytics**: High-speed streaming ingestion.
-- **ML Integration**: `CREATE MODEL` lets you train ML models using standard SQL (BigQuery ML).
+- **Serverless Enterprise Data Warehousing**: Querying petabytes of structured and semi-structured data with zero infrastructure management.
+- **Real-Time Streaming Analytics**: Ingesting and querying millions of events per second with sub-second data freshness.
+- **In-Database Machine Learning (BigQuery ML)**: Training and scoring regression, classification, and forecasting models using standard SQL.
+- **Federated Multi-Cloud Queries (BigQuery Omni)**: Querying data stored in AWS S3 and Azure Blob Storage directly without egress replication.
 
 ## Quick Start
 
@@ -26,31 +27,102 @@ LIMIT 10;
 
 ## Core Concepts
 
-### Slots and Reservations
+#Capacitor Columnar Storage & Dremel Query Engine
 
-A "Slot" is a unit of computational capacity. BigQuery autoscales slots, or you can reserve them for flat-rate pricing.
+Data is stored in proprietary Capacitor columnar format with dynamic tree-based Dremel execution slots:
 
-### Columnar Storage (Capacitor)
+```sql
+-- Partitioned & Clustered Table DDL
+CREATE OR REPLACE TABLE `my_project.analytics.user_events`
+(
+  event_id STRING,
+  user_id STRING,
+  event_name STRING,
+  event_timestamp TIMESTAMP,
+  metadata JSON
+)
+PARTITION BY DATE(event_timestamp)
+CLUSTER BY user_id, event_name
+OPTIONS(
+  description="Partitioned clickstream events with clustering for point lookups",
+  require_partition_filter=true
+);
+```
 
-Optimized for aggregation queries. Reading one column is much cheaper/faster than reading all columns (`SELECT *` is expensive).
+#Semi-Structured Native JSON Querying
 
-### Partitioning & Clustering
+Queries nested JSON attributes efficiently without schema migrations:
 
-- **Partitioning**: Splits table by Date/Int (e.g., Daily partitions). Prunes data scanning massive cost savings.
-- **Clustering**: Sorts data within partitions for faster filtering.
+```sql
+SELECT
+  user_id,
+  JSON_VALUE(metadata.device.os) AS os_name,
+  JSON_EXTRACT_SCALAR(metadata, '$.cart.total') AS cart_total
+FROM `my_project.analytics.user_events`
+WHERE DATE(event_timestamp) = CURRENT_DATE()
+  AND JSON_VALUE(metadata.action) = 'checkout';
+```
 
-## Best Practices (2025)
+#BigQuery ML Model Training
+
+Trains and evaluates predictive models entirely inside SQL:
+
+```sql
+CREATE OR REPLACE MODEL `analytics.churn_prediction_model`
+OPTIONS(model_type='logistic_reg', input_label_cols=['has_churned']) AS
+SELECT
+  total_spend,
+  session_count,
+  has_churned
+FROM `analytics.customer_features`;
+```
+
+## Common Patterns
+
+### Partitioning and Clustering for Cost-Optimized Queries
+
+**Problem**: Full table scans across billions of event rows lead to astronomical query costs and high latency.
+
+**Solution**:
+Partition by date and cluster by high-cardinality lookup keys:
+
+```sql
+CREATE TABLE `project.analytics.events` (
+  event_id STRING,
+  user_id STRING,
+  event_type STRING,
+  event_timestamp TIMESTAMP
+)
+PARTITION BY DATE(event_timestamp)
+CLUSTER BY user_id, event_type
+OPTIONS (
+  require_partition_filter = TRUE,
+  partition_expiration_days = 365
+);
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Partition by Date**: Almost mandatory for time-series logs.
-- **Use BigQuery ML**: Train models (Regression, K-Means) directly where data lives.
-- **Estimate Cost**: `Dry Run` your query to see how many bytes it will scan before running it.
+- **Always Enforce `require_partition_filter=true`**: Prevent runaway query billing by requiring users to specify date partitions in `WHERE` clauses.
+- **Cluster by High-Cardinality Filter Columns**: Order tables by user ID, customer ID, or category to minimize scanned bytes.
+- **Use BigQuery Storage Write API**: Stream real-time data using the gRPC-based Storage Write API for reduced cost and guaranteed atomicity.
+- **Inspect `Bytes Billed` in Query Validator**: Check dry-run scanned byte estimates before executing heavy exploratory queries.
 
 **Don't**:
 
-- **Don't run `SELECT *`**: You pay per column read. Select only what you need.
-- **Don't treat it like an OLTP**: Single row inserts are slow (unless using Streaming API). It is for bulk analytics.
+- **Don't use `SELECT *`**: BigQuery charges per byte scanned; querying all columns drains query budgets.
+- **Don't use `ORDER BY` in subqueries**: Global sorting requires single-node processing; sort only in the final outer query with `LIMIT`.
+- **Don't export large query results to single CSVs**: Use partitioned wildcards (`EXPORT DATA OPTIONS(...)`) for multi-part exports.
+
+## Troubleshooting
+
+| Error                                       | Cause                                                                  | Solution                                                                                  |
+| :------------------------------------------ | :--------------------------------------------------------------------- | :---------------------------------------------------------------------------------------- |
+| `Cannot query without partition filter`     | `require_partition_filter` enabled but query lacked date WHERE clause. | Include `WHERE DATE(event_timestamp) >= 'YYYY-MM-DD'` in query.                           |
+| `Resources exceeded during query execution` | Memory exhaustion from large skew in `JOIN` or `ORDER BY`.             | Pre-aggregate data, filter early, and avoid `ORDER BY` without `LIMIT`.                   |
+| `Quota exceeded: Exceeded rate limits`      | Too many concurrent DDL/DML mutation queries per table.                | Batch append mutations using BigQuery Storage Write API rather than small single INSERTs. |
 
 ## References
 
