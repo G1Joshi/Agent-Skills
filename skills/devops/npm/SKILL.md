@@ -1,6 +1,6 @@
 ---
 name: npm
-description: npm Node.js package manager and registry. Use for JavaScript dependencies.
+description: Expert npm package manager assistance covering package.json, lockfiles, workspaces (monorepos), scripts, and security audits. Use when managing JavaScript/Node.js dependencies and publishing packages.
 ---
 
 # npm
@@ -9,9 +9,10 @@ npm is the default package manager for Node.js. v11 (2025) introduces strict pub
 
 ## When to Use
 
-- **Default**: It comes with Node. Zero friction.
-- **Compatibility**: The standard `package-lock.json` is supported everywhere.
-- **Publishing**: `npm publish` is the canonical way to share JS code.
+- **JavaScript / TypeScript Package Management**: Installing, publishing, and managing npm modules and dependencies.
+- **Multi-Package Monorepos (npm Workspaces)**: Coordinating interconnected local packages with unified dependency resolution.
+- **Supply Chain Security & Provenance**: Publishing packages with cryptographically verifiable build provenance.
+- **Vulnerability Auditing & Dependency Overrides**: Resolving transitively vulnerable packages using `overrides`.
 
 ## Quick Start
 
@@ -26,30 +27,88 @@ npm init -w packages/my-lib
 
 ## Core Concepts
 
-### package.json
+#Configuring npm Workspaces in Monorepos
 
-Manifest file. Scripts, dependencies, metadata.
+Declaring multi-package structures in root `package.json`:
 
-### package-lock.json
+```json
+{
+  "name": "enterprise-monorepo",
+  "private": true,
+  "workspaces": ["packages/*", "apps/*"],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm test --workspaces --if-present"
+  },
+  "overrides": {
+    "glob": "^10.4.0",
+    "semver": "^7.6.0"
+  }
+}
+```
 
-Locks dependency tree for reproducible builds. **Commit this**.
+#Clean Installations & Deterministic Lockfiles
 
-### Workspaces
+Installing dependencies in continuous integration:
 
-Native monorepo support.
-`npm install` installs dependencies for root and all nested packages.
+```bash
+# Clean install adhering strictly to package-lock.json (never mutates lockfile)
+npm ci
 
-## Best Practices (2025)
+# Audit dependencies for known CVEs
+npm audit --audit-level=high
 
-**Do**:
+# Run targeted script across all workspaces
+npm run test --workspace=packages/core-utils
+```
 
-- **Use `npm ci`**: For CI/CD pipelines. Faster and strict (fails if lockfile doesn't match).
-- **Audit**: `npm audit` to find vulnerabilities.
-- **Use Scopes**: `@my-org/my-pkg` to avoid name collisions.
+#Publishing Packages with Cryptographic Provenance
 
-**Don't**:
+Publishing to the npm registry with supply-chain verification:
 
-- **Don't mix managers**: Don't use `yarn` in a repo with `package-lock.json`.
+```bash
+# Publish package with Sigstore verifiable provenance
+npm publish --access public --provenance
+```
+
+## Common Patterns
+
+### Monorepo Workspaces Configuration
+
+**Problem**: Managing shared libraries across multiple internal packages without publishing to external registries.
+
+**Solution**:
+Use native npm workspaces in root `package.json`:
+
+```json
+{
+  "name": "my-monorepo",
+  "private": true,
+  "workspaces": ["packages/*", "apps/*"],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm test --workspaces"
+  }
+}
+```
+
+## Best Practices (2026)
+
+- **Do** always use `npm ci` in CI/CD pipelines instead of `npm install` to enforce exact lockfile dependencies.
+- **Do** publish public packages with `--provenance` to establish cryptographic build transparency.
+- **Do** use `overrides` in root `package.json` to resolve security vulnerabilities in deep transitive dependencies.
+- **Do** commit `package-lock.json` to version control in all projects.
+- **Don't** use `npm install --force` or `--legacy-peer-deps` in production builds; resolve peer version conflicts cleanly.
+- **Don't** publish packages containing sensitive files; maintain an explicit `.npmignore` or `"files"` whitelist.
+- **Don't** execute untrusted scripts during install without verifying packages (`npm install --ignore-scripts`).
+
+## Troubleshooting
+
+| Error                                                  | Cause                                                                    | Solution                                                                    |
+| :----------------------------------------------------- | :----------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| `npm ERR! code ERESOLVE: could not resolve dependency` | Peer dependency version conflict.                                        | Run `npm install --legacy-peer-deps` or align conflicting package versions. |
+| `npm ERR! code EACCES: permission denied`              | Installing global packages without permissions on system node directory. | Configure user npm prefix: `npm config set prefix ~/.npm-global`.           |
+| `package-lock.json out of sync`                        | Dependencies installed with different npm major versions.                | Delete `node_modules` and run `npm ci` for strict deterministic installs.   |
 
 ## References
 

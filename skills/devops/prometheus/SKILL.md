@@ -1,6 +1,6 @@
 ---
 name: prometheus
-description: Prometheus monitoring and alerting with PromQL. Use for metrics collection.
+description: Expert Prometheus monitoring assistance covering PromQL, metric types (Counter, Gauge, Histogram), scrape configs, and Alertmanager. Use when collecting and querying operational metrics across microservices.
 ---
 
 # Prometheus
@@ -9,9 +9,10 @@ Prometheus is the cloud-native standard for metric collection. Prometheus 3.0 (2
 
 ## When to Use
 
-- **Kubernetes**: Standard monitoring stack (Prometheus Operator).
-- **White-box Monitoring**: Measuring internal state (heap usage, request count) via endpoints.
-- **Alerting**: Alertmanager handles de-duplication and routing to Slack/PagerDuty.
+- **Cloud-Native Time-Series Monitoring**: Scraping, storing, and querying numerical metrics from infrastructure and applications.
+- **PromQL Quantitative Querying**: Computing request rates, 99th percentile latencies, error ratios, and saturations.
+- **Automated Service Discovery**: Dynamically discovering Kubernetes pods, EC2 instances, and Consul nodes to scrape.
+- **Alerting Rules & Alertmanager Integration**: Evaluating threshold rules and dispatching alerts to on-call engineers.
 
 ## Quick Start
 
@@ -28,31 +29,139 @@ scrape_configs:
 
 ## Core Concepts
 
-### Time Series Format
+#Prometheus Scrape Configuration (prometheus.yml)
 
-Metrics are identified by name and label pairs.
-`http_requests_total{method="POST", handler="/api"}`
+Configuring scrape jobs with relabeling:
 
-### PromQL
+```yaml
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
 
-Powerful query language.
-`rate(http_requests_total[5m])`
+rule_files:
+  - "alert_rules.yml"
 
-### Pull Model
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
 
-Prometheus scrapes targets. Apps do not push to Prometheus (usually).
+  - job_name: "api-microservices"
+    scrape_interval: 10s
+    metrics_path: "/metrics"
+    kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names: ["production"]
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: "true"
+      - source_labels: [__meta_kubernetes_pod_container_port_number]
+        action: keep
+        regex: "8080"
+```
 
-## Best Practices (2025)
+#Production Alerting Rules (alert_rules.yml)
 
-**Do**:
+Defining SLO-based alert thresholds:
 
-- **Use High-Cardinality wisely**: Native Histograms in v3.0 help, but keep labels bounded.
-- **Use Service Monitors**: In K8s, use the Operator's `ServiceMonitor` CRD instead of manual config.
-- **Use OTLP**: Ingest OTel metrics directly if you are transitioning standards.
+```yaml
+groups:
+  - name: API_SLO_Alerts
+    rules:
+      - alert: HighHttpErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total[5m]))
+          ) * 100 > 5
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High HTTP 5xx error rate on {{ $labels.service }}"
+          description: 'Service {{ $labels.service }} error rate is {{ $value | printf "%.2f" }}% (> 5% SLO threshold).'
+```
 
-**Don't**:
+#Exposing Custom Metrics in Python
 
-- **Don't use for logs**: It is for metrics only. Use Loki for logs.
+Instrumentation using official Prometheus Python client:
+
+```python
+from prometheus_client import start_http_server, Counter, Histogram
+import time
+
+REQUEST_COUNTER = Counter(
+    'http_requests_total',
+    'Total count of HTTP requests processed',
+    ['method', 'endpoint', 'status']
+)
+
+REQUEST_DURATION = Histogram(
+    'http_request_duration_seconds',
+    'Histogram of HTTP request latency in seconds',
+    ['endpoint'],
+    buckets=(0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0)
+)
+
+@REQUEST_DURATION.labels(endpoint='/api/orders').time()
+def process_order():
+    time.sleep(0.08)
+    REQUEST_COUNTER.labels(method='POST', endpoint='/api/orders', status='200').inc()
+
+# Start metrics endpoint server on port 8000
+start_http_server(8000)
+```
+
+## Common Patterns
+
+### High-Throughput Scrape Config with Kubernetes Service Discovery
+
+**Problem**: Static IP scraping configurations fail as pods scale dynamically in Kubernetes.
+
+**Solution**:
+Use `kubernetes_sd_configs` with metric path annotations:
+
+```yaml
+scrape_configs:
+  - job_name: "kubernetes-pods"
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      - source_labels:
+          [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        target_label: __address__
+```
+
+## Best Practices (2026)
+
+- **Do** adhere strictly to the Four Golden Signals (Latency, Traffic, Errors, Saturation) when building PromQL alert rules.
+- **Do** configure appropriate histogram buckets around your service SLO targets (e.g. 100ms, 200ms, 500ms).
+- **Do** use recording rules (`record: job:metric:rate5m`) for complex PromQL expressions queried by dashboards.
+- **Do** store long-term historical metrics using remote-write storage (Thanos, Cortex, or VictoriaMetrics).
+- **Don't** introduce high-cardinality label values (user IDs, email addresses, order IDs) into metric labels.
+- **Don't** set scrape intervals too low (< 5s) across large fleets; it overloads target scrapers and storage.
+- **Don't** alert on simple transient spikes; always use `for: 2m` or `for: 5m` to filter temporary noise.
+
+## Troubleshooting
+
+| Error                                        | Cause                                                                             | Solution                                                               |
+| :------------------------------------------- | :-------------------------------------------------------------------------------- | :--------------------------------------------------------------------- |
+| `Target shows DOWN in Prometheus Targets UI` | Scrape target port firewalled or application metrics path crashing.               | Test target endpoint manually: `curl http://<pod-ip>:<port>/metrics`.  |
+| `High memory usage / Prometheus OOM`         | High churn in metric series (high cardinality tags like UUIDs or user emails).    | Audit and drop unbounded labels using `metric_relabel_configs`.        |
+| `PromQL: many-to-many matching not allowed`  | Vector matching join (`on(...)`) without `group_left` or `group_right` modifiers. | Add `group_left` or `group_right` to specify many-to-one relationship. |
 
 ## References
 

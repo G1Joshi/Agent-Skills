@@ -1,6 +1,6 @@
 ---
 name: sentry
-description: Sentry error tracking and performance monitoring. Use for error tracking.
+description: Expert Sentry error monitoring assistance covering exception tracking, performance tracing, source maps, releases, and breadcrumbs. Use when monitoring production errors and diagnosing stack traces.
 ---
 
 # Sentry
@@ -9,9 +9,10 @@ Sentry provides self-hosted and cloud-based error monitoring. In 2025, it excels
 
 ## When to Use
 
-- **Error Tracking**: "My app crashed, what is the stack trace?"
-- **Frontend Performance**: Web Vitals monitoring (LCP, FID).
-- **Release Tracking**: Associate errors with specific git commits/releases.
+- **Real-Time Application Error Monitoring**: Capturing unhandled exceptions, stack traces, and runtime errors in production.
+- **End-to-End Performance Tracing**: Measuring transaction durations, database queries, and distributed trace spans.
+- **Source Map Processing & De-Minification**: Translating minified production bundle errors back to original TypeScript source lines.
+- **Session Replay & User Crash Feedback**: Watching user sessions to reproduce difficult-to-catch client-side bugs.
 
 ## Quick Start
 
@@ -32,29 +33,121 @@ try {
 
 ## Core Concepts
 
-### Issues
+#Node.js / Next.js SDK Initialization with Performance Tracing
 
-Aggregated groups of events. Sentry expects 1000 events of "NullPointerException" to be grouped into 1 Issue.
+Instrumenting application with trace sampling and error capture:
 
-### Releases
+```typescript
+import * as Sentry from "@sentry/node";
 
-Tying code versions to errors. Sentry can tell you "This error started in Release v3.4".
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.NODE_ENV || "production",
+  release: "api-service@2026.1.0",
+  tracesSampleRate: 0.1, // Sample 10% of transactions for performance metrics
 
-### Distributed Tracing
+  // Filter sensitive data before transmitting to Sentry
+  beforeSend(event, hint) {
+    if (event.request?.headers) {
+      delete event.request.headers["authorization"];
+      delete event.request.headers["cookie"];
+    }
+    return event;
+  },
+});
+```
 
-Connects frontend errors to backend bottlenecks.
+#Manual Error Capture with Custom Context
 
-## Best Practices (2025)
+Enriching errors with user context and custom tags:
 
-**Do**:
+```typescript
+import * as Sentry from "@sentry/node";
 
-- **Upload Source Maps**: Essential for JS/TS debugging.
-- **Use `ignoreErrors`**: Filter out noise (like "Network Error" when user is offline) in the SDK config.
-- **Use Session Replay**: Video-like reproduction of user actions leading up to an error.
+async function processPayment(userId: string, amountCents: number) {
+  try {
+    // Simulated payment logic
+    throw new Error("Payment gateway rejected authorization token");
+  } catch (error) {
+    Sentry.withScope((scope) => {
+      scope.setUser({ id: userId });
+      scope.setTag("payment.provider", "stripe");
+      scope.setExtra("amount_cents", amountCents);
+      scope.setLevel("error");
 
-**Don't**:
+      Sentry.captureException(error);
+    });
+    throw error;
+  }
+}
+```
 
-- **Don't log PII**: Sanitize data before sending. Sentry has scrubbers, but do it client-side too.
+#Custom Performance Spans
+
+Measuring execution duration of critical code blocks:
+
+```typescript
+import * as Sentry from "@sentry/node";
+
+async function calculateRiskScore(orderId: string): Promise<number> {
+  return await Sentry.startSpan(
+    { name: "calculateRiskScore", op: "fraud.evaluation" },
+    async (span) => {
+      span.setAttribute("order_id", orderId);
+      // Run intensive risk calculation
+      return 0.95;
+    },
+  );
+}
+```
+
+## Common Patterns
+
+### Node.js / Express Error Middleware with User Context
+
+**Problem**: Production exceptions logged without user session context or breadcrumb history.
+
+**Solution**:
+Configure Sentry tracing and request isolation:
+
+```javascript
+import * as Sentry from "@sentry/node";
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  tracesSampleRate: 0.2, // Capture 20% of transactions
+  environment: process.env.NODE_ENV,
+});
+
+// Attach user context in auth middleware
+app.use((req, res, next) => {
+  if (req.user) {
+    Sentry.setUser({ id: req.user.id, email: req.user.email });
+  }
+  next();
+});
+
+// Sentry error handler must be before any other error middleware
+Sentry.setupExpressErrorHandler(app);
+```
+
+## Best Practices (2026)
+
+- **Do** configure `release` tags to correlate error occurrences with specific Git commits and deployments.
+- **Do** upload source maps during CI/CD using `@sentry/cli` to get clear TypeScript line numbers in stack traces.
+- **Do** sanitize sensitive PII, credit card numbers, and authorization headers in `beforeSend`.
+- **Do** tune `tracesSampleRate` in high-throughput environments to prevent excessive ingestion costs.
+- **Don't** leave DSN keys exposed in public repositories without domain restriction rules.
+- **Don't** catch exceptions silently without logging or passing to `Sentry.captureException()`.
+- **Don't** log high-frequency expected user validation errors (e.g. invalid form fields) as Sentry exceptions.
+
+## Troubleshooting
+
+| Error                                     | Cause                                                                      | Solution                                                                           |
+| :---------------------------------------- | :------------------------------------------------------------------------- | :--------------------------------------------------------------------------------- |
+| `Source maps not showing in stack traces` | Source maps not uploaded during build or release version mismatch.         | Upload source maps via `@sentry/webpack-plugin` with identical `release` tag.      |
+| `Sentry DSN not capturing events`         | DSN variable missing in production runtime or rate limit exceeded.         | Verify `SENTRY_DSN` is set and inspect Sentry Organization Stats for quota spikes. |
+| `Transactions flooded / quota exhausted`  | `tracesSampleRate` set to 1.0 (100%) on high-traffic production endpoints. | Reduce `tracesSampleRate` to 0.05 - 0.2 (5% - 20%).                                |
 
 ## References
 

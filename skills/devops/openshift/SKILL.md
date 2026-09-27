@@ -1,6 +1,6 @@
 ---
 name: openshift
-description: OpenShift enterprise Kubernetes platform. Use for enterprise K8s.
+description: Expert Red Hat OpenShift assistance covering oc CLI, DeploymentConfigs, Routes, Security Context Constraints (SCC), and BuildConfigs. Use when deploying enterprise Kubernetes applications on Red Hat OpenShift.
 ---
 
 # OpenShift
@@ -9,11 +9,12 @@ Red Hat OpenShift is an enterprise-ready Kubernetes container platform with full
 
 ## When to Use
 
-- **Hybrid Cloud**: Consistent experience across On-Prem and Cloud.
-- **Enterprise Requirements**: Built-in strict security (SCC), registry, monitoring, and CI/CD.
-- **VM Migration**: Lift-and-shift VMs into K8s using OpenShift Virtualization (KubeVirt).
+- **Enterprise Kubernetes Distribution**: Red Hat OpenShift providing turnkey security, developer tooling, and compliance.
+- **Source-to-Image (S2I) & BuildConfigs**: Automatically building container images directly from Git repositories.
+- **OpenShift Routes & Ingress**: Routing external traffic with automated Let's Encrypt or corporate certificates.
+- **Security Context Constraints (SCC)**: Enforcing strict multi-tenant container isolation and user namespace policies.
 
-## Quick Start (OC CLI)
+## Quick Start
 
 ```bash
 # Login
@@ -28,29 +29,129 @@ oc new-app nodejs~https://github.com/sclorg/nodejs-ex.git
 
 ## Core Concepts
 
-### Source-to-Image (S2I)
+#OpenShift BuildConfig & ImageStream (S2I)
 
-Build container images directly from source code without writing a Dockerfile. OpenShift detects the language (Node/Java/Python) and builds it.
+Building containers from Git inside the cluster:
 
-### Routes
+```yaml
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: billing-api
+  namespace: prod-apps
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: billing-api-build
+  namespace: prod-apps
+spec:
+  source:
+    type: Git
+    git:
+      uri: https://github.com/my-org/billing-service.git
+      ref: main
+  strategy:
+    type: Source
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: nodejs:20-ubi9
+        namespace: openshift
+  output:
+    to:
+      kind: ImageStreamTag
+      name: billing-api:latest
+  triggers:
+    - type: GitHub
+      github:
+        secretReference:
+          name: webhook-secret
+    - type: ConfigChange
+```
 
-OpenShift's native ingress controller. Used long before K8s Ingress/Gateway API.
+#OpenShift Route for External Traffic
 
-### Operators
+Exposing services with edge TLS termination:
 
-First-class citizens. Everything in OpenShift is managed by an Operator.
+```yaml
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: billing-api-route
+  namespace: prod-apps
+spec:
+  host: billing.apps.cluster.example.com
+  to:
+    kind: Service
+    name: billing-api-service
+    weight: 100
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+```
 
-## Best Practices (2025)
+#OpenShift CLI (oc) Operations
 
-**Do**:
+Logging in and managing cluster projects:
 
-- **Use OpenShift GitOps**: ArgoCD is fully integrated.
-- **Use `oc`**: It is a superset of `kubectl`. You rarely need `kubectl` on OpenShift.
-- **Leverage Virtualization**: Run legacy Windows/Linux VMs as Pods to decommission old VMWare clusters.
+```bash
+# Log in to OpenShift cluster via OAuth token
+oc login https://api.cluster.domain.com:6443 --token="$OC_TOKEN"
 
-**Don't**:
+# Switch to project namespace
+oc project prod-apps
 
-- **Don't run as root**: OpenShift forbids this by default. Don't disable SCCs (Security Context Constraints) just to make a bad image work. Fix the image.
+# Trigger a build and follow output logs
+oc start-build billing-api-build --follow
+```
+
+## Common Patterns
+
+### Declarative Route with Edge TLS Termination
+
+**Problem**: Ingress resources in OpenShift requiring specialized router features and certificates.
+
+**Solution**:
+Use OpenShift Route custom resources:
+
+```yaml
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: api-route
+  namespace: prod-apps
+spec:
+  host: api.cloud.example.com
+  to:
+    kind: Service
+    name: api-service
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+```
+
+## Best Practices (2026)
+
+- **Do** use Red Hat Universal Base Images (`ubi9-minimal`) for enterprise security and CVE patching guarantees.
+- **Do** manage OpenShift resources declaratively via GitOps using OpenShift GitOps (Argo CD).
+- **Do** adhere strictly to OpenShift `restricted-v2` Security Context Constraints (SCC); never run containers as root.
+- **Do** use `insecureEdgeTerminationPolicy: Redirect` on Routes to force HTTPS.
+- **Don't** grant `anyuid` or `privileged` SCC permissions to service accounts unless strictly necessary.
+- **Don't** hardcode external cluster hostnames; use OpenShift Route domain wildcards.
+- **Don't** perform manual cluster modifications via OpenShift Web Console without tracking in Git.
+
+## Troubleshooting
+
+| Error                                                            | Cause                                                                    | Solution                                                                            |
+| :--------------------------------------------------------------- | :----------------------------------------------------------------------- | :---------------------------------------------------------------------------------- |
+| `CrashLoopBackOff: container cannot run as root (SCC violation)` | OpenShift default `restricted-v2` SCC prevents root container execution. | Build container image with non-root user (`USER 1001`) or assign custom SCC.        |
+| `oc: command not found`                                          | OpenShift CLI tools not installed in system PATH.                        | Download and install OpenShift client tools from Red Hat mirror.                    |
+| `Build failed in BuildConfig`                                    | S2I (Source-to-Image) build pod ran out of memory.                       | Increase build pod resources: `oc patch bc/<name> -p '{"spec":{"resources":...}}'`. |
 
 ## References
 

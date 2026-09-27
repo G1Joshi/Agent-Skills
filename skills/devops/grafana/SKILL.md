@@ -1,6 +1,6 @@
 ---
 name: grafana
-description: Grafana dashboards and visualization for metrics. Use for observability.
+description: Expert Grafana assistance covering dashboards, PromQL/LogQL panels, alerting rules, data sources, and Grafana Loki/Tempo. Use when visualizing system metrics, application logs, and building monitoring dashboards.
 ---
 
 # Grafana
@@ -9,9 +9,10 @@ Grafana is the visualization layer for Observability. Grafana 11 (2025) introduc
 
 ## When to Use
 
-- **Dashboards**: Visualize data from Prometheus, InfluxDB, CloudWatch, SQL, etc.
-- **Single Pane of Glass**: Combine metrics (Prometheus), logs (Loki), and traces (Tempo) in one UI.
-- **Alerting**: Unified alerting UI regardless of the data source.
+- **Unified Observability Dashboards**: Visualizing time-series metrics from Prometheus, Datadog, CloudWatch, and InfluxDB.
+- **Log Exploration with Grafana Loki**: Querying streaming logs using LogQL with zero-indexing overhead.
+- **Distributed Trace Visualization with Grafana Tempo**: Inspecting traces, span latencies, and service dependency graphs.
+- **Alerting & Incident Management**: Routing alerts via Grafana Alerting to PagerDuty, Slack, OpsGenie, and Webhooks.
 
 ## Quick Start
 
@@ -32,29 +33,99 @@ providers:
 
 ## Core Concepts
 
-### Data Sources
+#Prometheus Metrics Visualization with PromQL
 
-Plugins that connect to storage backends.
+Configuring time-series queries for dashboard panels:
 
-### Panels
+```promql
+# Rate of HTTP 5xx errors per second across microservices
+sum(rate(http_requests_total{status=~"5.."}[5m])) by (service)
 
-Individual visualizations (Time Series, Gauge, Bar Chart).
+# 99th percentile request latency in seconds
+histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, service))
 
-### Variables
+# CPU Utilization percentage per container
+sum(rate(container_cpu_usage_seconds_total{container!=""}[5m])) by (pod) * 100
+```
 
-Dropdowns at the top of dashboards (e.g., Select `Cluster` or `Namespace`) to make dashboards dynamic.
+#Log Exploration with LogQL (Grafana Loki)
 
-## Best Practices (2025)
+Filtering and parsing streaming application logs:
 
-**Do**:
+```logql
+# Filter production API logs for errors and extract JSON fields
+{env="production", service="billing"}
+  |= "error"
+  | json
+  | latency_ms > 500
+  | line_format "[{{.status}}] {{.error_message}} ({{.latency_ms}}ms)"
+```
 
-- **Provision as Code**: Store dashboards as JSON files in Git.
-- **Use Explore metrics**: The new v11 UI for ad-hoc querying.
-- **Standardize Labels**: Ensure "env" and "service" labels match across Metrics and Logs for seamless correlation links.
+#Declarative Dashboard as Code (JSON Model)
 
-**Don't**:
+Managing dashboard definitions in Git for automated provisioning:
 
-- **Don't hardcode queries**: Use Variables so one dashboard serves all environments.
+```json
+{
+  "title": "Platform Health KPI",
+  "panels": [
+    {
+      "id": 1,
+      "title": "API Request Rate (req/s)",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prom-primary" },
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total[2m]))",
+          "legendFormat": "Total Requests"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    }
+  ]
+}
+```
+
+## Common Patterns
+
+### Dynamic Dashboard Variables with PromQL Label Values
+
+**Problem**: Creating separate dashboard panels for every server instance or Kubernetes pod.
+
+**Solution**:
+Define template variables with dynamic queries:
+
+```text
+# Dashboard Variable: $instance
+Query: label_values(node_cpu_seconds_total, instance)
+
+# PromQL panel query utilizing variable:
+sum(rate(node_cpu_seconds_total{mode!="idle", instance=~"$instance"}[5m]))
+  by (instance) * 100
+```
+
+## Best Practices (2026)
+
+- **Do** provision dashboards and datasources declaratively using Grafana Provisioning (`/etc/grafana/provisioning`).
+- **Do** use Dashboard Template Variables (`$service`, `$environment`) to create dynamic, reusable panels.
+- **Do** set standard units (`reqps`, `bytes`, `seconds`, `percent`) on panel field configs for human-readable axes.
+- **Do** correlate metrics, logs, and traces using Grafana Explore cross-linking (Data Links).
+- **Don't** write high-cardinality PromQL queries that query raw unaggregated metrics over long timeframes (e.g. 30 days).
+- **Don't** edit production dashboards directly in the UI without exporting and committing the JSON model to Git.
+- **Don't** configure un-muted alerts that spam communication channels; group alerts by symptom and severity.
+
+## Troubleshooting
+
+| Error                                              | Cause                                                                      | Solution                                                                 |
+| :------------------------------------------------- | :------------------------------------------------------------------------- | :----------------------------------------------------------------------- |
+| `Data source connection failed: Bad Gateway (502)` | Grafana cannot reach Prometheus or database endpoint URL.                  | Verify internal network URL (e.g. `http://prometheus:9090`).             |
+| `Panel showing 'No Data'`                          | Query filter labels do not match incoming metrics, or time range is empty. | Expand time range to "Last 24 hours" and test query in Explore view.     |
+| `Alerting rule constantly flapping`                | Alert threshold evaluated without duration window.                         | Set evaluation interval: `for: 5m` before triggering alert notification. |
 
 ## References
 

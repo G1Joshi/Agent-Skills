@@ -1,6 +1,6 @@
 ---
 name: vagrant
-description: Vagrant development environments with VMs. Use for dev environments.
+description: Expert HashiCorp Vagrant assistance covering Vagrantfile configuration, virtualization providers (VirtualBox, Libvirt), and provisioners (Shell, Ansible). Use when automating reproducible local virtual machines.
 ---
 
 # Vagrant
@@ -9,9 +9,10 @@ Vagrant provides reproducible, portable development environments using Virtual M
 
 ## When to Use
 
-- **Legacy/Full OS Dev**: You need to simulate a full Linux Kernel or multi-vm network that Docker cannot easily do.
-- **Local Testing**: Testing Ansible Playbooks locally on a clean VM.
-- **Windows/Mac**: Running Linux VMs on non-Linux hardware with ease.
+- **Local Multi-VM Development Environments**: Creating isolated virtual machines using VirtualBox, VMware, or Libvirt.
+- **Testing Infrastructure Playbooks**: Validating Ansible, Chef, and shell provisioning scripts before cloud deployment.
+- **Legacy System Emulation**: Simulating specific enterprise Linux OS distributions and kernel versions locally.
+- **Cross-Platform Team Alignment**: Providing identical developer VM environments across macOS, Windows, and Linux.
 
 ## Quick Start
 
@@ -32,29 +33,119 @@ end
 
 ## Core Concepts
 
-### Boxes
+#Multi-Machine Vagrantfile with Ansible Provisioning
 
-Base images. Analogous to Docker Images. (e.g. `ubuntu/trusty64`).
+Declaring clustered VM topologies:
 
-### Providers
+```ruby
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
 
-The hypervisor backend. VirtualBox (default), VMWare, Hyper-V, Docker, Libvirt.
+Vagrant.configure("2") do |config|
+  # Base box image
+  config.vm.box = "bento/ubuntu-24.04"
 
-### Provisioners
+  # Master Node
+  config.vm.define "control-plane" do |master|
+    master.vm.hostname = "control-plane.local"
+    master.vm.network "private_network", ip: "192.168.56.10"
 
-Scripts that run on first boot (Shell, Ansible, Chef) to set up the software.
+    master.vm.provider "virtualbox" do |vb|
+      vb.memory = "4096"
+      vb.cpus = 2
+    end
 
-## Best Practices (2025)
+    master.vm.provision "ansible" do |ansible|
+      ansible.playbook = "playbooks/setup_k8s_master.yml"
+    end
+  end
 
-**Do**:
+  # Worker Node
+  config.vm.define "worker-01" do |worker|
+    worker.vm.hostname = "worker-01.local"
+    worker.vm.network "private_network", ip: "192.168.56.11"
 
-- **Use Multi-Machine**: Simulate a network (DB + Web) in one Vagrantfile.
-- **Sync Folders**: Edit code in VS Code on Host, run it on Guest VM.
-- **Consider Docker**: For most "App Dev" use cases, Docker/DevContainers are preferred in 2025. Use Vagrant for "Infra Dev".
+    worker.vm.provider "virtualbox" do |vb|
+      vb.memory = "2048"
+      vb.cpus = 2
+    end
+  end
 
-**Don't**:
+  # Shared folder mapping
+  config.vm.synced_folder "./shared", "/mnt/shared", type: "nfs"
+end
+```
 
-- **Don't check in `.vagrant/`**: Add it to `.gitignore`.
+#Essential Vagrant CLI Commands
+
+Managing VM lifecycle:
+
+```bash
+# Launch and provision all machines
+vagrant up
+
+# SSH into specific defined machine
+vagrant ssh control-plane
+
+# Re-run provisioners on active VM
+vagrant provision
+
+# Suspend or destroy environment
+vagrant suspend
+vagrant destroy -f
+```
+
+## Common Patterns
+
+### Multi-Machine Cluster with Private Network and Shell Provisioning
+
+**Problem**: Simulating a multi-node cluster locally with hardcoded IPs and dependencies.
+
+**Solution**:
+Define multi-machine topology in `Vagrantfile`:
+
+```ruby
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/noble64"
+
+  # Master Node
+  config.vm.define "master" do |master|
+    master.vm.network "private_network", ip: "192.168.56.10"
+    master.vm.provider "virtualbox" do |vb|
+      vb.memory = "2048"
+      vb.cpus = 2
+    end
+  end
+
+  # Worker Node
+  config.vm.define "worker" do |worker|
+    worker.vm.network "private_network", ip: "192.168.56.11"
+    worker.vm.provider "virtualbox" do |vb|
+      vb.memory = "1024"
+    end
+  end
+
+  config.vm.provision "shell", inline: "apt-get update && apt-get install -y curl"
+end
+```
+
+## Best Practices (2026)
+
+- **Do** use official, verified boxes (e.g. `bento/*` or `generic/*`) to ensure clean base operating system states.
+- **Do** commit `Vagrantfile` to source control while adding `.vagrant/` to `.gitignore`.
+- **Do** use NFS or VirtioFS for synced folders to improve file system I/O performance on macOS and Linux.
+- **Do** test provisioning idempotency with `vagrant provision`.
+- **Don't** allocate more RAM than available on the host machine; check host resources before launching multi-VM setups.
+- **Don't** store credentials or SSH private keys inside synced shared folders.
+- **Don't** use Vagrant for production deployments; it is strictly intended for local development and testing.
+
+## Troubleshooting
+
+| Error                                             | Cause                                                                  | Solution                                                          |
+| :------------------------------------------------ | :--------------------------------------------------------------------- | :---------------------------------------------------------------- |
+| `Timed out while waiting for the machine to boot` | VirtualBox hardware virtualization (VT-x/AMD-V) disabled in BIOS.      | Enable hardware virtualization in host BIOS settings.             |
+| `Failed to mount VirtualBox shared folders`       | Guest Additions version mismatch or not installed inside VM.           | Install vagrant plugin: `vagrant plugin install vagrant-vbguest`. |
+| `SSH authentication failed for 'vagrant'`         | Corrupted insecure private key in `~/.vagrant.d/insecure_private_key`. | Delete `.vagrant/` directory and recreate with `vagrant up`.      |
 
 ## References
 

@@ -1,6 +1,6 @@
 ---
 name: terraform
-description: Terraform infrastructure as code with providers and state management. Use for cloud provisioning.
+description: Expert HashiCorp Terraform assistance covering HCL, providers, modules, state locking, workspaces, and plan/apply workflows. Use when provisioning and managing cloud infrastructure declaratively.
 ---
 
 # Terraform
@@ -9,9 +9,10 @@ Terraform is the world's most popular Infrastructure as Code (IaC) tool. It uses
 
 ## When to Use
 
-- **Provisioning**: Creating VPCs, Databases, K8s Clusters.
-- **Multi-Cloud**: Learn one syntax (HCL), use it for AWS, Azure, GCP, Datadog, etc.
-- **State Management**: It tracks resource state, allowing "Plan" (preview) and "Apply".
+- **Multi-Cloud Declarative Infrastructure as Code (IaC)**: Provisioning and managing resources across AWS, Azure, GCP, and Kubernetes.
+- **State Management & Team Collaboration**: Tracking real-world cloud resources via remote state backends with locking.
+- **Modular Infrastructure Architecture**: Writing reusable, version-controlled modules for standard cloud topologies.
+- **Pre-Deployment Execution Planning**: Auditing infrastructure changes with `terraform plan` before applying.
 
 ## Quick Start
 
@@ -31,29 +32,140 @@ resource "aws_s3_bucket" "b" {
 
 ## Core Concepts
 
-### Providers
+#Modular Architecture with Remote State & Locking
 
-Plugins that talk to APIs (AWS, Azure, Kubernetes).
+Configuring S3 remote backend with DynamoDB state locking:
 
-### State
+```hcl
+# versions.tf
+terraform {
+  required_version = ">= 1.9.0"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.50"
+    }
+  }
 
-`terraform.tfstate`. The source of truth mapping your code to real-world resource IDs. Must be stored remotely (S3 + DynamoDB Locking) in teams.
+  backend "s3" {
+    bucket         = "corp-terraform-state-prod"
+    key            = "platform/network/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "terraform-state-lock"
+    encrypt        = true
+  }
+}
 
-### Stacks (2025)
+provider "aws" {
+  region = var.aws_region
+  default_tags {
+    tags = {
+      Environment = var.environment
+      ManagedBy   = "Terraform"
+      Project     = "CoreInfrastructure"
+    }
+  }
+}
+```
 
-A new layer above Modules. Allows defined dependencies between deployments (e.g., Deploy VPC, _then_ Deploy K8s using VPC ID output).
+#Reusable VPC Module with Inputs & Outputs
 
-## Best Practices (2025)
+Encapsulating network resources:
 
-**Do**:
+```hcl
+# modules/vpc/main.tf
+resource "aws_vpc" "main" {
+  cidr_block           = var.cidr_block
+  enable_dns_hostnames = true
+  enable_dns_support   = true
 
-- **Use Remote State**: S3 backend or Terraform Cloud. Never local state.
-- **Use Modules**: DRY. Write a "Company Standard Bucket" module and reuse it.
-- **Use `tfsec` / `trivy`**: Scan HCL for misconfigurations (open security groups) before deploy.
+  tags = {
+    Name = "${var.environment}-vpc"
+  }
+}
 
-**Don't**:
+resource "aws_subnet" "public" {
+  count                   = length(var.public_subnet_cidrs)
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = var.public_subnet_cidrs[count.index]
+  availability_zone       = var.availability_zones[count.index]
+  map_public_ip_on_launch = true
 
-- **Don't hardcode secrets**: Use `variable "db_password" {}` and pass it via `TF_VAR_` or a secret manager.
+  tags = {
+    Name = "${var.environment}-public-${count.index + 1}"
+  }
+}
+
+output "vpc_id" {
+  description = "The ID of the provisioned VPC"
+  value       = aws_vpc.main.id
+}
+```
+
+#Terraform CLI Workflow
+
+Planning and applying changes safely:
+
+```bash
+# Initialize providers and remote backend
+terraform init
+
+# Validate configuration syntax and variables
+terraform validate
+
+# Generate and save execution plan
+terraform plan -out=tfplan.binary
+
+# Apply verified plan atomically
+terraform apply tfplan.binary
+```
+
+## Common Patterns
+
+### S3 Backend with DynamoDB State Locking
+
+**Problem**: Concurrent `terraform apply` executions from CI pipelines corrupting state files.
+
+**Solution**:
+Configure remote backend with distributed state locking:
+
+```hcl
+terraform {
+  required_version = ">= 1.6.0"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+
+  backend "s3" {
+    bucket         = "my-terraform-state-bucket"
+    key            = "production/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "terraform-locks"
+    encrypt        = true
+  }
+}
+```
+
+## Best Practices (2026)
+
+- **Do** always store Terraform state in a remote backend (S3/GCS) with encryption and state locking (DynamoDB).
+- **Do** always generate an execution plan (`terraform plan -out=tfplan`) and apply the saved plan file in CI.
+- **Do** use `default_tags` at the provider level to ensure consistent tagging across all cloud resources.
+- **Do** isolate environments using separate state files or directories (`environments/prod`, `environments/stage`), not workspaces.
+- **Don't** commit `.tfstate` files or files containing secrets to version control.
+- **Don't** use `terraform apply --auto-approve` in production without review and approval gates.
+- **Don't** modify cloud resources manually via web consoles; out-of-band changes cause state drift.
+
+## Troubleshooting
+
+| Error                                          | Cause                                                                         | Solution                                                                          |
+| :--------------------------------------------- | :---------------------------------------------------------------------------- | :-------------------------------------------------------------------------------- |
+| `Error: Error acquiring the state lock`        | Previous apply was interrupted, leaving lock active in DynamoDB.              | Unlock after verifying no process is running: `terraform force-unlock <LOCK-ID>`. |
+| `Error: Resource already managed by Terraform` | Importing resource without configuration block or duplicate resource address. | Ensure unique resource label and run `terraform import <addr> <id>`.              |
+| `Provider configuration not present`           | Module using provider configuration not inherited from parent root.           | Pass providers explicitly: `providers = { aws = aws.west }`.                      |
 
 ## References
 
