@@ -1,6 +1,6 @@
 ---
 name: clean-architecture
-description: Clean Architecture layered design. Use for maintainable code.
+description: Expert Clean Architecture assistance covering Onion/Hexagonal layered boundaries, dependency inversion, use case interactors, entities, and repository interfaces. Use when designing maintainable software architectures, decoupling business logic from frameworks, or structuring testable domain models.
 ---
 
 # Clean Architecture
@@ -9,9 +9,10 @@ Clean Architecture, popularized by Robert C. Martin (Uncle Bob), separates softw
 
 ## When to Use
 
-- Building enterprise applications with complex business logic.
-- Long-lived projects where frameworks/databases might change over time.
-- Large teams requiring clear separation of concerns to work in parallel.
+- **Long-Lived Enterprise Applications**: Building systems designed to evolve over 5-10+ years without being held hostage by framework obsolescence.
+- **Framework & Database Decoupling**: Structuring codebases where swapping ORMs (Prisma -> Drizzle) or delivery mechanisms (REST -> gRPC) requires zero domain changes.
+- **Comprehensive Unit Testing**: Enabling fast, isolated unit tests for core business use cases without requiring running databases or network stubs.
+- **Complex Business Rule Isolation**: Separating intricate domain invariants from presentation controllers and database migration scripts.
 
 ## Quick Start
 
@@ -52,40 +53,125 @@ class SqlUserRepository implements UserRepository {
 
 ## Core Concepts
 
-### The Dependency Rule
+#Dependency Inversion Principle (The Dependency Rule)
 
-Inner layers (Entities) know nothing about outer layers (Controllers, Presenters). Outer layers depend on inner layers.
+Source code dependencies must point inward only. Inner circles (Entities, Use Cases) know nothing about outer circles (Web, DB, CLI):
 
-### Entities
+```
+       [ Frameworks & Drivers (DB, Web, Devices) ]
+                         ↓
+             [ Interface Adapters (Controllers, Gateways) ]
+                               ↓
+                 [ Application Business Rules (Use Cases) ]
+                                     ↓
+                     [ Enterprise Business Rules (Entities) ]
+```
 
-Enterprise-wide business rules. These are the least likely to change when something external changes (e.g., page navigation security).
+#Domain Entities (Pure Business Objects)
 
-### Application Business Rules (Use Cases)
+Encapsulates core business data and invariants without external annotations or framework decorators:
 
-Orchestrate the flow of data to and from the entities. They contain the specific business rules of the application (e.g., "Create Order").
+```typescript
+// domain/entities/subscription.entity.ts
+export class Subscription {
+  constructor(
+    public readonly id: string,
+    public readonly customerId: string,
+    private _status: "ACTIVE" | "PAST_DUE" | "CANCELED",
+    private _validUntil: Date,
+  ) {}
+
+  public renew(durationDays: number): void {
+    if (this._status === "CANCELED") {
+      throw new Error("Cannot renew a canceled subscription");
+    }
+    this._validUntil = new Date(
+      this._validUntil.getTime() + durationDays * 86400000,
+    );
+    this._status = "ACTIVE";
+  }
+
+  get isValid(): boolean {
+    return this._status === "ACTIVE" && this._validUntil > new Date();
+  }
+}
+```
+
+#Use Case Interactors & Boundary Ports
+
+Coordinates the flow of data to and from entities, defining input/output boundary interfaces:
+
+```typescript
+// application/use-cases/renew-subscription.use-case.ts
+export interface SubscriptionRepositoryPort {
+  findById(id: string): Promise<Subscription | null>;
+  save(sub: Subscription): Promise<void>;
+}
+
+export class RenewSubscriptionUseCase {
+  constructor(private readonly repo: SubscriptionRepositoryPort) {}
+
+  async execute(subscriptionId: string, days: number): Promise<void> {
+    const sub = await this.repo.findById(subscriptionId);
+    if (!sub) throw new Error("Subscription not found");
+    sub.renew(days);
+    await this.repo.save(sub);
+  }
+}
+```
 
 ## Common Patterns
 
-### Dependency Injection
+#Inverted Repository Dependency (Domain -> Infrastructure)
+**Problem**: Business logic becomes tightly coupled to SQL ORM models and database drivers.  
+**Solution**: Declare repository interfaces inside domain layer; implement them in infrastructure layer.
 
-The glue that makes Clean Architecture possible. Outer layers inject concrete implementations (e.g., `SqlUserRepository`) into inner layers (which expect `UserRepository` interface).
+```typescript
+// 1. Domain Layer (core/ports/user-repository.port.ts) - Zero external dependencies
+export interface UserRepositoryPort {
+  findById(id: string): Promise<UserEntity | null>;
+  save(user: UserEntity): Promise<void>;
+}
 
-### DTOs (Data Transfer Objects)
+// 2. Application Layer (use-cases/create-user.use-case.ts)
+export class CreateUserUseCase {
+  constructor(private readonly userRepo: UserRepositoryPort) {}
+  async execute(dto: CreateUserDto): Promise<UserEntity> {
+    const user = new UserEntity(dto.email, dto.name);
+    await this.userRepo.save(user);
+    return user;
+  }
+}
 
-Use simple objects (DTOs) to cross boundaries. Do not pass Entities to the UI or Database rows to the Use Case.
+// 3. Infrastructure Layer (adapters/drizzle-user.repository.ts)
+export class DrizzleUserRepository implements UserRepositoryPort {
+  async save(user: UserEntity): Promise<void> {
+    await db.insert(usersTable).values({ id: user.id, email: user.email });
+  }
+  async findById(id: string): Promise<UserEntity | null> {
+    const [row] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, id));
+    return row ? new UserEntity(row.email, row.name, row.id) : null;
+  }
+}
+```
 
-## Best Practices
+## Best Practices (2026)
 
 **Do**:
 
-- Define **Interfaces** in the layer that uses them (Interface Segregation).
-- Test **Use Cases** in isolation using mocks for repositories.
-- Keep **Frameworks** (React, NestJS, Spring) at the outermost layer.
+- **Keep Domain Entities Free of Framework Imports**: Never import `@Entity`, `drizzle-orm`, or HTTP request classes in the domain layer.
+- **Define Ports as Interfaces in the Domain**: Let the domain dictate its persistence requirements; implement adapters in the infrastructure layer.
+- **Test Use Cases with In-Memory Mocks**: Execute thousands of unit tests in milliseconds using plain in-memory array/map repository stubs.
+- **Use DTOs across Boundaries**: Map between HTTP JSON payloads and domain entities using validation schemas (Zod/Valibot).
 
 **Don't**:
 
-- Don't let **database entities** (ORM models) leak into the inner layers. Map them to domain Entities.
-- Don't skip layers "for speed" (e.g., Controller calling DB directly) in complex apps.
+- **Don't return database ORM entities to API controllers**: Prevent database schema changes from leaking into external API contracts.
+- **Don't create anemic domain models**: Do not use entities as dumb data bags with getters/setters; encapsulate operations and invariants inside methods.
+- **Don't over-engineer simple CRUD apps**: Clean Architecture carries cognitive and boilerplate overhead; avoid using it for trivial prototypes.
 
 ## Troubleshooting
 

@@ -1,6 +1,6 @@
 ---
 name: event-sourcing
-description: Event sourcing event-based persistence. Use for audit trails.
+description: Expert Event Sourcing assistance covering immutable append-only event logs, state reconstruction, snapshotting, event versioning, and temporal queries. Use when building audit-compliant persistence systems, financial ledgers, or historical state tracking.
 ---
 
 # Event Sourcing
@@ -9,49 +9,159 @@ Event Sourcing ensures that all changes to application state are stored as a seq
 
 ## When to Use
 
-- **Audit Logs**: When you need to know exactly how you got to the current state (Banking, Legal).
-- **Temporal Queries**: "What did the system look like last Tuesday?".
-- **Intent Capture**: distinguishing between "Correction" vs "Update".
+- **Complete Audit & Compliance Trails**: Financial ledgers, healthcare records, and legal systems where historical state cannot be overwritten.
+- **Temporal Queries & Time Travel**: Reconstructing the exact state of an entity as of any specific timestamp in history.
+- **Complex Domain Debugging**: Replaying production incident events in local environments to pinpoint exact logic flaws.
+- **High-Velocity Append-Only Ingestion**: Maximizing write throughput by appending immutable events without updates or delete locks.
 
-## Quick Start (Conceptual)
+## Quick Start
 
-**Traditional (State Stored):**
-`Order { id: 1, status: 'Shipped' }` -> Update to 'Delivered' -> `Order { id: 1, status: 'Delivered' }` (History lost)
+```typescript
+// Append-only domain event structure and aggregate reconstruction
+interface DomainEvent {
+  eventId: string;
+  aggregateId: string;
+  type: string;
+  payload: Record<string, any>;
+  timestamp: number;
+}
 
-**Event Sourcing (Events Stored):**
+class OrderAggregate {
+  public id: string = "";
+  public status: "PENDING" | "PAID" | "SHIPPED" = "PENDING";
 
-1. `OrderCreated(id=1)`
-2. `PaymentReceived(id=1)`
-3. `OrderShipped(id=1)`
-4. `OrderDelivered(id=1)`
+  apply(event: DomainEvent): void {
+    switch (event.type) {
+      case "ORDER_CREATED":
+        this.id = event.aggregateId;
+        this.status = "PENDING";
+        break;
+      case "ORDER_PAID":
+        this.status = "PAID";
+        break;
+      case "ORDER_SHIPPED":
+        this.status = "SHIPPED";
+        break;
+    }
+  }
 
-To get current state: Replay (1) + (2) + (3) + (4).
+  static reconstruct(events: DomainEvent[]): OrderAggregate {
+    const aggregate = new OrderAggregate();
+    for (const event of events) {
+      aggregate.apply(event);
+    }
+    return aggregate;
+  }
+}
+```
 
 ## Core Concepts
 
-### Event Store
+#Immutable Event Stream Architecture
 
-A database optimized for appending immutable events (e.g., EventStoreDB).
+State is derived purely by folding historical events sequentially over an initial empty state:
 
-### Snapshots
+```
+Stream: Account-42
+Event 1: AccountOpened(initialDeposit: 100)  -> Balance = 100
+Event 2: MoneyDeposited(amount: 50)          -> Balance = 150
+Event 3: MoneyWithdrawn(amount: 30)          -> Balance = 120 (Current State)
+```
 
-To avoid replay performance issues for long histories (10,000 events), save a "Snapshot" every 100 events. Replay = Snapshot + subsequent events.
+#State Reconstruction via Aggregate Replay
 
-### Projections
+```typescript
+// domain/aggregates/account.ts
+export class Account {
+  public balance: number = 0;
+  public version: number = 0;
 
-Code that listens to events and builds a read-optimized view (The "R" in CQRS).
+  apply(event: DomainEvent): void {
+    switch (event.type) {
+      case "ACCOUNT_OPENED":
+        this.balance = event.data.initialDeposit;
+        break;
+      case "MONEY_DEPOSITED":
+        this.balance += event.data.amount;
+        break;
+      case "MONEY_WITHDRAWN":
+        this.balance -= event.data.amount;
+        break;
+    }
+    this.version++;
+  }
 
-## Best Practices
+  static fromHistory(events: DomainEvent[]): Account {
+    const account = new Account();
+    events.forEach((e) => account.apply(e));
+    return account;
+  }
+}
+```
+
+#Snapshotting for High-Volume Streams
+
+Stores periodic state checkpoints to prevent replaying millions of events on every read:
+
+```typescript
+// Snapshot pattern
+async function getAccount(accountId: string): Promise<Account> {
+  const snapshot = await snapshotStore.getLatest(accountId);
+  const fromVersion = snapshot ? snapshot.version : 0;
+
+  const events = await eventStore.getEvents(accountId, fromVersion);
+  const account = snapshot ? Account.fromSnapshot(snapshot) : new Account();
+  events.forEach((e) => account.apply(e));
+  return account;
+}
+```
+
+## Common Patterns
+
+### Snapshotting Aggregates
+
+**Problem**: Replaying thousands of past events to rebuild state for an aggregate causes severe read latency.
+
+**Solution**:
+Persist periodic aggregate state snapshots (e.g., every 100 events) and replay events only from the snapshot forward:
+
+```typescript
+class AccountAggregate {
+  private balance: number = 0;
+  private version: number = 0;
+
+  loadFromSnapshot(
+    snapshot: { balance: number; version: number },
+    eventsSince: DomainEvent[],
+  ) {
+    this.balance = snapshot.balance;
+    this.version = snapshot.version;
+    for (const event of eventsSince) {
+      this.apply(event);
+      this.version++;
+    }
+  }
+
+  apply(event: DomainEvent) {
+    if (event.type === "DEPOSITED") this.balance += event.amount;
+  }
+}
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- Keep Events **Immutable**. You can never change the past. To fix an error, append a "CorrectionEvent".
-- Version your Events carefully (Upcasting) to handle schema changes over years.
+- **Treat Events as Immutable Facts**: Never edit, mutate, or delete events; record compensating events (e.g. `PaymentReversed`) to fix mistakes.
+- **Snapshot Long-Lived Streams**: Create snapshots every 100-500 events to keep hydration latency under 10ms.
+- **Enforce Optimistic Concurrency Control**: Pass expected stream version on append; reject write if version has changed.
+- **Pair with CQRS**: Separate read query views from the event store to provide fast query responses.
 
 **Don't**:
 
-- Don't put logic in the Event Store. It's just a log.
-- Don't query the Event Stream for complex searches (Use a Projection/Read Model).
+- **Don't change past event structures**: Maintain backwards compatibility when updating schemas; use upcasters for migration.
+- **Don't put PII in unencrypted event streams**: If subject to GDPR Right to be Forgotten, use Crypto-Shredding (encrypt PII with disposable keys).
+- **Don't use Event Sourcing for everything**: Simple CRUD entities without audit requirements incur massive complexity under Event Sourcing.
 
 ## Troubleshooting
 

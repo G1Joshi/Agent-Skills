@@ -1,6 +1,6 @@
 ---
 name: hexagonal
-description: Hexagonal architecture ports and adapters. Use for testable systems.
+description: Expert Hexagonal Architecture (Ports and Adapters) assistance covering driving/driven ports, infrastructure adapters, domain core isolation, and test stubbing. Use when decoupling domain logic from databases/HTTP frameworks, improving testability, or modernizing enterprise applications.
 ---
 
 # Hexagonal Architecture (Ports and Adapters)
@@ -9,9 +9,10 @@ Hexagonal Architecture aims to create a loosely coupled application component th
 
 ## When to Use
 
-- When you need to support multiple input channels (e.g., REST API, GraphQL, CLI, Message Queue) for the same business logic.
-- When you want to be able to swap "driven" actors (e.g., verify logic with a Mock DB, then swap to Postgres).
-- Developing standard microservices.
+- **Core Business Logic Isolation**: Keeping domain models completely pure and independent of database choices, web frameworks, and messaging tools.
+- **Pluggable Architecture**: Systems where components (e.g. storage engine, notification providers, payment gateways) must be easily swappable.
+- **Automated Regression Testing**: Running full business scenario tests with fast, zero-dependency in-memory adapters.
+- **Microservice Reusability**: Allowing the exact same business core to be driven by an HTTP REST controller, a gRPC server, and a CLI simultaneously.
 
 ## Quick Start
 
@@ -51,38 +52,104 @@ func (r *PostgresRepo) Save(u User) error { ... }
 
 ## Core Concepts
 
-### Ports
+#Ports and Adapters Topology
 
-Interfaces that define the entry and exit points of the application.
+The application core sits at the center; Driving Ports receive input from the outside world; Driven Ports communicate with infrastructure:
 
-- **Driving Ports (In)**: API surfaces (what the app _can do_).
-- **Driven Ports (Out)**: Infrastructure dependencies (what the app _needs_).
+```
+[ HTTP Controller ] ──(Driving Port)──→ [ APPLICATION CORE ] ──(Driven Port)──→ [ Postgres Adapter ]
+[ CLI Command ]     ──(Driving Port)──→ [ APPLICATION CORE ] ──(Driven Port)──→ [ Mock DB Adapter ]
+```
 
-### Adapters
+#Driving Port & Primary Adapter
 
-Concrete implementations that bridge the gap between the Ports and the outside world.
+The driving port defines what the application can do:
 
-- **Driving Adapters**: REST Controller, gRPC Handler, CLI Command.
-- **Driven Adapters**: SQL Repository, SMTP Client, Redis Cache.
+```typescript
+// core/ports/driving/register-user.port.ts
+export interface RegisterUserCommand {
+  email: string;
+  fullName: string;
+}
+
+export interface RegisterUserUseCase {
+  execute(command: RegisterUserCommand): Promise<string>;
+}
+```
+
+```typescript
+// adapters/driving/http/user.controller.ts (Primary Adapter)
+export class UserController {
+  constructor(private readonly registerUserUseCase: RegisterUserUseCase) {}
+
+  async handlePost(req: Request, res: Response) {
+    const userId = await this.registerUserUseCase.execute(req.body);
+    res.status(201).json({ id: userId });
+  }
+}
+```
+
+#Driven Port & Secondary Adapter
+
+The driven port defines external capabilities needed by the core:
+
+```typescript
+// core/ports/driven/notification.port.ts
+export interface NotificationPort {
+  sendWelcomeEmail(email: string, name: string): Promise<void>;
+}
+
+// adapters/driven/resend-email.adapter.ts (Secondary Adapter)
+export class ResendEmailAdapter implements NotificationPort {
+  async sendWelcomeEmail(email: string, name: string) {
+    await resend.emails.send({
+      to: email,
+      subject: `Welcome, ${name}!`,
+      from: "app@example.com",
+    });
+  }
+}
+```
 
 ## Common Patterns
 
-### Testing with Fake Adapters
+#Mock Adapter for Unit Testing Ports
+**Problem**: Testing business core without spinning up actual databases or message brokers.  
+**Solution**: Implement an in-memory stub that satisfies the driven port interface.
 
-Because the core depends on interfaces (Ports), you can implement "Fake" adapters (e.g., `InMemoryRepository`) to test complex business logic without spinning up Docker containers.
+```typescript
+// test/mocks/in-memory-order.repository.ts
+export class InMemoryOrderRepository implements OrderRepositoryPort {
+  private readonly items = new Map<string, Order>();
 
-## Best Practices
+  async save(order: Order): Promise<void> {
+    this.items.set(order.id, order);
+  }
+
+  async findById(id: string): Promise<Order | null> {
+    return this.items.get(id) ?? null;
+  }
+}
+
+// Unit test executes with zero I/O overhead:
+const repo = new InMemoryOrderRepository();
+const service = new OrderService(repo);
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- Keep the **Core** free of any framework dependencies (no HTTP, no SQL, no JSON tags).
-- Define **Ports** in the Core, not in the adapters.
-- Use **Hexagonal** for the domain layer of a microservice.
+- **Define Ports as Interfaces Inside Core**: Ensure driven ports are authored by the business domain team, not infrastructure engineers.
+- **Create In-Memory Adapters for Fast Testing**: Implement mock adapters for all driven ports to enable sub-second test suite runs.
+- **Keep Domain Core Pure**: Disallow any external library imports in the domain core (except language utilities).
+- **Use Dependency Injection**: Bind ports to concrete adapters at application bootstrap time.
 
 **Don't**:
 
-- Don't leak implementation details (like `sql.Rows`) into the Core.
-- Don't create an Adapter for every single class; focus on architectural boundaries.
+- **Don't let infrastructure types enter the domain**: Map incoming database models and HTTP requests to domain types inside adapters.
+- **Don't bypass the ports**: Never allow driving adapters (controllers) to communicate directly with driven adapters (databases).
+- **Don't over-engineer simple utility services**: For simple scripts or read-only tools, Hexagonal Architecture adds unnecessary complexity.
 
 ## Troubleshooting
 

@@ -1,6 +1,6 @@
 ---
 name: modular-monolith
-description: Modular monolith with bounded contexts. Use for scalable monoliths.
+description: Expert Modular Monolith architecture assistance covering bounded module boundaries, internal public APIs, decoupled package structures, and single-deployment velocity. Use when scaling monolith development teams, preventing spaghetti code, or preparing for future microservice extraction.
 ---
 
 # Modular Monolith
@@ -9,10 +9,10 @@ A Modular Monolith is a single deployable unit (Monolith) where the code is stru
 
 ## When to Use
 
-- Starting a new project (Greenfield).
-- Domain boundaries are not yet fully clear.
-- Wanting the speed of simple deployment (one CI pipeline, one DB instance) but preventing "spaghetti code".
-- Precursor to Microservices.
+- **Medium-to-Large Engineering Teams**: Scaling a codebase across multiple teams without the operational overhead of microservices.
+- **Single-Deployment Velocity**: Retaining simple CI/CD pipelines, single-transaction database migrations, and local Docker setups.
+- **Clear Domain Boundaries**: Preventing spaghetti code by enforcing strict module encapsulation and public API boundaries at compile-time.
+- **Pre-Microservice Preparation**: Architecting systems that can be cleanly sliced into separate microservices later if scaling demands it.
 
 ## Quick Start
 
@@ -43,46 +43,111 @@ public class OrderService {
 
 ## Core Concepts
 
-### Module Boundaries
+#Strict Module Encapsulation & Public API Facades
 
-Code in Module A cannot access internal classes of Module B. It can only use Module B's "Public API" (Interfaces/DTOs). Enforced by compiler tools (ArchUnit, NetArchTest).
+Modules interact exclusively through explicit public facades; internal repositories, models, and helpers are unexported:
 
-### Single Deployment
+```
+src/modules/
+  ├── billing/
+  │   ├── internal/        # Private tables, services, entities
+  │   └── index.ts         # Public Interface & Facade ONLY
+  └── shipping/
+      ├── internal/
+      └── index.ts
+```
 
-Modules are compiled together into one binary/container and deployed to one server/cluster. Simplifies Ops.
+#In-Process Domain Events
 
-### Data Isolation (Virtual)
+Modules communicate asynchronously across boundaries using in-memory event buses:
 
-Ideally, each module has its own DB schema (or at least different tables). Cross-module Joins are forbidden.
+```typescript
+// modules/common/event-bus.ts
+import EventEmitter from "events";
+export const inProcessBus = new EventEmitter();
+
+// modules/orders/internal/order.service.ts
+inProcessBus.emit("order.created", { orderId: "123", customerId: "456" });
+
+// modules/notifications/internal/notification.listener.ts
+inProcessBus.on("order.created", (payload) => {
+  // Executes in same process, decoupled from order module code
+});
+```
+
+#Architecture Linter Boundary Enforcement
+
+Enforces boundary rules in CI using tools like `eslint-plugin-boundaries` or ArchUnit:
+
+```javascript
+// .eslintrc.js
+rules: {
+  "boundaries/element-types": [2, {
+    default: "disallow",
+    rules: [
+      { from: "module:billing", allow: ["module:billing", "module:common"] },
+      { from: "module:shipping", allow: ["module:shipping", "module:common"] },
+    ]
+  }]
+}
+```
 
 ## Common Patterns
 
-### In-Memory Events
+#Internal Module Public API Facade
+**Problem**: Modules access each other's private tables, destroying encapsulation and preventing future service extraction.  
+**Solution**: Expose an explicit Public API interface per module.
 
-Using a mediator (like MediatR in .NET or Spring Events) to decouple modules. Module A publishes `OrderCreated`, Module B listens. No Kafka needed (yet).
+```typescript
+// modules/billing/index.ts (Billing Module Public Boundary)
+export interface BillingModuleApi {
+  chargeCustomer(
+    customerId: string,
+    amountCents: number,
+  ): Promise<PaymentReceipt>;
+  getSubscriptionStatus(customerId: string): Promise<SubscriptionStatus>;
+}
 
-### Internal APIs
+// Internal billing tables, services, and repositories are NOT exported.
+export class BillingFacade implements BillingModuleApi {
+  constructor(private readonly paymentService: InternalPaymentService) {}
+  async chargeCustomer(id: string, amount: number) {
+    return this.paymentService.processCharge(id, amount);
+  }
+  async getSubscriptionStatus(id: string) {
+    return this.paymentService.checkSubscription(id);
+  }
+}
+```
 
-Defining strict interfaces that act as "Gateways" between modules. Changing the internals of Module A doesn't break Module B as long as the interface holds.
-
-## Best Practices
+## Best Practices (2026)
 
 **Do**:
 
-- Force **Architecture Tests** (e.g., "Classes in `Ordering` cannot depend on `Shipping`").
-- Separate **Data Schemas** logically (different schemas in Postgres).
-- Treat it as "Microservices ready to be extracted".
+- **Enforce Boundaries with Build Tools**: Use ESLint rules, TypeScript project references, or ArchUnit to prevent illegal module cross-imports.
+- **Isolate Module Schemas**: Use separate database schemas (`billing.*`, `users.*`) within the same database to prevent illicit SQL joins.
+- **Communicate Across Modules via Facades or Events**: Disallow direct access to another module's internal classes or database repositories.
+- **Keep Deployment Pipeline Unified**: Enjoy the speed of atomic single-binary deployments and coordinated database migrations.
 
 **Don't**:
 
-- Don't bypass boundaries "just this once".
-- Don't share Domain Entities across modules (use integration DTOs).
+- **Don't execute direct cross-module foreign key joins**: Reference entities from foreign modules by ID only; do not write `LEFT JOIN shipping.parcels`.
+- **Don't share mutable memory state across modules**: Pass immutable DTOs or primitive values through public facade methods.
+- **Don't prematurely split into microservices**: Extract a module into a microservice only when deployment frequency or scaling demands it.
 
 ## Advantages over Microservices
 
 - **Zero Latency** communication.
 - **Transactional Consistency** (ACID) is easier (though ideally, avoid cross-module transactions).
 - **Refactoring** is cheap (IDE "Rename" works globally).
+
+## Troubleshooting
+
+| Error                              | Cause                                                          | Solution                                                                         |
+| :--------------------------------- | :------------------------------------------------------------- | :------------------------------------------------------------------------------- |
+| `Cyclic module dependency`         | Modules directly importing internal classes across boundaries. | Expose strictly typed public APIs/facades and enforce boundary linting.          |
+| `Accidental shared database table` | Cross-module queries joining tables across domains.            | Isolate schemas per module or access data exclusively through module interfaces. |
+| `Leaky module abstractions`        | Direct access to internal database entities instead of DTOs.   | Return immutable Data Transfer Objects (DTOs) from module public services.       |
 
 ## References
 

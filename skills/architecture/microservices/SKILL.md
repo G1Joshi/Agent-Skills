@@ -1,6 +1,6 @@
 ---
 name: microservices
-description: Microservices distributed architecture pattern. Use for scalable systems.
+description: Expert Microservices architecture assistance covering service decomposition, service discovery, distributed tracing, circuit breakers, and database-per-service isolation. Use when refactoring monoliths, designing distributed microservice systems, or orchestrating service communications.
 ---
 
 # Microservices
@@ -9,10 +9,10 @@ Microservices architecture structures an application as a collection of loosely 
 
 ## When to Use
 
-- Large teams (50+ devs) where coordination on a monolith slows down deployment.
-- Modules have conflicting resource requirements (e.g., one needs huge RAM, another needs GPU).
-- Need to scale specific parts of the system independently.
-- **2025 Reality check**: Don't start with Microservices. Start with a Modular Monolith.
+- **Independent Scaling & Deployment**: Different business capabilities (e.g. video processing vs user authentication) require independent scaling.
+- **Autonomous Multi-Team Velocity**: Large engineering organizations where decoupled cross-functional teams need to deploy without stepping on each other.
+- **Polyglot Technology Requirements**: Leveraging specific runtimes for specific workloads (Python for ML, Go/Rust for networking, Node for APIs).
+- **Fault Domain Isolation**: Preventing an out-of-memory crash in a non-critical feature from bringing down the core payment pipeline.
 
 ## Quick Start
 
@@ -39,46 +39,82 @@ services:
 
 ## Core Concepts
 
-### Independence
+#Database-Per-Service Isolation
 
-Each service owns its own data. Service A cannot query Service B's database directly; it must ask Service B via API.
+Each microservice owns its private database. No service can directly query another service's database tables:
 
-### Inter-Service Communication
+```
+[ Orders Service ] ──→ ( Orders DB )
+        │ (Async Events / gRPC)
+        ▼
+[ Customers Service ] ──→ ( Customers DB )
+```
 
-- **Synchronous**: HTTP/REST or gRPC (Request/Response). Tightly coupled in time.
-- **Asynchronous**: Message Queues (RabbitMQ, Kafka, SQS). Decoupled in time.
+#Distributed Tracing (W3C Trace Context)
 
-### Database per Service
+Correlates requests across multiple network hops using standardized trace IDs:
 
-Ensures loose coupling. If a service needs data from another, use data replication (Events) or API composition.
+```typescript
+// Injected into outgoing HTTP/gRPC calls
+headers: {
+  "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+}
+```
+
+#Circuit Breakers & Graceful Degradation
+
+Fails fast when downstream services become unresponsive, preventing cascading thread exhaustion:
+
+```typescript
+import CircuitBreaker from "opossum";
+
+const breaker = new CircuitBreaker(callRecommendationService, {
+  timeout: 1000,
+  errorThresholdPercentage: 50,
+  resetTimeout: 10000,
+});
+
+breaker.fallback(() => [/* Fallback cached generic recommendations */]);
+const recommendations = await breaker.fire(userId);
+```
 
 ## Common Patterns
 
-### API Gateway
+#Circuit Breaker Pattern
+**Problem**: Cascading failures when a downstream dependency experiences degraded response times.  
+**Solution**: Wrap external calls in a circuit breaker to fail fast and shed load.
 
-A single entry point for all clients. Handles routing, auth, rate limiting, and aggregation.
+```typescript
+import CircuitBreaker from "opossum";
 
-### Circuit Breaker
+async function fetchPaymentGateway(payload: PaymentPayload) {
+  return await http.post("https://payment.example.com/charge", payload);
+}
 
-Detects failures and prevents the application from trying to perform the action that is doomed to fail (e.g., external service down), protecting the system.
+const breaker = new CircuitBreaker(fetchPaymentGateway, {
+  timeout: 3000, // 3s timeout
+  errorThresholdPercentage: 50, // Open breaker if 50% calls fail
+  resetTimeout: 10000, // Wait 10s before attempting half-open state
+});
 
-### Saga Pattern
+breaker.fallback(() => ({ status: "QUEUED_FOR_RETRY", cached: true }));
+const result = await breaker.fire(paymentData);
+```
 
-Managing distributed transactions. Since you can't have ACID across services, use Sagas (sequence of local transactions) with compensating actions for rollbacks.
-
-## Best Practices
+## Best Practices (2026)
 
 **Do**:
 
-- Automate **CI/CD** and **Infrastructure as Code** (Terraform/K8s). You can't manage 50 services manually.
-- Implement **Distributed Tracing** (OpenTelemetry) immediately.
-- Define clear **Service Boundaries** (use DDD).
+- **Enforce Database-per-Service**: Never share a database instance between microservices; communicate via APIs or events.
+- **Implement Comprehensive Observability**: Instrument all services with OpenTelemetry traces, Prometheus metrics, and structured JSON logs.
+- **Use Contract Testing (Pact)**: Validate API compatibility between consumer and provider services in CI/CD without running end-to-end clusters.
+- **Adopt Service Meshes for Mesh Security**: Leverage Envoy / Istio for automated mTLS encryption and traffic steering.
 
 **Don't**:
 
-- Don't share code libraries for domain logic (leads to "Distributed Monolith"). Share utils only.
-- Don't use synchronous calls for everything (cascading failures).
-- Don't underestimate the **Operational Complexity** (Logging, Monitoring, Auth).
+- **Don't start with microservices on day one**: Start with a well-structured Modular Monolith until organizational scale warrants extraction.
+- **Don't build distributed monoliths**: Avoid deep synchronous HTTP chains (Service A calls B, which calls C, which calls D).
+- **Don't ignore distributed transactions**: Use Saga patterns or eventual consistency rather than two-phase commits.
 
 ## Troubleshooting
 
