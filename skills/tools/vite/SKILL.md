@@ -1,6 +1,6 @@
 ---
 name: vite
-description: Vite fast build tool with HMR. Use for modern frontend builds.
+description: Expert Vite assistance covering modern frontend tooling, ESM development server, rollup-based production builds, Vite plugins, and framework integrations. Use when configuring vite.config.ts, setting up HMR, optimizing dependency pre-bundling, or building SPA/SSR applications.
 ---
 
 # Vite
@@ -9,35 +9,182 @@ Vite is the standard build tool for modern web development. v6.0 (2025) introduc
 
 ## When to Use
 
-- **New Projects**: The default for React, Vue, Svelte, etc.
-- **SPA**: Optimized for Single Page Apps.
-- **Speed**: Instant server start via native ESM.
+- **High-Speed Frontend Application Development**: Instant dev server startup and lightning-fast HMR for React, Vue, Svelte, and Solid.
+- **Optimized Production Bundling**: Generating tree-shaken, code-split production bundles using Rollup and esbuild.
+- **Modern Full-Stack SSR & Library Development**: Building SSR setups, component libraries, and client-side SPAs.
+- **Fast Unit & Component Testing with Vitest**: Executing unit tests using the identical Vite transform pipeline.
+
+## Quick Start
+
+### 1. Minimal vite.config.ts
+
+```typescript
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+  server: {
+    port: 3000,
+    open: true,
+  },
+  build: {
+    target: "esnext",
+    sourcemap: true,
+  },
+});
+```
+
+### 2. Scaffold and Run
+
+```bash
+npm create vite@latest my-app -- --template react-ts
+cd my-app && npm install && npm run dev
+```
 
 ## Core Concepts
 
-### Dev Server (ESM)
+### Production Configuration (`vite.config.ts`)
 
-Vite serves files as native ESM modules. The browser downloads files as needed. No bundling in dev.
+Configuring plugins, build optimizations, path aliases, and local HTTPS:
 
-### Rollup Build
+```typescript
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react-swc";
+import path from "node:path";
+import basicSsl from "@vitejs/plugin-basic-ssl";
 
-Vite uses Rollup for production builds, ensuring highly optimized chunks.
+export default defineConfig({
+  plugins: [react(), basicSsl()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+      "@components": path.resolve(__dirname, "./src/components"),
+    },
+  },
+  server: {
+    port: 3000,
+    strictPort: true,
+    open: true,
+  },
+  build: {
+    target: "es2022",
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom", "react-router-dom"],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 600,
+  },
+});
+```
 
-### Plugins
+### Seamless Unit Testing with Vitest
 
-Rollup-compatible plugin system.
+Configuring Vitest directly within `vite.config.ts`:
 
-## Best Practices (2025)
+```typescript
+/// <reference types="vitest" />
+import { defineConfig } from "vite";
 
-**Do**:
+export default defineConfig({
+  test: {
+    globals: true,
+    environment: "jsdom",
+    setupFiles: ["./src/test/setup.ts"],
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "json", "html"],
+    },
+  },
+});
+```
 
-- **Use `vitest`**: The native test runner for Vite projects.
-- **Use `vite.config.ts`**: TypeScript config is standard.
-- **Environment API**: Use the new API to define custom environments (e.g. `ssr`, `worker`).
+### Static Asset & Web Worker Handling
 
-**Don't**:
+Importing assets and initializing Web Workers with native Vite syntax:
 
-- **Don't use `require`**: Vite is ESM-first. Use `import`.
+```typescript
+// Import raw SVG string or URL
+import logoUrl from "./assets/logo.svg";
+import rawSvg from "./assets/logo.svg?raw";
+
+// Spawn Web Worker with native ESM support
+const worker = new Worker(new URL("./workers/compute.ts", import.meta.url), {
+  type: "module",
+});
+
+worker.postMessage({ task: "PROCESS_IMAGE", data: [] });
+worker.onmessage = (event) => console.log("Result:", event.data);
+```
+
+## Common Patterns
+
+### Proxy API Requests in Development
+
+**Problem**: Avoid CORS errors when frontend on `localhost:3000` talks to backend on `localhost:8080`.  
+**Solution**: Configure dev server reverse proxy in `vite.config.ts`.
+
+```typescript
+export default defineConfig({
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://localhost:8080",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+    },
+  },
+});
+```
+
+### Dynamic Code Splitting and Manual Chunks
+
+**Problem**: Large vendor packages (e.g. `lodash`, `chart.js`) inflate initial bundle chunk.  
+**Solution**: Configure `manualChunks` in Rollup output options.
+
+```typescript
+export default defineConfig({
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom"],
+          charts: ["chart.js"],
+        },
+      },
+    },
+  },
+});
+```
+
+## Best Practices (2026)
+
+- **Do** use `@vitejs/plugin-react-swc` instead of Babel for maximum transpilation and HMR performance.
+- **Do** configure `manualChunks` in `rollupOptions` to split large vendor dependencies (React, UI libraries) into cached chunks.
+- **Do** pair Vite with **Vitest** to share the exact same configuration, plugins, and module resolution rules.
+- **Do** enforce `strictPort: true` in CI environments to prevent silent port fallback collisions.
+- **Don't** use Webpack-specific syntax (`require.context`, `module.hot`); use standard `import.meta.glob`.
+- **Don't** leave source maps enabled in public production builds without uploading them to private error trackers (Sentry).
+- **Don't** commit `dist/` or `.vite/` cache directories to Git.
+
+## Troubleshooting
+
+| Error / Symptom                                                | Cause                                                                          | Solution                                                                                  |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| `[vite] Internal server error: Failed to resolve import "..."` | Missing path alias or file extension                                           | Add alias in `resolve.alias` inside `vite.config.ts` and verify file exists.              |
+| HMR stops updating in browser without full reload              | Circular dependencies or component missing explicit React default/named export | Break circular dependency chain; ensure React components have capitalized function names. |
+| `Outdated optimize dep` warning                                | Dependencies changed without clearing Vite cache                               | Run `npx vite --force` or delete `node_modules/.vite`.                                    |
 
 ## References
 

@@ -1,6 +1,6 @@
 ---
 name: lazygit
-description: lazygit terminal UI for git. Use for git operations.
+description: Expert Lazygit terminal UI assistance covering git staging, interactive rebasing, branch management, cherry-picking, and diff inspection. Use when managing Git repositories with keyboard speed.
 ---
 
 # Lazygit
@@ -9,38 +9,116 @@ Lazygit is a TUI for Git. It makes complex operations (interactive rebase, parti
 
 ## When to Use
 
-- **Staging**: Staging individual lines/hunks (`Space`).
-- **Rebasing**: Drag-and-drop commits to reorder them (via keybindings).
-- **Conflict Resolution**: A clear 3-way view to pick "Ours" or "Theirs".
+- **Interactive Terminal Git UI**: Fast, keyboard-centric interface for staging, committing, branching, and rebasing.
+- **Interactive Rebase & Cherry-Picking**: Squashing, rewording, dropping, and reordering commits visually.
+- **Partial Line-by-Line Staging**: Staging specific lines or code hunks within modified files via keybindings.
+- **Git Worktree & Submodule Management**: Switching worktrees and managing submodules without memorizing flags.
+
+## Quick Start
+
+```bash
+# Launch lazygit inside any Git repository
+lazygit
+
+# Key Navigation:
+# 1, 2, 3, 4, 5: Jump between Files, Branches, Commits, Stash panels
+# Space: Stage/unstage selected file or hunk
+# c: Commit staged changes
+# P: Push to upstream
+# p: Pull from upstream
+# r: Interactive rebase on selected commit
+```
 
 ## Core Concepts
 
-### Panels
+#Core Keybindings & Panel Navigation
 
-Status, Files, Local Branches, Commits, Stash. Navigate with `h/l` or arrows.
+Navigating git repository state with single keystrokes:
 
-### Keybindings
+- `1` through `5`: Jump between panels (`1`: Status, `2`: Files, `3`: Branches, `4`: Commits, `5`: Stash).
+- `Space`: Stage/unstage selected file or line.
+- `a`: Stage all modified files.
+- `c`: Open commit message prompt.
+- `P`: Push to remote branch (`p`: Pull from remote).
+- `b`: Create or checkout branch.
+- `z`: Undo last Git action (uses Git reflog).
 
-- `c`: Commit
-- `P`: Push
-- `p`: Pull
-- `s`: Stage
+#Interactive Rebase & Commit Squashing
 
-### Custom Commands
+Streamlining commit histories visually:
 
-Define custom actions in `config.yml` (e.g. "Create PR").
+1. Press `4` to navigate to the **Commits** panel.
+2. Highlight the base commit before your branch changes.
+3. Press `i` to start an interactive rebase.
+4. Highlight commits to modify:
+   - `s`: Squash into previous commit.
+   - `r`: Reword commit message.
+   - `d`: Drop commit entirely.
+   - `e`: Edit commit contents.
+5. Press `m` to open merge / rebase options.
 
-## Best Practices (2025)
+#Custom Commands Configuration (config.yml)
 
-**Do**:
+Adding customized workflows to Lazygit:
 
-- **Interactive Rebase**: Press `i` on a past commit to fix it up.
-- **Filter**: Press `/` to filter branches or files.
-- **Bisect**: Use the built-in bisect wizard to find bugs.
+```yaml
+# ~/.config/lazygit/config.yml
+gui:
+  theme:
+    selectedLineBgColor:
+      - reverse
+  nerdFontsVersion: "3"
 
-**Don't**:
+customCommands:
+  - key: "P"
+    command: "git push --force-with-lease origin {{.SelectedLocalBranch.Name}}"
+    context: "localBranches"
+    description: "Force push with lease safely"
+    prompts:
+      - type: "confirm"
+        title: "Force Push"
+        body: "Are you sure you want to force push with lease?"
+```
 
-- **Don't fear the CLI**: Lazygit is a wrapper. Understanding underlying git concepts is still needed.
+## Common Patterns
+
+#Custom Lazygit Commands
+**Problem**: Need one-key git workflow actions (e.g. git standup, prune remote branches).  
+**Solution**: Define custom keybindings in `~/.config/lazygit/config.yml`.
+
+```yaml
+# ~/.config/lazygit/config.yml
+customCommands:
+  - key: "P"
+    command: "git remote prune origin"
+    context: "remotes"
+    loadingText: "Pruning stale branches..."
+  - key: "b"
+    command: 'git branch --merged | grep -v "\*" | xargs -n 1 git branch -d'
+    context: "branches"
+    prompts:
+      - type: "confirm"
+        title: "Delete Merged Branches"
+        body: "Are you sure you want to delete all merged local branches?"
+```
+
+## Best Practices (2026)
+
+- **Do** use `v` in the diff panel to enter line-by-line staging mode for atomic commits.
+- **Do** use `git push --force-with-lease` rather than raw `--force` when pushing rebased feature branches.
+- **Do** press `z` in Lazygit to safely undo accidental rebases or commits using the reflog.
+- **Do** configure Nerd Fonts support in `config.yml` for clean file and branch iconography.
+- **Don't** perform interactive rebases on shared public branches (`main`, `production`).
+- **Don't** stage files without reviewing the visual diff panel on the right.
+- **Don't** leave abandoned rebases in progress; abort with `m -> Abort rebase`.
+
+## Troubleshooting
+
+| Error                                | Cause                                                         | Solution                                                                                    |
+| :----------------------------------- | :------------------------------------------------------------ | :------------------------------------------------------------------------------------------ |
+| `lazygit: command not found`         | Binary not installed in system PATH.                          | Install via `brew install lazygit` or Linux package manager.                                |
+| `Rebase conflict screen in Lazygit`  | Interactive rebase paused due to merge conflict.              | Resolve conflicting files, stage with `Space`, and press `m` to choose "Continue rebase".   |
+| `Cannot push: credentials not found` | Git credential helper not configured in terminal environment. | Configure credential cache: `git config --global credential.helper osxkeychain` (or store). |
 
 ## References
 

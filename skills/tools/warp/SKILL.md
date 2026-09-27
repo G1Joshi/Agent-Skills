@@ -1,6 +1,6 @@
 ---
 name: warp
-description: Warp modern terminal with AI. Use for terminal work.
+description: Expert Warp terminal assistance covering AI command search, block-based navigation, workflows, team sharing, and session customization. Use when using Warp terminal, authoring custom Warp workflows, configuring AI prompts, or optimizing terminal command management.
 ---
 
 # Warp
@@ -9,36 +9,122 @@ Warp is a modern, Rust-based terminal that works like a text editor. In 2025, it
 
 ## When to Use
 
-- **Productivity**: Input area works like an IDE (selection, cursor).
-- **Teamwork**: Share "Blocks" (command + output) with a link.
-- **AI**: Built-in "Warp AI" can explain errors or generate commands ("How do I undo the last git commit?").
+- **Modern AI-Powered Terminal Operations**: Executing CLI commands with block-based outputs, native autocomplete, and integrated AI error fixes.
+- **Team Command Sharing via Warp Workflows**: Packaging complex multi-step devops commands into parameterized, searchable workflows.
+- **Collaborative Terminal Sessions**: Sharing session outputs and command blocks securely via web permalinks.
+- **Fast Rust-Based Terminal Performance**: Rendering high-throughput terminal logs with GPU-accelerated rendering.
+
+## Quick Start
+
+### 1. Essential Warp Controls
+
+- `Cmd + P`: Open Command Palette
+- `Ctrl + Space`: Activate Warp AI command prediction
+- `Cmd + Up / Down`: Jump between command execution blocks
+- `Cmd + Shift + C`: Copy block command output directly to clipboard
+
+### 2. Custom Workflow Definition
+
+Save under `~/.warp/workflows/docker_clean.yaml`:
+
+```yaml
+name: Docker Prune Dangling Images
+description: Remove dangling Docker containers, volumes, and networks safely
+command: docker system prune -a --volumes -f
+tags:
+  - docker
+  - devops
+```
 
 ## Core Concepts
 
-### Blocks
+### Authoring Parameterized Warp Workflows (`.warp/workflows/*.yaml`)
 
-Warp groups command and output into a visual block. You can navigate block-by-block, not character-by-character.
+Defining reproducible, searchable engineering runbooks:
 
-### Workflows
+```yaml
+# ~/.warp/workflows/k8s_debug_pod.yaml
+name: Debug Failing Kubernetes Pod
+description: Spin up an ephemeral debugging container attached to a failing pod.
+command: kubectl debug -it {{pod_name}} --image=nicolaka/netshoot --namespace={{namespace}} --target={{container_name}}
+tags:
+  - kubernetes
+  - devops
+  - debugging
+arguments:
+  - name: pod_name
+    description: The name of the target pod
+    default_value: auth-service-784f4bf78d-9x2kz
+  - name: namespace
+    description: Kubernetes namespace
+    default_value: default
+  - name: container_name
+    description: Target container inside pod
+    default_value: app
+```
 
-Save parameterized commands.
-`npm run build --env={{env}}`
+Search and execute workflow:
 
-### Warp Drive
+- Open Warp -> Press `Ctrl + Shift + R` -> Type `k8s debug pod` -> Fill parameters -> Run.
 
-Cloud-synced configurations and workflows.
+### Warp Drive Team Synchronization
 
-## Best Practices (2025)
+Sharing workflows, launch configurations, and documentation across teams:
 
-**Do**:
+- Navigate to **Warp Drive** in the left sidebar.
+- Create a team workspace (e.g. `Platform-Engineering`).
+- Save workflows directly into the shared folder; team members receive instant real-time synchronization.
 
-- **Use AI Command Search**: Press `#` and type natural language to generate a command.
-- **Use Workflows**: Don't memorize complex kubectl commands. Save them.
-- **Enable "Notebook Mode"**: For a literate programming experience in the shell.
+### Native AI Command Generation & Diagnostics
 
-**Don't**:
+- Press `Ctrl + Space` or click **Warp AI**:
+  - Ask: _"Generate a command to find all Docker images older than 30 days and delete them."_
+  - Warp generates the exact command line with safe preview before execution.
+- If a command exits with code `1`, click **Ask AI** on the error block to diagnose stack traces automatically.
 
-- **Don't use for SSH (Legacy)**: Warp has its own "Warp SSH" wrapper to maintain features on remote servers. Use it instead of plain `ssh`.
+## Common Patterns
+
+### Parameterized Warp Workflows
+
+**Problem**: Team members frequently forget complex CLI syntax with multiple arguments.  
+**Solution**: Define workflows with parameterized arguments.
+
+```yaml
+# ~/.warp/workflows/k8s_restart.yaml
+name: Restart Kubernetes Deployment
+description: Rollout restart a specific deployment in target namespace
+command: kubectl rollout restart deployment {{deployment_name}} -n {{namespace}}
+arguments:
+  - name: deployment_name
+    description: Target deployment name
+    default_value: api-gateway
+  - name: namespace
+    description: Kubernetes namespace
+    default_value: production
+```
+
+### Block Sharing & Collaboration
+
+**Problem**: Share exact error output and failed command context with teammates without messy screenshotting.  
+**Solution**: Click block menu (`...`) > **Create Secret Link** or **Copy Block Link** to share executable, syntax-highlighted blocks directly.
+
+## Best Practices (2026)
+
+- **Do** parameterize repeated deployment and debugging commands as Warp Workflows (`.warp/workflows/`).
+- **Do** use **Block Sharing** (right-click block -> Share) to generate secure links to command outputs during incidents.
+- **Do** organize team operational runbooks inside **Warp Drive** for centralized onboarding.
+- **Do** inspect and review generated shell commands from Warp AI before pressing enter on production environments.
+- **Don't** share terminal output blocks containing unredacted API tokens, customer PII, or credentials.
+- **Don't** hardcode static credentials or cluster names into shared team workflows; use variables (`{{argument}}`).
+- **Don't** disable native shell integrations; Warp relies on them for command status tracking and block boundaries.
+
+## Troubleshooting
+
+| Error / Symptom                                       | Cause                                                    | Solution                                                                   |
+| ----------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Shell integration not loading custom `.zshrc` aliases | Warp subshell initialization sequence overriding aliases | Place custom aliases in `~/.zshrc` after the Warp shell integration block. |
+| AI Assistant suggests outdated CLI commands           | Missing local context or outdated CLI version            | Provide specific target version in prompt or update CLI binary on host.    |
+| Custom keybinding conflict with terminal multiplexer  | Warp intercepting keys assigned to tmux or nvim          | Customize shortcut mappings under **Settings > Keyboard Shortcuts**.       |
 
 ## References
 

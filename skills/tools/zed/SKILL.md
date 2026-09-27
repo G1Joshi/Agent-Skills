@@ -1,6 +1,6 @@
 ---
 name: zed
-description: Zed high-performance collaborative editor. Use for fast editing.
+description: Expert Zed editor assistance covering high-performance Rust-based text editing, multi-buffer editing, language server protocols (LSP), and AI assistant integrations. Use when configuring Zed settings.json, setting up language extensions, collaborating in real-time channels, or optimizing editor startup speed.
 ---
 
 # Zed
@@ -9,35 +9,163 @@ Zed is a high-performance editor from the creators of Atom. Built in Rust with a
 
 ## When to Use
 
-- **Performance**: It is significantly faster than VS Code. Opens 5GB logs instantly.
-- **Collaboration**: "Multiplayer" is built-in. Share a link, code together like Google Docs.
-- **Rust/Web Dev**: First-class support for these languages.
+- **High-Performance Rust-Engineered Code Editing**: Sub-millisecond typing latency, instant file opening, and smooth 120 FPS rendering.
+- **Real-Time Multiplayer Pair Programming**: Collaborating directly in the editor buffer with audio chat and shared cursor sessions.
+- **Integrated Language Model (LLM) Assistants**: Generating code, refactoring functions, and querying codebase context natively.
+- **Modern Tree-sitter & LSP Polyglot Development**: Seamless out-of-the-box support for Rust, TypeScript, Python, and Go.
+
+## Quick Start
+
+### 1. Minimal ~/.config/zed/settings.json
+
+```json
+{
+  "theme": "One Dark",
+  "buffer_font_family": "JetBrains Mono",
+  "buffer_font_size": 14,
+  "tab_size": 2,
+  "hard_tabs": false,
+  "format_on_save": "on",
+  "formatter": "auto",
+  "lsp": {
+    "rust-analyzer": {
+      "initialization_options": {
+        "checkOnSave": { "command": "clippy" }
+      }
+    }
+  }
+}
+```
+
+### 2. Core Shortcuts
+
+- `Cmd + P`: File finder
+- `Cmd + Shift + P`: Command palette
+- `Cmd + Shift + F`: Project search
+- `Cmd + ?`: Toggle AI Assistant panel
 
 ## Core Concepts
 
-### Channel
+### Production Zed Configuration (`~/.config/zed/settings.json`)
 
-A persistent chat room + coding session. Teams hang out in a Channel.
+Configuring typography, formatters, LSP language servers, and AI integration:
 
-### GPUI
+```json
+{
+  "theme": "One Dark",
+  "ui_font_size": 15,
+  "buffer_font_size": 14,
+  "buffer_font_family": "JetBrains Mono",
+  "autosave": "on_focus_change",
+  "format_on_save": "on",
+  "tab_size": 2,
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false
+  },
+  "languages": {
+    "TypeScript": {
+      "language_servers": ["vtsls", "!typescript-language-server"],
+      "formatter": {
+        "external": {
+          "command": "prettier",
+          "arguments": ["--stdin-filepath", "{buffer_path}"]
+        }
+      }
+    },
+    "Rust": {
+      "language_servers": ["rust-analyzer"]
+    },
+    "Python": {
+      "language_servers": ["pyright", "ruff"]
+    }
+  },
+  "assistant": {
+    "default_model": {
+      "provider": "anthropic",
+      "model": "claude-3-5-sonnet"
+    }
+  }
+}
+```
 
-Rendered on the GPU. 120fps typing experience.
+### Custom Modal & Vim Keybindings (`~/.config/zed/keymap.json`)
 
-### Assistant Panel
+Customizing keymaps for high-speed navigation:
 
-Built-in chat with context. Can use OpenAI, Anthropic, or Ollama (local models).
+```json
+[
+  {
+    "context": "Editor && vim_mode == normal",
+    "bindings": {
+      "space f f": "file_finder::Toggle",
+      "space f g": "pane::DeploySearch",
+      "space b d": "pane::CloseActiveItem",
+      "space c a": "editor::ToggleCodeActions",
+      "g d": "editor::GoToDefinition",
+      "g r": "editor::FindAllReferences"
+    }
+  }
+]
+```
 
-## Best Practices (2025)
+### Instant Multiplayer Collaboration
 
-**Do**:
+- Click the **Collaborate** icon in the top right window header.
+- Share your room link or invite team members via GitHub username.
+- Teammates share editor views, follow cursors, and edit code concurrently without screen-sharing lag.
 
-- **Use Vim Mode**: Zed's Vim emulation is excellent and getting better.
-- **Edit Remote**: Use `ssh` remote editing which is buttery smooth compared to VS Code.
-- **Bind AI**: Map `Command-Enter` to send to assistant.
+## Common Patterns
 
-**Don't**:
+### Multi-Buffer Project Search & Replace
 
-- **Don't expect every Extension**: The extension ecosystem is growing but strictly smaller than VS Code's.
+**Problem**: Search across entire codebase and edit results simultaneously in a single unified buffer.  
+**Solution**: Open multi-buffer editor.
+
+1. Press `Cmd + Shift + F` to open Project Search.
+2. Enter search term and press `Enter`.
+3. Press `Option + Enter` to expand all matches into an editable multi-buffer.
+4. Make code edits across multiple files in place and save (`Cmd + S`) to write to all files.
+
+### Configuring Custom Language Servers in Zed
+
+**Problem**: Configure specific language server arguments and formatters in Zed.  
+**Solution**: Define server settings in `settings.json`.
+
+```json
+{
+  "languages": {
+    "Python": {
+      "language_servers": ["pyright", "ruff"],
+      "format_on_save": "on",
+      "formatter": {
+        "external": {
+          "command": "ruff",
+          "arguments": ["format", "--stdin-filename", "{buffer_path}"]
+        }
+      }
+    }
+  }
+}
+```
+
+## Best Practices (2026)
+
+- **Do** configure `format_on_save: "on"` with external tools (Prettier, Ruff, Rustfmt) for automated code cleanliness.
+- **Do** use `vtsls` for TypeScript development in Zed for superior performance and memory efficiency.
+- **Do** enable Vim mode (`"vim_mode": true`) if accustomed to modal editing workflows.
+- **Do** leverage the native Assistant Panel (`Cmd + ?`) with codebase context for rapid refactoring.
+- **Don't** overload project folders with unexcluded build caches (`target`, `dist`, `.next`).
+- **Don't** hardcode private API keys in `settings.json`; use system keychain or environment variables.
+- **Don't** leave collaborative rooms open and public when editing sensitive production configuration files.
+
+## Troubleshooting
+
+| Error / Symptom                        | Cause                                                               | Solution                                                                                                    |
+| -------------------------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Language server fails to initialize    | Server binary (e.g. `gopls`, `pyright`) not found in system `$PATH` | Install server binary globally or ensure it is accessible in user shell environment.                        |
+| Keybinding clash with system shortcuts | Mac system keyboard shortcuts intercepting Zed keystrokes           | Check `settings.json` keymap overrides under `~/.config/zed/keymap.json`.                                   |
+| Zed AI Assistant fails to respond      | Missing API key (OpenAI/Anthropic) or quota exceeded                | Open Zed settings and configure `"features": { "edit_prediction_provider": "copilot" }` or provide API key. |
 
 ## References
 

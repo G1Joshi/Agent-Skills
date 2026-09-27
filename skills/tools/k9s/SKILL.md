@@ -1,6 +1,6 @@
 ---
 name: k9s
-description: k9s terminal UI for Kubernetes. Use for K8s management.
+description: Expert K9s CLI assistance covering terminal Kubernetes cluster navigation, real-time log streaming, port forwarding, and pod debugging. Use when managing and troubleshooting Kubernetes clusters with speed.
 ---
 
 # K9s
@@ -9,35 +9,136 @@ K9s is a terminal UI (TUI) for Kubernetes. It is faster than clicking in a web d
 
 ## When to Use
 
-- **Cluster Management**: Viewing Pods, Logs, and YAML in real-time.
-- **Debugging**: Shell into a pod (`s`), view logs (`l`), delete pod (`Ctrl+d`).
-- **Safety**: Read-only mode prevents accidental deletions in Prod.
+- **Terminal-Based Kubernetes Cluster Management**: Fast, interactive curses UI for navigating pods, services, and deployments.
+- **Real-Time Log Streaming & Resource Monitoring**: Tailing multi-pod logs, sorting by CPU/memory, and port forwarding.
+- **Custom K9s Plugins & Aliases**: Extending the CLI with custom shell commands (e.g. running stern, cert-manager status).
+- **Read-Only Inspection & Troubleshooting**: Safely debugging production clusters with read-only modes.
+
+## Quick Start
+
+```bash
+# Launch k9s with active kubeconfig
+k9s
+
+# Navigation shortcuts in k9s:
+# :pods      - View all pods across namespaces
+# :deploy    - View deployments
+# :svc       - View services
+# /<term>    - Filter items in active view
+# l          - Stream logs for selected pod
+# s          - Open shell (exec) inside selected container
+```
 
 ## Core Concepts
 
-### Views
+#Custom Plugins Configuration (plugins.yaml)
 
-Navigate by resource type (`:pods`, `:svc`, `:deploy`).
+Adding custom keyboard commands for rapid debugging:
 
-### XRay
+```yaml
+# ~/.config/k9s/plugins.yaml
+plugin:
+  # Press 'Shift-D' on a deployment to view detailed rollout history
+  rollout-history:
+    shortCut: Shift-D
+    confirm: false
+    description: "Rollout History"
+    scopes:
+      - deployments
+    command: kubectl
+    background: false
+    args:
+      - rollout
+      - history
+      - deployment/$NAME
+      - -n
+      - $NAMESPACE
 
-`:xray RESOURCE` creates a dependency tree view (e.g., Service -> Pod -> Node).
+  # Press 'Shift-F' on a pod to launch interactive debug container
+  debug-pod:
+    shortCut: Shift-F
+    confirm: true
+    description: "Debug Pod"
+    scopes:
+      - pods
+    command: kubectl
+    background: false
+    args:
+      - debug
+      - -it
+      - $NAME
+      - --image=nicolaka/netshoot
+      - -n
+      - $NAMESPACE
+```
 
-### Pulses
+#Essential Navigation & Keyboard Shortcuts
 
-`:pulse` gives a high-level health dashboard.
+Accelerating cluster management:
 
-## Best Practices (2025)
+- `:pod`: Jump to Pod view across namespaces.
+- `:svc`, `:deploy`, `:ing`: Jump to Services, Deployments, and Ingresses.
+- `/`: Search and filter resources by name or status.
+- `l`: Tail logs for selected pod or container.
+- `s`: Open an interactive shell (`sh` / `bash`) inside the selected container.
+- `Shift-F`: Port-forward local port to selected pod service port.
+- `y`: View full YAML manifest of selected resource.
 
-**Do**:
+#Launching K9s with Custom Options
 
-- **Use Aliases**: Define aliases for commonly used CRDs.
-- **Use Plugins**: Extend K9s with custom scripts (e.g., `kubectl neat` to clean YAML).
-- **Context Awareness**: Use skins to color-code Prod (Red) vs Dev (Blue).
+Starting K9s in secure modes:
 
-**Don't**:
+```bash
+# Launch in read-only mode to prevent accidental pod deletion in production
+k9s --readonly --namespace production
 
-- **Don't rely solely on it**: Know your `kubectl` commands for scripting/automation.
+# Specify custom context and refresh rate
+k9s --context prod-eks-cluster --refresh 2
+```
+
+## Common Patterns
+
+#Custom K9s Shortcuts and Plugins
+**Problem**: Frequently running custom kubectl commands across different namespaces.  
+**Solution**: Define custom plugins in `~/.config/k9s/plugin.yaml`.
+
+```yaml
+# ~/.config/k9s/plugin.yaml
+plugin:
+  raw-logs:
+    shortCut: Shift-L
+    description: "Tail logs without truncation"
+    scopes:
+      - pods
+    command: kubectl
+    background: false
+    args:
+      - logs
+      - -f
+      - $NAME
+      - -n
+      - $NAMESPACE
+      - --context
+      - $CONTEXT
+```
+
+## Best Practices (2026)
+
+- **Do** use `k9s --readonly` when connecting to production environments to prevent accidental deletions.
+- **Do** configure custom plugins in `~/.config/k9s/plugins.yaml` for repetitive `kubectl` commands.
+- **Do** use the port-forward shortcut (`Shift-F`) instead of typing long `kubectl port-forward` commands.
+- **Do** filter views using `<all>` namespaces or specific namespaces to reduce API server query loads.
+- **Don't** leave dozens of active port forwards open; manage and terminate them in the `:portforwards` view.
+- **Don't** run K9s against large enterprise clusters without setting appropriate `--refresh` intervals.
+- **Don't** delete persistent volume claims (PVCs) through K9s without verifying backups.
+
+## Troubleshooting
+
+| Error                                    | Cause                                                              | Solution                                                                                        |
+| :--------------------------------------- | :----------------------------------------------------------------- | :---------------------------------------------------------------------------------------------- |
+| `Boom!! K9s cannot connect to cluster`   | Active kubeconfig context invalid or cluster endpoint unreachable. | Verify connection: `kubectl cluster-info` and switch context with `kubectl config use-context`. |
+| `Pod logs failing to stream in k9s`      | Pod container crashed or user lacks RBAC `pods/log` permission.    | Check container status and verify cluster role permissions.                                     |
+| `Terminal display corrupted / artifacts` | Incompatible terminal terminfo or small terminal window.           | Run `export TERM=xterm-256color` and maximize terminal window.                                  |
 
 ## References
 
