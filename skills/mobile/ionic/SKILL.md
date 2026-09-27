@@ -1,6 +1,6 @@
 ---
 name: ionic
-description: Ionic hybrid mobile framework with web technologies. Use for hybrid mobile apps.
+description: Expert Ionic Framework assistance covering responsive mobile UI components, Ionic Vue/React/Angular integrations, mobile navigation, and Capacitor deployment. Use when designing mobile-first web applications, building hybrid apps, or standardizing cross-platform UI components.
 ---
 
 # Ionic
@@ -9,10 +9,10 @@ Ionic Framework is an open-source UI toolkit for building performant, high-quali
 
 ## When to Use
 
-- Web developers (Angular/React/Vue) wanting to build mobile apps.
-- Building a Progressive Web App (PWA) and mobile app from the exact same codebase.
-- Apps with heavy data entry forms or standard UI patterns (lists, tabs).
-- Enterprise apps requiring write-once-deploy-everywhere.
+- **Web-First Cross-Platform Apps**: Building mobile-optimized applications using standard web frameworks (Vue, React, Angular) with Ionic UI components.
+- **Design System Consistency**: Ensuring UI components adapt automatically to iOS (Cupertino) and Android (Material Design) design guidelines.
+- **Hybrid PWA + Mobile Store Deployment**: Serving a production Progressive Web App that compiles directly to iOS/Android via Capacitor.
+- **Enterprise CRUD Applications**: Delivering business applications rapidly with prebuilt form controls, virtual scrollers, and adaptive navigation.
 
 ## Quick Start
 
@@ -76,49 +76,115 @@ export default Home;
 
 ## Core Concepts
 
-### Web Components
+#Platform-Adaptive UI (Material vs Cupertino)
 
-Ionic components (`<ion-button>`, `<ion-card>`) are Web Components. They work in any framework (or no framework) and encapsulate their styles and behavior (Shadow DOM).
+Ionic components automatically detect host operating systems and adjust styling, typography, ripple effects, and icon placements:
 
-### Adaptive Styling
+```tsx
+import React from "react";
+import {
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonButton,
+  IonIcon,
+} from "@ionic/react";
+import { arrowForwardOutline } from "ionicons/icons";
 
-Ionic automatically adapts the look and feel based on the platform.
+export const DashboardScreen: React.FC = () => (
+  <>
+    <IonHeader>
+      <IonToolbar color="primary">
+        <IonTitle>Enterprise Dashboard</IonTitle>
+      </IonToolbar>
+    </IonHeader>
+    <IonContent className="ion-padding">
+      <IonButton expand="block" shape="round">
+        Continue <IonIcon slot="end" icon={arrowForwardOutline} />
+      </IonButton>
+    </IonContent>
+  </>
+);
+```
 
-- **iOS**: Uses Cupertino design standards.
-- **Android**: Uses Material Design.
-- No code change required.
+#Mobile Navigation with IonRouterOutlet
 
-### Capacitor Integration
+Maintains separate page navigation stacks for iOS and Android, caching previous pages in the DOM to preserve scroll positions:
 
-Ionic uses **Capacitor** as the native bridge. It provides a Native Runtime for the web app and exposes native APIs (Camera, Geolocation, Haptics) via JavaScript plugins.
+```tsx
+import { IonReactRouter } from "@ionic/react-router";
+import { IonRouterOutlet } from "@ionic/react";
+import { Route, Redirect } from "react-router-dom";
+
+export const AppRouter: React.FC = () => (
+  <IonReactRouter>
+    <IonRouterOutlet>
+      <Route exact path="/dashboard" component={DashboardScreen} />
+      <Route exact path="/details/:id" component={DetailScreen} />
+      <Redirect exact from="/" to="/dashboard" />
+    </IonRouterOutlet>
+  </IonReactRouter>
+);
+```
+
+#Ionic Lifecycle Events
+
+Ionic provides component lifecycle hooks that trigger when views enter and leave the active navigation stack (complementing React/Vue lifecycles):
+
+```typescript
+import { useIonViewDidEnter, useIonViewDidLeave } from "@ionic/react";
+
+const AnalyticsView: React.FC = () => {
+  useIonViewDidEnter(() => {
+    // Triggers when page finishes animating into view
+    fetchLatestMetrics();
+  });
+
+  useIonViewDidLeave(() => {
+    // Triggers when navigated away (page remains cached in DOM)
+    cancelActiveTimers();
+  });
+
+  return <div>Analytics Active</div>;
+};
+```
 
 ## Common Patterns
 
-### Lazy Loading
+#Native Biometric Authentication with Capacitor
+**Problem**: Secure mobile app access using FaceID / TouchID on iOS and Android.  
+**Solution**: Integrate `@capacitor-community/biometric-auth`.
 
-Crucial for startup performance.
+```typescript
+import { BiometricAuth } from "@capacitor-community/biometric-auth";
 
-- **Angular**: Use `loadChildren` in Router.
-- **React**: Use `React.lazy` and `Suspense`.
+async function authenticateUser(): Promise<boolean> {
+  const available = await BiometricAuth.checkBiometry();
+  if (!available.isAvailable) return false;
 
-### Overlay Components
+  const result = await BiometricAuth.verify({
+    reason: "Authenticate to view sensitive account details",
+    title: "Biometric Login",
+  });
+  return result.verified;
+}
+```
 
-Modals, Alerts, and Action Sheets are handled via controllers or hooks (`useIonModal`), ensuring they render outside the regular DOM flow for proper z-indexing.
-
-## Best Practices
+## Best Practices (2026)
 
 **Do**:
 
-- Use **Capacitor** instead of Cordova for new projects.
-- Use **Virtual Scroll** (or framework equivalents) for long lists.
-- Test on real devices early (Web view behavior can differ from Chrome Desktop).
-- Use `ion-img` instead of `img` for efficient lazy loading within `ion-content`.
+- **Pair with Modern Capacitor**: Always use Capacitor (not Cordova) for native device access and plugin capabilities.
+- **Use Ionic CSS Variables**: Customize themes globally using CSS custom properties (`--ion-color-primary`, `--ion-background-color`).
+- **Implement Virtual Scrolling**: Use `@ionic/react` virtual scroller or TanStack Virtual for long item feeds to prevent DOM bloat.
+- **Respect Native Back Navigation**: Handle hardware Android back buttons and iOS swipe-to-go-back gestures gracefully.
 
 **Don't**:
 
-- Don't block the UI thread with synchronous heavy logic (use Web Workers).
-- Don't use arbitrary CSS `z-index` to fix layering (use Ionic utilities/slots).
-- Don't forget to handle the **Hardware Back Button** on Android.
+- **Don't place heavy animations in WebViews**: Use CSS transforms and hardware-accelerated transitions; avoid expensive DOM mutations.
+- **Don't ignore notch safe areas**: Ensure header and footer toolbars leverage Ionic's built-in safe area insets.
+- **Don't mix non-Ionic modal systems**: Use `IonModal` to ensure focus management and native hardware dismiss events work predictably.
 
 ## Troubleshooting
 

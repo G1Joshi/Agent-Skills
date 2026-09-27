@@ -1,6 +1,6 @@
 ---
 name: uikit
-description: UIKit imperative iOS UI framework. Use for iOS development.
+description: Expert UIKit assistance covering UIViewController lifecycles, Auto Layout programmatically, UITableView/UICollectionView architectures, delegates, and view hierarchies. Use when maintaining production iOS applications, writing custom UIKit components, or bridging UIKit with SwiftUI.
 ---
 
 # UIKit
@@ -9,9 +9,10 @@ UIKit is the traditional, imperative framework for building iOS user interfaces.
 
 ## When to Use
 
-- Maintaining legacy iOS codebases (Objective-C or Swift).
-- Fine-grained control over view hierarchy performance not yet possible in SwiftUI.
-- Using third-party libraries that haven't migrated to SwiftUI ViewRepresentables.
+- **Production iOS Codebase Maintenance**: Maintaining and extending established enterprise iOS applications built on UIKit.
+- **Fine-Grained Touch & Gesture Control**: Implementing bespoke drag-and-drop, gesture recognizers, and custom touch tracking.
+- **Complex UICollectionView Layouts**: Building high-performance custom layouts with `UICollectionViewCompositionalLayout` and Diffable Data Sources.
+- **SwiftUI Interoperability**: Hosting complex UIKit view controllers inside SwiftUI via `UIViewControllerRepresentable`.
 
 ## Quick Start
 
@@ -45,48 +46,121 @@ class HomeViewController: UIViewController {
 
 ## Core Concepts
 
-### View Controller Lifecycle
+#UICollectionView Diffable Data Sources & Compositional Layout
 
-Understanding `viewDidLoad`, `viewWillAppear`, `viewDidLayoutSubviews` is critical for managing state and layout updates correctly in the imperative model.
+Eliminates index-path calculation bugs by managing list state through unique hashable identifiers and snapshots:
 
-### Auto Layout
+```swift
+final class FeedViewController: UIViewController {
+    enum Section { case main }
+    struct Post: Hashable { let id: UUID; let title: String }
 
-The layout engine based on constraints. Use `NSLayoutConstraint` or library wrappers (SnapKit) to define rules (e.g., "A is 10px below B").
+    private var collectionView: UICollectionView!
+    private var dataSource: UICollectionViewDiffableDataSource<Section, Post>!
 
-### Delegates & Data Sources
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        configureLayout()
+        configureDataSource()
+    }
 
-Common pattern for handling events (UITableViewDelegate) and providing data (UITableViewDataSource).
+    private func configureLayout() {
+        var config = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
+        collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: UICollectionViewCompositionalLayout.list(using: config))
+        view.addSubview(collectionView)
+    }
+
+    private func configureDataSource() {
+        let registration = UICollectionView.CellRegistration<UICollectionViewListCell, Post> { cell, _, item in
+            var content = cell.defaultContentConfiguration()
+            content.text = item.title
+            cell.contentConfiguration = content
+        }
+        dataSource = UICollectionViewDiffableDataSource<Section, Post>(collectionView: collectionView) { cv, ip, item in
+            cv.dequeueConfiguredReusableCell(using: registration, for: ip, item: item)
+        }
+    }
+}
+```
+
+#UIViewController Lifecycle Flow
+
+Strictly isolates setup, layout, and appearance phases to ensure optimal memory and rendering performance:
+
+```swift
+class OrderDetailViewController: UIViewController {
+    override func loadView() {
+        // Instantiate and assign custom root view (bypassing storyboard)
+        self.view = OrderDetailRootView()
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // One-time data binding, notification registration
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        // Refresh lightweight view state
+    }
+}
+```
+
+#Programmatic Layout Anchor Constraints
+
+Constructs responsive layouts programmatically without external dependencies:
+
+```swift
+NSLayoutConstraint.activate([
+    headerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+    headerView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+    headerView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+    headerView.heightAnchor.constraint(equalToConstant: 64)
+])
+```
 
 ## Common Patterns
 
-### Diffable Data Source
+#Programmatic Auto Layout with NSLayoutConstraint
+**Problem**: Storyboard merge conflicts and fragile constraint debugging in team repositories.  
+**Solution**: Construct view hierarchies and constraints purely in Swift.
 
-Modern replacement for `reloadData()`.
+```swift
+final class ProfileViewController: UIViewController {
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = .systemFont(ofSize: 20, weight: .bold)
+        return label
+    }()
 
-- Uses `NSDiffableDataSourceSnapshot` to animate changes automatically and safely.
-- eliminates "Index out of range" crashes during updates.
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .systemBackground
+        view.addSubview(titleLabel)
 
-### Compositional Layout
+        NSLayoutConstraint.activate([
+            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            titleLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+    }
+}
+```
 
-Modern API for building complex collection view layouts (grids, carousels) without subclassing `UICollectionViewLayout`.
-
-### Coordinator Pattern
-
-Moving navigation logic out of ViewControllers to improve reusability and testing.
-
-## Best Practices
+## Best Practices (2026)
 
 **Do**:
 
-- Use **Diffable Data Sources** for Lists and Collections.
-- Use **Compositional Layouts** instead of FlowLayouts.
-- Use **View Binding** mechanisms (like Combine) to update UI, rather than manually setting properties everywhere.
+- **Adopt Diffable Data Sources**: Replace error-prone `reloadData()` and `performBatchUpdates()` with atomic `NSDiffableDataSourceSnapshot`.
+- **Use `translatesAutoresizingMaskIntoConstraints = false`**: Always disable autotranslation on programmatically created views before activating constraints.
+- **Bridge with SwiftUI**: Wrap new feature views in `UIHostingController` rather than rebuilding everything in UIKit.
+- **Audit Retain Cycles in Closures**: Capture `[weak self]` in completion handlers and event closures to prevent ViewController leaks.
 
 **Don't**:
 
-- Don't use massive Storyboards (merge conflicts hell).
-- Don't force `layoutIfNeeded()` unless animating changes.
-- Don't forget `[weak self]` in closures to avoid memory leaks (Retain Cycles).
+- **Don't trigger expensive layout inside `draw(_:)`**: Keep custom core graphics rendering strictly inside draw methods; avoid layout passes.
+- **Don't hardcode frame coordinates**: Avoid explicit `CGRect(x: ..., y: ...)` math; use Auto Layout or safe area layout guides.
+- **Don't block the main thread**: Perform data decoding and persistence asynchronously and update UIKit views on `MainActor`.
 
 ## Troubleshooting
 

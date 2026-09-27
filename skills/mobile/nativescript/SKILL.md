@@ -1,6 +1,6 @@
 ---
 name: nativescript
-description: NativeScript native mobile with JS. Use for native mobile.
+description: Expert NativeScript assistance covering direct native API access from JavaScript/TypeScript, XML layouts, custom native wrappers, and cross-platform app deployment. Use when building truly native mobile apps without WebViews using JavaScript or TypeScript.
 ---
 
 # NativeScript
@@ -9,9 +9,10 @@ NativeScript allows you to write native mobile apps using JavaScript/TypeScript,
 
 ## When to Use
 
-- You need 100% native performance and API access but want to share logic in JS/TS.
-- You want to use Angular or Vue architecture for mobile.
-- You need to access a new native API (e.g., latest iOS SDK) immediately without waiting for a plugin wrapper.
+- **Direct Native API Access**: Invoking 100% of native iOS (Objective-C/Swift) and Android (Java/Kotlin) APIs directly from TypeScript/JavaScript.
+- **True Native Views without WebViews**: Building apps that render native UIKit/SwiftUI and Android View/Compose hierarchies without WebView overhead.
+- **Familiar Web Framework Tooling**: Writing native mobile apps using modern Angular, Vue, React, or Svelte frameworks.
+- **High-Performance Hardware Interop**: Interfacing directly with native device hardware libraries and third-party iOS CocoaPods or Android AARs.
 
 ## Quick Start
 
@@ -32,35 +33,125 @@ console.log(time.format("%d.%m.%Y"));
 
 ## Core Concepts
 
-### Runtime Marshalling
+#Direct Native Runtime Bridge
 
-The V8 (Android) and JavaScriptCore (iOS) engines are modified to inject native APIs into the JS global scope.
+NativeScript generates JavaScript runtime bindings for all platform APIs at compile time, allowing direct native instantiation:
 
-- `new android.widget.Button(context)` creates a real Android Button.
-- `UILabel.alloc().init()` creates a real iOS Label.
+```typescript
+import { isIOS, isAndroid } from "@nativescript/core";
 
-### Layouts
+export function showNativeNotification(title: string, message: string) {
+  if (isIOS) {
+    const alert =
+      UIAlertController.alertControllerWithTitleMessagePreferredStyle(
+        title,
+        message,
+        UIAlertControllerStyle.Alert,
+      );
+    alert.addAction(
+      UIAlertAction.actionWithTitleStyleHandler(
+        "OK",
+        UIAlertActionStyle.Default,
+        null,
+      ),
+    );
+    UIApplication.sharedApplication.keyWindow.rootViewController.presentViewControllerAnimatedCompletion(
+      alert,
+      true,
+      null,
+    );
+  } else if (isAndroid) {
+    const context = android.app.Application;
+    android.widget.Toast.makeText(
+      context,
+      message,
+      android.widget.Toast.LENGTH_SHORT,
+    ).show();
+  }
+}
+```
 
-NativeScript uses its own layout system that maps to native structures.
+#Declarative Native Layout Containers
 
-- `StackLayout`, `GridLayout`, `FlexboxLayout`.
+NativeScript layouts translate directly into native ViewGroup components:
 
-### Plugins
+```xml
+<!-- app-main.xml -->
+<Page xmlns="http://schemas.nativescript.org/tns.xsd" navigatingTo="onNavigatingTo">
+    <ActionBar title="Inventory Manager" class="action-bar" />
+    <GridLayout rows="auto, *" columns="*">
+        <SearchBar row="0" hint="Search items..." text="{{ searchQuery }}" />
+        <ListView row="1" items="{{ inventoryItems }}">
+            <ListView.itemTemplate>
+                <StackLayout class="item-card">
+                    <Label text="{{ name }}" class="item-title" />
+                    <Label text="{{ stockCount }}" class="item-subtitle" />
+                </StackLayout>
+            </ListView.itemTemplate>
+        </ListView>
+    </GridLayout>
+</Page>
+```
 
-While you _can_ call native APIs directly, plugins are used to simplify complex tasks (Camera, Map) and provide a unified JS API.
+#Native Plugin Integration via CocoaPods & Gradle
 
-## Best Practices
+Seamlessly bundles third-party native libraries:
+
+```ruby
+# App_Resources/iOS/Podfile
+pod 'Lottie', '~> 4.0'
+```
+
+## Common Patterns
+
+### Platform-Specific Code Splitting
+
+**Problem**: Writing distinct native implementations for iOS and Android without polluting UI files with runtime branching.
+
+**Solution**:
+Use file suffix convention (`.ios.ts` and `.android.ts`) or conditional platform checks:
+
+```typescript
+import { isAndroid, isIOS, Application } from "@nativescript/core";
+
+export function showToast(message: string): void {
+  if (isAndroid) {
+    android.widget.Toast.makeText(
+      Application.android.context,
+      message,
+      android.widget.Toast.LENGTH_SHORT,
+    ).show();
+  } else if (isIOS) {
+    // Present native UIAlertController on root view controller
+    const alert =
+      UIAlertController.alertControllerWithTitleMessagePreferredStyle(
+        null,
+        message,
+        UIAlertControllerStyle.Alert,
+      );
+    Application.ios.rootController.presentViewControllerAnimatedCompletion(
+      alert,
+      true,
+      null,
+    );
+  }
+}
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- Use **TypeScript** strictly. Direct native access without types is error-prone.
-- Offload heavy CPU tasks to **Worker Threads** (JS runs on the main UI thread).
-- Use `Webpack` optimizations provided by the CLI.
+- **Use Modern Framework Flavors**: Prefer `@nativescript/angular` or `@nativescript/vue` for modern component architectures.
+- **Cache Native Object Lookups**: Store repeated native references instead of constantly traversing the JS-to-native reflection bridge.
+- **Implement Virtualized Lists**: Always use `ListView` or `CollectionView` rather than repeating items inside a `ScrollView`.
+- **Test on Physical Devices**: Native bridge behavior and memory performance differ significantly between simulators and actual devices.
 
 **Don't**:
 
-- Don't block the main thread.
-- Don't assume CSS works exactly like the web (it's a subset/mapping).
+- **Don't use HTML/DOM APIs**: There is no browser DOM in NativeScript; do not reference `document.getElementById` or `window`.
+- **Don't block the Native UI Thread**: Offload heavy computational algorithms to background Web Workers.
+- **Don't ignore Platform Differences**: Account for distinct iOS navigation controllers versus Android activity back-stack lifecycles.
 
 ## Troubleshooting
 

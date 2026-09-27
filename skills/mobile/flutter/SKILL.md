@@ -1,6 +1,6 @@
 ---
 name: flutter
-description: Flutter cross-platform UI toolkit with Dart. Use for mobile/web/desktop.
+description: Expert Flutter assistance covering declarative widget trees, state management (Bloc/Riverpod/Provider), custom painters, platform channels, and cross-platform compilation. Use when building iOS, Android, web, and desktop applications using Flutter and Dart.
 ---
 
 # Flutter
@@ -9,10 +9,10 @@ Flutter is Google's UI toolkit for building natively compiled applications for m
 
 ## When to Use
 
-- Building high-performance Android and iOS apps with a single codebase.
-- Creating custom, branded UI designs that need to look identical across platforms.
-- Developing prototypes or MVPs quickly with Hot Reload.
-- needing a solution that compiles to native code (ARM/x86) and WebAssembly.
+- **High-Fidelity Cross-Platform Apps**: Building pixel-perfect, hardware-accelerated applications for iOS, Android, Web, and Desktop from a single Dart codebase.
+- **Custom Brand & Animation Experiences**: Creating bespoke UI widgets, smooth transitions, and complex interactive canvases using Impeller rendering engine.
+- **Fast Prototyping & Iteration**: Utilizing sub-second Stateful Hot Reload to iterate rapidly on UI components and application logic.
+- **Unified Enterprise Applications**: Maintaining unified multi-screen architectures spanning mobile tablets, point-of-sale systems, and web consoles.
 
 ## Quick Start
 
@@ -85,26 +85,83 @@ class HomePage extends StatelessWidget {
 
 ## Core Concepts
 
-### Widget Tree & Element Tree
+#Widget Tree, Element Tree & RenderObject Architecture
 
-Flutter uses a reactive style where the UI is built from a tree of immutable Widgets.
+Flutter bypasses platform WebViews and OEM widgets, rendering directly via the Impeller graphics engine:
 
-- **Widget**: A configuration for an Element. Immutable description of part of the UI.
-- **Element**: An instantiation of a Widget at a particular location in the tree. Mutable manager of state and lifecycle.
-- **RenderObject**: The actual object that gets painted on the screen.
+```dart
+// Declarative immutable widget tree
+class MetricCard extends StatelessWidget {
+  final String label;
+  final double value;
 
-### State Management (Bloc)
+  const MetricCard({super.key, required this.label, required this.value});
 
-Modern Flutter apps often use the **Bloc** (Business Logic Component) pattern for separation of concerns and predictable state.
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceVariant,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(height: 4),
+          Text('\$${value.toStringAsFixed(2)}', style: Theme.of(context).textTheme.headlineMedium),
+        ],
+      ),
+    );
+  }
+}
+```
 
-- **Events**: Inputs to the Bloc (e.g., button pressed).
-- **States**: Outputs from the Bloc (e.g., loading, data loaded).
-- **Bloc/Cubit**: The class that receives events and emits new states.
-- **BlocBuilder**: Widget that rebuilds in response to new states.
+#Predictable State Management with Bloc / Cubit
 
-### Asynchronous Programming (Isolates)
+Decouples UI layout from reactive business logic via event-driven streams:
 
-Dart is single-threaded but event-driven. Heavy computations should be moved to background **Isolates** to avoid blocking the UI thread (jank).
+```dart
+// State Definition
+sealed class CounterState {}
+class CounterValue extends CounterState { final int count; CounterValue(this.count); }
+
+// Cubit Logic
+class CounterCubit extends Cubit<CounterState> {
+  CounterCubit() : super(CounterValue(0));
+  void increment() {
+    final current = (state as CounterValue).count;
+    emit(CounterValue(current + 1));
+  }
+}
+
+// Consumed in UI via BlocBuilder
+BlocBuilder<CounterCubit, CounterState>(
+  builder: (context, state) {
+    return Text('Count: ${(state as CounterValue).count}');
+  },
+)
+```
+
+#Platform Channels for Native Integration
+
+Bidirectional asynchronous message passing between Dart and platform-native Swift/Kotlin:
+
+```dart
+class BatteryService {
+  static const _channel = MethodChannel('com.example.app/battery');
+
+  static Future<int> getBatteryLevel() async {
+    try {
+      final int level = await _channel.invokeMethod('getBatteryLevel');
+      return level;
+    } on PlatformException catch (e) {
+      return -1;
+    }
+  }
+}
+```
 
 ## Common Patterns
 
@@ -136,29 +193,29 @@ lib/
 - **Domain Layer**: Entities, business logic (pure Dart).
 - **Presentation Layer**: Widgets, Blocs/Cubits.
 
-## Best Practices
+## Best Practices (2026)
 
 **Do**:
 
-- **Use `const` constructors** everywhere possible to optimize rebuilds.
-- **Use `GoRouter`** for deep linking and declarative navigation.
-- **Use `flutter_bloc`** to separate business logic from UI.
-- **Use `ThemeData`** and `TextTheme` for consistent styling.
+- **Leverage `const` Constructors Everywhere**: Mark immutable widgets with `const` to allow Flutter to skip unnecessary widget rebuilds.
+- **Rely on the Impeller Engine**: Ensure modern Impeller rendering is active on iOS and Android to prevent shader compilation jank.
+- **Split Large Build Methods into Subwidgets**: Extract deep widget hierarchies into dedicated `StatelessWidget` classes for clean rebuild scopes.
+- **Implement Strict Lint Rules**: Enforce `flutter_lints` or `very_good_analysis` in `analysis_options.yaml`.
 
 **Don't**:
 
-- **Don't put complex logic** inside `build()` methods.
-- **Don't misuse `setState`** for complex global state.
-- **Don't block the main thread**; use `compute()` for heavy JSON parsing or calculations.
+- **Don't perform async operations directly inside `build()`**: Never call HTTP requests or database operations in build methods.
+- **Don't overuse `setState` in Root Widgets**: Keep state local; triggering top-level `setState` forces excessive full-tree recomposition.
+- **Don't hardcode fixed pixel sizes for layouts**: Use `LayoutBuilder`, `MediaQuery`, and Flexible/Expanded widgets for responsive scaling.
 
 ## Troubleshooting
 
-| Error | Cause | Solution |
-140: | :--------------------------------------------- | :--------------------------------------------- | :----------------------------------------------------------- |
-141: | `RenderFlex overflowed by ... pixels` | Content is too wide/tall for the parent. | Wrap in `Expanded`, `Flexible`, or `SingleChildScrollView`. |
-142: | `ProviderNotFoundException` | Reading a Bloc without a provider up the tree. | Ensure `BlocProvider` wraps the widget trying to access it. |
-143: | `LateInitializationError` | Accessing a `late` variable before assignment. | Ensure generic initialization or use nullable types locally. |
-144: | `Vertical viewport was given unbounded height` | ListView inside Column without constraints. | Wrap ListView in `Expanded` or `SizedBox`. |
+| Error                                          | Cause                                          | Solution                                                     |
+| :--------------------------------------------- | :--------------------------------------------- | :----------------------------------------------------------- |
+| `RenderFlex overflowed by ... pixels`          | Content is too wide/tall for the parent.       | Wrap in `Expanded`, `Flexible`, or `SingleChildScrollView`.  |
+| `ProviderNotFoundException`                    | Reading a Bloc without a provider up the tree. | Ensure `BlocProvider` wraps the widget trying to access it.  |
+| `LateInitializationError`                      | Accessing a `late` variable before assignment. | Ensure generic initialization or use nullable types locally. |
+| `Vertical viewport was given unbounded height` | ListView inside Column without constraints.    | Wrap ListView in `Expanded` or `SizedBox`.                   |
 
 ## References
 

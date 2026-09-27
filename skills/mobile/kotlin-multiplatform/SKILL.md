@@ -1,6 +1,6 @@
 ---
 name: kotlin-multiplatform
-description: Kotlin Multiplatform for shared code. Use for cross-platform.
+description: Expert Kotlin Multiplatform (KMP) assistance covering expect/actual declarations, shared business logic across iOS/Android, Compose Multiplatform, and Ktor client integration. Use when sharing domain models, networking, or persistence across platforms while retaining native UI.
 ---
 
 # Kotlin Multiplatform (KMP)
@@ -9,10 +9,10 @@ Kotlin Multiplatform (KMP) allows you to share code between Android, iOS, Web, a
 
 ## When to Use
 
-- Sharing complex business logic and data layers between mobile platforms.
-- Building a "Super App" SDK to be used by other native apps.
-- Teams with strong Kotlin expertise wanting to target iOS.
-- Sharing UI code via Compose Multiplatform (stable for iOS in 2025).
+- **Cross-Platform Shared Logic**: Sharing core business logic, data models, networking, and validation across Android and iOS apps.
+- **Native UI Independence**: Retaining 100% native UI performance (SwiftUI on iOS, Jetpack Compose on Android) while sharing domain code.
+- **Compose Multiplatform**: Building shared user interfaces across Android, iOS, Desktop (JVM), and Web using Kotlin Compose.
+- **SDK & Library Development**: Authoring multiplatform mobile libraries published to Maven Central and CocoaPods/Swift Package Manager.
 
 ## Quick Start
 
@@ -42,46 +42,81 @@ class Greeting {
 
 ## Core Concepts
 
-### Expect / Actual
+#Source Sets Hierarchy (commonMain vs Platform Sets)
 
-Mechanism to define an interface in common code (`expect`) and provide platform-specific implementations (`actual`) in platform modules.
+Shared code lives in `commonMain`; platform-specific source sets bridge native OS features:
 
-### Shared Module
+```
+shared/src/
+  ├── commonMain/kotlin/     # Shared business logic, Ktor, SQLDelight
+  ├── androidMain/kotlin/    # Android-specific APIs & Context
+  └── iosMain/kotlin/        # iOS Objective-C / Swift interop
+```
 
-A Gradle module usually named `shared` or `composeApp`. This compiles to an `.aar` for Android and a `.framework` (or XCFramework) for iOS.
+#`expect` / `actual` Platform Declarations
 
-### Compose Multiplatform
+Defines a common contract that must be implemented by each target platform:
 
-Google's declarative UI framework (Jetpack Compose) ported to iOS, Web, and Desktop by JetBrains. Allows sharing UI code 100%.
+```kotlin
+// commonMain: Contract declaration
+expect class PlatformSecureStorage() {
+    fun store(key: String, value: String)
+    fun retrieve(key: String): String?
+}
+
+// iosMain: Actual implementation using iOS Keychain
+actual class PlatformSecureStorage actual constructor() {
+    actual fun store(key: String, value: String) { /* iOS SecItemAdd */ }
+    actual fun retrieve(key: String): String? { /* iOS SecItemCopyMatching */ return null }
+}
+```
+
+#Shared Persistence with SQLDelight / Room KMP
+
+Compiles SQL queries into type-safe Kotlin data classes shared across platforms:
+
+```kotlin
+// commonMain: Shared Database driver setup
+class DatabaseDriverFactory(private val driver: SqlDriver) {
+    fun createDatabase(): AppDatabase = AppDatabase(driver)
+}
+// Android uses AndroidSqliteDriver; iOS uses NativeSqliteDriver
+```
 
 ## Common Patterns
 
-### Ktor + Kotlinx.Serialization
+#Shared Ktor Client Across iOS and Android
+**Problem**: Duplicating HTTP request logic and deserialization schemas across platforms.  
+**Solution**: Define shared Ktor HttpClient in `commonMain`.
 
-Use **Ktor** for multiplatform networking and **kotlinx.serialization** for JSON parsing. Both are pure Kotlin and work on all targets.
+```kotlin
+// commonMain/src/ApiClient.kt
+class ApiClient(engine: HttpClientEngine) {
+    private val client = HttpClient(engine) {
+        install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
+    }
 
-### SQLDelight / Room
+    suspend fun getItems(): List<Item> = client.get("https://api.example.com/items").body()
+}
 
-Use **SQLDelight** or **Room** (KMP support active) for type-safe database access shared across platforms.
+// androidMain: ApiClient(OkHttp.create())
+// iosMain: ApiClient(Darwin.create())
+```
 
-### Dependency Injection (Koin)
-
-**Koin** is a popular pure Kotlin dependency injection framework that works seamlessly in KMP to manage singletons and factories.
-
-## Best Practices
+## Best Practices (2026)
 
 **Do**:
 
-- Share **Business Logic**, **Data Models**, and **Networking Code**.
-- Use **Compose Multiplatform** for UI if pixel-perfect native compliance isn't critical or for custom branded apps.
-- Use **Coroutines** (Flow/Suspend) for all async operations.
-- Test shared code in `commonTest`.
+- **Export Swift-Friendly Frameworks**: Configure `shared.podspec` or Swift Package export with transitive dependencies enabled.
+- **Use SKIE for Coroutines & Flow Interop**: Generate native Swift `async/await` and `@Observable` wrappers for Kotlin coroutines.
+- **Keep UI Frameworks Decoupled**: Share domain and network logic in `commonMain` while letting iOS teams use native SwiftUI idioms.
+- **Automate Multiplatform CI/CD**: Run Gradle builds on macOS runners to validate both Android and iOS targets in CI pipelines.
 
 **Don't**:
 
-- Don't try to share 100% of code if it degrades the user experience.
-- Don't use Java-dependent libraries in `commonMain` (only pure Kotlin).
-- Don't force `expect/actual` usage if a library (like KMP-NativeCoroutines) can solve the bridging better.
+- **Don't leak Android `Context` into `commonMain`**: Keep domain logic pure and dependency-injected.
+- **Don't expose raw Kotlin coroutine Job types to Swift**: Wrap shared flows with SKIE or custom cancellation tokens.
+- **Don't ignore iOS memory management (ARC)**: Be mindful of reference cycles when sharing objects across the Kotlin/Native boundary.
 
 ## Troubleshooting
 

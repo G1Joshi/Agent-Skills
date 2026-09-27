@@ -1,6 +1,6 @@
 ---
 name: react-native
-description: React Native cross-platform mobile with JavaScript. Use for iOS/Android.
+description: Expert React Native assistance covering the New Architecture (TurboModules, Fabric renderer, Bridgeless mode), Hermes JS engine, React Navigation, and native styling. Use when building cross-platform mobile apps for iOS and Android using React and TypeScript.
 ---
 
 # React Native
@@ -9,10 +9,10 @@ React Native allows you to build native mobile apps using React and JavaScript/T
 
 ## When to Use
 
-- Building iOS and Android apps with a shared codebase.
-- Teams with existing React/Web expertise.
-- Apps requiring Over-the-Air (OTA) updates (via Expo Updates or CodePush).
-- Prototyping cross-platform mobile experiences rapidly.
+- **Universal Mobile Apps**: Building cross-platform iOS and Android applications using React and TypeScript.
+- **The New Architecture**: Leveraging TurboModules, Fabric concurrent rendering, and Bridgeless mode for 60/120fps native performance.
+- **Code Sharing Across Web & Mobile**: Sharing hooks, validation logic, and state stores between React web apps and React Native mobile apps.
+- **Ecosystem Scale**: Accessing the massive ecosystem of React Native libraries, devtools, and component libraries.
 
 ## Quick Start
 
@@ -54,56 +54,143 @@ const styles = StyleSheet.create({
 
 ## Core Concepts
 
-### Native Components vs Web
+#Fabric Renderer & TurboModules (New Architecture)
 
-React Native works by bridging JavaScript to Native UI components.
+Replaces legacy JSON bridge serialization with direct C++ JSI (JavaScript Interface) calls for instant memory access and synchronous layout passes:
 
-- `<View>` maps to `UIView` (iOS) / `android.view.View` (Android).
-- `<Text>` maps to `UITextView` / `TextView`.
-- **New Architecture (Fabric/TurboModules)**: Removes the async bridge for synchronous, direct C++ communication (JSI), improving performance.
+```tsx
+// Modern TurboModule invocation runs synchronously without serialization penalty
+import { TurboModuleRegistry } from "react-native";
 
-### Flexbox Layout
+export interface Spec extends TurboModule {
+  multiply(a: number, b: number): Promise<number>;
+  syncCalculation(x: number): number; // Synchronous C++ method
+}
 
-Layouts use Flexbox (like CSS), but defaults to `flexDirection: 'column'` (unlike row on web). Everything needs strict dimensions or flex grow capabilities.
+export default TurboModuleRegistry.getEnforcing<Spec>("CustomMathModule");
+```
 
-### Fast Refresh
+#High-Performance Layout with Flexbox (Yoga)
 
-React Native preserves local state while reloading components instantly on file save, significantly speeding up the dev loop.
+React Native uses Yoga C++ engine to implement CSS Flexbox layout calculations directly into native mobile views:
+
+```tsx
+import { StyleSheet, View, Text } from "react-native";
+
+export const ProfileHeader = () => (
+  <View style={styles.container}>
+    <View style={styles.avatarPlaceholder} />
+    <View style={styles.textColumn}>
+      <Text style={styles.name}>Jane Doe</Text>
+      <Text style={styles.role}>Principal Engineer</Text>
+    </View>
+  </View>
+);
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    backgroundColor: "#ffffff",
+  },
+  avatarPlaceholder: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#6366f1",
+  },
+  textColumn: { marginLeft: 12 },
+  name: { fontSize: 16, fontWeight: "600", color: "#111827" },
+  role: { fontSize: 13, color: "#6b7280" },
+});
+```
+
+#Concurrent Reanimated Animations
+
+Executes fluid gestures and physics-based animations directly on the UI thread via worklets:
+
+```tsx
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from "react-native-reanimated";
+
+export const PulsingBadge = () => {
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const triggerPulse = () => {
+    scale.value = withSpring(scale.value === 1 ? 1.2 : 1);
+  };
+
+  return <Animated.View style={[styles.badge, animatedStyle]} />;
+};
+```
 
 ## Common Patterns
 
-### Expo Router (File-based Routing)
+#High-Performance Animations with Reanimated
+**Problem**: JavaScript thread frame drops cause jittery mobile gesture animations.  
+**Solution**: Run animations on UI thread using `react-native-reanimated`.
 
-Modern React Native apps use `expo-router` which mimics Next.js.
+```tsx
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from "react-native-reanimated";
+import { GestureDetector, Gesture } from "react-native-gesture-handler";
 
-- `app/index.tsx` -> Home screen
-- `app/(tabs)/_layout.tsx` -> Tab navigation
-- `app/[id].tsx` -> Dynamic routes
+export function DraggableBox() {
+  const offset = useSharedValue({ x: 0, y: 0 });
 
-### Server State (React Query)
+  const panGesture = Gesture.Pan()
+    .onChange((e) => {
+      offset.value = {
+        x: offset.value.x + e.changeX,
+        y: offset.value.y + e.changeY,
+      };
+    })
+    .onEnd(() => {
+      offset.value = withSpring({ x: 0, y: 0 });
+    });
 
-Avoid Redux for API state. Use `TanStack Query` (React Query).
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: offset.value.x }, { translateY: offset.value.y }],
+  }));
 
-- Caches data, handles loading/error states, and manages refetching.
+  return (
+    <GestureDetector gesture={panGesture}>
+      <Animated.View
+        style={[
+          { width: 80, height: 80, backgroundColor: "#6366f1" },
+          animatedStyle,
+        ]}
+      />
+    </GestureDetector>
+  );
+}
+```
 
-### Client State (Zustand)
-
-For global app state (theme, auth token), `Zustand` is preferred over Redux/Context for its simplicity and performance (selectors).
-
-## Best Practices
+## Best Practices (2026)
 
 **Do**:
 
-- Use **Expo** for new projects unless you have strict native code dependency needs that Config Plugins can't handle.
-- Use **TypeScript** for type safety.
-- Use **FlashList** (by Shopify) instead of `FlatList` for long lists performance.
-- Use **Reanimated** for complex animations (runs on UI thread).
+- **Enable the New Architecture**: Ensure `newArchEnabled=true` is active in `android/gradle.properties` and CocoaPods.
+- **Use FlashList Instead of FlatList**: Adopt Shopify's `@shopify/flash-list` for recycling cell views without memory spikes or blank cells.
+- **Extract Styles with `StyleSheet.create`**: Prevent creating new style objects on every render pass.
+- **Profile with React DevTools and Flipper/Chrome Inspector**: Measure layout passes and identify unnecessary component re-renders.
 
 **Don't**:
 
-- Don't leave `console.log` in production builds (it slows down the bridge).
-- Don't do heavy calculations in the JS thread during animations/gestures.
-- Don't define styles inside the render function (recreates objects every render).
+- **Don't pass raw anonymous functions to FlatList items**: Memoize render items using `useCallback` or dedicated subcomponents.
+- **Don't perform heavy work on the JavaScript thread**: Offload encryption, image compression, and heavy parsing to background threads or native modules.
+- **Don't ignore Android BackHandler**: Always handle hardware back presses to avoid terminating user flows abruptly.
 
 ## Troubleshooting
 
