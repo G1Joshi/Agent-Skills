@@ -1,6 +1,6 @@
 ---
 name: cockroachdb
-description: CockroachDB distributed SQL database. Use for geo-distributed data.
+description: Expert CockroachDB distributed SQL assistance covering global ACID transactions, Raft consensus, multi-region survivability, and geo-partitioning. Use when scaling relational PostgreSQL workloads across multiple clouds or regions.
 ---
 
 # CockroachDB
@@ -9,9 +9,10 @@ CockroachDB is a cloud-native, distributed SQL database. It survives disk, machi
 
 ## When to Use
 
-- **Global/Multi-Region Apps**: "Geo-partitioning" ties data to specific locations for low latency and compliance (GDPR).
-- **Financial Ledgers**: Strong consistency (Serializable Isolation) is the default.
-- **Serverless (2025)**: Use CockroachDB Serverless for auto-scaling from zero to millions of requests without managing nodes.
+- **Global Distributed SQL**: Multi-region enterprise applications requiring PostgreSQL compatibility with multi-region write latency optimization.
+- **Zero-Downtime Surviving Outages**: Applications requiring automated failover and self-healing data survival across region or datacenter outages.
+- **Strict Serializable ACID Transactions**: Systems requiring the highest isolation level (Serializable) to prevent phantom reads and write skews.
+- **Horizontal Scaling without Sharding**: Scaling relational databases beyond single-instance limits without manual application-layer sharding.
 
 ## Quick Start
 
@@ -31,30 +32,89 @@ COMMIT;
 
 ## Core Concepts
 
-### Ranges
+#Raft Consensus Ranges & Distributed Storage
 
-Data is broken into 512MB chunks called "Ranges". These are replicated (Raft consensus) across 3+ nodes.
+Tables are automatically split into 64MB ordered contiguous chunks called Ranges, replicated across nodes via Raft:
 
-### Geo-Partitioning
+```
+[ Table: orders ]
+  ├── Range 1 (Keys: 000-100) ──→ Replicated via Raft (Node 1, Node 2, Node 3)
+  └── Range 2 (Keys: 101-200) ──→ Replicated via Raft (Node 2, Node 3, Node 4)
+```
 
-You can tell the DB: "Keep German users' data in EU servers, and US users in US servers" using SQL `ALTER TABLE ... PARTITION BY ...`.
+#Multi-Region Table Topologies (REGIONAL vs GLOBAL)
 
-### Follow-the-Workload
+Optimizes data locality to keep data close to users and comply with data residency regulations (GDPR):
 
-The database automatically moves "leaseholders" (read/write leaders) close to where the requests are coming from for low latency.
+```sql
+-- Multi-region database and table definition
+ALTER DATABASE enterprise_crm SET PRIMARY REGION "us-east-1";
+ALTER DATABASE enterprise_crm ADD REGION "eu-west-1";
+ALTER DATABASE enterprise_crm ADD REGION "ap-southeast-1";
 
-## Best Practices (2025)
+-- Regional table colocates rows in the user's home region
+CREATE TABLE enterprise_crm.customers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    region crdb_region NOT NULL,
+    full_name STRING,
+    email STRING
+) LOCALITY REGIONAL BY ROW AS region;
+```
+
+#Strict Serializable Transaction Isolation
+
+CockroachDB runs all transactions at `SERIALIZABLE` isolation using hybrid logical clocks (HLC) and multi-version concurrency control (MVCC):
+
+```sql
+BEGIN TRANSACTION PRIORITY HIGH;
+UPDATE accounts SET balance = balance - 100 WHERE id = 'acc_1';
+UPDATE accounts SET balance = balance + 100 WHERE id = 'acc_2';
+COMMIT;
+```
+
+## Common Patterns
+
+### Multi-Region Row-Level Geo-Partitioning
+
+**Problem**: Cross-continent latency degrades transactions when data must travel across oceans for consensus.
+
+**Solution**:
+Assign multi-region survival goals with regional tables:
+
+```sql
+ALTER DATABASE global_store SET PRIMARY REGION "us-east1";
+ALTER DATABASE global_store ADD REGION "eu-west1";
+
+CREATE TABLE global_store.accounts (
+  account_id UUID DEFAULT gen_random_uuid(),
+  region crdb_region NOT NULL,
+  balance DECIMAL(15, 2),
+  PRIMARY KEY (region, account_id)
+) LOCALITY REGIONAL BY ROW AS region;
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Use UUIDs**: Sequential keys (1, 2, 3) cause "hot spots" (all writes go to one Range). UUIDs distribute load.
-- **Use Serverless**: For most start-ups/mid-size apps, the Serverless consumption model is cheaper and easier than managing nodes.
-- **Retry Transactions**: In a distributed system, contention happens. Use client libraries that retry 40001 (serialization failure) errors automatically.
+- **Use Multi-Region Survivability Goals**: Configure `SURVIVE REGION FAILURE` to allow clusters to operate through entire cloud region outages.
+- **Use UUIDs or Hash-Sharded Indexes**: Avoid monotonically increasing primary keys (`SERIAL` / timestamps) which create hot-spot ranges.
+- **Implement Client-Side Transaction Retries**: Handle error code `40001` (transaction serialization retry errors) with exponential backoff.
+- **Use `AS OF SYSTEM TIME` for Analytical Queries**: Read from historical MVCC snapshots to eliminate read lock contention.
 
 **Don't**:
 
-- **Don't use `SELECT *` without Limits**: In a distributed DB, this might scatter-gather from 100 nodes.
-- **Don't use Foreign Keys excessively**: Cross-range FK checks can be expensive.
+- **Don't use sequential integer IDs as primary keys**: Sequential IDs force all insert writes onto a single Raft range node.
+- **Don't execute massive unbounded transactions**: Transactions affecting millions of rows create heavy memory pressure on the Raft coordinator.
+- **Don't ignore table locality configurations**: Missing multi-region locality rules forces cross-continental WAN roundtrips on every commit.
+
+## Troubleshooting
+
+| Error                                           | Cause                                                                | Solution                                                                    |
+| :---------------------------------------------- | :------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| `TransactionRetryWithProtoRefreshError (40001)` | Concurrent transactions modified overlapping key ranges.             | Wrap business logic in an automated retry loop for serialization conflicts. |
+| `Node dead / Raft quorum degraded`              | Network partition or host failure dropping available range replicas. | Check CockroachDB DB Console node status and ensure odd number of replicas. |
+| `Slow query due to full range scan`             | Secondary index missing for query WHERE predicates.                  | Run `EXPLAIN` and add composite indexes covering lookup columns.            |
 
 ## References
 

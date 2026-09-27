@@ -1,6 +1,6 @@
 ---
 name: nextjs
-description: Next.js React framework with SSR, App Router, and server components. Use for full-stack React.
+description: Expert Next.js assistance covering App Router, Server Components (RSC), Server Actions, metadata SEO, and edge runtime. Use when building high-performance full-stack React applications.
 ---
 
 # Next.js
@@ -13,7 +13,7 @@ Next.js is the leading full-stack framework for React. Next.js 15 (2025) stabili
 - **SEO Critical**: Server-Side Rendering (SSR) is first-class.
 - **Vercel Ecosystem**: seamless deployment to Vercel's edge network.
 
-## Quick Start (App Router)
+## Quick Start
 
 ```tsx
 // app/page.tsx (Server Component by default)
@@ -55,7 +55,40 @@ export async function create(formData) {
 }
 ```
 
-## Best Practices (2025)
+## Common Patterns
+
+### Server Action with Optimistic UI Mutation
+
+**Problem**: Form submission requires manual API route handlers and triggers full page reloads.
+
+**Solution**:
+Use React 19 Server Actions in Next.js App Router:
+
+```tsx
+// app/actions.ts
+"use server";
+import { revalidatePath } from "next/cache";
+
+export async function addComment(formData: FormData) {
+  const text = formData.get("comment") as string;
+  await db.comments.create({ data: { text } });
+  revalidatePath("/posts/[id]");
+}
+
+// app/CommentForm.tsx
+import { addComment } from "./actions";
+
+export function CommentForm() {
+  return (
+    <form action={addComment}>
+      <input name="comment" required />
+      <button type="submit">Post Comment</button>
+    </form>
+  );
+}
+```
+
+## Best Practices (2026)
 
 **Do**:
 
@@ -67,6 +100,14 @@ export async function create(formData) {
 
 - **Don't leak secrets**: Ensure `'use server'` files don't export sensitive data.
 - **Don't `use client` everything**: Only put `'use client'` at the leaves of your tree (buttons, inputs). Keep high-level layouts as Server Components.
+
+## Troubleshooting
+
+| Error                                                                       | Cause                                                                           | Solution                                                                                 |
+| :-------------------------------------------------------------------------- | :------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------- |
+| `Error: Event handlers cannot be passed to Client Component props`          | Passing client function from Server Component to Client Component.              | Mark file with `'use client'` at the very top.                                           |
+| `Hydration failed because the server rendered HTML didn't match the client` | Browser-specific values (`window`, date/time, random IDs) evaluated during SSR. | Move browser-only evaluations to `useEffect` or wrap in dynamic import `{ ssr: false }`. |
+| `Dynamic server usage: headers() / cookies() used in static page`           | Component marked static accessed request-time headers or searchParams.          | Export `export const dynamic = 'force-dynamic'` in page file.                            |
 
 ## References
 

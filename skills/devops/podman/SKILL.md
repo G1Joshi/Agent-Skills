@@ -1,6 +1,6 @@
 ---
 name: podman
-description: Podman daemonless container engine. Use for rootless containers.
+description: Expert Podman container engine assistance covering rootless containers, podman-compose, pod generation (Kubernetes YAML), and systemd integration. Use when managing secure, daemonless OCI containers on Linux.
 ---
 
 # Podman
@@ -9,9 +9,10 @@ Podman is a daemonless container engine for developing, managing, and running OC
 
 ## When to Use
 
-- **Security**: Rootless containers by default. No central daemon running as root.
-- **HPC / Restricted Env**: Run containers on systems where you don't have root access.
-- **Kubernetes**: Generating K8s YAML from running containers (`podman kube generate`).
+- **Rootless & Daemonless Containerization**: Running OCI containers without requiring root privileges or background daemons.
+- **Drop-in Docker CLI Replacement**: 100% command-line compatible alias (`alias docker=podman`) with enhanced security.
+- **Podman Pods for Kubernetes Prototyping**: Grouping containers into shared network pods locally before deploying to Kubernetes.
+- **Systemd Integration via Quadlets**: Running production containers managed natively by Linux `systemd` service managers.
 
 ## Quick Start
 
@@ -28,29 +29,102 @@ podman kube play pod.yaml
 
 ## Core Concepts
 
-### Daemonless
+#Rootless Pod Architecture & Container Execution
 
-Fork/Exec model. The parent process is the user shell, not a `dockerd` daemon. If Podman crashes, it doesn't take down your containers (usually).
+Running containers without root privileges or central daemons:
 
-### Pods
+```bash
+# Run rootless container using user namespace mapping
+podman run -d \
+  --name web-app \
+  -p 8080:8080 \
+  --userns=keep-id \
+  --security-opt no-new-privileges \
+  registry.example.com/app:v1.0
 
-Podman can manage "Pods" (groups of containers sharing network namespace) locally, mimicking K8s Pods.
+# Group containers into a shared-namespace Pod (mirrors Kubernetes Pod)
+podman pod create --name microservice-pod -p 3000:3000
+podman run -d --pod microservice-pod --name api-service my-api:latest
+podman run -d --pod microservice-pod --name redis-cache redis:alpine
+```
 
-### Quadlet
+#Systemd Integration with Podman Quadlets
 
-Systemd integration. Run containers as systemd services effortlessly.
+Managing containers as native systemd services:
 
-## Best Practices (2025)
+```ini
+# ~/.config/containers/systemd/api-service.container
+[Unit]
+Description=Production API Microservice
+After=network-online.target
 
-**Do**:
+[Container]
+Image=registry.example.com/api-service:v2.1.0
+ContainerName=api-service
+PublishPort=8080:8080
+Environment=NODE_ENV=production
+UserNS=auto
 
-- **Use `podman-desktop`**: A GUI alternative to Docker Desktop.
-- **Use Rootless**: This is the main selling point. Stick to it to improve security posture.
-- **Use `podman kube play`**: Test your K8s manifests locally without a full Minikube cluster.
+[Service]
+Restart=always
 
-**Don't**:
+[Install]
+WantedBy=default.target
+```
 
-- **Don't mount Docker socket**: It doesn't exist. Use the Podman socket if you need tools to talk to the engine, but be aware of API differences.
+```bash
+# Reload systemd to generate service and start container
+systemctl --user daemon-reload
+systemctl --user start api-service
+```
+
+#Exporting Pods to Kubernetes YAML
+
+Generating native Kubernetes manifests directly from local Podman pods:
+
+```bash
+# Generate Kubernetes Deployment and Service YAML
+podman generate kube microservice-pod > k8s-deployment.yaml
+```
+
+## Common Patterns
+
+### Generate Systemd Service for Rootless Container Autostart
+
+**Problem**: Containers on bare-metal servers must start automatically on host boot without Docker daemon.
+
+**Solution**:
+Use Podman Quadlet or systemd service generation:
+
+```bash
+# Run rootless container
+podman run -d --name web-api -p 8080:8080 myorg/api:latest
+
+# Generate systemd unit file
+podman generate systemd --new --name web-api > ~/.config/systemd/user/container-web-api.service
+
+# Enable user systemd service to start on boot
+systemctl --user enable --now container-web-api.service
+loginctl enable-linger $USER
+```
+
+## Best Practices (2026)
+
+- **Do** run containers rootless (`--userns=keep-id`) to neutralize container breakout risks.
+- **Do** manage production containers on Linux servers using Podman Quadlets (`.container` systemd files).
+- **Do** use `podman generate kube` to prototype Kubernetes pod manifests locally.
+- **Do** configure `registries.conf` with explicit, secure container registry search paths.
+- **Don't** run containers with `--privileged` unless strictly managing bare-metal kernel hardware.
+- **Don't** assume ports < 1024 are accessible rootless; use ports >= 1024 (e.g. 8080, 8443) or adjust sysctl.
+- **Don't** leave orphaned storage layers; clean up periodically with `podman system prune`.
+
+## Troubleshooting
+
+| Error                                                    | Cause                                                        | Solution                                                                                       |
+| :------------------------------------------------------- | :----------------------------------------------------------- | :--------------------------------------------------------------------------------------------- |
+| `Error: rootless users cannot bind to ports < 1024`      | Linux non-privileged port binding restriction.               | Run on port >1024 (e.g. 8080) or set `sysctl net.ipv4.ip_unprivileged_port_start=80`.          |
+| `Error: short-name "..." did not expand to any registry` | Podman requires fully qualified registry domains by default. | Use `docker.io/library/nginx:latest` or configure `registries.conf`.                           |
+| `Subuid/subgid range missing for user`                   | User lacks subuid mappings for rootless namespaces.          | Add entry in `/etc/subuid` and `/etc/subgid` with `usermod --add-subuids 100000-165535 $USER`. |
 
 ## References
 

@@ -1,6 +1,6 @@
 ---
 name: domain-driven-design
-description: DDD tactical and strategic patterns. Use for complex domains.
+description: Expert Domain-Driven Design (DDD) assistance covering strategic bounded contexts, ubiquitous language, aggregates, value objects, domain events, and repository patterns. Use when modeling complex business domains, decomposing monoliths into microservices, or implementing rich domain models.
 ---
 
 # Domain-Driven Design (DDD)
@@ -9,9 +9,10 @@ DDD is a software design approach focusing on modeling software to match a domai
 
 ## When to Use
 
-- Complex business domains (e.g., Insurance, Banking, Logistics) where logic is intricate.
-- When there is a communication gap between developers and business experts.
-- decomposing a Monolith into Microservices (defining boundaries).
+- **Complex Business Domains**: Healthcare, fintech, logistics, and enterprise systems with intricate operational rules and workflows.
+- **Monolith Decomposition**: Establishing well-defined Bounded Contexts as boundaries for microservices or modular monoliths.
+- **Cross-Functional Team Alignment**: Creating a shared Ubiquitous Language between domain experts and software engineers.
+- **High-Change Core Software**: Managing business logic that evolves rapidly without introducing unexpected regressions.
 
 ## Quick Start
 
@@ -43,44 +44,125 @@ public class Order {
 
 ## Core Concepts
 
-### Ubiquitous Language
+#Strategic DDD: Bounded Contexts & Context Mapping
 
-A common, rigorous language shared by developers and domain experts. If the expert calls it a "Policy", the code must call it `Policy`, not `UserPlan` or `Subscription`.
+Divides a large organization into autonomous boundaries with distinct terminology and models:
 
-### Bounded Context
+```
+[ Sales Context ] ──(Customer = Buyer)──→ [ Context Map ] ──(Customer = Borrower)──→ [ Underwriting Context ]
+```
 
-The specific boundary within which a particular domain model is defined and applicable. Ideally maps to a Microservice or a Module.
+#Value Objects vs Entities
 
-### Aggregates
+Entities possess a persistent identity that endures across mutations; Value Objects are immutable and defined entirely by their attributes:
 
-A cluster of associated objects treated as a unit for data changes. External objects can only hold references to the **Aggregate Root**.
+```typescript
+// domain/value-objects/money.vo.ts
+export class Money {
+  constructor(
+    public readonly amount: number,
+    public readonly currency: "USD" | "EUR" | "GBP",
+  ) {
+    if (amount < 0) throw new Error("Amount cannot be negative");
+    Object.freeze(this);
+  }
+
+  public add(other: Money): Money {
+    if (this.currency !== other.currency) throw new Error("Currency mismatch");
+    return new Money(this.amount + other.amount, this.currency);
+  }
+
+  public equals(other: Money): boolean {
+    return this.amount === other.amount && this.currency === other.currency;
+  }
+}
+```
+
+#Aggregate Roots & Transaction Boundaries
+
+The Aggregate Root is the sole gateway through which external callers can interact with inner entities:
+
+```typescript
+// domain/aggregates/invoice.ts
+export class Invoice {
+  private readonly lineItems: InvoiceLineItem[] = [];
+
+  constructor(
+    public readonly id: string,
+    public readonly customerId: string,
+  ) {}
+
+  public addLineItem(description: string, price: Money): void {
+    if (this.lineItems.length >= 100)
+      throw new Error("Maximum line items exceeded");
+    this.lineItems.push(
+      new InvoiceLineItem(crypto.randomUUID(), description, price),
+    );
+  }
+
+  get total(): Money {
+    return this.lineItems.reduce(
+      (sum, item) => sum.add(item.price),
+      new Money(0, "USD"),
+    );
+  }
+}
+```
 
 ## Common Patterns
 
-### Value Objects
+#Aggregate Root with Encapsulated Business Invariants
+**Problem**: Direct mutation of entity state bypasses business rules and produces inconsistent data.  
+**Solution**: Protect invariants inside Aggregate Roots and emit Domain Events.
 
-Immutable objects defined by their attributes, not identity (e.g., `Money`, `Address`, `Email`). Two `Money(5)` objects are equal.
+```typescript
+// domain/aggregates/bank-account.ts
+export class BankAccount {
+  private _balance: number = 0;
+  private readonly _domainEvents: any[] = [];
 
-### Domain Events
+  constructor(
+    public readonly id: string,
+    initialDeposit: number,
+  ) {
+    if (initialDeposit < 25) throw new Error("Minimum opening balance is $25");
+    this._balance = initialDeposit;
+  }
 
-Something that happened in the domain that domain experts care about (`OrderShipped`, `AccountDebited`). Used to decouple side effects.
+  public withdraw(amount: number): void {
+    if (amount <= 0) throw new Error("Withdrawal amount must be positive");
+    if (this._balance - amount < 0) throw new Error("Insufficient funds");
+    this._balance -= amount;
+    this._domainEvents.push({
+      type: "FUNDS_WITHDRAWN",
+      accountId: this.id,
+      amount,
+    });
+  }
 
-### Anti-Corruption Layer (ACL)
+  get balance(): number {
+    return this._balance;
+  }
+  pullDomainEvents(): any[] {
+    return this._domainEvents.splice(0);
+  }
+}
+```
 
-A layer that translates models from an external system (or legacy subsystem) into the model of the current Bounded Context to prevent pollution.
-
-## Best Practices
+## Best Practices (2026)
 
 **Do**:
 
-- Focus on **Behaviors**, not just Data (Anemic Domain Model vs Rich Domain Model).
-- Use **Event Storming** sessions to discover the domain events and boundaries.
-- Ensure **Transactional Consistency** within an Aggregate, and **Eventual Consistency** between Aggregates.
+- **Co-Design with Domain Experts**: Conduct Event Storming workshops to map domain workflows before writing code.
+- **Enforce Invariants Inside the Aggregate**: Ensure invalid state can never exist within an entity or aggregate root.
+- **Reference Other Aggregates by ID Only**: Never hold direct object references to other aggregate roots; use their unique IDs.
+- **Make Value Objects Immutable**: Guarantee side-effect free equality checks and safe passing across concurrent threads.
 
 **Don't**:
 
-- Don't apply DDD to simple CRUD domains (it's overkill).
-- Don't let Aggregates reference each other by Object Pointer; use IDs.
+- **Don't create massive aggregates**: Keep aggregates small; large aggregates cause database lock contention and performance bottlenecks.
+- **Don't let technical database concerns leak into Domain logic**: Design domain models for business behavior, not database normalization.
+- **Don't use DDD for generic CRUD contexts**: Reserve DDD tactical patterns for the Core Domain where competitive advantage lies.
 
 ## Troubleshooting
 

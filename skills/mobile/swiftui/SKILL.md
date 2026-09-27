@@ -1,6 +1,6 @@
 ---
 name: swiftui
-description: SwiftUI declarative Apple UI framework. Use for iOS/macOS.
+description: Expert SwiftUI assistance covering declarative iOS/macOS layouts, @Observable / ObservableObject state propagation, view modifiers, custom animations, and NavigationStack. Use when creating modern Apple platform user interfaces, widgets, and multi-platform apps.
 ---
 
 # SwiftUI
@@ -9,10 +9,10 @@ SwiftUI is Apple's declarative framework for building user interfaces across all
 
 ## When to Use
 
-- Building modern iOS and macOS applications.
-- Targeting multiple Apple platforms with shared UI code.
-- Implementing complex animations and transitions with less code.
-- Utilizing live previews for rapid UI iteration.
+- **Modern Apple Platform Apps**: Building user interfaces for iOS, iPadOS, macOS, watchOS, and visionOS from a unified declarative syntax.
+- **State-Driven Interactive Interfaces**: Creating fluid, animated user experiences using `@Observable`, Swift 6 concurrency, and `@State`.
+- **Dynamic Layout Adaptability**: Designing views that adapt smoothly to Dynamic Type, Dark Mode, and diverse Apple device form factors.
+- **Interactive Widgets & Live Activities**: Implementing Lock Screen widgets, Home Screen widgets, and Dynamic Island activities.
 
 ## Quick Start
 
@@ -64,19 +64,100 @@ struct ContentView: View {
 
 ## Core Concepts
 
-### Declarative Syntax
+#Modern `@Observable` Architecture (iOS 17+)
 
-Instead of imperatively mutating UI views (like UIKit), you describe **what** the UI should look like for a given state. The system handles the updates.
+Replaces legacy `ObservableObject` and `@Published` with compiler-macro observations, tracking only properties actually read in the view:
 
-### State & Data Flow (Modern)
+```swift
+import SwiftUI
+import Observation
 
-- **@State**: Source of truth for simple, view-local value types.
-- **@Binding**: Two-way connection to a value owned by another view.
-- **@Observable**: (iOS 17+) Macro for creating observable reference types. Replaces `@StateObject` and `@ObservedObject` for cleaner data flow.
+@Observable
+final class WalletViewModel {
+    var balance: Double = 1420.50
+    var isRefreshing: Bool = false
 
-### Modifiers
+    func loadBalance() async {
+        isRefreshing = true
+        defer { isRefreshing = false }
+        // Async network fetch
+        try? await Task.sleep(nanoseconds: 500_000_000)
+        balance += 50.0
+    }
+}
 
-Methods called on views that wrap the view and return a new view with the modification applied (e.g., `.padding()`, `.background()`). Order matters.
+struct WalletView: View {
+    @State private var viewModel = WalletViewModel()
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Text("Available Balance")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Text(viewModel.balance, format: .currency(code: "USD"))
+                .font(.system(size: 34, weight: .bold))
+            Button("Add Funds") {
+                Task { await viewModel.loadBalance() }
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .padding()
+    }
+}
+```
+
+#Declarative View Modifiers & Composition
+
+Modifiers return new view structures, composing functionality through ordered transformations:
+
+```swift
+struct PrimaryButtonModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(.headline)
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color.indigo, in: RoundedRectangle(cornerRadius: 14))
+            .shadow(color: .indigo.opacity(0.3), radius: 8, y: 4)
+    }
+}
+
+extension View {
+    func primaryButtonStyle() -> some View {
+        modifier(PrimaryButtonModifier())
+    }
+}
+```
+
+#NavigationStack & Value-Based Routing
+
+Modern type-safe navigation using `NavigationStack` and `navigationDestination`:
+
+```swift
+enum AppRoute: Hashable {
+    case orderDetail(id: String)
+    case settings
+}
+
+struct MainCoordinator: View {
+    @State private var path: [AppRoute] = []
+
+    var body: some View {
+        NavigationStack(path: $path) {
+            List {
+                Button("View Order #415") { path.append(.orderDetail(id: "415")) }
+            }
+            .navigationDestination(for: AppRoute.self) { route in
+                switch route {
+                case .orderDetail(let id): Text("Order Detail: \(id)")
+                case .settings: Text("App Settings")
+                }
+            }
+        }
+    }
+}
+```
 
 ## Common Patterns
 
@@ -99,20 +180,20 @@ Bind Views to ViewModels marked with `@Observable`. The View purely renders the 
 }
 ```
 
-## Best Practices
+## Best Practices (2026)
 
 **Do**:
 
-- Use **@Observable** for data models in iOS 17+ targets.
-- Break down large views into smaller, reusable subviews (`Extract Subview`).
-- Use **Previews** with different configurations (Dark Mode, Dynamic Type) to catch UI issues early.
-- Use `Environment` for global dependencies (like themes or user session).
+- **Adopt Swift 6 Strict Concurrency**: Ensure all view models and background tasks conform to `@MainActor` and Sendable protocols.
+- **Decompose Large Views into Subviews**: Break body properties into discrete subviews to allow SwiftUI to localize re-evaluations.
+- **Leverage Standard Semantic Colors**: Use `.foregroundStyle(.primary)` and `.background(.background)` to support Light and Dark modes automatically.
+- **Provide View Previews with Static Mock Data**: Utilize `#Preview` macro with sample models for instant canvas rendering.
 
 **Don't**:
 
-- Don't perform heavy work in the `body` property (it's computed frequently).
-- Don't use `AnyView` unless absolutely necessary (kills performance/diffing).
-- Don't force imperative patterns (like trying to "refresh" a view manually); change the state instead.
+- **Don't store non-transient state in `@State`**: `@State` is for view-owned local state; domain business models belong in observable ViewModels.
+- **Don't block the main actor with heavy computations**: Move image processing and JSON decoding to non-isolated background actor tasks.
+- **Don't overuse `AnyView`**: Type-erasure prevents SwiftUI from performing structural diffing optimizations; use `@ViewBuilder` instead.
 
 ## Troubleshooting
 

@@ -1,6 +1,6 @@
 ---
 name: jest
-description: Jest JavaScript testing framework with snapshots. Use for JS testing.
+description: Expert Jest testing assistance covering unit testing, snapshot testing, mocking, and coverage reports. Use when writing tests for JavaScript/TypeScript, React, Node.js, or Next.js applications.
 ---
 
 # Jest
@@ -9,9 +9,10 @@ Jest is a delightful JavaScript Testing Framework with a focus on simplicity. It
 
 ## When to Use
 
-- **React Apps**: The default and most supported runner for Create React App / Next.js (historically).
-- **Snapshot Testing**: When you want to ensure UI or JSON structures haven't changed unexpectedly.
-- **Legacy/Standard**: Extensive community plugins and support.
+- **JavaScript & TypeScript Unit Testing**: Standard, battery-included test runner for React, Node.js, and legacy frontend projects.
+- **Snapshot Testing**: Freezing and asserting on large rendered component output, GraphQL responses, or JSON configurations.
+- **Comprehensive Mocking Engine**: Spying on, mocking, and stubbing functions, timers, and entire modules with `jest.mock()`.
+- **Code Coverage Reporting**: Generating built-in Istanbul code coverage metrics without external plugins.
 
 ## Quick Start
 
@@ -32,47 +33,105 @@ test("adds 1 + 2 to equal 3", () => {
 
 ## Core Concepts
 
-### Matchers
+#Module Mocking & Function Spies (`jest.fn()`, `jest.mock()`)
 
-Jest uses "matchers" to test values.
+Replaces dependencies with mock implementations:
 
-- `toBe(value)`: Exact equality (Object.is).
-- `toEqual(value)`: Recursive equality (great for Objects/Arrays).
-- `toContain(item)`: Checks if an array contains an item.
+```typescript
+// service.test.ts
+import { sendWelcomeEmail } from "./mailer";
+import { registerUser } from "./user.service";
 
-### Mock Functions
+jest.mock("./mailer", () => ({
+  sendWelcomeEmail: jest.fn().mockResolvedValue(true),
+}));
 
-`jest.fn()` creates a mock function. You can track calls, arguments, and instances.
-
-```javascript
-const mockCallback = jest.fn((x) => 42 + x);
-forEach([0, 1], mockCallback);
-expect(mockCallback.mock.calls.length).toBe(2);
-```
-
-### Async Testing
-
-Jest supports `async/await`.
-
-```javascript
-test("data is peanut butter", async () => {
-  const data = await fetchData();
-  expect(data).toBe("peanut butter");
+test("sends welcome email upon registration", async () => {
+  const result = await registerUser("test@example.com");
+  expect(result.success).toBe(true);
+  expect(sendWelcomeEmail).toHaveBeenCalledWith("test@example.com");
+  expect(sendWelcomeEmail).toHaveBeenCalledTimes(1);
 });
 ```
 
-## Best Practices (2025)
+#Fake Timers for Asynchronous Delays
+
+Fast-forwards debounce timers, intervals, and timeouts instantaneously:
+
+```typescript
+test("debounced search triggers after 300ms", () => {
+  jest.useFakeTimers();
+  const searchMock = jest.fn();
+
+  triggerDebouncedSearch(searchMock, "query");
+  expect(searchMock).not.toHaveBeenCalled();
+
+  // Fast forward clock
+  jest.advanceTimersByTime(300);
+  expect(searchMock).toHaveBeenCalledWith("query");
+  jest.useRealTimers();
+});
+```
+
+#Snapshot Assertions
+
+Detects unintended regressions in complex structures:
+
+```typescript
+test("matches expected invoice schema snapshot", () => {
+  const invoice = generateInvoiceTemplate();
+  expect(invoice).toMatchSnapshot();
+});
+```
+
+## Common Patterns
+
+### Mocking External Modules and Spying on Calls
+
+**Problem**: Unit tests hitting third-party SDKs or database clients slow down test runs and produce side effects.
+
+**Solution**:
+Use `jest.mock` and `jest.spyOn`:
+
+```typescript
+import axios from "axios";
+import { fetchUserData } from "./userService";
+
+jest.mock("axios");
+const mockedAxios = axios as jest.Mocked<typeof axios>;
+
+test("fetches successfully data from an API", async () => {
+  const data = { id: 1, name: "John" };
+  mockedAxios.get.mockResolvedValueOnce({ data });
+
+  const result = await fetchUserData(1);
+  expect(result).toEqual(data);
+  expect(mockedAxios.get).toHaveBeenCalledWith("/api/users/1");
+});
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Use `test.each`**: For data-driven tests. Avoid writing valid/invalid test cases manually 10 times.
-- **Isolate Tests**: Tests should not depend on each other. Jest runs them in parallel.
-- **Mock External APIs**: Never hit real APIs in unit tests. Use `jest.mock`.
+- **Clear Mocks Between Tests**: Enable `clearMocks: true` in `jest.config.js` to prevent call count contamination across tests.
+- **Use `@swc/jest` for Fast TypeScript Compilation**: Replace slow `ts-jest` with SWC compiler to dramatically accelerate execution.
+- **Use `test.each` for Table-Driven Test Cases**: Consolidate repetitive test scenarios into parameterized tables.
+- **Keep Snapshots Small**: Avoid snapshotting massive DOM trees; snapshot focused component states and data contracts.
 
 **Don't**:
 
-- **Don't overuse Snapshots**: Large snapshots are impossible to review. Use them for small, critical structures.
-- **Don't ignore "Unhandled Promise Rejection"**: It usually means a test finished before an async operation completed.
+- **Don't blindly update snapshots (`-u`)**: Review snapshot diffs carefully before accepting changes to prevent approving bugs.
+- **Don't mock what you don't own**: Avoid mocking third-party libraries excessively; prefer integration tests with real adapters where possible.
+- **Don't leave hanging asynchronous promises**: Always return promises or `await` async calls to avoid unhandled rejections.
+
+## Troubleshooting
+
+| Error                                            | Cause                                                                        | Solution                                                            |
+| :----------------------------------------------- | :--------------------------------------------------------------------------- | :------------------------------------------------------------------ |
+| `Cannot use import statement outside a module`   | Jest attempting to execute ESM files without proper Babel/ts-jest transform. | Configure `ts-jest` or set `"transform": {}` in `jest.config.js`.   |
+| `A worker process has failed to exit gracefully` | Open handles, database connections, or active timers remaining.              | Run with `--detectOpenHandles` and close connections in `afterAll`. |
+| `Snapshot mismatch error`                        | Intended UI or markup change failed snapshot assertion.                      | Review diff and update snapshots with `jest -u`.                    |
 
 ## References
 

@@ -1,6 +1,6 @@
 ---
 name: cloudflare
-description: Cloudflare CDN, Workers, and edge services. Use for CDN and edge.
+description: Expert Cloudflare assistance covering Workers, Pages, DNS records, CDN caching rules, and DDoS protection. Use when deploying edge applications, configuring DNS, and optimizing web performance.
 ---
 
 # Cloudflare
@@ -9,35 +9,158 @@ Cloudflare is more than a CDN; it is a global super-cloud. In 2025, **Workers AI
 
 ## When to Use
 
-- **Edge Compute**: Cloudflare Workers start in <5ms globally. Perfect for APIs and Middleware.
-- **Storage**: R2 is S3-compatible but has **zero egress fees**. Massive cost savings for data-heavy apps.
-- **Security**: Zero Trust (Access) replaces corporate VPNs.
+- **Global Edge Compute with Cloudflare Workers**: Executing serverless TypeScript/Rust code across 300+ global data centers with 0ms cold starts.
+- **Edge Storage (KV, R2, D1, Vectorize)**: Distributed key-value, S3-compatible object storage, serverless SQL, and vector indexing.
+- **DDoS Mitigation & Web Application Firewall (WAF)**: Protecting origins against layer 3/4/7 DDoS attacks and bots.
+- **Zero Trust Network Access (ZTNA) & Tunnels**: Securely routing traffic to private services without opening public ports via `cloudflared`.
+
+## Quick Start
+
+```bash
+# Initialize and deploy a Cloudflare Worker using Wrangler
+npm create cloudflare@latest my-edge-app -- --type hello-world
+cd my-edge-app
+npx wrangler dev    # Run locally with edge simulation
+npx wrangler deploy # Deploy globally to 300+ edge locations
+```
 
 ## Core Concepts
 
-### Workers
+#Modern Cloudflare Worker with Fetch Handler
 
-V8 Isolate-based serverless functions. No cold starts. Write code in TS/JS/Rust/Python.
+Sub-millisecond edge API handling requests:
 
-### Durable Objects
+```typescript
+// src/index.ts
+export interface Env {
+  CACHE_KV: KVNamespace;
+  API_SECRET: string;
+}
 
-Stateful storage at the edge. Allows coordination (e.g., waiting lists, chat rooms) globally without a central DB.
+export default {
+  async fetch(
+    request: Request,
+    env: Env,
+    ctx: ExecutionContext,
+  ): Promise<Response> {
+    const url = new URL(request.url);
 
-### Workers AI
+    if (url.pathname === "/api/geoip") {
+      const country = request.cf?.country || "Unknown";
+      const city = request.cf?.city || "Unknown";
 
-Run open-source models (Llama 3, Whisper) on Cloudflare's network of GPUs with a simple API call.
+      return Response.json({
+        ip: request.headers.get("cf-connecting-ip"),
+        country,
+        city,
+        colo: request.cf?.colo, // Cloudflare data center airport code
+      });
+    }
 
-## Best Practices (2025)
+    // Check edge KV cache
+    const cacheKey = `content:${url.pathname}`;
+    const cached = await env.CACHE_KV.get(cacheKey);
+    if (cached) {
+      return new Response(cached, {
+        headers: { "X-Cache": "HIT", "Content-Type": "application/json" },
+      });
+    }
 
-**Do**:
+    const payload = JSON.stringify({
+      message: "Generated at edge",
+      timestamp: Date.now(),
+    });
+    ctx.waitUntil(env.CACHE_KV.put(cacheKey, payload, { expirationTtl: 300 }));
 
-- **Use Wrangler**: The CLI is fantastic for local dev and deploy (`npx wrangler dev`).
-- **Use R2**: Move high-bandwidth assets from AWS S3 to R2 to kill egress bills.
-- **Use Pages**: For hosting static sites + functions (full stack JAMstack).
+    return new Response(payload, {
+      headers: { "X-Cache": "MISS", "Content-Type": "application/json" },
+    });
+  },
+};
+```
 
-**Don't**:
+#Wrangler Configuration (wrangler.jsonc)
 
-- **Don't block good bots**: Configure WAF carefully. Use "Managed Rulesets" rather than writing brittle regex rules securely.
+Declarative configuration of bindings and environments:
+
+```json
+{
+  "name": "edge-gateway",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-01-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "kv_namespaces": [{ "binding": "CACHE_KV", "id": "f8a03c20..." }],
+  "r2_buckets": [
+    { "binding": "MEDIA_BUCKET", "bucket_name": "prod-media-assets" }
+  ]
+}
+```
+
+#Secure Origin Access with Cloudflare Tunnels (cloudflared)
+
+Exposing internal services to the edge without opening firewall ports:
+
+```yaml
+# ~/.cloudflared/config.yml
+tunnel: 6ff398a8-3f8d-4f10-9111-923485720193
+credentials-file: /etc/cloudflared/cert.json
+
+ingress:
+  - hostname: internal-dash.company.com
+    service: http://localhost:8080
+  - service: http_status:404
+```
+
+## Common Patterns
+
+### Cloudflare Worker with KV Cache and Geo-Routing
+
+**Problem**: Querying origin servers repeatedly for static JSON metadata adds unnecessary latency.
+
+**Solution**:
+Cache responses at the edge with Cloudflare Workers KV:
+
+```typescript
+export default {
+  async fetch(request, env, ctx): Promise<Response> {
+    const url = new URL(request.url);
+    const country = request.cf?.country || "US";
+
+    const cached = await env.MY_KV.get(`content:${country}`);
+    if (cached) {
+      return new Response(cached, {
+        headers: { "content-type": "application/json" },
+      });
+    }
+
+    const data = JSON.stringify({ message: `Hello from ${country}` });
+    ctx.waitUntil(
+      env.MY_KV.put(`content:${country}`, data, { expirationTtl: 3600 }),
+    );
+    return new Response(data, {
+      headers: { "content-type": "application/json" },
+    });
+  },
+};
+```
+
+## Best Practices (2026)
+
+- **Do** target `compatibility_date` with `nodejs_compat` enabled to access standard Node.js APIs at the edge.
+- **Do** offload asynchronous non-blocking work (e.g. analytics logging) to `ctx.waitUntil()` to avoid blocking user response.
+- **Do** use Cloudflare R2 for asset storage to eliminate egress bandwidth fees.
+- **Do** deploy Cloudflare Tunnels to connect private backends without opening public ports.
+- **Don't** store large relational datasets in KV; use Cloudflare D1 (SQL) or Hyperdrive for PostgreSQL connection pooling.
+- **Don't** perform CPU-bound tasks exceeding the Worker CPU time limit; offload heavy jobs to standard containers.
+- **Don't** commit `wrangler.jsonc` files containing unencrypted secret values; use `wrangler secret put`.
+
+## Troubleshooting
+
+| Error                                      | Cause                                                                                | Solution                                                                |
+| :----------------------------------------- | :----------------------------------------------------------------------------------- | :---------------------------------------------------------------------- |
+| `Error 521: Web server is down`            | Cloudflare edge cannot connect to origin server port 80/443.                         | Verify origin web server is running and firewall allows Cloudflare IPs. |
+| `Error 525: SSL handshake failed`          | Origin server SSL certificate invalid or SSL mode set to Full (strict) without cert. | Switch to Full mode or install valid SSL certificate on origin server.  |
+| `10015: Workers KV key size exceeds limit` | Key length exceeds 512 bytes.                                                        | Hash long keys with SHA-256 before querying Workers KV.                 |
 
 ## References
 

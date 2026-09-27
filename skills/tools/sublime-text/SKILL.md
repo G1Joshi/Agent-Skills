@@ -1,6 +1,6 @@
 ---
 name: sublime-text
-description: Sublime Text fast editor with multiple cursors. Use for quick editing.
+description: Expert Sublime Text assistance covering Package Control, LSP integration, custom keybindings, syntax definitions, and build systems. Use when configuring Sublime Text 4, setting up LSP for language intelligence, writing custom build systems, or optimizing text editing workflows.
 ---
 
 # Sublime Text 4
@@ -9,35 +9,148 @@ Sublime Text is legendary for its speed and "Goto Anything" (`Cmd+P`) interface.
 
 ## When to Use
 
-- **Large Files**: Opening a 500MB SQL dump? VS Code chokes. Sublime opens it instantly.
-- **Regex**: Multi-cursor + Regex find/replace workflow is unparalleled.
-- **Minimalism**: Distraction-free coding without 50 sidebars.
+- **Instantaneous Large File Editing**: Opening massive log files, JSON dumps, and SQL exports with zero lag.
+- **Multiple Selection & Column Editing**: Refactoring repeated patterns rapidly using multi-cursor manipulation.
+- **Lightweight Polyglot Coding**: Editing diverse scripts (Python, Bash, Rust, Go) without the overhead of heavy IDEs.
+- **Custom Build Systems & Macros**: Automating compilation, syntax checking, and text transformation pipelines.
+
+## Quick Start
+
+### 1. Minimal Custom Build System
+
+```json
+// ~/.config/sublime-text/Packages/User/NodeRun.sublime-build
+{
+  "cmd": ["node", "$file"],
+  "file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+  "selector": "source.js",
+  "shell": true
+}
+```
+
+### 2. Custom User Keybindings
+
+```json
+// Preferences > Key Bindings
+[
+  { "keys": ["super+shift+r"], "command": "reindent" },
+  { "keys": ["super+d"], "command": "find_under_expand" }
+]
+```
 
 ## Core Concepts
 
-### Package Control
+### Production Editor Configuration (`Preferences.sublime-settings`)
 
-The extension manager. Must be installed first.
+Configuring modern performance, typography, and whitespace rules:
 
-### Computed Layout
+```json
+{
+  "font_face": "JetBrains Mono",
+  "font_size": 13,
+  "theme": "Default Dark.sublime-theme",
+  "color_scheme": "Packages/Color Scheme - Default/Mariana.sublime-color-scheme",
+  "draw_white_space": "selection",
+  "ensure_newline_at_eof_on_save": true,
+  "trim_trailing_white_space_on_save": true,
+  "tab_size": 2,
+  "translate_tabs_to_spaces": true,
+  "word_wrap": false,
+  "hardware_acceleration": "opengl",
+  "index_files": true,
+  "show_git_status": true
+}
+```
 
-Mini-map (on the right) allows visual navigation of code shape.
+### Custom Polyglot Build System (`PythonTest.sublime-build`)
 
-### Projects
+Automating test running and error matching directly from the editor:
 
-`sublime-project` files allow saving workspace state (open tabs, layout).
+```json
+{
+  "cmd": ["pytest", "-q", "$file"],
+  "selector": "source.python",
+  "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
+  "working_dir": "$project_path",
+  "env": {
+    "PYTHONPATH": "$project_path"
+  },
+  "variants": [
+    {
+      "name": "Ruff Check",
+      "cmd": ["ruff", "check", "$file"]
+    }
+  ]
+}
+```
 
-## Best Practices (2025)
+### High-Speed Multi-Cursor Workflows
 
-**Do**:
+- Select word: `Ctrl+D` (macOS: `Cmd+D`) to select next matching occurrence.
+- Select all matching occurrences in file: `Alt+F3` (macOS: `Ctrl+Cmd+G`).
+- Split lines into selection: Select lines -> `Ctrl+Shift+L` (macOS: `Cmd+Shift+L`) -> edit every line simultaneously.
+- Jump to file: `Ctrl+P` (macOS: `Cmd+P`).
+- Jump to symbol: `Ctrl+R` (macOS: `Cmd+R`).
 
-- **Use LSP**: The `LSP` package brings VS Code-like intelligence to Sublime.
-- **Buy a License**: Support indie developers. It's worth it.
-- **Keep it Light**: Don't turn it into an IDE. Use it for its speed.
+## Common Patterns
 
-**Don't**:
+### Full LSP Integration (LSP + LSP-typescript)
 
-- **Don't ignore startup time**: Keep plugins to a minimum.
+**Problem**: Need modern TypeScript autocompletion, hover docs, and diagnostics inside Sublime Text.  
+**Solution**: Install `LSP` and `LSP-typescript` via Package Control.
+
+```json
+// LSP.sublime-settings
+{
+  "clients": {
+    "lsp-typescript": {
+      "enabled": true,
+      "settings": {
+        "typescript.suggest.completeFunctionCalls": true
+      }
+    }
+  }
+}
+```
+
+### Project Workspace Management
+
+**Problem**: Save project-specific folder configurations, excluded paths, and build targets.  
+**Solution**: Create a `.sublime-project` file.
+
+```json
+{
+  "folders": [
+    {
+      "path": ".",
+      "folder_exclude_patterns": ["node_modules", ".git", "dist"],
+      "file_exclude_patterns": ["*.min.js", "*.map"]
+    }
+  ],
+  "settings": {
+    "tab_size": 2,
+    "translate_tabs_to_spaces": true
+  }
+}
+```
+
+## Best Practices (2026)
+
+- **Do** install **Package Control** and the **LSP** package (`LSP`, `LSP-pyright`, `LSP-typescript`) for IDE-grade completions.
+- **Do** enable `hardware_acceleration: "opengl"` for ultra-fluid 120Hz/144Hz scrolling on supported displays.
+- **Do** use `Ctrl+Shift+L` (`Cmd+Shift+L`) to convert multiple lines into independent cursor selections.
+- **Do** configure project files (`.sublime-project`) with explicit `folder_exclude_patterns` for `node_modules` and `.git`.
+- **Don't** leave file indexing enabled on massive multi-gigabyte build output directories.
+- **Don't** install unmaintained legacy Sublime Text 2/3 plugins that block the UI thread.
+- **Don't** store sensitive API keys in plaintext user snippets or build configurations.
+
+## Troubleshooting
+
+| Error / Symptom                                                     | Cause                                                                | Solution                                                                                                            |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `Package Control: There are no packages available for installation` | SSL cert validation failure or network proxy interference            | Check `Preferences > Package Settings > Package Control > Settings` and add custom `http_proxy` or refresh channel. |
+| High CPU usage by `plugin_host`                                     | Heavy file indexing on large dependency directories (`node_modules`) | Add `node_modules` to `binary_file_patterns` or `folder_exclude_patterns` in User Preferences.                      |
+| LSP server fails to start                                           | Target runtime (`node`, `python`, etc.) not in Sublime's `$PATH`     | Add environment path in `LSP.sublime-settings` under `"env": { "PATH": "/usr/local/bin:$PATH" }`.                   |
 
 ## References
 

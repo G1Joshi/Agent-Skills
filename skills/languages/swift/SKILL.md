@@ -1,6 +1,6 @@
 ---
 name: swift
-description: Swift development for iOS/macOS with SwiftUI, async/await, and Combine. Use for .swift files.
+description: Expert Swift assistance covering Swift 6 strict concurrency, async/await, actors, protocols, generics, memory management with ARC, and SwiftUI integration. Use when writing iOS/macOS applications, debugging concurrency warnings, or building robust Swift codebases.
 ---
 
 # Swift
@@ -9,10 +9,10 @@ Modern Swift development with protocol-oriented programming and async/await.
 
 ## When to Use
 
-- Working with `.swift` files
-- Building iOS/macOS applications
-- SwiftUI development
-- Server-side Swift with Vapor
+- **Apple Ecosystem Native Applications**: iOS, iPadOS, macOS, watchOS, and visionOS applications using SwiftUI.
+- **Modern Concurrent Systems**: Utilizing Swift 6 complete concurrency checking, actors, and structured `Task` trees.
+- **Cross-Platform Server-Side Swift**: High-performance backends and microservices built with Hummingbird or Vapor.
+- **Embedded & Real-Time Edge Processing**: Utilizing Embedded Swift for microcontrollers and real-time audio engines.
 
 ## Quick Start
 
@@ -30,53 +30,111 @@ struct User: Identifiable, Codable {
 
 ## Core Concepts
 
-### Value Types & Structs
+#Modern Swift 6 Concurrency: Actors & Structured Tasks
+
+Data-race safety guaranteed at compile time with Sendable enforcement and actors:
 
 ```swift
-// Prefer structs for data
-struct User: Identifiable, Codable, Hashable {
-    let id: UUID
-    var name: String
-    var email: String
-    var createdAt: Date = .now
+import Foundation
+
+// Thread-safe state isolation via actor
+actor AccountManager {
+    private var balances: [UUID: Decimal] = [:]
+
+    func deposit(to accountId: UUID, amount: Decimal) {
+        guard amount > 0 else { return }
+        balances[accountId, default: 0] += amount
+    }
+
+    func balance(for accountId: UUID) -> Decimal {
+        balances[accountId, default: 0]
+    }
 }
 
-// Enums with associated values
-enum NetworkError: Error, LocalizedError {
-    case invalidURL
-    case noData
-    case decodingError(Error)
+// Structured concurrency with TaskGroup
+func fetchUserMetrics(userIds: [UUID]) async throws -> [UUID: Decimal] {
+    let manager = AccountManager()
 
-    var errorDescription: String? {
-        switch self {
-        case .invalidURL: return "Invalid URL"
-        case .noData: return "No data received"
-        case .decodingError(let error): return "Decoding failed: \(error)"
+    return try await withThrowingTaskGroup(of: (UUID, Decimal).self) { group in
+        for id in userIds {
+            group.addTask {
+                let bal = await manager.balance(for: id)
+                return (id, bal)
+            }
         }
+
+        var results: [UUID: Decimal] = [:]
+        for try await (id, bal) in group {
+            results[id] = bal
+        }
+        return results
     }
 }
 ```
 
-### Protocol-Oriented Programming
+#Protocol-Oriented Architecture & Primary Associated Types
+
+Expressive type contracts using Swift 5.7+ `some` and `any` semantics:
 
 ```swift
-protocol Repository {
-    associatedtype Entity: Identifiable
-
-    func findById(_ id: Entity.ID) async throws -> Entity?
-    func save(_ entity: Entity) async throws -> Entity
-    func delete(_ entity: Entity) async throws
+// Protocol with primary associated type
+protocol Repository<Entity>: Sendable {
+    associatedtype Entity: Identifiable, Sendable
+    func fetch(by id: Entity.ID) async throws -> Entity?
+    func save(_ entity: Entity) async throws
 }
 
-extension Repository {
-    func saveAll(_ entities: [Entity]) async throws -> [Entity] {
-        try await withThrowingTaskGroup(of: Entity.self) { group in
-            for entity in entities {
-                group.addTask { try await self.save(entity) }
-            }
-            return try await group.reduce(into: []) { $0.append($1) }
-        }
+struct User: Identifiable, Sendable {
+    let id: UUID
+    let name: String
+}
+
+final class InMemoryUserRepository: Repository {
+    private var store: [UUID: User] = [:]
+
+    func fetch(by id: UUID) async throws -> User? {
+        store[id]
     }
+
+    func save(_ entity: User) async throws {
+        store[entity.id] = entity
+    }
+}
+
+// Opaque return type using 'some' for static dispatch performance
+func makeDefaultRepo() -> some Repository<User> {
+    InMemoryUserRepository()
+}
+```
+
+#Result Builders & Custom DSLs
+
+Constructing declarative hierarchies modeled after SwiftUI:
+
+```swift
+@resultBuilder
+struct HTMLBuilder {
+    static func buildBlock(_ components: String...) -> String {
+        components.joined(separator: "
+")
+    }
+
+    static func buildOptional(_ component: String?) -> String {
+        component ?? ""
+    }
+}
+
+func htmlDoc(@HTMLBuilder content: () -> String) -> String {
+    "<html>
+<body>
+\(content())
+</body>
+</html>"
+}
+
+let page = htmlDoc {
+    "<h1>Welcome to Swift 6</h1>"
+    "<p>Safe, fast, and expressive systems programming.</p>"
 }
 ```
 
@@ -114,21 +172,15 @@ actor UserCache {
 }
 ```
 
-## Best Practices
+## Best Practices (2026)
 
-**Do**:
-
-- Prefer value types (structs, enums) over classes
-- Use protocol-oriented programming
-- Handle optionals safely with `if let`, `guard`
-- Use async/await for concurrency
-
-**Don't**:
-
-- Force unwrap with `!` except for IBOutlets
-- Use implicitly unwrapped optionals unnecessarily
-- Ignore error handling
-- Create reference cycles without `weak`/`unowned`
+- **Do** enable Swift 6 complete concurrency checking (`-strict-concurrency=complete`) to catch data races at compile time.
+- **Do** prefer `struct` and value types over `class` unless reference identity or Objective-C runtime bridging is explicitly required.
+- **Do** favor `some Protocol` (opaque types) over `any Protocol` (existential types) to eliminate dynamic dispatch overhead.
+- **Do** use `async/await` and structured `withTaskGroup` rather than legacy completion handlers and Grand Central Dispatch (`DispatchQueue`).
+- **Don't** force unwrap optionals (`!`) in production; use `guard let`, `if let`, or default coalescing (`??`).
+- **Don't** capture strong `self` references in escaping closures; use `[weak self]` to avoid retain cycles.
+- **Don't** bypass actor isolation with `@unchecked Sendable` without verifying thread-safety invariants.
 
 ## Troubleshooting
 

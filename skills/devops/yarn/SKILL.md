@@ -1,6 +1,6 @@
 ---
 name: yarn
-description: Yarn package manager with workspaces. Use for JavaScript dependencies.
+description: Expert Yarn package manager assistance covering Yarn Berry (v4+), Zero-Installs, PnP (Plug'n'Play), and workspaces. Use when managing fast, deterministic JavaScript monorepo dependencies.
 ---
 
 # Yarn
@@ -9,9 +9,10 @@ Yarn (Berry) is a modern package manager. It introduced Plug'n'Play (PnP) to eli
 
 ## When to Use
 
-- **Monorepos**: Yarn Workspaces are robust and feature-rich (Constraints, plugins).
-- **Speed**: PnP is faster than node_modules linking.
-- **Correctness**: Strict phantom dependency checks prevent requiring packages you didn't list.
+- **Modern JavaScript Package Management (Yarn v4+)**: Fast, reliable dependency management with Corepack support.
+- **Plug'n'Play (PnP) & Zero-Installs**: Eliminating `node_modules` folders for instant workspace switching and CI runs.
+- **Enterprise Monorepos**: Coordinated workspace resolution, constraints, and release workflows.
+- **Hardened Security & Integrity**: Strict lockfile checksums and automated dependency audits.
 
 ## Quick Start
 
@@ -26,29 +27,95 @@ yarn add react
 
 ## Core Concepts
 
-### Plug'n'Play (PnP)
+#Modern Yarn Configuration (.yarnrc.yml)
 
-Instead of copying files to `node_modules`, Yarn generates a `.pnp.cjs` map. Node requires are intercepted and resolved directly from the cache.
+Configuring node-modules linker or Plug'n'Play:
 
-### Zero Installs
+```yaml
+# .yarnrc.yml
+nodeLinker: node-modules # Use 'pnp' for Zero-Installs, 'node-modules' for standard compatibility
+compressionLevel: mixed
+enableGlobalCache: true
 
-Commit the `.yarn/cache` folder. Cloning the repo = Installation complete. No `yarn install` needed in CI.
+packageExtensions:
+  "@types/react@*":
+    peerDependencies:
+      react: "*"
+```
 
-### Constraints
+#Workspace Commands in Monorepos
 
-Enforce rules across workspaces (e.g., "All packages must use React 18").
+Executing commands across workspaces:
 
-## Best Practices (2025)
+```bash
+# Run build command in parallel across all workspaces
+yarn workspaces foreach --parallel --verbose run build
 
-**Do**:
+# Run tests only on workspaces changed relative to main branch
+yarn workspaces foreach --since=main run test
 
-- **Use Corepack**: Manage Yarn versions via Node's `corepack` tool.
-- **Use `yarn dlx`**: Equivalent to `npx`.
-- **Commit Cache**: If using Zero Installs, do commit the binary cache.
+# Add dependency to a specific workspace
+yarn workspace @my-org/web-app add swr
+```
 
-**Don't**:
+#Upgrading Dependencies with Interactive CLI
 
-- **Don't use Yarn 1**: Legacy Yarn (v1) is dead. Migrate to Berry (v4+).
+Upgrading packages adhering to SemVer:
+
+```bash
+# Interactively review and upgrade outdated packages
+yarn upgrade-interactive
+
+# Re-validate lockfile integrity
+yarn install --immutable
+```
+
+## Common Patterns
+
+### Yarn Berry Monorepo Workspaces with TypeScript Loose Mode
+
+**Problem**: Slow installs and node_modules bloat across multiple internal monorepo packages.
+
+**Solution**:
+Configure Yarn Berry workspaces with `.yarnrc.yml`:
+
+```yaml
+# .yarnrc.yml
+nodeLinker: node-modules # Use node-modules linker for maximum ecosystem compatibility
+yarnPath: .yarn/releases/yarn-4.5.0.cjs
+
+packageExtensions:
+  "react-scripts@*":
+    dependencies:
+      "typescript": "*"
+```
+
+Root `package.json`:
+
+```json
+{
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"]
+}
+```
+
+## Best Practices (2026)
+
+- **Do** target modern Yarn (v4+) enabled through Corepack (`corepack enable yarn`).
+- **Do** use `yarn install --immutable` in CI/CD pipelines to prevent unintended lockfile updates.
+- **Do** leverage `yarn workspaces foreach` with `--since=main` to test only modified packages in monorepos.
+- **Do** use `packageExtensions` in `.yarnrc.yml` to cleanly resolve missing peer dependency warnings from older third-party packages.
+- **Don't** use legacy Yarn 1.x (Classic); migrate to modern Yarn v4+ for enhanced performance and security.
+- **Don't** edit `yarn.lock` manually; resolve conflicts via `yarn install`.
+- **Don't** mix npm or pnpm lockfiles within a Yarn repository.
+
+## Troubleshooting
+
+| Error                                                    | Cause                                                            | Solution                                                                |
+| :------------------------------------------------------- | :--------------------------------------------------------------- | :---------------------------------------------------------------------- |
+| `Usage Error: Couldn't find the node_modules state file` | Project running under PnP mode when tools expect `node_modules`. | Set `nodeLinker: node-modules` in `.yarnrc.yml` and run `yarn install`. |
+| `YN0002: Missing peer dependency`                        | Package requires peer dependency not declared in consumer.       | Declare missing package in root `.yarnrc.yml` `packageExtensions`.      |
+| `Yarn command not found`                                 | Yarn Berry binary missing in `.yarn/releases/`.                  | Run `corepack enable && corepack use yarn@stable`.                      |
 
 ## References
 

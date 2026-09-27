@@ -1,6 +1,6 @@
 ---
 name: sveltekit
-description: SvelteKit full-stack Svelte framework with SSR and routing. Use for Svelte applications.
+description: Expert SvelteKit assistance covering file-based routing (+page.svelte, +page.server.ts), form actions, hooks, and adapters. Use when developing full-stack, server-rendered Svelte web applications.
 ---
 
 # SvelteKit
@@ -56,7 +56,44 @@ export const actions = {
 
 Deployment targets are plugins. `adapter-auto`, `adapter-node`, `adapter-cloudflare`.
 
-## Best Practices (2025)
+## Common Patterns
+
+### Form Actions with Progressive Enhancement
+
+**Problem**: Writing separate API endpoints and client fetch handlers for simple form submissions.
+
+**Solution**:
+Use SvelteKit Form Actions with `use:enhance`:
+
+```typescript
+// src/routes/login/+page.server.ts
+import { fail, redirect, type Actions } from "@sveltejs/kit";
+
+export const actions: Actions = {
+  default: async ({ request }) => {
+    const data = await request.formData();
+    const email = data.get("email");
+    if (!email) return fail(400, { email, missing: true });
+    // Process login
+    throw redirect(303, "/dashboard");
+  },
+};
+```
+
+```svelte
+<!-- src/routes/login/+page.svelte -->
+<script>
+  import { enhance } from '$app/forms';
+  export let form;
+</script>
+
+<form method="POST" use:enhance>
+  <input name="email" value={form?.email ?? ''} />
+  <button type="submit">Log In</button>
+</form>
+```
+
+## Best Practices (2026)
 
 **Do**:
 
@@ -67,6 +104,14 @@ Deployment targets are plugins. `adapter-auto`, `adapter-node`, `adapter-cloudfl
 **Don't**:
 
 - **Don't use `store` for server data**: Use `page.data` (Context) for data passing down the tree to avoid state leakage on valid server execution.
+
+## Troubleshooting
+
+| Error                                               | Cause                                                         | Solution                                                                    |
+| :-------------------------------------------------- | :------------------------------------------------------------ | :-------------------------------------------------------------------------- |
+| `500 Internal Error: Cannot load module ... in SSR` | Client-only library imported directly in SSR bundle.          | Use dynamic import in `onMount()` or check `browser` in `$app/environment`. |
+| `Not found: /route`                                 | File naming convention mismatch.                              | Ensure route page is named `+page.svelte` (with leading plus sign).         |
+| `Adapter not specified`                             | `svelte.config.js` missing build adapter for target platform. | Install and configure `@sveltejs/adapter-auto` or `@sveltejs/adapter-node`. |
 
 ## References
 

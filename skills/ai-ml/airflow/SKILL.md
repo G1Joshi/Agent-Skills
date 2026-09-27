@@ -1,6 +1,6 @@
 ---
 name: airflow
-description: Apache Airflow workflow orchestration. Use for data pipelines.
+description: Expert Apache Airflow assistance covering DAG authoring, TaskFlow API (@task), operators, sensors, and Celery/Kubernetes executors. Use when orchestrating complex data engineering and ML pipelines.
 ---
 
 # Airflow
@@ -9,34 +9,187 @@ Apache Airflow is the standard for data engineering pipelines. v3.0 (2025) intro
 
 ## When to Use
 
-- **ETL/ELT**: Scheduling nightly data warehouse loads.
-- **ML Ops**: Retraining models when new data arrives.
-- **Dependency Management**: "Run Task B only if Task A succeeds".
+- **Enterprise Data Pipeline Orchestration**: Scheduling, monitoring, and authoring complex DAGs across cloud and on-premise systems.
+- **Modern TaskFlow API Workloads**: Writing clean, Pythonic DAGs using `@task` and `@dag` decorators with automated XCom serialization.
+- **Dynamic Task Mapping**: Fan-out and fan-in workflows processing variable numbers of files, partitions, or microservices.
+- **Event-Driven & Deferrable Operators**: Minimizing worker slot utilization during long-running external jobs with async triggers.
+
+## Quick Start
+
+```python
+from datetime import datetime
+from airflow.decorators import dag, task
+
+@dag(
+    schedule="@daily",
+    start_date=datetime(2025, 1, 1),
+    catchup=False,
+    tags=["pipeline"]
+)
+def etl_pipeline():
+    @task
+    def extract() -> list[dict]:
+        return [{"id": 1, "val": 100}, {"id": 2, "val": 200}]
+
+    @task
+    def transform(data: list[dict]) -> list[dict]:
+        return [{**d, "val": d["val"] * 2} for d in data]
+
+    @task
+    def load(data: list[dict]):
+        print(f"Loaded {len(data)} transformed records.")
+
+    raw = extract()
+    transformed = transform(raw)
+    load(transformed)
+
+etl_pipeline()
+```
 
 ## Core Concepts
 
-### DAGs (Directed Acyclic Graphs)
+#TaskFlow API & Functional DAG Authoring
 
-Defined in Python.
+Pythonic DAG definition with automatic XCom data passing:
 
-### Task SDK
+```python
+from datetime import datetime, timedelta
+from airflow.decorators import dag, task
 
-New in v3.0. Allows writing tasks in any language, not just Python.
+default_args = {
+    'owner': 'data-platform',
+    'retries': 3,
+    'retry_delay': timedelta(minutes=5),
+}
 
-### Edge Executor
+@dag(
+    dag_id='customer_metrics_pipeline',
+    default_args=default_args,
+    start_date=datetime(2026, 1, 1),
+    schedule='@daily',
+    catchup=False,
+    tags=['analytics', 'production']
+)
+def customer_metrics_dag():
 
-Run tasks on remote edge devices.
+    @task
+    def extract_raw_records() -> list[dict]:
+        return [
+            {'user_id': 101, 'spend': 120.50},
+            {'user_id': 102, 'spend': 450.00},
+            {'user_id': 103, 'spend': 89.20},
+        ]
 
-## Best Practices (2025)
+    @task
+    def compute_summary(records: list[dict]) -> dict:
+        total = sum(r['spend'] for r in records)
+        count = len(records)
+        return {'total_spend': total, 'avg_spend': total / count, 'count': count}
 
-**Do**:
+    @task
+    def publish_metrics(summary: dict):
+        print(f"Published KPI: Total=${summary['total_spend']}, Avg=${summary['avg_spend']:.2f}")
 
-- **Use the TaskFlow API**: `@task` decorators are cleaner than `PythonOperator`.
-- **Use Datasets**: Define data-aware scheduling (`schedule=[Dataset("s3://bucket/file")]`).
+    raw = extract_raw_records()
+    summary = compute_summary(raw)
+    publish_metrics(summary)
 
-**Don't**:
+customer_pipeline = customer_metrics_dag()
+```
 
-- **Don't put top-level code in DAG files**: It runs every scheduler heartbeat.
+#Dynamic Task Mapping with expand()
+
+Fanning out tasks concurrently based on upstream output:
+
+```python
+from airflow.decorators import dag, task
+from datetime import datetime
+
+@dag(start_date=datetime(2026, 1, 1), schedule=None, catchup=False)
+def dynamic_fanout_dag():
+
+    @task
+    def get_file_partitions() -> list[str]:
+        return ['part-001.parquet', 'part-002.parquet', 'part-003.parquet']
+
+    @task
+    def process_file(partition_name: str) -> int:
+        print(f"Processing partition: {partition_name}")
+        return len(partition_name)
+
+    @task
+    def aggregate_results(counts: list[int]):
+        print(f"Total processed characters: {sum(counts)}")
+
+    files = get_file_partitions()
+    # expand() spawns dynamic worker tasks per element
+    processed = process_file.expand(partition_name=files)
+    aggregate_results(processed)
+
+fanout_dag = dynamic_fanout_dag()
+```
+
+#Deferrable Operators for Efficient Resource Utilization
+
+Freeing worker slots while awaiting remote cluster jobs:
+
+```python
+from airflow.sensors.base import BaseSensorOperator
+from airflow.triggers.temporal import TimeDeltaTrigger
+from datetime import timedelta
+
+# Example pattern using deferrable trigger
+# Releases the worker slot to the triggerer service
+class CustomAsyncClusterSensor(BaseSensorOperator):
+    def execute(self, context):
+        self.defer(
+            trigger=TimeDeltaTrigger(timedelta(minutes=10)),
+            method_name='execute_complete'
+        )
+
+    def execute_complete(self, context, event=None):
+        self.log.info("Cluster job completed successfully!")
+```
+
+## Common Patterns
+
+### Dynamic Task Mapping with Expanding
+
+**Problem**: Processing a variable number of partition files without hardcoding task instances.
+
+**Solution**:
+Use `.expand()` on TaskFlow tasks:
+
+```python
+@task
+def get_files():
+    return ["file_a.csv", "file_b.csv", "file_c.csv"]
+
+@task
+def process_file(filename: str):
+    print(f"Processing {filename}")
+
+files = get_files()
+process_file.expand(filename=files)
+```
+
+## Best Practices (2026)
+
+- **Do** write new DAGs using the TaskFlow API (`@task`, `@dag`) instead of legacy PythonOperator boilerplate.
+- **Do** set `catchup=False` on DAGs unless historically backfilling missing time intervals intentionally.
+- **Do** use Deferrable Operators and Sensors to prevent worker slot exhaustion during long external waits.
+- **Do** test DAGs for parse errors and syntax issues in CI using `pytest` and `dag.test()`.
+- **Don't** perform heavy compute or database queries in top-level DAG script code; execute them only inside tasks.
+- **Don't** store large binary payloads or massive DataFrames in XCom; store metadata/S3 pointers instead.
+- **Don't** hardcode credentials in DAG files; use Airflow Connections and Secrets Backends (HashiCorp Vault, AWS Secrets Manager).
+
+## Troubleshooting
+
+| Error                                       | Cause                                                                       | Solution                                                                |
+| :------------------------------------------ | :-------------------------------------------------------------------------- | :---------------------------------------------------------------------- |
+| `DagBag parsing timeout (DAG taking > 30s)` | Heavy imports, database queries, or network calls at top level of DAG file. | Move heavy imports and I/O operations inside task functions.            |
+| `Task marked as failed without error log`   | Airflow worker process killed by OOM killer or host shutdown.               | Increase worker container memory limits or use `KubernetesPodOperator`. |
+| `XCom payload size limit exceeded`          | Passing massive dataframes (>48KB in SQLite/MySQL) between tasks via XCom.  | Store data in S3/GCS object storage and pass only URI paths via XCom.   |
 
 ## References
 

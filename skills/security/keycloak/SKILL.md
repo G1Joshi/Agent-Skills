@@ -1,6 +1,6 @@
 ---
 name: keycloak
-description: Keycloak identity and access management. Use for SSO.
+description: Expert Keycloak IAM assistance covering OpenID Connect realms, identity brokering, user federation, and client adapters. Use when configuring enterprise SSO, managing Keycloak realms, or securing microservices.
 ---
 
 # Keycloak
@@ -9,11 +9,12 @@ Keycloak is an open-source Identity and Access Management solution aimed at mode
 
 ## When to Use
 
-- **Self-Hosted IAM**: You want Auth0 features but deployed on your own infrastructure (GDPR/Compliance).
-- **Enterprise Integration**: Connecting to legacy LDAP/Active Directory user federations.
-- **Single Sign-On (SSO)**: One login for your internal wiki, chat, and cloud apps.
+- **Self-Hosted Open-Source Identity Management**: Deploying an enterprise IAM solution on Kubernetes without commercial vendor lock-in.
+- **Enterprise Federation (Active Directory / LDAP)**: Syncing users, groups, and credentials from corporate LDAP and Active Directory domains.
+- **Identity Brokering & Social Logins**: Centralizing authentication across Google, GitHub, SAML 2.0, and OIDC identity providers.
+- **Fine-Grained Authorization Services**: Defining attribute-based access control (ABAC) and resource permission policies.
 
-## Quick Start (Docker)
+## Quick Start
 
 ```bash
 docker run -p 8080:8080 -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=admin quay.io/keycloak/keycloak:latest start-dev
@@ -21,30 +22,93 @@ docker run -p 8080:8080 -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=admin
 
 ## Core Concepts
 
-### Realm
+#Realm Architecture & Multi-Tenancy
 
-A space where you manage objects (users, apps, roles). You usually create a dedicated realm for your app (e.g., `my-app-realm`) and leave `master` for admin tasks.
+Realms isolate groups of users, credentials, roles, and client applications completely:
 
-### Clients
+```
+[ Master Realm (Administer Keycloak) ]
+       ├── [ Realm: EnterpriseA ] ── (Users, Roles, Clients, LDAP Provider)
+       └── [ Realm: EnterpriseB ] ── (Users, Roles, Clients, Google Provider)
+```
 
-Applications (Web, Mobile, Service) that can request login.
+#OIDC Client Registration (Public vs Confidential)
 
-### Identity Brokering
+- **Confidential Clients**: Backend servers that maintain a `client_secret` securely.
+- **Public Clients**: SPAs and mobile apps that authenticate via PKCE without secrets:
 
-Keycloak can act as a broker: User clicks "Login with GitHub" -> Keycloak talks to GitHub -> Keycloak issues its own token to your app.
+```json
+{
+  "clientId": "frontend-spa",
+  "publicClient": true,
+  "standardFlowEnabled": true,
+  "redirectUris": ["https://app.example.com/*"],
+  "webOrigins": ["https://app.example.com"],
+  "pkceCodeChallengeMethod": "S256"
+}
+```
 
-## Best Practices (2025)
+#Docker Deployment with Production Database
+
+Running Keycloak in production mode connected to PostgreSQL:
+
+```yaml
+# docker-compose.yml
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    command: start --optimized
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: secretpassword
+      KC_HOSTNAME: auth.example.com
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: adminpassword
+    ports:
+      - "8080:8080"
+```
+
+## Common Patterns
+
+### Client Credentials Flow for Service-to-Service Auth
+
+**Problem**: Backend microservices calling other microservices require automated machine-to-machine authentication.
+
+**Solution**:
+Authenticate using Keycloak Client Credentials grant:
+
+```bash
+curl -X POST "http://keycloak:8080/realms/enterprise/protocol/openid-connect/token" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=client_credentials" \
+  -d "client_id=order-service" \
+  -d "client_secret=YOUR_CLIENT_SECRET"
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Use the Operator**: On Kubernetes, use the Keycloak Operator for upgrades and scaling.
-- **Production Mode**: `start-dev` is for local only. Use an external DB (Postgres) and proper HTTPS for production.
-- **Theme It**: Don't use the default login page. Extend the theme to match your brand.
+- **Run Keycloak with `start --optimized`**: Build container images with `kc.sh build` ahead of time to minimize container boot time in Kubernetes.
+- **Never Use the `master` Realm for Application Users**: Create custom dedicated realms for applications; reserve `master` strictly for Keycloak admin.
+- **Enable PKCE on All Public Clients**: Enforce S256 code challenge method on all single-page and mobile applications.
+- **Use Distributed Cache Replication (Infinispan)**: Configure Infinispan clustering when deploying multi-replica Keycloak pods to synchronize sessions.
 
 **Don't**:
 
-- **Don't Modify Core**: Use the SPI (Service Provider Interface) to write plugins if you need custom logic.
-- **Don't expose Admin Console**: Block `/admin` and `/master` access from the public internet.
+- **Don't expose Keycloak administration console to the public internet**: Protect `/admin` endpoints behind private VPNs or IP whitelists.
+- **Don't use embedded H2 database in production**: Always use external, managed PostgreSQL or MySQL with automated backups.
+- **Don't neglect database migration planning during upgrades**: Major Keycloak version updates require coordinated database schema migrations.
+
+## Troubleshooting
+
+| Error                                  | Cause                                                               | Solution                                                            |
+| :------------------------------------- | :------------------------------------------------------------------ | :------------------------------------------------------------------ |
+| `Invalid parameter: redirect_uri`      | Target redirect URI not listed in client's Valid Redirect URIs.     | Add exact scheme, host, and port to Keycloak client configuration.  |
+| `KC-SERVICES0093: Invalid credentials` | Secret mismatch or user locked out by brute-force protection.       | Verify client secret and check user unlock status in Admin Console. |
+| `Token signature verification failed`  | Microservice validating token against outdated Keycloak realm keys. | Flush JWKS public key cache in the resource server.                 |
 
 ## References
 

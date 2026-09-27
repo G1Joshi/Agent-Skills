@@ -1,6 +1,6 @@
 ---
 name: mlflow
-description: MLflow ML lifecycle management. Use for ML experiment tracking.
+description: Expert MLflow assistance covering experiment tracking, autologging, model registry, and MLflow recipes. Use when tracking ML metrics, versioning model artifacts, or serving production models.
 ---
 
 # MLflow
@@ -9,34 +9,161 @@ MLflow is the standard for tracking experiments. v3.0 (2025) pivots to **GenAI**
 
 ## When to Use
 
-- **Experiment Tracking**: Logging hyperparameters (`lr=0.01`) and metrics (`accuracy=0.98`).
-- **GenAI Tracing**: Visualizing the full chain of a RAG application.
-- **Model Registry**: Versioning models (`my-model/v3`) for deployment.
+- **Machine Learning Experiment Tracking**: Logging parameters, metrics, code versions, and artifacts across runs.
+- **Model Registry & Governance**: Managing model lifecycle stages (Staging, Production, Archived) with lineage.
+- **LLM Evaluation & Prompt Engineering**: Evaluating LLMs, RAG applications, and prompts using MLflow Evaluate.
+- **Unified Model Deployment**: Packaging models into self-contained flavors (Python function, PyTorch, ONNX) for one-click deployment.
+
+## Quick Start
+
+```python
+import mlflow
+import mlflow.sklearn
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
+
+mlflow.set_experiment("housing_price_prediction")
+
+with mlflow.start_run():
+    n_estimators = 50
+    model = RandomForestRegressor(n_estimators=n_estimators)
+    model.fit(X_train, y_train)
+
+    preds = model.predict(X_val)
+    mse = mean_squared_error(y_val, preds)
+
+    mlflow.log_param("n_estimators", n_estimators)
+    mlflow.log_metric("mse", mse)
+    mlflow.sklearn.log_model(model, "random_forest_model")
+```
 
 ## Core Concepts
 
-### Tracking URI
+#Experiment Tracking & Autologging
 
-Where logs are stored (local `./mlruns` or remote `http://mlflow-server`).
+Logging parameters, evaluation metrics, and model weights automatically:
 
-### Autologging
+```python
+import mlflow
+import mlflow.sklearn
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
 
-`mlflow.autolog()` automatically captures params from Scikit-learn, PyTorch, etc.
+# Configure remote or local tracking URI
+mlflow.set_tracking_uri("http://localhost:5000")
+mlflow.set_experiment("iris_classification_prod")
 
-### LLM Tracing
+# Enable automatic framework logging
+mlflow.sklearn.autolog(log_model_signatures=True)
 
-OpenTelemetry-based tracing to debug prompt chains.
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-## Best Practices (2025)
+with mlflow.start_run(run_name="rf_n100_d5") as run:
+    params = {"n_estimators": 100, "max_depth": 5, "random_state": 42}
+    mlflow.log_params(params)
 
-**Do**:
+    clf = RandomForestClassifier(**params)
+    clf.fit(X_train, y_train)
 
-- **Use `mlflow.evaluate()`**: To run "LLM-as-a-Judge" metrics on your RAG pipeline.
-- **Use Prompt Engineering UI**: MLflow 3.0 has a UI to iterate on prompts.
+    score = clf.score(X_test, y_test)
+    mlflow.log_metric("accuracy", score)
+    print(f"Logged run: {run.info.run_id} with Accuracy: {score:.4f}")
+```
 
-**Don't**:
+#Model Registry & Production Staging
 
-- **Don't use it for data storage**: Log artifacts (models), not datasets. Log metadata about datasets instead.
+Registering and promoting versioned models:
+
+```python
+from mlflow import MlflowClient
+
+client = MlflowClient()
+
+# Register model from a completed run artifact
+model_uri = f"runs:/{run.info.run_id}/model"
+registered_model = mlflow.register_model(model_uri, "CustomerChurnPredictor")
+
+# Assign an alias (MLflow 2.x recommended pattern)
+client.set_registered_model_alias(
+    name="CustomerChurnPredictor",
+    alias="champion",
+    version=registered_model.version
+)
+
+# Load champion model in production serving microservice
+champion_model = mlflow.pyfunc.load_model("models:/CustomerChurnPredictor@champion")
+predictions = champion_model.predict(X_test)
+```
+
+#LLM Evaluation with mlflow.evaluate
+
+Benchmarking RAG outputs against ground truth datasets:
+
+```python
+import mlflow
+import pandas as pd
+
+eval_df = pd.DataFrame({
+    "inputs": ["What is MLflow?", "How does autologging work?"],
+    "ground_truth": [
+        "MLflow is an open-source platform for managing the end-to-end ML lifecycle.",
+        "Autologging automatically captures metrics, parameters, and models without explicit log statements."
+    ],
+    "predictions": [
+        "MLflow manages machine learning experiments, models, and deployments.",
+        "It automatically tracks parameters and metrics during training."
+    ]
+})
+
+with mlflow.start_run():
+    results = mlflow.evaluate(
+        data=eval_df,
+        targets="ground_truth",
+        predictions="predictions",
+        model_type="text-summarization",
+        evaluators="default"
+    )
+    print("Evaluation Metrics:", results.metrics)
+```
+
+## Common Patterns
+
+### Autologging Framework Integrations
+
+**Problem**: Writing manual `mlflow.log_metric` lines for every epoch and hyperparameter.
+
+**Solution**:
+Enable automatic framework-level logging:
+
+```python
+import mlflow
+
+# Autolog PyTorch, TensorFlow, Scikit-Learn, LightGBM, or XGBoost
+mlflow.autolog()
+
+# Subsequent model.fit() calls automatically log all parameters, metrics, and models
+model.fit(X_train, y_train)
+```
+
+## Best Practices (2026)
+
+- **Do** target MLflow 2.15+ utilizing model aliases (`@champion`, `@challenger`) rather than legacy stage transitions.
+- **Do** log model signatures (`mlflow.models.infer_signature`) to ensure input/output schema validation at deployment time.
+- **Do** use `mlflow.start_run()` inside Python context managers to ensure runs are reliably closed on errors.
+- **Do** back up the remote backend store (PostgreSQL) and artifact repository (S3/GCS) regularly.
+- **Don't** store large training datasets directly as artifacts; log dataset hashes and S3 URIs via `mlflow.data`.
+- **Don't** use local filesystem tracking URIs in production or collaborative team environments.
+- **Don't** hardcode tracking URIs; configure via environment variable `MLFLOW_TRACKING_URI`.
+
+## Troubleshooting
+
+| Error                                                | Cause                                                                | Solution                                                                       |
+| :--------------------------------------------------- | :------------------------------------------------------------------- | :----------------------------------------------------------------------------- |
+| `MlflowException: Could not find experiment with ID` | Experiment deleted or connecting to mismatched tracking URI.         | Set explicit tracking URI: `mlflow.set_tracking_uri("http://localhost:5000")`. |
+| `Artifact transfer failed`                           | S3 / GCS bucket permissions missing on client runner.                | Ensure AWS/GCP credentials with write permissions are active in environment.   |
+| `Schema enforcement error on model load`             | Input DataFrame columns mismatch model signature logged at training. | Align DataFrame columns and types with logged `ModelSignature`.                |
 
 ## References
 

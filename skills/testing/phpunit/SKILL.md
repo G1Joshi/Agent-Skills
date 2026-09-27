@@ -1,6 +1,6 @@
 ---
 name: phpunit
-description: PHPUnit PHP testing framework. Use for PHP testing.
+description: Expert PHPUnit testing assistance covering PHP assertions, data providers, and test doubles. Use when writing unit and functional tests for PHP, Laravel, Symfony, or WordPress.
 ---
 
 # PHPUnit
@@ -9,8 +9,10 @@ PHPUnit is the standard unit testing framework for the PHP ecosystem. Examples i
 
 ## When to Use
 
-- **PHP Application**: The industry standard.
-- **TDD**: Built-in support for mocking and code coverage.
+- **PHP Standard Testing Framework**: The official, universal testing framework for Laravel, Symfony, and modern PHP applications.
+- **Unit and Integration Testing**: Testing PHP domain models, services, controllers, and database interactions.
+- **Data Providers for Parameterized Tests**: Running tests against multi-dimensional test datasets using `@dataProvider`.
+- **Mocking & Test Doubles**: Generating mock objects and verifying invocation expectations natively without external libraries.
 
 ## Quick Start
 
@@ -34,40 +36,133 @@ final class StackTest extends TestCase
 
 ## Core Concepts
 
-### Assertions
+#PHPUnit Test Case Structure
 
-Methods like `$this->assertTrue()`, `$this->assertSame()`, `$this->expectException()`.
-
-### Mock Objects
-
-PHPUnit gives you control over the behavior of dependencies.
+Extends `TestCase` and leverages modern PHP 8 attributes:
 
 ```php
-$stub = $this->createMock(SomeClass::class);
-$stub->method('doSomething')->willReturn('foo');
-$this->assertEquals('foo', $stub->doSomething());
+<?php
+use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+
+final class CurrencyConverterTest extends TestCase
+{
+    #[Test]
+    #[DataProvider('currencyProvider')]
+    public function it_converts_usd_to_eur(float $usd, float $expectedEur): void
+    {
+        $converter = new CurrencyConverter(exchangeRate: 0.92);
+        $this->assertEqualsWithDelta($expectedEur, $converter->toEur($usd), 0.01);
+    }
+
+    public static function currencyProvider(): array
+    {
+        return [
+            'zero value' => [0.0, 0.0],
+            'standard transaction' => [100.0, 92.0],
+            'fractional amount' => [10.50, 9.66],
+        ];
+    }
+}
 ```
 
-### Data Providers
+#Native Mock Objects
 
-Pass data to a test method (similar to parameterized tests).
+Stubs methods and asserts on invocation parameters:
 
 ```php
-#[DataProvider('additionProvider')]
-public function testAdd(int $a, int $b, int $expected): void { ... }
+public function testPaymentServiceSendsNotification(): void
+{
+    $mailerMock = $this->createMock(MailerInterface::class);
+    $mailerMock->expects($this->once())
+        ->method('send')
+        ->with($this->equalTo('user@example.com'));
+
+    $service = new PaymentService($mailerMock);
+    $service->processPayment('user@example.com', 50);
+}
 ```
 
-## Best Practices (2025)
+#Declarative phpunit.xml Configuration
+
+Configures test suites, environment variables, and coverage enforcement:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         cacheDirectory=".phpunit.cache">
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include><directory>src</directory></include>
+    </source>
+</phpunit>
+```
+
+## Common Patterns
+
+### Data Providers for Clean Test Matrices
+
+**Problem**: Writing multiple separate test methods to validate email formatting regex rules.
+
+**Solution**:
+Use PHPUnit Data Providers:
+
+```php
+use PHPUnit\Framework\TestCase;
+
+class ValidatorTest extends TestCase
+{
+    /**
+     * @dataProvider emailProvider
+     */
+    public function testEmailValidation(string $email, bool $expected): void
+    {
+        $validator = new EmailValidator();
+        $this->assertSame($expected, $validator->isValid($email));
+    }
+
+    public static function emailProvider(): array
+    {
+        return [
+            ['test@example.com', true],
+            ['invalid-email', false],
+            ['user@sub.domain.org', true],
+            ['', false],
+        ];
+    }
+}
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Use Strict Assertions**: `$this->assertSame()` checks types (===), whereas `assertEquals` is loose (==). Strict is safer.
-- **Use Namespaces**: Organize tests `Tests\Unit\UserTest` matching `App\Models\User`.
-- **PHPUnit 11 features**: Use the new attributes `#[Test]` instead of `/** @test */` annotations if on PHP 8.2+.
+- **Adopt PHP 8 Attributes**: Use `#[Test]` and `#[DataProvider]` instead of legacy docblock annotations (`@test`).
+- **Use Static Data Providers**: Ensure all data provider methods are declared as `public static`.
+- **Run with `--colors=always --testdox`**: Produce clean, human-readable test output in local terminals and CI.
+- **Enforce Strict Types in Tests**: Add `declare(strict_types=1);` at the top of all test files.
 
 **Don't**:
 
-- **Don't test private methods**: Test the public API. If a private method is complex, extract it to a new class.
+- **Don't use `@runInSeparateProcess` unless strictly necessary**: Process isolation adds severe performance overhead.
+- **Don't use `assertEquals` on floats**: Use `assertEqualsWithDelta` to avoid floating point precision failures.
+- **Don't catch exceptions manually**: Use `$this->expectException(CustomException::class)` to assert on thrown errors.
+
+## Troubleshooting
+
+| Error                                                  | Cause                                                            | Solution                                                                 |
+| :----------------------------------------------------- | :--------------------------------------------------------------- | :----------------------------------------------------------------------- |
+| `Class 'PHPUnit\Framework\TestCase' not found`         | Composer autoload missing or PHPUnit not installed via Composer. | Run `composer dump-autoload` and execute via `./vendor/bin/phpunit`.     |
+| `Failed asserting that false is true`                  | Method assertion failed.                                         | Add custom failure message: `$this->assertTrue($val, 'Custom message')`. |
+| `Risky Test: This test did not perform any assertions` | Test executed code without performing explicit `$this->assert*`. | Add assertion or mark with `@doesNotPerformAssertions` annotation.       |
 
 ## References
 

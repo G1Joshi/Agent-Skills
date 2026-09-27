@@ -1,6 +1,6 @@
 ---
 name: twelve-factor
-description: Twelve-factor app methodology. Use for cloud-native apps.
+description: Expert Twelve-Factor App methodology assistance covering declarative setup, environment configuration, backing service bindings, stateless processes, and concurrency models. Use when architecting cloud-native applications, containerizing web services, or standardizing 12-factor compliance.
 ---
 
 # Twelve-Factor App
@@ -9,25 +9,12 @@ The Twelve-Factor App methodology is a set of best practices for building softwa
 
 ## When to Use
 
-- ALWAYS, for any web application or service destined for the cloud (Kubernetes, PaaS, Serverless).
-- Migrating legacy apps to the cloud (Replatforming).
+- **Cloud-Native Application Architecture**: Designing stateless, scalable web applications intended for Kubernetes, PaaS, or container clusters.
+- **Legacy Replatforming**: Modernizing monolithic legacy software into containerized, cloud-ready deployment units.
+- **Zero-Downtime Rolling Deploys**: Ensuring services can boot fast, survive sudden terminations, and run alongside differing versions.
+- **Standardizing Microservice Conventions**: Establishing uniform configuration, logging, and dependency isolation standards across teams.
 
-## The Twelve Factors (2025 Context)
-
-1.  **Codebase**: One codebase tracked in revision control (Git), many deploys.
-2.  **Dependencies**: Explicitly declare and isolate dependencies (Docker, package.json). No system-wide installs.
-3.  **Config**: Store config in the environment (Env Vars, Secrets Manager). Never in code.
-4.  **Backing Services**: Treat backing services (DB, Queue, Cache) as attached resources (URL/Credentials).
-5.  **Build, Release, Run**: Strictly separate build and run stages. CI/CD pipelines are mandatory.
-6.  **Processes**: Execute the app as one or more stateless processes. State goes to backing services (Redis/DB).
-7.  **Port Binding**: Export services via port binding (e.g., `app.listen(8080)`). No reliance on server injection (Tomcat).
-8.  **Concurrency**: Scale out via the process model (Replicas in K8s).
-9.  **Disposability**: Maximize robustness with fast startup and graceful shutdown (SIGTERM handling).
-10. **Dev/Prod Parity**: Keep development, staging, and production as similar as possible (Docker helps here).
-11. **Logs**: Treat logs as event streams. Do not write to files; write to `stdout`/`stderr`.
-12. **Admin Processes**: Run admin/management tasks as one-off processes (e.g., DB migrations) in the same environment.
-
-## Quick Start (Dockerized App)
+## Quick Start
 
 ```dockerfile
 # Dockerfile embodies dependencies, port binding, and build/run separation
@@ -51,19 +38,119 @@ EXPOSE 8080
 CMD ["node", "dist/main.js"]
 ```
 
-## Best Practices
+## Core Concepts
+
+#Declarative Dependencies & Port Binding
+
+Dependencies are strictly pinned; applications self-host their web servers and bind directly to assigned ports:
+
+```json
+// Explicit pinned dependencies in package.json
+{
+  "dependencies": {
+    "express": "4.19.2",
+    "pg": "8.12.0"
+  }
+}
+```
+
+```typescript
+// Self-contained port binding (no external application container like Tomcat required)
+const port = process.env.PORT || 8080;
+app.listen(port, () => console.log(`Server bound to port ${port}`));
+```
+
+#Config Stored in the Environment
+
+Strict separation of code and config; credentials, hostnames, and secrets are injected via environment variables:
+
+```typescript
+// Validate environment config with Zod at startup
+import { z } from "zod";
+
+const EnvSchema = z.object({
+  PORT: z.coerce.number().default(8080),
+  DATABASE_URL: z.string().url(),
+  REDIS_URL: z.string().url(),
+  NODE_ENV: z.enum(["development", "test", "production"]).default("production"),
+});
+
+export const config = EnvSchema.parse(process.env);
+```
+
+#Disposability & Graceful Shutdown
+
+Processes must start fast and shut down gracefully upon receiving termination signals:
+
+```typescript
+// Graceful termination handling
+process.on("SIGTERM", async () => {
+  console.log("SIGTERM received. Draining connections...");
+  server.close(async () => {
+    await dbPool.end();
+    console.log("All connections closed. Exiting process.");
+    process.exit(0);
+  });
+});
+```
+
+## Common Patterns
+
+### Graceful Shutdown (Disposability)
+
+**Problem**: Unhandled SIGTERM signals cause aborted in-flight HTTP requests and database connection leaks during rolling updates.
+
+**Solution**:
+Intercept OS termination signals to drain traffic and close resources cleanly:
+
+```typescript
+import express from "express";
+
+const app = express();
+const server = app.listen(process.env.PORT || 8080);
+
+const shutdown = async (signal: string) => {
+  console.log(`Received ${signal}, starting graceful shutdown...`);
+  server.close(async () => {
+    // Close DB pool, flush queues, drain connections
+    await dbPool.end();
+    console.log("Cleanup complete. Exiting.");
+    process.exit(0);
+  });
+
+  // Force shutdown after timeout
+  setTimeout(() => {
+    console.error("Forcefully terminating process due to timeout.");
+    process.exit(1);
+  }, 10000).unref();
+};
+
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- Use **Docker** to satisfy dependencies and dev/prod parity.
-- Use **Environment Variables** for secrets and config.
-- Implement **Graceful Shutdown** to stop accepting new requests and finish current ones.
+- **Treat Logs as Event Streams**: Write JSON logs directly to `stdout` / `stderr`; let vector collectors (FluentBit, Promtail) ship them.
+- **Execute One-Off Admin Tasks in the Same Environment**: Run database migrations via one-off container jobs matching release image hashes.
+- **Keep Development and Production Parity**: Use Docker Compose locally to run the exact database and cache engines used in production.
+- **Keep Processes Stateless**: Store persistent data in external backing services (PostgreSQL, S3, Redis).
 
 **Don't**:
 
-- Don't hardcode IP addresses or file paths.
-- Don't rely on "Sticky Sessions" (violates Statelessness).
-- Don't log to local files in a container (they vanish).
+- **Don't hardcode configuration or secrets in source code**: Keep all credentials out of Git repositories.
+- **Don't rely on sticky sessions**: Session state must live in distributed caches (Redis) to allow effortless horizontal scaling.
+- **Don't log to local files inside containers**: Container filesystems are ephemeral and destroyed upon pod restart.
+
+## Troubleshooting
+
+| Error                             | Cause                                                   | Solution                                                                      |
+| :-------------------------------- | :------------------------------------------------------ | :---------------------------------------------------------------------------- |
+| `Container killed with 137 (OOM)` | Memory leak or unbounded container memory limit.        | Set appropriate memory limits and profile process heap usage.                 |
+| `EADDRINUSE`                      | Port binding conflict or previous process did not exit. | Check running containers/processes; ensure dynamic `PORT` assignment.         |
+| `Missing environment variable`    | Config not injected during container startup.           | Validate required env vars at startup using schema validation (e.g. Zod/Joi). |
 
 ## References
 

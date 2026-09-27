@@ -1,6 +1,6 @@
 ---
 name: clerk
-description: Clerk authentication for modern apps. Use for user management.
+description: Expert Clerk authentication assistance covering Next.js middleware, React user components, webhooks, and session tokens. Use when integrating Clerk auth, protecting routes, or handling user management.
 ---
 
 # Clerk
@@ -9,11 +9,12 @@ Clerk is a comprehensive user management and authentication service built specif
 
 ## When to Use
 
-- **Next.js / React Apps**: Best-in-class integration with App Router and Server Components.
-- **SaaS B2B/B2C**: Built-in Organization (Multi-tenancy) management.
-- **Speed**: You want the User Profile, Avatar upload, and Email management UI done for you.
+- **Modern React & Next.js Authentication**: Adding drop-in, beautifully designed authentication components to modern frontend stacks.
+- **B2B SaaS Multi-Tenancy & Organizations**: Managing team invites, role assignments, seat limits, and organization switching.
+- **Passwordless & Passkey Auth**: Enabling WebAuthn passkeys, biometric logins, and magic links out of the box.
+- **Edge-Ready Middleware Verification**: Validating JWT session tokens at the network edge (Cloudflare Workers, Next.js Middleware).
 
-## Quick Start (Next.js App Router)
+## Quick Start
 
 ```typescript
 // middleware.ts
@@ -41,26 +42,127 @@ export default async function Page() {
 
 ## Core Concepts
 
-### Pre-built Components
+#Drop-in Component Architecture (<SignIn />, <UserButton />)
 
-Clerk provides the full UI: Login, Register, Forgot Password, Managed MFA, User Profile (Change Password, 2FA, Sessions).
+Provides prebuilt, accessible, themed UI components that handle complete auth lifecycles:
 
-### Sessions vs Tokens
+```tsx
+// app/layout.tsx
+import {
+  ClerkProvider,
+  SignInButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/nextjs";
 
-Clerk handles the complexity of short-lived JWTs (`__session` cookie) and keeps them fresh automatically via frontend SDKs.
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <ClerkProvider>
+      <html lang="en">
+        <body>
+          <header className="flex justify-between p-4 border-b">
+            <h1>Enterprise SaaS</h1>
+            <SignedOut>
+              <SignInButton mode="modal" />
+            </SignedOut>
+            <SignedIn>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
+          </header>
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
+  );
+}
+```
 
-## Best Practices (2025)
+#Edge Middleware Session Protection
+
+Protects routes and extracts authenticated user claims at the edge before rendering:
+
+```typescript
+// middleware.ts
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+
+const isProtectedRoute = createRouteMatcher([
+  "/dashboard(.*)",
+  "/api/protected(.*)",
+]);
+
+export default clerkMiddleware((auth, req) => {
+  if (isProtectedRoute(req)) {
+    auth().protect();
+  }
+});
+
+export const config = {
+  matcher: ["/((?!.*\..*|_next).*)", "/", "/(api|trpc)(.*)"],
+};
+```
+
+#Multi-Tenant Organizations & Role Checks
+
+Manages multi-organization contexts with granular RBAC permissions:
+
+```typescript
+import { auth } from "@clerk/nextjs/server";
+
+export async function POST() {
+  const { orgId, orgRole } = auth();
+  if (!orgId) throw new Error("Unauthorized: Select an organization");
+  if (orgRole !== "org:admin")
+    throw new Error("Forbidden: Admin privileges required");
+
+  // Execute admin organization mutations
+}
+```
+
+## Common Patterns
+
+### Next.js App Router Route Protection with Clerk Middleware
+
+**Problem**: Public API endpoints inadvertently exposed without explicit session verification.
+
+**Solution**:
+Enforce route matcher guards in Next.js `middleware.ts`:
+
+```typescript
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+
+const isProtectedRoute = createRouteMatcher([
+  "/dashboard(.*)",
+  "/api/protected(.*)",
+]);
+
+export default clerkMiddleware(async (auth, req) => {
+  if (isProtectedRoute(req)) await auth.protect();
+});
+
+export const config = {
+  matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
+};
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- Use **Server Components** (`currentUser()`) to fetch user data on the backend.
-- Use **Organizations** feature for B2B SaaS apps (Tenant isolation).
-- Enable **Passkeys** (Passwordless) in the dashboard (Clerk supports this natively).
+- **Verify Webhook Signatures with Svix**: Always verify incoming Clerk user lifecycle webhooks using `svix` before updating local databases.
+- **Use Server-Side `auth()` in App Router**: Extract `userId` and `orgId` via `auth()` in Server Components to eliminate client-side waterfall fetches.
+- **Theme Components with Tailored CSS**: Match application design systems using Clerk's `appearance` prop and Tailwind utility variables.
+- **Enable Passkeys by Default**: Encourage users to register biometric passkeys to eliminate credential phishing risks.
 
 **Don't**:
 
-- Don't try to build custom UI unless necessary. The pre-built components handle edge cases (MFA, Captcha, Error states) perfectly.
-- Don't expose Secret Keys in client-side env vars.
+- **Don't expose `CLERK_SECRET_KEY` in frontend code**: Keep secret keys strictly in server environment variables.
+- **Don't store database IDs in client state**: Treat Clerk's JWT session claims as the single source of truth for the active request.
+- **Don't bypass route protection**: Always enforce server-side protection in route handlers and middleware; do not rely on UI hiding alone.
 
 ## Troubleshooting
 

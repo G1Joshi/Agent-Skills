@@ -1,6 +1,6 @@
 ---
 name: fastapi
-description: FastAPI Python async framework with Pydantic and automatic OpenAPI. Use for Python APIs.
+description: Expert FastAPI assistance covering Pydantic models, async endpoints, dependency injection, and OpenAPI generation. Use when developing high-performance Python REST APIs and microservices.
 ---
 
 # FastAPI
@@ -9,9 +9,10 @@ FastAPI is a modern, fast (high-performance), web framework for building APIs wi
 
 ## When to Use
 
-- **APIs**: The default choice for modern Python APIs.
-- **Machine Learning**: Native integration with Pydantic makes JSON <-> Model interaction seamless.
-- **Performance**: Built on Starlette and Pydantic v2, it rivals Node.js and Go in benchmarks.
+- **High-Performance Python Web APIs**: Developing modern async APIs built on Starlette and Pydantic.
+- **AI & Machine Learning Model Serving**: Serving PyTorch, TensorFlow, Scikit-learn, and Hugging Face inference endpoints.
+- **Automatic OpenAPI & Swagger Documentation**: Generating interactive documentation with zero manual configuration.
+- **Data Validation & Type-Safe Payloads**: Validating query parameters, paths, headers, and request bodies with Pydantic v2.
 
 ## Quick Start
 
@@ -32,30 +33,125 @@ async def create_item(item: Item):
 
 ## Core Concepts
 
-### Pydantic Models
+#Async Route Handlers & Pydantic v2 Models
 
-Define data shape using Python classes. Validation and JSON serialization happen automatically.
+Strict payload parsing and serialization:
 
-### Dependency Injection
+```python
+from fastapi import FastAPI, HTTPException, status, Depends
+from pydantic import BaseModel, EmailStr, Field
+from typing import List
 
-FastAPI has a powerful DI system.
-`async def read_users(db: Session = Depends(get_db)):`.
+app = FastAPI(title="Catalog API", version="2.0.0")
 
-### OpenAPI (Swagger)
+class ProductCreate(BaseModel):
+    name: str = Field(min_length=2, max_length=100)
+    price: float = Field(gt=0, description="Price in USD")
+    tags: List[str] = []
 
-Automatically generates interactive API documentation at `/docs`.
+class ProductResponse(ProductCreate):
+    id: int
+    is_active: bool = True
 
-## Best Practices (2025)
+@app.post("/products", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
+async def create_product(product: ProductCreate):
+    # Process and persist product
+    return {
+        "id": 101,
+        "name": product.name,
+        "price": product.price,
+        "tags": product.tags,
+        "is_active": True
+    }
+```
 
-**Do**:
+#Dependency Injection System with Depends
 
-- **Use Pydantic v2**: Ensure you are on v2 for the massive Rust-based performance boost.
-- **Use `lifespan`**: Use the new `lifespan` context manager for startup/shutdown events instead of deprecated `on_event`.
-- **Type Everything**: The more you type, the better the auto-generated docs and validation.
+Reusing database sessions, authentication, and service clients:
 
-**Don't**:
+```python
+from fastapi import Header, HTTPException
 
-- **Don't block the loop**: Run CPU bound code (image processing, heavy math) in `def` endpoints (threadpool), not `async def` (event loop), or use background tasks.
+async def verify_api_key(x_api_key: str = Header(...)):
+    if x_api_key != "secret-internal-key":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid API Key"
+        )
+    return x_api_key
+
+@app.get("/secure-metrics")
+async def get_metrics(api_key: str = Depends(verify_api_key)):
+    return {"status": "authorized", "system_load": 0.42}
+```
+
+#Lifespan Events & Async Resource Management
+
+Initializing ML models, database connection pools, and Redis caches:
+
+```python
+from contextlib import asynccontextmanager
+
+class ResourceState:
+    db_pool = None
+
+state = ResourceState()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Initialize connections
+    print("Connecting to database pool...")
+    state.db_pool = "connected_pool_instance"
+    yield
+    # Shutdown: Clean up connections
+    print("Closing database pool...")
+    state.db_pool = None
+
+app = FastAPI(lifespan=lifespan)
+```
+
+## Common Patterns
+
+### Dependency Injection with Database Session
+
+**Problem**: Replicating database connection creation and teardown across every API route.
+
+**Solution**:
+Use `Depends()` with generator context management:
+
+```python
+from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy.orm import Session
+from .database import get_db
+from . import models, schemas
+
+app = FastAPI()
+
+@app.get("/items/{item_id}", response_model=schemas.ItemResponse)
+def read_item(item_id: int, db: Session = Depends(get_db)):
+    db_item = db.query(models.Item).filter(models.Item.id == item_id).first()
+    if db_item is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return db_item
+```
+
+## Best Practices (2026)
+
+- **Do** migrate to FastAPI lifespan handlers (`@asynccontextmanager`) instead of deprecated `@app.on_event("startup")`.
+- **Do** leverage Pydantic v2 for up to 5x-10x faster schema serialization and parsing.
+- **Do** define synchronous `def` (instead of `async def`) for blocking operations so FastAPI executes them in the worker threadpool.
+- **Do** structure routes with `APIRouter` to maintain clean domain separation.
+- **Don't** perform blocking CPU or I/O calls directly inside `async def` handlers; use `asyncio.to_thread`.
+- **Don't** return raw database entities; map them through Pydantic `response_model` schemas.
+- **Don't** hardcode CORS origins to `["*"]` when authentication credentials are allowed.
+
+## Troubleshooting
+
+| Error                                                     | Cause                                                                     | Solution                                                                                     |
+| :-------------------------------------------------------- | :------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------- |
+| `422 Unprocessable Entity`                                | Inbound request payload failed Pydantic schema validation.                | Inspect response body details to see field validation failures.                              |
+| `RuntimeError: Task attached to a different loop`         | Blocking synchronous database driver used in async `async def` route.     | Use `def` instead of `async def` for sync I/O, or switch to async driver (asyncpg/aiomysql). |
+| `AttributeError: 'NoneType' object has no attribute 'id'` | Query returned None and code attempted to access attribute without check. | Guard with `if not item: raise HTTPException(404)`.                                          |
 
 ## References
 

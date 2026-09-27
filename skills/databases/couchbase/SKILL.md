@@ -1,6 +1,6 @@
 ---
 name: couchbase
-description: Couchbase distributed NoSQL database. Use for mobile and edge.
+description: Expert Couchbase NoSQL assistance covering N1QL/SQL++ queries, memory-first caching, document scopes, and cross-datacenter replication (XDCR). Use when building ultra-low latency JSON document platforms.
 ---
 
 # Couchbase
@@ -9,9 +9,10 @@ Couchbase works as a Key-Value store (managed memory cache) + Document Database.
 
 ## When to Use
 
-- **Caching + Persistence**: When you need the speed of Redis but the persistence/querying of MongoDB.
-- **Mobile Sync**: Couchbase Mobile / Sync Gateway provides robust offline-sync for mobile apps.
-- **SQL on JSON**: N1QL allows using standard SQL (`SELECT * FROM users JOIN orders`) on JSON documents.
+- **Memory-First NoSQL Document Store**: Applications requiring sub-millisecond document lookups powered by an integrated managed memory cache.
+- **SQL for JSON (N1QL / SQL++)**: Querying JSON documents using familiar SQL syntax with joins, nested arrays, and subqueries.
+- **Distributed Key-Value + Full-Text Search**: Unifying key-value caching, document storage, and vector/full-text search in a single cluster.
+- **Mobile Edge Data Sync (Couchbase Lite)**: Synchronizing embedded mobile database instances with cloud clusters using Sync Gateway.
 
 ## Quick Start
 
@@ -26,28 +27,88 @@ GROUP BY u.name;
 
 ## Core Concepts
 
-### Memory First
+#Memory-First VBucket Architecture
 
-Writes go to memory first (microseconds), then disk. Reads serve from memory if hot.
+Documents are mapped across 1024 virtual buckets (vBuckets), cached directly in RAM before being asynchronously written to disk:
 
-### Couchbase Capella
+```
+[ Application Client ] ──Sub-Millisecond Read/Write──→ [ Managed Memory Cache (RAM) ]
+                                                                 │ (Async Flush)
+                                                                 ▼
+                                                        [ Append-Only Disk Storage ]
+```
 
-The fully managed Database-as-a-Service (DBaaS) version. Best for 2025 usage.
+#SQL++ (N1QL) Declarative JSON Queries
 
-### Buckets, Scopes, Collections
+Executes full SQL expressions over schemaless JSON structures:
 
-Hierarchy: Cluster -> Bucket -> Scope -> Collection -> Document. Maps roughly to Database -> Schema -> Table -> Row.
+```sql
+-- Query nested JSON orders in Couchbase SQL++
+SELECT
+  meta().id AS orderId,
+  customer.email,
+  ARRAY_SUM(items[*].price) AS totalAmount
+FROM `commerce`.`orders` AS o
+WHERE status = 'PAID'
+  AND ANY item IN items SATISFIES item.category = 'Electronics' END
+ORDER BY totalAmount DESC
+LIMIT 20;
+```
 
-## Best Practices (2025)
+#Scopes and Collections Multi-Tenancy
+
+Organizes documents into logical namespaces mimicking relational databases:
+
+```
+[ Bucket: enterprise ]
+  ├── [ Scope: billing ]
+  │   ├── [ Collection: invoices ]
+  │   └── [ Collection: payments ]
+  └── [ Scope: catalog ]
+      └── [ Collection: products ]
+```
+
+## Common Patterns
+
+### SQL++ (N1QL) Secondary Indexing and Querying
+
+**Problem**: Ad-hoc JSON document filtering results in slow primary index table scans.
+
+**Solution**:
+Build covering secondary GSI indexes for high-throughput queries:
+
+```sql
+CREATE INDEX idx_orders_status ON `ecommerce`.`sales`.`orders` (customerId, orderStatus, orderDate)
+WHERE orderStatus != 'cancelled';
+
+SELECT customerId, orderDate, total
+FROM `ecommerce`.`sales`.`orders`
+WHERE customerId = "cust_987" AND orderStatus = "completed"
+ORDER BY orderDate DESC;
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Index N1QL queries**: Like a relational DB, specific queries need specific GSI (Global Secondary Indexes).
-- **Use Vector Search**: 2025 versions support Vector Search for AI apps.
+- **Use Sub-Document API for Partial Mutations**: Mutate specific JSON array items or attributes without fetching/resaving the entire document.
+- **Create Global Secondary Indexes (GSI) Covering Queries**: Index the exact fields in `WHERE` and `SELECT` to enable index-only scans.
+- **Leverage Key-Value Operations for Hot Lookups**: Use `get()` and `upsert()` key-value APIs for sub-millisecond reads rather than N1QL queries.
+- **Size Bucket RAM Quotas Carefully**: Allocate sufficient RAM to ensure high active working set cache-hit ratios.
 
 **Don't**:
 
-- **Don't use Views**: Old MapReduce Views are deprecated. Use N1QL.
+- **Don't use Primary Indexes in Production**: Avoid `CREATE PRIMARY INDEX`; primary scans scan all documents in the collection.
+- **Don't store massive binary blobs in documents**: Keep documents under 1MB; store images and media in object storage.
+- **Don't ignore Cross-Datacenter Replication (XDCR) lag**: Monitor XDCR replication queues when synchronizing across multi-region clusters.
+
+## Troubleshooting
+
+| Error                               | Cause                                                                | Solution                                                                              |
+| :---------------------------------- | :------------------------------------------------------------------- | :------------------------------------------------------------------------------------ |
+| `No index available for query`      | Missing secondary index matching the WHERE predicate in SQL++ query. | Create an index covering query filter and projection columns.                         |
+| `Temporary failure / Out of memory` | Couchbase bucket memory quota exhausted by high item count.          | Increase bucket RAM quota or configure eviction policy (value-only vs full eviction). |
+| `DocumentExistsException`           | Key already exists in bucket during insert operation.                | Use `upsert` instead of `insert` if overwrite semantics are intended.                 |
 
 ## References
 

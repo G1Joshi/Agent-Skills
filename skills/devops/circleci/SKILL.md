@@ -1,6 +1,6 @@
 ---
 name: circleci
-description: CircleCI cloud CI/CD platform. Use for continuous integration.
+description: Expert CircleCI assistance covering config.yml, orbs, docker executors, workflows, caching, and parallelism. Use when automating continuous integration and deployment pipelines on CircleCI.
 ---
 
 # CircleCI
@@ -9,9 +9,10 @@ CircleCI is a cloud-native CI/CD platform focused on speed and parallelism. In 2
 
 ## When to Use
 
-- **Speed**: Best-in-class caching, test splitting, and parallelism.
-- **Complexity**: Dynamic Configuration allows pipelines to change structure based on changed files (Monorepo support).
-- **Compliance**: FedRAMP / SOC2 compliance is strong.
+- **High-Velocity Cloud CI/CD Pipelines**: Automating builds, tests, and deployments with Docker, Machine, and macOS executors.
+- **Reusable Pipeline Architecture with Orbs**: Sharing validated workflows using certified CircleCI Orbs (AWS, Slack, Docker).
+- **Test Splitting & Parallelism**: Accelerating slow test suites across dozens of concurrent execution containers.
+- **Complex Multi-Stage Workflows**: Approval gates, scheduled nightlies, and matrix build pipelines.
 
 ## Quick Start
 
@@ -37,29 +38,152 @@ workflows:
 
 ## Core Concepts
 
-### Orbs
+#Multi-Job Workflow with Caching & Docker Executor
 
-Shareable packages of config. `circleci/aws-s3@3.0` encapsulates 500 lines of bash into one line of YAML.
+Fast build and test pipeline with dependency caching:
 
-### Test Splitting
+```yaml
+version: 2.1
 
-Intelligently divides test files across N parallel nodes to reduce build time from 30m to 3m.
+orbs:
+  node: circleci/node@6.0.0
+  slack: circleci/slack@4.13.0
 
-### Dynamic Config (2025)
+executors:
+  app-executor:
+    docker:
+      - image: cimg/node:22.0.0
+    resource_class: medium
 
-A setup workflow generates the _real_ workflow. Allows logic like "If only /backend changed, don't run frontend tests".
+jobs:
+  build-and-test:
+    executor: app-executor
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-deps-{{ checksum "package-lock.json" }}
+            - v1-deps-
+      - run:
+          name: Install Dependencies
+          command: npm ci
+      - save_cache:
+          key: v1-deps-{{ checksum "package-lock.json" }}
+          paths:
+            - ~/.npm
+      - run:
+          name: Execute Static Analysis & Tests
+          command: |
+            npm run lint
+            npm test -- --coverage
+      - store_test_results:
+          path: junit.xml
+      - store_artifacts:
+          path: coverage
 
-## Best Practices (2025)
+workflows:
+  build-test-deploy:
+    jobs:
+      - build-and-test
+      - hold-for-approval:
+          type: approval
+          requires:
+            - build-and-test
+          filters:
+            branches:
+              only: main
+```
 
-**Do**:
+#Test Splitting by Timing for Concurrent Runners
 
-- **Use Dynamic Config**: Essential for monorepos to save credits.
-- **Use Contexts**: Securely share secrets across projects (e.g., `AWS_CREDS`).
-- **Use `docker` executor**: It is faster than `machine` executor for most tasks.
+Distributing tests across parallel containers based on historical execution duration:
 
-**Don't**:
+```yaml
+jobs:
+  parallel-tests:
+    parallelism: 4 # Run across 4 parallel containers
+    docker:
+      - image: cimg/python:3.12
+    steps:
+      - checkout
+      - run:
+          name: Run Split Tests
+          command: |
+            TEST_FILES=$(circleci tests glob "tests/**/*.py" | circleci tests split --split-by=timings)
+            pytest $TEST_FILES --junitxml=test-results/junit.xml
+      - store_test_results:
+          path: test-results
+```
 
-- **Don't reinvent the wheel**: Check the Orb Registry before writing custom commands.
+#OIDC Authentication with Cloud Providers
+
+Authenticating to AWS/GCP without permanent secrets:
+
+```yaml
+jobs:
+  deploy-aws:
+    docker:
+      - image: cimg/aws:2026.01
+    steps:
+      - run:
+          name: Assume AWS Role via OIDC
+          command: |
+            # CircleCI OpenID Connect token exchange
+            echo "Authenticating via $CIRCLE_OIDC_TOKEN"
+```
+
+## Common Patterns
+
+### Caching Dependencies and Docker Layer Caching
+
+**Problem**: Installing npm/cargo dependencies from scratch on every commit inflates CI build duration.
+
+**Solution**:
+Use CircleCI cache keys:
+
+```yaml
+version: 2.1
+
+jobs:
+  build_and_test:
+    docker:
+      - image: cimg/node:20.10
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-deps-{{ checksum "package-lock.json" }}
+            - v1-deps-
+      - run: npm ci
+      - save_cache:
+          key: v1-deps-{{ checksum "package-lock.json" }}
+          paths:
+            - ~/.npm
+      - run: npm test
+
+workflows:
+  build:
+    jobs:
+      - build_and_test
+```
+
+## Best Practices (2026)
+
+- **Do** leverage CircleCI test splitting (`circleci tests split --split-by=timings`) to minimize CI pipeline wall-clock time.
+- **Do** use `cimg/*` official convenience images optimized for caching and performance.
+- **Do** authenticate to cloud platforms (AWS, GCP, Azure) via OIDC tokens instead of static credentials.
+- **Do** store test results with `store_test_results` to view flaky test analytics and trends.
+- **Don't** use resource classes larger than needed (`xlarge`); right-size containers to optimize credits.
+- **Don't** store unencrypted credentials in repository config files; use Project Environment Variables or Contexts.
+- **Don't** re-run entire workflows on minor test failures; use 'Rerun failed tests' functionality.
+
+## Troubleshooting
+
+| Error                                             | Cause                                                                      | Solution                                                      |
+| :------------------------------------------------ | :------------------------------------------------------------------------- | :------------------------------------------------------------ |
+| `CircleCI config error: Schema validation failed` | YAML syntax error or invalid orb/step parameter in `.circleci/config.yml`. | Validate locally with `circleci config validate`.             |
+| `Job exceeded memory limit and was killed`        | Build task exceeded RAM limit of selected resource class.                  | Upgrade resource class: `resource_class: medium+` or `large`. |
+| `Cannot find environment variable`                | Context or project environment variable not linked to job.                 | Link context under `workflows.jobs.context` in `config.yml`.  |
 
 ## References
 

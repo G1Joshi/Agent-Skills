@@ -1,6 +1,6 @@
 ---
 name: k6
-description: k6 load testing tool. Use for performance testing.
+description: Expert k6 load and performance testing assistance covering virtual users, thresholds, metrics, and scenario scripting. Use when benchmarking APIs, performing stress testing, or integrating load tests into CI/CD.
 ---
 
 # k6
@@ -9,9 +9,10 @@ k6 is a developer-centric, open-source load testing tool suitable for testing AP
 
 ## When to Use
 
-- **API Load Testing**: The gold standard for modern API performance testing.
-- **CI/CD Integration**: Very lightweight binary (or Docker), easy to gate capabilities ("fail if p95 > 500ms").
-- **Developer Friendly**: Uses JS (ES6) for scripting, so backend/frontend devs can write tests.
+- **Developer-Centric Load Testing**: Writing high-performance load tests in modern JavaScript / TypeScript with CLI execution.
+- **CI/CD Performance Regression Gates**: Defining thresholds (`http_req_duration: ['p(95)<200']`) that automatically fail build pipelines on regressions.
+- **Spike, Stress & Soak Testing**: Simulating traffic surges, system breaking points, and prolonged sustained load over hours.
+- **Cloud Distributed Load Generation**: Running distributed tests across global regions via Grafana Cloud k6.
 
 ## Quick Start
 
@@ -37,34 +38,135 @@ Run with `k6 run script.js`.
 
 ## Core Concepts
 
-### Virtual Users (VUs)
+#Go-Powered Virtual Users (VUs) with JS Runtimes
 
-Simulated users that run your script in a loop. They are concurrent but not browser-based (unless you use xk6-browser), so they are CPU efficient.
+Tests are written in JavaScript, but executed by a multi-threaded Go engine with zero NodeJS overhead:
 
-### Checks & Thresholds
+```javascript
+// load-test.js
+import http from "k6/http";
+import { check, sleep } from "k6";
 
-- **Check**: Boolean assertion (like an assert). Doesn't fail the test, just reports pass/fail % at end.
-- **Threshold**: Pass/Fail criteria for the CI pipeline.
+export const options = {
+  stages: [
+    { duration: "30s", target: 50 }, // Ramp up to 50 users
+    { duration: "1m", target: 50 }, // Stay at 50 users
+    { duration: "20s", target: 0 }, // Ramp down
+  ],
+  thresholds: {
+    http_req_duration: ["p(95)<300"], // 95% of requests must complete below 300ms
+    http_req_failed: ["rate<0.01"], // Error rate must be less than 1%
+  },
+};
+
+export default function () {
+  const res = http.get("https://api.staging.example.com/v1/items");
+  check(res, {
+    "status is 200": (r) => r.status === 200,
+    "transaction time OK": (r) => r.timings.duration < 300,
+  });
+  sleep(1);
+}
+```
+
+#Custom Metrics (Counters, Gauges, Trends)
+
+Tracks domain-specific operational metrics alongside standard HTTP timings:
+
+```javascript
+import { Trend, Counter } from "k6/metrics";
+
+const checkoutLatency = new Trend("checkout_duration");
+const completedOrders = new Counter("successful_checkouts");
+
+export default function () {
+  const start = Date.now();
+  const res = http.post(
+    "https://api.example.com/checkout",
+    JSON.stringify({ cartId: 415 }),
+    {
+      headers: { "Content-Type": "application/json" },
+    },
+  );
+
+  if (res.status === 201) {
+    completedOrders.add(1);
+    checkoutLatency.add(Date.now() - start);
+  }
+}
+```
+
+#Tagging & Scenarios
+
+Isolates different user behaviors (e.g. 80% readers, 20% writers) in a single test run:
 
 ```javascript
 export const options = {
-  thresholds: {
-    http_req_duration: ["p(95)<500"], // 95% of requests must complete below 500ms
+  scenarios: {
+    readers: {
+      executor: "constant-vus",
+      vus: 100,
+      duration: "5m",
+      exec: "browseCatalog",
+    },
   },
 };
 ```
 
-## Best Practices (2025)
+## Common Patterns
+
+### Staged Load Test with Strict SLA Thresholds
+
+**Problem**: Performance regressions slip into production when build pipelines lack automated latency gatechecks.
+
+**Solution**:
+Define ramp-up stages and SLO thresholds in k6 script options:
+
+```javascript
+import http from "k6/http";
+import { check, sleep } from "k6";
+
+export const options = {
+  stages: [
+    { duration: "30s", target: 50 },
+    { duration: "1m", target: 50 },
+    { duration: "20s", target: 0 },
+  ],
+  thresholds: {
+    http_req_duration: ["p(95)<300"],
+    http_req_failed: ["rate<0.01"],
+  },
+};
+
+export default function () {
+  const res = http.get("https://test-api.k6.io/public/crocodiles/");
+  check(res, { "status is 200": (r) => r.status === 200 });
+  sleep(1);
+}
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Modularize**: Split logic into folders. k6 supports ES modules (`import { ... } from './utils.js'`).
-- **Use Scenarios**: Mix different patterns (ramping up, constant arrival rate) in one test.
-- **Correlate specific data**: Ensure you are not just hitting cache. Use dynamic data (random IDs).
+- **Always Define Explicit `thresholds`**: Let CI/CD pipelines fail automatically if latency percentiles or error rates degrade.
+- **Ramp Virtual Users Incrementally**: Avoid instant spikes unless specifically conducting a spike/break test.
+- **Parameterize Test Data**: Feed unique data using `SharedArray` from JSON/CSV files to prevent caching artifacts.
+- **Export Metrics to Prometheus / InfluxDB**: Use `k6 run --out statsd` or Grafana Cloud k6 for real-time visualization.
 
 **Don't**:
 
-- **Don't treat it like a browser**: Standard k6 `http` does not parse HTML or execute JS on the page. It just hits endpoints. Use `k6-browser` module if you strictly need browser rendering (but it's heavier).
+- **Don't import heavy NPM packages directly**: Use k6-compatible polyfills; k6 does not run inside standard Node.js.
+- **Don't print logs inside default test functions**: `console.log()` inside virtual user loops degrades test runner performance.
+- **Don't omit think time (`sleep`)**: Zero sleep simulations hammer servers unrealistically and skew load profiles.
+
+## Troubleshooting
+
+| Error                                             | Cause                                                             | Solution                                                                  |
+| :------------------------------------------------ | :---------------------------------------------------------------- | :------------------------------------------------------------------------ |
+| `dial tcp: lookup ...: no such host`              | DNS resolution failure or target URL incorrect.                   | Verify endpoint connectivity and ensure VPN or internal DNS is reachable. |
+| `Threshold failed: p(95)<300 [current: 450ms]`    | Target service latency exceeded predefined performance threshold. | Profile database query latency, server CPU/memory, and caching layers.    |
+| `warn: Request Failed: context deadline exceeded` | Target server timing out under load.                              | Increase request timeout in k6 or scale upstream application workers.     |
 
 ## References
 

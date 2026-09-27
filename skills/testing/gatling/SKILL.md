@@ -1,6 +1,6 @@
 ---
 name: gatling
-description: Gatling load testing for APIs. Use for load testing.
+description: Expert Gatling load testing assistance covering virtual users, scenarios, assertions, and throughput benchmarking. Use when designing performance tests, stress-testing HTTP APIs, or analyzing latency distributions.
 ---
 
 # Gatling
@@ -9,11 +9,12 @@ Gatling is a powerful load testing tool. It is designed for ease of use, maintai
 
 ## When to Use
 
-- **High Throughput**: When you need to simulate 10k+ users from a single laptop.
-- **Complex Scenarios**: The DSL (Domain Specific Language) allows describing very complex user journeys.
-- **JVM Shops**: If your team uses Java/Scala/Kotlin.
+- **High-Concurrency Load Testing**: Simulating tens of thousands of concurrent virtual users with minimal CPU and memory footprints.
+- **Performance Regression Gates in CI/CD**: Running automated performance assertions against staging environments on every release.
+- **Scala / Java / Kotlin / TypeScript Load DSLs**: Writing programmatic, version-controlled load testing scenarios as code.
+- **Protocol Benchmarking**: Stress testing HTTP, WebSockets, Server-Sent Events, and JMS message queues.
 
-## Quick Start (Java)
+## Quick Start
 
 ```java
 import static io.gatling.javaapi.core.CoreDsl.*;
@@ -38,24 +39,119 @@ public class BasicSimulation extends Simulation {
 
 ## Core Concepts
 
-### Simulation
+#Non-Blocking Asynchronous Engine (Netty & Akka)
 
-The definition of the load test. Contains the HTTP configuration, the _Scenario_ (steps users take), and the _Injection Profile_ (how users arrive).
+Unlike thread-per-user load tools, Gatling uses non-blocking actors to simulate thousands of users on a single OS thread:
 
-### Feeders
+```
+[ Gatling Scenario Engine ] ──(Netty Event Loop)──→ [ Thousands of Async Virtual Users ]
+```
 
-Mechanisms to inject data (valid usernames, search terms) from CSV/JSON into the virtual users so they don't all look identical.
+#Scenario DSL & Injection Profiles (Java / TypeScript)
 
-## Best Practices (2025)
+Defines user journeys, think times, and virtual user ramp-up profiles:
+
+```java
+// Java / Scala Gatling Simulation
+import io.gatling.javaapi.core.*;
+import io.gatling.javaapi.http.*;
+import static io.gatling.javaapi.core.CoreDsl.*;
+import static io.gatling.javaapi.http.HttpDsl.*;
+
+public class ApiLoadSimulation extends Simulation {
+    HttpProtocolBuilder httpProtocol = http
+        .baseUrl("https://api.staging.example.com")
+        .acceptHeader("application/json");
+
+    ScenarioBuilder scn = scenario("Browse and Checkout")
+        .exec(http("Get Products").get("/products").check(status().is(200)))
+        .pause(2)
+        .exec(http("Add to Cart").post("/cart").body(StringBody("{"id": 101}")).asJson());
+
+    {
+        setUp(
+            scn.injectOpen(
+                rampUsers(500).during(60) // Ramp up to 500 users over 60 seconds
+            )
+        ).protocols(httpProtocol)
+         .assertions(
+             global().responseTime().percentile(95).lt(300), // 95th percentile under 300ms
+             global().successfulRequests().percent().gt(99.0) // 99% success rate
+         );
+    }
+}
+```
+
+#Feeders for Dynamic Parameterized Test Data
+
+Injects dynamic user credentials and search queries from CSV or JSON files:
+
+```java
+FeederBuilder<String> csvFeeder = csv("users.csv").circular();
+
+ScenarioBuilder scn = scenario("User Login")
+    .feed(csvFeeder)
+    .exec(http("Login")
+        .post("/login")
+        .formParam("user", "#{username}")
+        .formParam("pass", "#{password}"));
+```
+
+## Common Patterns
+
+### Ramp-up Virtual Users with Latency Assertions
+
+**Problem**: Sudden spike tests cause immediate connection saturation that masks normal production bottlenecks.
+
+**Solution**:
+Use incremental user ramping with percentile assertions:
+
+```scala
+import io.gatling.core.Predef._
+import io.gatling.http.Predef._
+import scala.concurrent.duration._
+
+class ApiLoadTest extends Simulation {
+  val httpProtocol = http.baseUrl("https://api.example.com")
+    .acceptHeader("application/json")
+
+  val scn = scenario("Checkout Workflow")
+    .exec(http("Get Products").get("/products"))
+    .pause(1)
+    .exec(http("Place Order").post("/orders").body(StringBody("{\"item\":\"widget\"}")) .asJson)
+
+  setUp(
+    scn.inject(rampUsers(500).during(60.seconds))
+  ).protocols(httpProtocol)
+   .assertions(
+     global.responseTime.percentile3.lt(500),
+     global.successfulRequests.percent.gt(99.0)
+   )
+}
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Use the Java/Kotlin DSL**: Scala was the default, but Java/Kotlin SDKs are now first-class and easier for most teams.
-- **Record User Journeys**: Use the Gatling Recorder (proxy) to capture browser interactions, then clean up the code.
+- **Enforce Service Level Agreements (SLAs) with Assertions**: Define explicit assertions on p95/p99 response times and error rates.
+- **Ramp Virtual Users Smoothly**: Use `rampUsers` or `rampUsersPerSec` to allow connection pools and autoscalers to adapt realistically.
+- **Model Realistic Think Times**: Use `pause(min, max)` to replicate human user behavior rather than firing continuous request loops.
+- **Generate Real-Time Reports with Graphite / InfluxDB**: Stream Gatling metrics live into Grafana dashboards during tests.
 
 **Don't**:
 
-- **Don't ignore reports**: Gatling generates beautiful HTML reports at the end. Open `index.html` to see the response time distribution graphs.
+- **Don't run load tests from the same machine hosting the application**: CPU contention corrupts latency measurements.
+- **Don't ignore network bandwidth limits on test runners**: Saturated runner network cards artificially degrade response percentiles.
+- **Don't hardcode fixed authentication tokens**: Rotate users via feeders to test realistic database index and cache hit rates.
+
+## Troubleshooting
+
+| Error                                                        | Cause                                                       | Solution                                                                    |
+| :----------------------------------------------------------- | :---------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| `java.net.ConnectException: Cannot assign requested address` | OS ephemeral socket exhaustion on Gatling runner.           | Increase ephemeral port range and enable TCP TIME_WAIT socket recycling.    |
+| `i.g.h.c.i.Response: 504 Gateway Timeout`                    | Target server overwhelmed under simulated load.             | Inspect server metrics, connection pool limits, and database query latency. |
+| `Gatling simulation compile error`                           | Gatling version API mismatch between Gatling 3.x and 3.10+. | Check imported packages against official Gatling SDK migration guide.       |
 
 ## References
 

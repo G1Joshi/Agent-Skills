@@ -1,6 +1,6 @@
 ---
 name: typescript
-description: TypeScript static typing with interfaces, generics, decorators, and type inference. Use for .ts files.
+description: Expert TypeScript assistance covering advanced type gymnastics, generic constraints, conditional types, mapped types, declaration merging, and tsconfig optimization. Use when building type-safe applications, designing strict library typings, or refactoring JavaScript to TypeScript.
 ---
 
 # TypeScript
@@ -9,10 +9,10 @@ Static typing for JavaScript with advanced type features for safer, more maintai
 
 ## When to Use
 
-- Working with `.ts` or `.tsx` files
-- Building type-safe APIs and applications
-- Defining complex data models with validation
-- Creating reusable generic utilities
+- **Enterprise Full-Stack Web Development**: Building large-scale React, Next.js, Vue, Angular, or Svelte web apps.
+- **Node.js & Edge Server Backends**: Developing robust APIs with NestJS, Fastify, Express, or Hono.
+- **Type-Safe Domain Modeling & SDKs**: Publishing npm libraries and SDKs with rich IntelliSense and compile-time contract safety.
+- **End-to-End Type Safety (tRPC / Prisma)**: Sharing database schema and API route types across frontend and backend without codegen.
 
 ## Quick Start
 
@@ -34,40 +34,89 @@ async function fetchUser(id: string): Promise<User | undefined> {
 
 ## Core Concepts
 
-### Interfaces and Types
+#Advanced Type-Level Programming: Conditional & Mapped Types
+
+Type transformations using conditional logic, `infer`, and template literal types:
 
 ```typescript
-// Interface for object shapes (extendable)
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
+// Deep Readonly utility type
+type DeepReadonly<T> = T extends
+  Function | boolean | number | string | symbol | null | undefined
+  ? T
+  : T extends Array<infer U>
+    ? ReadonlyArray<DeepReadonly<U>>
+    : { readonly [K in keyof T]: DeepReadonly<T[K]> };
 
-// Type for unions, intersections, mapped types
-type Status = "pending" | "active" | "inactive";
-type UserWithStatus = User & { status: Status };
+// Extract event names from route path template literal
+type ExtractRouteParams<T extends string> =
+  T extends `${string}:${infer Param}/${infer Rest}`
+    ? Param | ExtractRouteParams<Rest>
+    : T extends `${string}:${infer Param}`
+      ? Param
+      : never;
+
+type ApiParams = ExtractRouteParams<"/users/:userId/posts/:postId">;
+// Equivalent to: "userId" | "postId"
 ```
 
-### Generics
+#Discriminated Unions & Exhaustive Type Narrowing
+
+Modeling finite domain states with compiler-verified completeness:
 
 ```typescript
-// Generic functions
-function first<T>(items: T[]): T | undefined {
-  return items[0];
+interface LoadingState {
+  status: "loading";
 }
 
-// Generic constraints
-function getProperty<T, K extends keyof T>(obj: T, key: K): T[K] {
-  return obj[key];
+interface SuccessState<T> {
+  status: "success";
+  data: T;
+  receivedAt: Date;
 }
 
-// Generic interfaces
-interface Repository<T extends { id: string }> {
-  findById(id: string): Promise<T | null>;
-  save(entity: T): Promise<T>;
-  delete(id: string): Promise<void>;
+interface ErrorState {
+  status: "error";
+  error: Error;
 }
+
+type AsyncData<T> = LoadingState | SuccessState<T> | ErrorState;
+
+function renderState<T>(state: AsyncData<T>): string {
+  switch (state.status) {
+    case "loading":
+      return "Loading...";
+    case "success":
+      return `Loaded data at ${state.receivedAt.toISOString()}`;
+    case "error":
+      return `Failed: ${state.error.message}`;
+    default: {
+      // Exhaustiveness check: compile error if any union case is unhandled
+      const _unhandled: never = state;
+      throw new Error(`Unhandled state: ${_unhandled}`);
+    }
+  }
+}
+```
+
+#Satisfies Operator & Exact Literal Inference
+
+Validating structure conformance without losing precise literal types:
+
+```typescript
+type RouteConfig = {
+  path: string;
+  method: "GET" | "POST" | "PUT" | "DELETE";
+  rateLimit?: number;
+};
+
+// The satisfies operator validates types while retaining exact literal properties
+const routes = {
+  getUser: { path: "/users/:id", method: "GET" },
+  createPost: { path: "/posts", method: "POST", rateLimit: 60 },
+} satisfies Record<string, RouteConfig>;
+
+// Exact string literal is preserved: "GET", not widened to "GET" | "POST" | ...
+const method = routes.getUser.method;
 ```
 
 ## Common Patterns
@@ -117,21 +166,15 @@ type UserCreate = Omit<User, "id" | "createdAt">;
 type UserId = string & { readonly brand: unique symbol };
 ```
 
-## Best Practices
+## Best Practices (2026)
 
-**Do**:
-
-- Enable `strict` mode in `tsconfig.json`
-- Use `unknown` instead of `any` for truly unknown types
-- Use discriminated unions for state management
-- Export types alongside implementations
-
-**Don't**:
-
-- Use `any` to bypass type checking
-- Use type assertions (`as`) when narrowing works
-- Ignore TypeScript errors with `// @ts-ignore`
-- Mix `interface` and `type` inconsistently
+- **Do** enable `"strict": true` and `"noUncheckedIndexedAccess": true` in `tsconfig.json` for bulletproof type safety.
+- **Do** use runtime validation libraries like `Zod` or `Valibot` at API boundaries to parse untrusted JSON into verified types.
+- **Do** leverage the `satisfies` operator to validate types without widening literal types or losing autocomplete.
+- **Do** favor `type` over `interface` for complex unions and tuples; use `interface` when public declaration merging is desired.
+- **Don't** use `any`; use `unknown` and narrow types using type guards, `instanceof`, or discriminated unions.
+- **Don't** use non-null assertions (`foo!.bar`); handle null/undefined explicitly with optional chaining (`?.`) and nullish coalescing (`??`).
+- **Don't** perform double-casting (`foo as unknown as Bar`) to bypass compile-time type errors.
 
 ## Troubleshooting
 

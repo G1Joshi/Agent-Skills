@@ -1,6 +1,6 @@
 ---
 name: oauth
-description: OAuth 2.0 authorization framework. Use for authorization.
+description: Expert OAuth 2.0 / 2.1 protocol assistance covering Authorization Code Flow with PKCE, Client Credentials, and token exchange. Use when implementing third-party logins, securing API endpoints, or configuring OAuth servers.
 ---
 
 # OAuth 2.1
@@ -9,11 +9,12 @@ OAuth 2.1 is the consolidation of OAuth 2.0 and its best practices into a single
 
 ## When to Use
 
-- **Social Login**: "Log in with Google/Facebook".
-- **Third-Party Access**: Giving a budgeting app access to your bank APIs.
-- **Microservices**: Service A accessing Service B on behalf of a user.
+- **Delegated Authorization Framework**: Permitting third-party applications to access user resources without exposing user passwords.
+- **Single Sign-On (SSO) Architectures**: Authorizing cross-application access tokens across interconnected enterprise platforms.
+- **Securing Public and Mobile APIs**: Implementing standards-compliant token issuance, verification, and revocation.
+- **Machine-to-Machine Service Accounts**: Granting automated microservice background daemons scoped API access.
 
-## Quick Start (Authorization Code Flow with PKCE)
+## Quick Start
 
 ```javascript
 // Client (Frontend) - redirect to Auth Server
@@ -43,37 +44,78 @@ const tokenResponse = await fetch("https://auth.example.com/token", {
 
 ## Core Concepts
 
-### Roles
+#The 4 OAuth 2.0 / 2.1 Grant Types
 
-- **Resource Owner**: The User.
-- **Client**: The App (Web, Mobile, Server).
-- **Authorization Server**: The Identity Provider (Auth0, Okta, Google).
-- **Resource Server**: The API holding the data.
+| Grant Type                       | Client Type                                      | Use Case                                        |
+| :------------------------------- | :----------------------------------------------- | :---------------------------------------------- |
+| **Authorization Code with PKCE** | Public (SPA, Mobile) & Confidential (Web Server) | Standard user login and authorization           |
+| **Client Credentials**           | Confidential (Backend Daemons)                   | Machine-to-machine background communication     |
+| **Refresh Token**                | Confidential & Public                            | Renewing expired access tokens without re-login |
+| **Device Authorization**         | Input-constrained (Smart TV, CLI)                | Authenticating via secondary browser screen     |
 
-### PKCE (Proof Key for Code Exchange)
+#Proof Key for Code Exchange (PKCE) Protocol Flow
 
-Now **Mandatory** in OAuth 2.1 for all clients (public and confidential). Prevents authorization code interception attacks.
+Protects authorization codes from interception on public clients:
 
-### Grants (Flows)
+```
+[ Client ] ──1. Generate Verifier & Challenge (SHA256)──→ Local
+[ Client ] ──2. GET /authorize?code_challenge=xyz───────→ [ Auth Server ]
+[ Client ] ←─3. Receive Authorization Code─────────────── [ Auth Server ]
+[ Client ] ──4. POST /token?code=123&code_verifier=abc──→ [ Auth Server ]
+[ Client ] ←─5. Receive Access Token & Refresh Token───── [ Auth Server ]
+```
 
-- **Authorization Code**: The standard flow (Web/Mobile).
-- **Client Credentials**: Machine-to-Machine (No user).
-- **Device Code**: TV/Input-constrained devices.
-- **Implicit Grant**: **REMOVED** (Insecure). Do not use.
-- **Password Grant**: **REMOVED** (Insecure). Do not use.
+#Scopes & Consent Management
 
-## Best Practices (2025)
+Defines granular operational permissions approved by the resource owner:
+
+```http
+POST /oauth/token HTTP/1.1
+Host: auth.example.com
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials
+&client_id=service_analytics
+&client_secret=supersecret
+&scope=read:reports%20export:csv
+```
+
+## Common Patterns
+
+### Authorization Code Flow with PKCE (Proof Key for Code Exchange)
+
+**Problem**: Public clients (SPAs, mobile apps) cannot safely store client secrets, making authorization codes vulnerable to interception.
+
+**Solution**:
+Generate cryptographic code verifier and code challenge on the client before initiating authorization:
+
+```javascript
+// Generate Code Verifier and S256 Challenge
+const verifier = generateRandomString(64);
+const challenge = base64UrlEncode(sha256(verifier));
+
+// Redirect user to authorization endpoint
+const authUrl =
+  `https://auth.example.com/oauth/authorize?` +
+  `response_type=code&client_id=spa-client&` +
+  `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+  `code_challenge=${challenge}&code_challenge_method=S256`;
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- Use **Authorization Code Flow with PKCE** for everything.
-- Validate **Exact Redirect URIs** (No wildcards).
-- Use **Sender-Constrained Tokens** (DPoP or mTLS) to prevent token replay/theft.
+- **Enforce OAuth 2.1 Recommendations**: Deprecate legacy Implicit Grant and Resource Owner Password Credentials (ROPC) completely.
+- **Mandate PKCE for All Authorization Code Flows**: Require PKCE for confidential clients as well as public clients.
+- **Implement Refresh Token Rotation**: Invalidate previous refresh tokens upon each exchange to detect token reuse and theft immediately.
+- **Validate Redirect URIs Strictly**: Use exact string matching against registered redirect URIs; never use wildcard regular expressions.
 
 **Don't**:
 
-- Don't use the Implicit Grant (access token in URL fragment).
-- Don't store Access Tokens in `localStorage` (XSS risk). Use HttpOnly cookies or memory.
+- **Don't use OAuth 2.0 for Authentication without OpenID Connect**: OAuth provides authorization (access tokens); OIDC adds authentication (ID tokens).
+- **Don't pass access tokens in URL query strings**: Query parameters leak into browser histories, server access logs, and referrer headers.
+- **Don't grant broad wildcard scopes**: Enforce least privilege by issuing fine-grained scopes tailored to the application's actual needs.
 
 ## Troubleshooting
 

@@ -1,6 +1,6 @@
 ---
 name: midjourney
-description: Midjourney AI image generation. Use for creative AI.
+description: Expert Midjourney generative AI assistance covering prompt engineering, parameters (--v, --ar, --stylize, --chaos), and style referencing. Use when designing photorealistic concept art and production visuals.
 ---
 
 # Midjourney
@@ -9,35 +9,91 @@ Midjourney is a closed-source image generator known for its **artistic quality**
 
 ## When to Use
 
-- **Marketing/Art**: Unbeatable aesthetic quality out of the box.
-- **Ideation**: Rapidly generating mood boards.
-- **Web Interface**: Now usable via web (no longer Discord-only).
+- **High-End Concept Art & Creative Exploration**: Synthesizing cinematic illustrations, character design, and game environments.
+- **Photorealistic Architectural & Product Visuals**: Generating high-fidelity mockups with precise lighting and texture prompts.
+- **Style Consistency with Style References**: Replicating specific artistic styles and palettes across multiple prompts using `--sref`.
+- **Multi-Prompt Weighting & Composition**: Blending concepts with explicit semantic weights using `::` syntax.
+
+## Quick Start
+
+```text
+/imagine prompt: cinematic wide shot of a futuristic data center with neon liquid cooling, architectural digest style, volumetric lighting, unreal engine 5 render --ar 16:9 --v 6.1 --style raw
+```
 
 ## Core Concepts
 
-### Parameters
+#Core Command Parameters (v6 & v6.1)
 
-`--ar 16:9` (Aspect Ratio), `--stylize 100`, `--niji` (Anime style).
+Directing aspect ratio, stylization, and rendering engines:
 
-### Zoom / Pan / Vary
+```text
+/imagine prompt: cinematic photography of a sleek glass server rack in a minimalist data center, volumetric teal lighting, shallow depth of field, architectural digest style --ar 16:9 --v 6.1 --style raw --stylize 250 --quality 1
+```
 
-In-painting and out-painting features to edit generated images.
+Parameter breakdown:
 
-### Character Reference (`--cref`)
+- `--ar 16:9`: Sets wide landscape aspect ratio (9:16 for mobile, 1:1 for square).
+- `--v 6.1`: Specifies the Midjourney v6.1 rendering algorithm.
+- `--style raw`: Reduces Midjourney's default aesthetic bias for more photographic realism.
+- `--stylize 250` (`--s`): Controls strength of artistic flair (range 0 to 1000).
+- `--chaos 15` (`--c`): Adds variation to initial grid generations (range 0 to 100).
 
-Keep the same character face across different images.
+#Style References (--sref) & Character Consistency (--cref)
 
-## Best Practices (2025)
+Transferring aesthetic signatures across scenes:
 
-**Do**:
+```text
+# Style Reference: match aesthetic of an existing reference image
+/imagine prompt: an autonomous delivery drone flying over a futuristic metropolis at sunset --sref https://example.com/style_sample.jpg --sw 800
 
-- **Use the Web Editor**: Much better than Discord for editing/masking.
-- **Use Style References (`--sref`)**: Pass an image URL to copy its art style.
-- **Use Permutations**: Generate 4 variations of a prompt with `{red, blue}` syntax.
+# Character Reference: maintain subject identity
+/imagine prompt: the detective sitting at a rainy cafe table reviewing case files --cref https://example.com/detective_face.jpg --cw 90
+```
 
-**Don't**:
+#Multi-Prompting with Explicit Weights (::)
 
-- **Don't use for text**: While v7 is better, SD3/Flux are often better for strict text rendering.
+Preventing concept bleed and tuning semantic emphasis:
+
+```text
+# Concept separation: 'hot' and 'dog' instead of a frankfurter
+/imagine prompt: hot::2 dog::1 running on beach --ar 3:2
+
+# Negative weighting: suppress specific elements without prompt negative words
+/imagine prompt: vibrant Tokyo street market at night, cinematic neon reflections --no blur, text, watermark, vehicles
+```
+
+## Common Patterns
+
+### Character Consistency with Style and Character Reference (--sref, --cref)
+
+**Problem**: Generating the same character or style across multiple scenes produces completely different visuals.
+
+**Solution**:
+Use `--cref` (character reference) and `--sref` (style reference) parameters:
+
+```text
+/imagine prompt: cybernetic detective walking down a rainy alley, night time, cinematic lighting --cref https://url-to-character-face.png --cw 80 --v 6.1
+
+/imagine prompt: cozy cafe interior with warm morning light --sref https://url-to-style-reference.png --sw 100 --v 6.1
+```
+
+## Best Practices (2026)
+
+- **Do** use `--style raw` when aiming for accurate photorealism and literal prompt adherence.
+- **Do** specify lighting, camera lenses, and film stock (e.g. `35mm lens, f/1.8, golden hour illumination`) for realism.
+- **Do** leverage `--sref` (Style Reference) with `--sw` (weight) to maintain brand aesthetic across a series of images.
+- **Do** use `--no` for negative conditions rather than writing phrases like "without people" in the main prompt.
+- **Don't** use buzzwords like "photorealistic", "hyperrealistic", or "4K"; describe physical lighting and textures instead.
+- **Don't** use long, rambling paragraphs; concise, comma-separated descriptive descriptors yield better results.
+- **Don't** exceed `--stylize 750` unless abstract, highly stylized, or artistic interpretation is desired.
+
+## Troubleshooting
+
+| Error                                    | Cause                                                                           | Solution                                                             |
+| :--------------------------------------- | :------------------------------------------------------------------------------ | :------------------------------------------------------------------- |
+| `Invalid parameter: unrecognized flag`   | Typo in parameter name or space between double dashes.                          | Ensure format is exactly `--ar 16:9`, `--v 6.1`, or `--stylize 250`. |
+| `Image reference URL cannot be accessed` | Direct link to image URL is private, expired, or not ending in image extension. | Ensure image URL is public and ends in `.png`, `.jpg`, or `.webp`.   |
+| `Banned prompt / Content filter trigger` | Prompt contains words flagged by Midjourney community guidelines.               | Rephrase prompt using descriptive, non-violent, non-explicit terms.  |
 
 ## References
 

@@ -1,6 +1,6 @@
 ---
 name: serverless
-description: Serverless architecture with FaaS and BaaS. Use for cloud functions.
+description: Expert Serverless architecture assistance covering Function-as-a-Service (FaaS), event triggers, cold start mitigation, stateless execution, and cloud BaaS integration. Use when building AWS Lambda, Google Cloud Functions, or Cloudflare Workers systems with event-driven scale.
 ---
 
 # Serverless
@@ -9,10 +9,10 @@ Serverless is a cloud-native development model for building and running applicat
 
 ## When to Use
 
-- Event-driven background tasks (Image processing, Cron jobs).
-- APIs with spiky or unpredictable traffic (Auto-scales instantly).
-- Startup/MVP where "Scale to Zero" (Zero cost when idle) is critical.
-- Glue code between cloud services (e.g., S3 trigger -> Lambda -> DynamoDB).
+- **Event-Driven Workloads**: Processing file uploads (S3), stream events (Kafka/Kinesis), and asynchronous queue workers.
+- **Variable & Spiky Traffic**: Applications with unpredictable request volumes scaling automatically from 0 to thousands of instances.
+- **Low-Maintenance Web APIs**: Deploying micro-APIs or webhook handlers without managing servers, operating systems, or patching.
+- **Scheduled Background Tasks**: Running cron jobs, batch data transformations, and reporting tasks via EventBridge / CloudWatch.
 
 ## Quick Start
 
@@ -48,40 +48,100 @@ functions:
 
 ## Core Concepts
 
-### FaaS (Function as a Service)
+#Ephemeral Stateless Execution
 
-Upload code (Function), define triggers (HTTP, Queue, DB, Timer). Run only when triggered.
+Instances spin up on demand and shut down after idle periods; in-memory state is destroyed when containers terminate:
 
-### Cold Start
+```typescript
+// AWS Lambda / Cloudflare Worker Handler
+export const handler = async (
+  event: APIGatewayProxyEvent,
+): Promise<APIGatewayProxyResult> => {
+  // Global variables persist across warm starts, but local handler state resets
+  const result = await processItem(event.body);
+  return {
+    statusCode: 200,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(result),
+  };
+};
+```
 
-The latency incurred when a function is invoked after being idle (container spinning up).
+#Cold Start Lifecycle & Mitigation
 
-### Statelessness
+Understanding initialization phases:
 
-Functions are ephemeral. Store state in external managed services (Redis, DynamoDB, S3).
+```
+[ Download Runtime ] ──→ [ Init Execution Context (Cold Start) ] ──→ [ Execute Handler (Warm) ]
+```
+
+```typescript
+// Optimize Cold Starts: Initialize heavy clients outside the handler function
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+
+const ddbClient = new DynamoDBClient({ region: "us-east-1" }); // Reused on warm starts
+```
+
+#Cloud BaaS Integration & Event Mappings
+
+Connects functions directly to cloud managed services without polling:
+
+```yaml
+# serverless.yml event mapping
+functions:
+  processInvoice:
+    handler: src/invoice.handler
+    events:
+      - s3:
+          bucket: enterprise-invoices
+          event: s3:ObjectCreated:*
+          rules:
+            - suffix: .pdf
+```
 
 ## Common Patterns
 
-### Fan-out
+#Connection Pool Management Outside Handler
+**Problem**: Serverless functions initialize new database connections on every invocation, exhausting connection limits.  
+**Solution**: Initialize database pools outside the lambda handler to reuse connections across warm invocations.
 
-One event triggers multiple parallel functions (e.g., Upload -> [Resize, Analyze, Back up]).
+```typescript
+import { Pool } from "pg";
 
-### Strangler Fig
+// Initialized in global scope during cold start, reused across invocations
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 2, // Keep pool small for serverless instances
+  idleTimeoutMillis: 30000,
+});
 
-Migrating a monolith by gradually replacing endpoints with serverless functions routed via API Gateway.
+export const handler = async (event: any) => {
+  const client = await pool.connect();
+  try {
+    const { rows } = await client.query("SELECT * FROM items WHERE id = $1", [
+      event.pathParameters.id,
+    ]);
+    return { statusCode: 200, body: JSON.stringify(rows[0]) };
+  } finally {
+    client.release();
+  }
+};
+```
 
-## Best Practices
+## Best Practices (2026)
 
 **Do**:
 
-- Use **Frameworks** (SST, Serverless Framework, SAM) for IaC.
-- optimize **Cold Starts** (keep functions small, use provisioned concurrency if needed).
-- Use **Managed Services** (DynamoDB, EventBridge) instead of custom code logic.
+- **Keep Deployment Packages Compact**: Minify JavaScript with esbuild; keep lambda zip files small to reduce cold start initialization times.
+- **Reuse Persistent Connections in Global Scope**: Instantiate database connection pools, AWS SDK clients, and HTTP agents outside the handler.
+- **Enforce Fine-Grained IAM Permissions**: Grant functions least-privilege access to only the specific database tables or S3 buckets needed.
+- **Implement Structured Logging with Correlation IDs**: Inject invocation request IDs and tracing headers into every log output.
 
 **Don't**:
 
-- Don't use Serverless for Long-Running tasks (Gateways timeout at ~30s, Lambdas at 15m). Use Fargate/Batch for that.
-- Don't ignore **vendor lock-in** (though often the speed creates enough value to justify it).
+- **Don't run long-running monolithic services in Lambda**: Functions exceeding 15-minute limits or requiring continuous memory belong in ECS/Kubernetes.
+- **Don't create unpooled relational database connections**: Use RDS Proxy or HTTP-based database drivers (Neon, PlanetScale) to prevent connection exhaustion.
+- **Don't store files on local disk**: The `/tmp` directory is ephemeral and shared only during warm invocations; store assets in S3.
 
 ## Troubleshooting
 

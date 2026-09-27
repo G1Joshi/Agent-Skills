@@ -1,6 +1,6 @@
 ---
 name: graphql
-description: GraphQL API query language with schema. Use for flexible APIs.
+description: Expert GraphQL architecture assistance covering schema definition language (SDL), resolver design, DataLoader batching, schema stitching/federation, and client caching. Use when designing GraphQL APIs, preventing N+1 query problems, building Apollo/Relay schemas, or aggregating data from multiple services.
 ---
 
 # GraphQL
@@ -9,9 +9,10 @@ GraphQL is a query language for APIs and a runtime for fulfilling those queries 
 
 ## When to Use
 
-- **Mobile Apps**: Minimize bandwidth by fetching only needed fields.
-- **Complex Systems**: Fetching related data (User + Orders + Products) in a single request.
-- **Rapid Iteration**: Frontend can change data requirements without Backend changes.
+- **Client-Driven Data Fetching**: Web and mobile clients with drastically different UI layout requirements consuming the same API.
+- **Over-Fetching & Under-Fetching Mitigation**: Allowing clients to request the exact fields needed for a view in a single HTTP request.
+- **API Aggregation & Federated Supergraphs**: Combining dozens of microservice APIs into a unified GraphQL schema via Apollo Federation.
+- **Real-Time Subscriptions**: Streaming live changes to clients over WebSockets or HTTP Server-Sent Events (SSE).
 
 ## Quick Start
 
@@ -43,42 +44,110 @@ query {
 
 ## Core Concepts
 
-### Schema First
+#Strongly-Typed Schema Definition (SDL)
 
-The schema (`.graphql`) is the contract. Teams agree on the schema before writing code.
+Defines types, relationships, queries, and mutations strictly:
 
-### Resolvers
+```graphql
+# schema.graphql
+type Query {
+  project(id: ID!): Project
+}
 
-Functions that fetch the data for a specific field in the schema.
+type Mutation {
+  assignTask(input: AssignTaskInput!): Task!
+}
 
-### Strong Typing
+type Project {
+  id: ID!
+  name: String!
+  tasks(status: TaskStatus): [Task!]!
+}
 
-Every field has a specific type (Int, String, Object). Validation happens automatically.
+type Task {
+  id: ID!
+  title: String!
+  assignee: User
+}
+```
+
+#Resolvers & Hierarchical Execution
+
+Each field on a type maps to an independent resolver function:
+
+```typescript
+// resolvers.ts
+export const resolvers = {
+  Query: {
+    project: async (_parent, { id }, ctx) => ctx.db.getProject(id),
+  },
+  Project: {
+    // Resolved only if the client requested the "tasks" field
+    tasks: async (project, { status }, ctx) =>
+      ctx.db.getTasksForProject(project.id, status),
+  },
+};
+```
+
+#DataLoader Request Batching & Deduplication
+
+Batches individual resolver database lookups into a single SQL `IN` query to prevent N+1 query storms:
+
+```typescript
+import DataLoader from "dataloader";
+
+export function createUserDataLoader(db: Database) {
+  return new DataLoader(async (userIds: readonly string[]) => {
+    const users = await db.query("SELECT * FROM users WHERE id = ANY($1)", [
+      userIds,
+    ]);
+    const userMap = new Map(users.map((u) => [u.id, u]));
+    return userIds.map((id) => userMap.get(id) || null);
+  });
+}
+```
 
 ## Common Patterns
 
-### n+1 Problem
+#DataLoader N+1 Query Prevention
+**Problem**: Nested resolvers trigger separate SQL queries for each child record (N+1 database reads).  
+**Solution**: Batch and cache database reads using DataLoader.
 
-Fetching a list of users and then firing a separate DB query for each user's address.
+```typescript
+import DataLoader from "dataloader";
 
-- **Solution**: **DataLoader**. Batches requests into a single query (`WHERE id IN (...)`).
+// Batch function receives array of IDs collected across concurrent resolvers
+const authorLoader = new DataLoader(async (authorIds: readonly string[]) => {
+  const authors = await db
+    .select()
+    .from(authorsTable)
+    .where(inArray(authorsTable.id, authorIds as string[]));
+  const authorMap = new Map(authors.map((a) => [a.id, a]));
+  return authorIds.map((id) => authorMap.get(id) || null);
+});
 
-### Federation
+// Resolver consumes DataLoader
+export const resolvers = {
+  Book: {
+    author: (book: { authorId: string }) => authorLoader.load(book.authorId),
+  },
+};
+```
 
-Splitting a single GraphQL graph across multiple services (Microservices). Apollo Federation is the standard.
-
-## Best Practices
+## Best Practices (2026)
 
 **Do**:
 
-- Use **Fragments** on the client to reuse query logic.
-- Limit **Query Depth** to prevent DoS attacks (e.g., `user { friends { friends { friends ... } } }`).
-- Use **Cursor-based Pagination** for infinite scrolling lists.
+- **Always Use DataLoader for Relational Fields**: Never allow nested child resolvers to execute raw database queries in a loop.
+- **Implement Query Complexity Limits**: Use libraries like `graphql-query-complexity` to reject nested query abuse before execution.
+- **Paginate List Fields with Cursors**: Follow the Relay Connection specification (`edges`, `node`, `pageInfo`) for robust infinite scroll.
+- **Persist Queries in Production**: Use Persisted Queries (hashes) to prevent arbitrary unbounded query submission from untrusted clients.
 
 **Don't**:
 
-- Don't simply wrap a REST API 1:1. Redesign for the Graph.
-- Don't utilize it for simple binary file uploads (use Signed URLs + REST/S3 for that).
+- **Don't expose internal database schemas directly as GraphQL types**: Design domain schemas optimized for frontend views.
+- **Don't return generic HTTP 500 errors for business failures**: Return structured validation errors inside GraphQL response payloads.
+- **Don't ignore HTTP caching**: GraphQL POST requests bypass browser caches; use CDN Edge caching with Cache-Control headers.
 
 ## Troubleshooting
 

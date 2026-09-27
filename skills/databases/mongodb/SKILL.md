@@ -1,6 +1,6 @@
 ---
 name: mongodb
-description: MongoDB document database with aggregation pipeline and Atlas. Use for document storage.
+description: Expert MongoDB document database assistance covering aggregation pipelines, compound indexes, replica sets, and sharding. Use when designing flexible JSON schemas, querying geospatial data, or scaling document stores.
 ---
 
 # MongoDB
@@ -9,9 +9,10 @@ MongoDB is a document database. It stores data in JSON-like documents (BSON). It
 
 ## When to Use
 
-- **Rapid Prototyping**: Schema-less design allows iterating fast without migrations.
-- **Content Management**: Storing diverse assets with varying metadata.
-- **Catalogs**: Product catalogs where each product has different attributes (size, color, wattage).
+- **Flexible JSON Document Storage**: Modeling evolving, nested domain entities with polymorphic schemas in BSON.
+- **High-Velocity Operational Data Stores**: Content management, e-commerce product catalogs, and user personalization platforms.
+- **Rich Aggregation Pipelines**: Transforming, joining ($lookup), grouping, and projecting analytical data streams in real time.
+- **Global Sharding & Geospatial Indexing**: Scaling collections horizontally across shards and executing 2dsphere geo queries.
 
 ## Quick Start
 
@@ -28,32 +29,119 @@ await silence.save();
 
 ## Core Concepts
 
-### Documents (BSON)
+#BSON Documents & Schema Flexibility
 
-Data is stored in "documents" (JSON objects) inside "collections" (Tables).
-`{ "_id": 1, "name": "Apple", "price": 10 }`
+Data is stored as binary JSON (BSON), supporting native dates, 64-bit integers, decimals, and geospatial points:
 
-### Embedded Data vs References
+```javascript
+// MongoDB Document in collections/orders
+{
+  "_id": ObjectId("66f6ab42d1e1c3a628a58a98"),
+  "orderNumber": "ORD-2026-901",
+  "customer": { "id": "cust_12", "email": "alex@example.com" },
+  "items": [
+    { "sku": "WIDGET-01", "qty": 2, "price": 49.99 }
+  ],
+  "shippingAddress": {
+    "type": "Point",
+    "coordinates": [-73.9851, 40.7488] // 2dsphere GeoJSON
+  },
+  "status": "PROCESSING",
+  "createdAt": ISODate("2026-09-27T10:00:00Z")
+}
+```
 
-- **Embed**: Store related data inside the document for fast reads. (e.g., Comments inside a Post).
-- **Reference**: Store the ID and look it up (`$lookup`) for many-to-many relationships.
+#Powerful Multi-Stage Aggregation Framework
 
-### Sharding
+Transforms and aggregates documents through sequential pipeline stages:
 
-MongoDB scales horizontally by splitting data across multiple servers (shards) based on a "shard key".
+```javascript
+db.orders.aggregate([
+  {
+    $match: { status: "COMPLETED", createdAt: { $gte: ISODate("2026-01-01") } },
+  },
+  { $unwind: "$items" },
+  {
+    $group: {
+      _id: "$items.sku",
+      totalRevenue: { $sum: { $multiply: ["$items.qty", "$items.price"] } },
+      unitsSold: { $sum: "$items.qty" },
+    },
+  },
+  { $sort: { totalRevenue: -1 } },
+  { $limit: 5 },
+]);
+```
 
-## Best Practices (2025)
+#Replica Sets & Automated Failover
+
+Ensures high availability through 3-node primary-secondary elections:
+
+```
+[ Primary (Read/Write) ] ──Oplog Replication (Async)──→ [ Secondary (Read Replicas) ]
+                                                              │
+                                                              ▼
+                                                     [ Secondary (Voter) ]
+```
+
+## Common Patterns
+
+### Aggregation Pipeline with Lookup and Facets
+
+**Problem**: Normalizing and joining related documents across collections efficiently in a single query.
+
+**Solution**:
+Use `$lookup` with `$project` and pagination `$facet`:
+
+```javascript
+db.orders.aggregate([
+  {
+    $match: { status: "DELIVERED", createdAt: { $gte: ISODate("2025-01-01") } },
+  },
+  {
+    $lookup: {
+      from: "users",
+      localField: "userId",
+      foreignField: "_id",
+      as: "customer",
+    },
+  },
+  { $unwind: "$customer" },
+  {
+    $project: {
+      orderId: "$_id",
+      totalAmount: 1,
+      customerName: "$customer.name",
+      customerEmail: "$customer.email",
+    },
+  },
+  { $sort: { totalAmount: -1 } },
+  { $limit: 20 },
+]);
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Use Version 8.0+**: For performance gains in time-series and queryable encryption.
-- **Index Early**: "Compass" (GUI) or "Atlas Performance Advisor" will tell you when you miss indexes.
-- **Limit Array Growth**: Don't use unbounded arrays (e.g., logging every login in the user document).
+- **Design for Data Access Patterns**: Embed data that is read together frequently; reference data when unbounded growth is expected.
+- **Follow the ESR Rule for Indexes**: Order compound indexes by **Equality** first, **Sort** second, and **Range** last.
+- **Enable JSON Schema Validation**: Enforce required fields and types at the collection level via `$jsonSchema`.
+- **Use Bulk Operations**: Batch multiple write operations using `bulkWrite()` to minimize network roundtrips.
 
 **Don't**:
 
-- **Don't join everything**: MongoDB supports `$lookup` (JOINS), but overuse kills performance. Embed data if accessed together.
-- **Don't ignore Document Size**: Max document size is 16MB.
+- **Don't create unbounded arrays inside documents**: Unbounded arrays degrade performance and can hit the 16MB document size limit.
+- **Don't use `$lookup` excessively**: MongoDB is not a relational database; heavy multi-collection joins destroy throughput.
+- **Don't perform unindexed queries**: Run `.explain("executionStats")` to verify queries utilize `IXSCAN` rather than `COLLSCAN`.
+
+## Troubleshooting
+
+| Error                                                            | Cause                                                                        | Solution                                                                                      |
+| :--------------------------------------------------------------- | :--------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------- |
+| `Executor error during find command: OperationExceededTimeLimit` | Query performing full collection scan (`COLLSCAN`) without supporting index. | Run `explain('executionStats')` and add compound index matching filter and sort keys.         |
+| `WriteConflict error`                                            | Concurrent updates modifying same document concurrently in WiredTiger.       | Implement retry logic in application layer or batch modifications.                            |
+| `BSONObj size exceeds maximum allowed size (16MB)`               | Single document exceeded 16MB limit due to unbounded arrays.                 | Refactor schema: move unbounded child arrays into separate collection with parent references. |
 
 ## References
 

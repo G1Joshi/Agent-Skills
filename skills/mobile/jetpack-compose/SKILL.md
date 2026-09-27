@@ -1,6 +1,6 @@
 ---
 name: jetpack-compose
-description: Jetpack Compose Android declarative UI. Use for Android.
+description: Expert Jetpack Compose assistance covering declarative Android UI, state hoisting, remember/mutableStateOf, composition lifecycles, and Material 3 theming. Use when developing native Android user interfaces, creating smooth UI animations, or optimizing Compose recomposition performance.
 ---
 
 # Jetpack Compose
@@ -9,9 +9,10 @@ Jetpack Compose is Android's modern toolkit for building native UIs. It simplifi
 
 ## When to Use
 
-- New Android application development (Grid/List content, complex layouts).
-- Migrating existing View-based apps incrementally (Interoperability).
-- Sharing UI logic with Kotlin Multiplatform (Compose Multiplatform).
+- **Modern Android Native Development**: Google's official, recommended declarative UI toolkit for native Android applications.
+- **Dynamic Theming & Animations**: Building rich, fluid UI designs with Material 3, dynamic color theming, and spring animations.
+- **Custom Design Systems**: Composing reusable UI building blocks with clean state hoisting and automated previews.
+- **Interoperability with Existing Code**: Integrating declarative Compose views seamlessly inside legacy Android XML layouts or ViewGroups.
 
 ## Quick Start
 
@@ -59,49 +60,103 @@ fun MyApp(viewModel: CounterViewModel = viewModel()) {
 
 ## Core Concepts
 
-### Composable Functions
+#Declarative UI & Recomposition Lifecycle
 
-Functions annotated with `@Composable` are the building blocks. They describe specialized UI widgets or layouts. They can call other Composables.
+Compose functions describe UI directly in Kotlin. Recomposition skips functions whose inputs have not changed:
 
-### Recomposition
+```kotlin
+@Composable
+fun OrderStatusBadge(status: String, modifier: Modifier = Modifier) {
+    val backgroundColor = when (status) {
+        "COMPLETED" -> Color(0xFF10B981)
+        "PENDING" -> Color(0xFFF59E0B)
+        else -> Color(0xFF6B7280)
+    }
 
-When the state of a Composable changes, the framework re-executes the function to update the UI. Smart logic ensures only necessary parts are redrawn.
+    Box(
+        modifier = modifier
+            .background(backgroundColor, shape = RoundedCornerShape(8.dp))
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+    ) {
+        Text(text = status, color = Color.White, style = MaterialTheme.typography.labelMedium)
+    }
+}
+```
 
-### Modifiers
+#State Hoisting with `remember` & `mutableStateOf`
 
-The `Modifier` object allows you to decorate or augment a composable (layout, appearance, interactions, etc.). They are chainable and order-sensitive.
+State flows down to composables through parameters; events flow up through lambda callbacks:
+
+```kotlin
+@Composable
+fun SearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        placeholder = { Text("Search transactions...") },
+        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+        singleLine = true,
+        modifier = modifier.fillMaxWidth()
+    )
+}
+```
+
+#Side-Effects & Coroutine Scopes (LaunchedEffect)
+
+Manages side-effects that execute outside the composition lifecycle safely without restarting on irrelevant recompositions:
+
+```kotlin
+@Composable
+fun UserSessionTracker(userId: String, analytics: AnalyticsTracker) {
+    // Only restarts when userId changes
+    LaunchedEffect(userId) {
+        analytics.trackUserSession(userId)
+    }
+}
+```
 
 ## Common Patterns
 
-### State Hoisting
+#State Hoisting and ViewModel Integration
+**Problem**: Tight coupling of state management inside composable functions prevents UI previews and testing.  
+**Solution**: Hoist state into ViewModel and pass state down with event callbacks up.
 
-State should be moved up to the caller to make components stateless and reusable.
+```kotlin
+@Composable
+fun CounterScreen(viewModel: CounterViewModel = viewModel()) {
+    val count by viewModel.count.collectAsStateWithLifecycle()
+    CounterContent(count = count, onIncrement = viewModel::increment)
+}
 
-- **Stateful**: Owns state (`remember { mutableStateOf(...) }`).
-- **Stateless**: Receives state as parameters and emits events via lambdas.
+@Composable
+fun CounterContent(count: Int, onIncrement: () -> Unit) {
+    Column(modifier = Modifier.padding(16.dp)) {
+        Text(text = "Current: $count", style = MaterialTheme.typography.headlineMedium)
+        Button(onClick = onIncrement) {
+            Text("Increment")
+        }
+    }
+}
+```
 
-### ViewModel & StateFlow
-
-Use `ViewModel` to hold business logic and expose screen state via `StateFlow` or `Compose State`. Collect it in the UI using `collectAsStateWithLifecycle()`.
-
-### Navigation Compose
-
-Define a `NavHost` with composable destinations. Pass arguments and navigate using a type-safe approach (library dependent) or string routes (default).
-
-## Best Practices
+## Best Practices (2026)
 
 **Do**:
 
-- Use **Material 3** (`androidx.compose.material3`) for the latest design specs.
-- Use `remember` and `derivedStateOf` to optimize performance.
-- Use `LazyColumn` / `LazyRow` for lists (equivalent to RecyclerView).
-- Use `Preview` annotations to visualize UI without running the app.
+- **Use `@Stable` and `@Immutable` Annotations**: Mark domain model classes to enable Compose compiler smart recomposition optimizations.
+- **Always Pass `modifier: Modifier = Modifier`**: Allow parent composables to specify sizing, padding, and constraints.
+- **Collect State with Lifecycle Awareness**: Use `collectAsStateWithLifecycle()` from Kotlin Flow to prevent background state emissions.
+- **Provide `@Preview` Annotations**: Create previews with light and dark mode variants to validate designs without deploying to devices.
 
 **Don't**:
 
-- Don't perform expensive operations in the composition phase (use `LaunchedEffect` or `ViewModel`).
-- Don't create state inside a loop.
-- Don't ignore the `Modifier` parameter in reusable components (always allow caller to pass one).
+- **Don't instantiate heavy objects inside composables**: Wrap object allocations in `remember { ... }` to prevent reinstantiation on every frame.
+- **Don't perform I/O in Composable functions**: Keep composables pure; delegate data fetching to ViewModels and Coroutine dispatchers.
+- **Don't hardcode color values**: Reference `MaterialTheme.colorScheme` tokens to ensure seamless dark theme support.
 
 ## Troubleshooting
 

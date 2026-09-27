@@ -1,6 +1,6 @@
 ---
 name: puppeteer
-description: Puppeteer headless Chrome automation. Use for browser automation.
+description: Expert Puppeteer automation covering headless Chrome, PDF generation, web scraping, and performance tracing. Use when generating screenshots/PDFs, automating browser interactions, or crawling JavaScript web apps.
 ---
 
 # Puppeteer
@@ -9,9 +9,10 @@ Puppeteer is a Node library which provides a high-level API to control Chrome or
 
 ## When to Use
 
-- **Chrome Specific**: If testing cross-browser isn't a priority (or you only care about Chromium).
-- **Web Scraping**: Excellent for scraping SPAs because it renders JS.
-- **PDF/Screenshots**: The industry standard for "HTML to PDF" generation.
+- **Headless Chrome Automation & Scraping**: High-performance headless browser control for web scraping, automation, and crawling.
+- **Server-Side PDF & Screenshot Generation**: Rendering HTML templates into pixel-perfect PDFs and high-resolution screenshots.
+- **Single-Page App Prerendering**: Pre-rendering client-side SPAs into static HTML for SEO indexing.
+- **Chrome DevTools Protocol (CDP) Access**: Tapping directly into raw Chrome DevTools Protocol events, performance profiling, and heap snapshots.
 
 ## Quick Start
 
@@ -30,25 +31,98 @@ import puppeteer from "puppeteer";
 
 ## Core Concepts
 
-### DevTools Protocol (CDP)
+#Browser & Page Architecture over CDP
 
-Puppeteer talks directly to Chrome via CDP. This allows deeper control (intercepting network at a low level, CPU profiling) than WebDriver.
+Puppeteer manages Chrome processes over WebSocket connections using the Chrome DevTools Protocol:
 
-### Headless by Default
+```typescript
+import puppeteer from "puppeteer";
 
-Puppeteer launches Chrome in headless mode by default. Use `headless: false` to see it.
+const browser = await puppeteer.launch({
+  headless: "new",
+  args: ["--no-sandbox", "--disable-setuid-sandbox"],
+});
 
-## Best Practices (2025)
+const page = await browser.newPage();
+await page.setViewport({ width: 1920, height: 1080 });
+await page.goto("https://example.com", { waitUntil: "networkidle0" });
+```
+
+#PDF Generation with CSS Print Styles
+
+Renders printable documents directly from HTML:
+
+```typescript
+await page.pdf({
+  path: "invoice.pdf",
+  format: "A4",
+  printBackground: true,
+  margin: { top: "20mm", bottom: "20mm", left: "15mm", right: "15mm" },
+});
+```
+
+#Page Evaluation in Browser Context
+
+Executes JavaScript inside the browser context and serializes results back to Node:
+
+```typescript
+const articleTitles = await page.evaluate(() => {
+  return Array.from(document.querySelectorAll("h2.article-title")).map((el) =>
+    el.textContent?.trim(),
+  );
+});
+console.log("Scraped Titles:", articleTitles);
+```
+
+## Common Patterns
+
+### PDF Generation with Clean Print Styles
+
+**Problem**: Screen styles and dynamic elements render poorly when converting web pages to PDFs.
+
+**Solution**:
+Emulate print media before generating high-res PDF:
+
+```javascript
+import puppeteer from "puppeteer";
+
+async function generateInvoicePdf(url, outputPath) {
+  const browser = await puppeteer.launch({ headless: "new" });
+  const page = await browser.newPage();
+  await page.goto(url, { waitUntil: "networkidle0" });
+  await page.emulateMediaType("print");
+  await page.pdf({
+    path: outputPath,
+    format: "A4",
+    printBackground: true,
+    margin: { top: "20mm", bottom: "20mm", left: "15mm", right: "15mm" },
+  });
+  await browser.close();
+}
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Use `page.waitForSelector`**: Before clicking or scraping.
-- **Use `stealth` plugins**: If scraping, use `puppeteer-extra-plugin-stealth` to avoid detection.
-- **Use Playwright**: _Consider_ switching. Playwright is maintained by the team that built Puppeteer (after moving to Microsoft) and has a better API.
+- **Use `headless: 'new'`**: Leverage Chrome's modern native headless mode for identical rendering to headful Chrome.
+- **Always Close Browsers in `finally` Blocks**: Wrap browser actions in `try/finally` to prevent orphaned Chrome zombie processes.
+- **Block Unnecessary Assets during Scraping**: Block images, fonts, and tracking scripts via `page.setRequestInterception(true)` to speed up scraping 3-5x.
+- **Use `waitUntil: 'networkidle0'` for SPAs**: Ensure all client-side JavaScript hydration requests finish before taking screenshots.
 
 **Don't**:
 
-- **Don't leak browsers**: Always ensure `browser.close()` is called in a `finally` block or via a test runner hook.
+- **Don't pass raw browser DOM elements back to Node**: Serialize return values to JSON or extract primitive values inside `page.evaluate()`.
+- **Don't launch a new browser instance for every request**: Reuse a single browser instance and create/close lightweight `page` contexts.
+- **Don't run Chrome as root without sandboxing precautions**: Follow secure Docker non-root user setup guidelines.
+
+## Troubleshooting
+
+| Error                                                                  | Cause                                                                           | Solution                                                                          |
+| :--------------------------------------------------------------------- | :------------------------------------------------------------------------------ | :-------------------------------------------------------------------------------- |
+| `Error: Failed to launch the browser process!`                         | Missing shared library dependencies (libnss3, libasound2) in Linux environment. | Install required dependencies or use `chrome-aws-lambda` in serverless.           |
+| `Execution context was destroyed, most likely because of a navigation` | Attempting to interact with an element after page redirected.                   | Re-query locator after `page.waitForNavigation()` resolves.                       |
+| `TimeoutError: Navigation timeout of 30000 ms exceeded`                | Network request still open preventing `networkidle0`.                           | Use `networkidle2` or set custom timeout in `page.goto(url, { timeout: 60000 })`. |
 
 ## References
 

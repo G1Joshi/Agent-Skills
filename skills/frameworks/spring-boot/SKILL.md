@@ -1,6 +1,6 @@
 ---
 name: spring-boot
-description: Spring Boot Java framework for microservices with auto-configuration. Use for enterprise Java.
+description: Expert Spring Boot assistance covering Java enterprise microservices, auto-configuration, Spring Data JPA, Spring Security, actuator observability, and REST controllers. Use when building production-grade enterprise Java backends, configuring Spring Boot applications, or tuning JVM performance.
 ---
 
 # Spring Boot
@@ -122,7 +122,7 @@ public class GlobalExceptionHandler {
 }
 ```
 
-## Best Practices
+## Best Practices (2026)
 
 **Do**:
 

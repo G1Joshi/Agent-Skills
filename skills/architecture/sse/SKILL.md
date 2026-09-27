@@ -1,6 +1,6 @@
 ---
 name: sse
-description: Server-Sent Events one-way real-time. Use for live updates.
+description: Expert Server-Sent Events (SSE) assistance covering HTTP streaming, EventSource API, unidirectional live updates, reconnection handling, and text/event-stream semantics. Use when streaming LLM completions, delivering live notifications, or building real-time dashboards without WebSockets.
 ---
 
 # Server-Sent Events (SSE)
@@ -9,10 +9,10 @@ SSE allow a web page to get updates from a server. Unlike WebSockets, SSEs are *
 
 ## When to Use
 
-- **Live Feeds**: News tickers, Sport scores, Stock prices.
-- **Progress Updates**: "Processing Import: 45%...", Logging streams.
-- **Notifications**: In-app alerts where the user doesn't need to reply instantly via the same channel.
-- **Replacement for Polling**: More efficient than asking "Are we there yet?" every second.
+- **Unidirectional Real-Time Streaming**: Pushing server updates to web browsers without requiring the overhead of bidirectional WebSockets.
+- **LLM Token Streaming**: Delivering incremental token completions from OpenAI/Anthropic/vLLM models to frontend chat interfaces.
+- **Live Activity Feeds & Dashboards**: Pushing live sport scores, stock tickers, system metrics, and notification counts.
+- **Native HTTP/2 Multiplexing**: Benefiting from standard HTTP infrastructure, firewalls, load balancers, and authentication headers.
 
 ## Quick Start
 
@@ -43,39 +43,104 @@ app.get("/api/events", (req, res) => {
 
 ## Core Concepts
 
-### Event Stream Format
+#`text/event-stream` Protocol Format
 
-Plain text. Fields: `event`, `data`, `id`, `retry`.
+Data is pushed over an open HTTP connection formatted in plain text blocks ending with double newlines:
 
+```http
+HTTP/1.1 200 OK
+Content-Type: text/event-stream
+Cache-Control: no-cache
+Connection: keep-alive
+
+id: 101
+event: price_update
+data: {"symbol": "NVDA", "price": 128.50}
+
+id: 102
+event: price_update
+data: {"symbol": "AAPL", "price": 224.10}
 ```
-event: update
-data: {"value": 42}
 
-data: This is a default message
+#Browser `EventSource` Client API
+
+Standard browser API with built-in automatic reconnection handling and event dispatching:
+
+```typescript
+// Client-side subscription
+const eventSource = new EventSource("/api/live-stream");
+
+eventSource.addEventListener("price_update", (e) => {
+  const data = JSON.parse(e.data);
+  console.log("Updated price:", data.symbol, data.price);
+});
+
+eventSource.onerror = (err) => {
+  console.error("SSE stream disconnected. Browser will auto-reconnect.", err);
+};
 ```
 
-### Auto-Reconnection
+#Resumable Streams with `Last-Event-ID`
 
-Browsers automatically try to reconnect if the connection drops. The server can send a `retry: 5000` field to control the delay.
+When reconnections occur, the browser automatically transmits the last received ID so servers can replay missed events:
+
+```typescript
+// Server resumes from last known event ID
+app.get("/api/live-stream", (req, res) => {
+  const lastEventId = req.headers["last-event-id"];
+  if (lastEventId) {
+    const missedEvents = eventLog.getSince(Number(lastEventId));
+    missedEvents.forEach((e) =>
+      res.write(`id: ${e.id}\ndata: ${JSON.stringify(e)}\n\n`),
+    );
+  }
+});
+```
 
 ## Common Patterns
 
-### Connection Limit
+#LLM Token Streaming via SSE
+**Problem**: Waiting for complete LLM responses takes seconds; users need instant incremental token streaming.  
+**Solution**: Stream chunks formatted as Server-Sent Events.
 
-Browsers (HTTP/1.1) limit concurrent connections (usually 6) per domain. Using HTTP/2 solves this (Multi-plexing).
+```typescript
+app.get("/api/stream", async (req, res) => {
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
 
-## Best Practices
+  const stream = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [{ role: "user", content: "Write a short poem" }],
+    stream: true,
+  });
+
+  for await (const chunk of stream) {
+    const text = chunk.choices[0]?.delta?.content || "";
+    res.write(`data: ${JSON.stringify({ text })}\n\n`);
+  }
+  res.write("event: done\ndata: {}\n\n");
+  res.end();
+});
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- Use **HTTP/2** to avoid connection limits.
-- Send **Hearbeats** (comments `: ping`) to prevent proxies from killing idle connections.
-- Use the `Last-Event-ID` header to resume streams after incorrect.
+- **Always Set `X-Accel-Buffering: no`**: Disable reverse proxy buffering in Nginx to ensure tokens and events flush instantly to clients.
+- **Assign Unique Monotonic Event IDs**: Include `id: <num>` with each event to enable automatic resumption upon network dropouts.
+- **Transmit Periodic Keep-Alive Comments**: Send a comment (`:
+
+`) every 15-30 seconds to prevent aggressive firewall timeouts.
+
+- **Use HTTP/2 in Production**: Avoid the legacy HTTP/1.1 6-connection per-domain browser limit by serving SSE over HTTP/2.
 
 **Don't**:
 
-- Don't use for Gaming/Chat (Latency and bidirectionality needs WebSockets).
-- Don't send huge binary blobs (It's text-based).
+- **Don't use SSE when bidirectional client messages are needed**: If clients must push frequent messages upstream, choose WebSockets.
+- **Don't omit CORS headers on cross-origin streams**: Set appropriate `Access-Control-Allow-Origin` headers on stream endpoints.
+- **Don't leave server streams open indefinitely when clients disconnect**: Listen to `req.on('close')` to release backend resources immediately.
 
 ## Troubleshooting
 

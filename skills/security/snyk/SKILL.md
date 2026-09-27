@@ -1,6 +1,6 @@
 ---
 name: snyk
-description: Snyk security scanning for dependencies. Use for vulnerability scanning.
+description: Expert Snyk security platform assistance covering SCA (open-source dependencies), SAST (code), container images, and IaC. Use when scanning repositories for CVEs, remediating vulnerabilities, or securing CI/CD.
 ---
 
 # Snyk
@@ -9,9 +9,10 @@ Snyk is a developer security platform. It finds and fixes vulnerabilities in you
 
 ## When to Use
 
-- **Dependency Checking**: "Does `lodash` have a vulnerability?" (SCA).
-- **Container Security**: Scanning your Dockerfile base image for CVEs.
-- **IDE Integration**: Real-time feedback in VS Code / IntelliJ while you code.
+- **Developer-First Security Scanning**: Detecting vulnerabilities in open-source dependencies (Snyk Open Source) directly in IDEs and CI/CD.
+- **Static Application Security Testing (SAST)**: Scanning source code for security flaws and code quality issues (Snyk Code).
+- **Container Image Vulnerability Scanning**: Inspecting Docker and OCI container images for OS package CVEs and base image upgrade advice.
+- **Infrastructure as Code (IaC) Scanning**: Identifying misconfigurations in Terraform, Kubernetes, Helm, and CloudFormation files.
 
 ## Quick Start
 
@@ -31,30 +32,72 @@ snyk monitor
 
 ## Core Concepts
 
-### Vulnerability Database
+#Snyk CLI Dependency Auditing
 
-Snyk maintains a proprietary DB (Intel) that often alerts faster than the public NVD.
+Scans project manifest files against Snyk's proprietary vulnerability intelligence database:
 
-### Fix PRs
+```bash
+# Scan npm / pip / Cargo dependencies for vulnerabilities
+snyk test --severity-threshold=high
 
-Snyk can automatically open a Pull Request to upgrade a vulnerable dependency to the patched version.
+# Generate automated fix advice and upgrade dependencies
+snyk fix
+```
 
-### Reachability Analysis
+#Container Image Vulnerability Analysis
 
-Determines if a vulnerable function in a library is _actually called_ by your code. prioritization.
+Analyzes base images and package managers, suggesting secure base image alternatives:
 
-## Best Practices (2025)
+```bash
+# Scan local Docker image
+snyk container test my-org/api:latest --file=Dockerfile
+```
+
+#GitHub Actions CI/CD Integration
+
+Blocks pull requests containing critical vulnerabilities:
+
+```yaml
+# .github/workflows/security.yml
+- name: Run Snyk Security Scan
+  uses: snyk/actions/node@master
+  env:
+    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  with:
+    args: --severity-threshold=high --sarif-file-output=snyk.sarif
+```
+
+## Common Patterns
+
+### Automated Snyk Container and Dependency Scan in CI
+
+**Problem**: Deploying container images with critical OS or library vulnerabilities into Kubernetes clusters.
+
+**Solution**:
+Integrate Snyk testing into CI build steps with severity thresholds:
+
+```bash
+# Test Node dependencies and fail only on high/critical issues
+snyk test --severity-threshold=high
+
+# Test built Docker container image before pushing to registry
+snyk container test myapp:latest --severity-threshold=critical --fail-on=upgradable
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Enable Snyk in CI**: Fail the build if `High` or `Critical` vulnerabilities are introduced.
-- **Use Snyk Code**: For SAST (finding bugs in your own code).
-- **Prioritize Reachable Vulns**: Don't waste time patching libraries you don't even use the dangerous part of.
+- **Integrate Snyk in Pre-Commit and IDEs**: Catch vulnerabilities while authoring code using the Snyk VS Code / JetBrains extensions.
+- **Enforce Severity Thresholds in CI**: Fail pull requests only on `high` or `critical` vulnerabilities to prevent pipeline gridlock.
+- **Scan Container Base Images Regularly**: Leverage minimal base images like Alpine or Chainguard to minimize attack surfaces.
+- **Scan Infrastructure as Code**: Run `snyk iac test` on Terraform and Kubernetes configs to prevent open security groups.
 
 **Don't**:
 
-- **Don't Ignore Low Severity**: Bulk triage them, but don't let them accumulate forever ("Death by a thousand cuts").
-- **Don't blindly upgrade**: Verify breaking changes. Snyk usually warns about this.
+- **Don't ignore transitive dependencies**: Vulnerabilities frequently live in nested child dependencies; use Snyk's automated PR fixes.
+- **Don't blindly ignore vulnerabilities with `.snyk` files**: Require security team approval before adding temporary expiration ignores.
+- **Don't leave Snyk tokens unrotated**: Rotate CI API tokens periodically in your Snyk organization settings.
 
 ## Troubleshooting
 

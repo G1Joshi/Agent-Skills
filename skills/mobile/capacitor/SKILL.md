@@ -1,6 +1,6 @@
 ---
 name: capacitor
-description: Capacitor cross-platform native runtime. Use for web to native.
+description: Expert Capacitor assistance covering web-to-native bridges, cross-platform plugins, iOS/Android project generation, and Progressive Web App (PWA) packaging. Use when wrapping React/Vue/Angular apps into native mobile binaries, writing custom native plugins, or managing Capacitor configurations.
 ---
 
 # Capacitor
@@ -9,9 +9,10 @@ Capacitor by Ionic is a cross-platform native runtime that makes it easy to buil
 
 ## When to Use
 
-- Converting existing React/Angular/Vue web apps to mobile apps.
-- Need specific native functionality (Camera, Haptics, Push) in a web app.
-- Building plugins that need to work across iOS, Android, and Web consistent APIs.
+- **Web to Native Transformation**: Deploying modern React, Vue, Svelte, or Angular web apps as native iOS and Android binaries.
+- **Progressive Web App (PWA) Parity**: Maintaining a single shared web codebase that compiles to web, App Store, and Google Play Store simultaneously.
+- **Native Device APIs**: Accessing device capabilities (Camera, Push Notifications, Secure Storage, Haptics) via unified TypeScript APIs.
+- **Enterprise Web App Packaging**: Wrapping internal enterprise portals into managed mobile apps with biometric authentication and certificate pinning.
 
 ## Quick Start
 
@@ -34,45 +35,107 @@ const printCurrentPosition = async () => {
 
 ## Core Concepts
 
-### Native Bridge
+#Web-to-Native Bridge Architecture
 
-Capacitor injects a native bridge into the WebView, allowing JavaScript to call Native Code (Java/Kotlin/Swift/Obj-C) asynchronously.
+Capacitor embeds web applications inside a hardware-accelerated native WebView (WKWebView on iOS, Android System WebView) and exposes a bi-directional JSON RPC bridge:
 
-### Plugins
+```typescript
+// Web layer invokes native method via unified bridge
+import { Geolocation } from "@capacitor/geolocation";
 
-Modular blocks of code that provide interface to native functionality.
+const printCurrentPosition = async () => {
+  const coordinates = await Geolocation.getCurrentPosition({
+    enableHighAccuracy: true,
+    timeout: 10000,
+  });
+  console.log(
+    "Current lat/lng:",
+    coordinates.coords.latitude,
+    coordinates.coords.longitude,
+  );
+};
+```
 
-- **Official Plugins**: Maintained by Ionic team (Camera, Filesystem).
-- **Community Plugins**: Maintained by the community.
+#Custom Native Plugin Implementation
 
-### Native Project Management
+Custom plugins allow writing native Swift or Kotlin code that hooks directly into the Capacitor TypeScript interface:
 
-Capacitor treats native projects (`android/`, `ios/`) as "source artifacts", meaning you commit them to git and use native tooling (Android Studio/Xcode) to build and configure them (permissions, icons).
+```swift
+// ios/App/App/CustomHapticsPlugin.swift
+import Capacitor
+
+@objc(CustomHapticsPlugin)
+public class CustomHapticsPlugin: CAPPlugin, CAPBridgedPlugin {
+    public let identifier = "CustomHapticsPlugin"
+    public let jsName = "CustomHaptics"
+    public let pluginMethods: [CAPPluginMethod] = [CAPPluginMethod(name: "vibrate", returnType: CAPPluginReturnPromise)]
+
+    @objc func vibrate(_ call: CAPPluginCall) {
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+        call.resolve(["success": true])
+    }
+}
+```
+
+#Configuration & Environment Management
+
+Capacitor configurations dictate bundle identifiers, plugins, server hosting modes, and security policies:
+
+```typescript
+// capacitor.config.ts
+import type { CapacitorConfig } from "@capacitor/cli";
+
+const config: CapacitorConfig = {
+  appId: "com.example.enterpriseapp",
+  appName: "EnterprisePortal",
+  webDir: "dist",
+  server: {
+    androidScheme: "https",
+    cleartext: false, // Disallow insecure HTTP in production
+  },
+  plugins: {
+    SplashScreen: { launchShowDuration: 1500, backgroundColor: "#0f172a" },
+  },
+};
+export default config;
+```
 
 ## Common Patterns
 
-### Secure Storage
+#Custom Native Plugin Bridge
+**Problem**: Need native platform functionality not provided by community plugins.  
+**Solution**: Create a custom Capacitor plugin bridge.
 
-Use `@capacitor-community/http` for secure requests (bypassing CORS) and secure storage plugins for tokens (Keychain/Keystore) instead of `localStorage`.
+```typescript
+// src/plugins/haptics.ts
+import { registerPlugin } from "@capacitor/core";
 
-### Deep Linking
+export interface CustomHapticsPlugin {
+  vibratePattern(options: { pattern: number[] }): Promise<void>;
+}
 
-Handle custom URL schemes (`myapp://`) for authentication redirects or opening specific content.
+const CustomHaptics = registerPlugin<CustomHapticsPlugin>("CustomHaptics");
+export default CustomHaptics;
 
-## Best Practices
+// Trigger in React/Vue:
+await CustomHaptics.vibratePattern({ pattern: [100, 200, 100] });
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- Use **official plugins** whenever possible for long-term maintenance.
-- Sync your project frequently: `npx cap sync`.
-- Handle **Permissions** gracefully in your UI before calling native APIs.
-- Use **Live Reload** during development: `npx cap run android -l --external`.
+- **Use `npx cap sync`**: Always run sync after web build to copy web assets and update native plugin dependencies.
+- **Use Secure Storage Plugins**: Store auth tokens in iOS Keychain and Android Keystore via `@capacitor-community/secure-storage`.
+- **Implement Live Updates Carefully**: Use platforms like Capgo or Ionic Appflow for OTA bugfixes while complying with Apple guidelines.
+- **Optimize Web Performance**: Keep initial bundle sizes small and ensure UI responsiveness meets native 60fps standards.
 
 **Don't**:
 
-- Don't store sensitive data (API Keys) in JS code; use environment variables or native config.
-- Don't ignore platform differences; test on real iOS and Android devices.
-- Don't rely on `alert()`/`confirm()`; use Capacitor Dialog plugin or UI framework modals.
+- **Don't edit generated `public` web folders inside native projects**: Modify the source web app and run `npx cap copy`.
+- **Don't leave debug live-reload URLs in production**: Remove `server.url` from `capacitor.config.ts` prior to release builds.
+- **Don't ignore notch safe areas**: Apply `viewport-fit=cover` and CSS `env(safe-area-inset-top)` to prevent status bar collisions.
 
 ## Troubleshooting
 

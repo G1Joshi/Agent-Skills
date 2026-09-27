@@ -1,6 +1,6 @@
 ---
 name: heroku
-description: Heroku platform-as-a-service with buildpacks. Use for easy deployment.
+description: Expert Heroku PaaS assistance covering Procfile, buildpacks, dynos, Heroku Postgres/Redis, and CLI management. Use when deploying and running web applications on Heroku without managing infrastructure.
 ---
 
 # Heroku
@@ -9,9 +9,10 @@ Heroku remains the simplest way to deploy full-stack apps. The 2025 "Fir" genera
 
 ## When to Use
 
-- **Simplicity**: "Git Push Heroku Master". No K8s, no Dockerfiles (optional).
-- **Stateful Apps**: Heroku Postgres is arguably the best managed Postgres service in existence for developer experience (DX).
-- **MVP**: Fastest time to market for Rails/Django/Node apps.
+- **Rapid Application Deployment & MVPs**: Deploying full-stack web applications with `git push heroku main` and zero server management.
+- **Managed Data Add-ons**: Instantly provisioning production-grade Heroku Postgres, Redis, and Apache Kafka.
+- **Procfile-Driven Workloads**: Declaring web, background worker, and cron scheduler processes clearly.
+- **Enterprise Review Apps**: Automatically spinning up ephemeral preview environments for every GitHub pull request.
 
 ## Quick Start
 
@@ -25,30 +26,90 @@ heroku addons:create heroku-postgresql:standard-0
 
 ## Core Concepts
 
-### Dynos
+#Declarative Process Definition with Procfile
 
-Lightweight Linux containers. Pro/Enterprise dynos sleep only when told.
-2025 includes **Performance-L (Large)** and **Eco** types.
+Declaring web servers, queue workers, and database release migrations:
 
-### Buildpacks
+```text
+# Procfile in repository root
+release: python manage.py migrate --no-input
+web: gunicorn myproject.wsgi:application --workers 4 --bind 0.0.0.0:$PORT
+worker: celery -A myproject worker -l info --concurrency 2
+clock: python clock.py
+```
 
-Scripts that detect your language (e.g. `package.json` -> Node) and build the app.
+#Ephemeral Review Apps Configuration (app.json)
 
-### Releases
+Automating branch preview environments:
 
-Atomic deployments. You can instant-rollback to v42 if v43 breaks.
+```json
+{
+  "name": "SaaS Platform",
+  "description": "Production SaaS application with Heroku Postgres and Redis",
+  "scripts": {
+    "postdeploy": "python manage.py setup_test_fixtures"
+  },
+  "env": {
+    "DJANGO_SETTINGS_MODULE": "myproject.settings.review",
+    "SECRET_KEY": { "generator": "secret" }
+  },
+  "addons": [
+    { "plan": "heroku-postgresql:essential-0" },
+    { "plan": "heroku-redis:mini" }
+  ]
+}
+```
 
-## Best Practices (2025)
+#Heroku CLI Operations
 
-**Do**:
+Scaling dynos, managing config, and running one-off processes:
 
-- **Use Environment Variables**: 12-Factor App methodology is native to Heroku.
-- **Use Review Apps**: Spin up a temp Heroku app for every Pull Request automatically.
-- **Use Docker (Container Registry)**: If Buildpacks fail you, push a Docker image.
+```bash
+# Set production environment variables
+heroku config:set NODE_ENV=production DATABASE_POOL_SIZE=20 -a my-prod-app
 
-**Don't**:
+# Scale web and worker dynos
+heroku ps:scale web=2:standard-2x worker=1:standard-1x -a my-prod-app
 
-- **Don't use local filesystem**: Dynos are ephemeral. Files written to disk vanish on restart. Use S3.
+# Run one-off interactive console or migration
+heroku run bash -a my-prod-app
+heroku logs --tail -a my-prod-app
+```
+
+## Common Patterns
+
+### Multi-Process Procfile with Web and Background Worker
+
+**Problem**: Heavy asynchronous tasks block the web dyno and trigger H12 request timeouts.
+
+**Solution**:
+Separate HTTP web serving from background worker processes in `Procfile`:
+
+```text
+web: node dist/server.js
+worker: node dist/worker.js
+release: npx prisma migrate deploy
+```
+
+Scale dynos: `heroku ps:scale web=2 worker=1`
+
+## Best Practices (2026)
+
+- **Do** use the `release:` phase in `Procfile` to run database migrations before routing traffic to new dynos.
+- **Do** configure `WEB_CONCURRENCY` to match dyno memory capacity and prevent R14 (Memory Quota Exceeded) errors.
+- **Do** bind to `$PORT` provided by Heroku; never hardcode HTTP port numbers in web applications.
+- **Do** use Heroku Review Apps in GitHub pull request workflows for stakeholder review.
+- **Don't** store uploaded user files on dyno local filesystems; dynos are ephemeral—use AWS S3 or Cloudflare R2.
+- **Don't** run long-running CPU tasks in web dynos; offload to background worker dynos.
+- **Don't** leave development add-ons on production apps; upgrade to production-tier Postgres with automated failover.
+
+## Troubleshooting
+
+| Error                                                                               | Cause                                                       | Solution                                                        |
+| :---------------------------------------------------------------------------------- | :---------------------------------------------------------- | :-------------------------------------------------------------- |
+| `Error R10 (Boot timeout) -> Web process failed to bind to $PORT within 60 seconds` | Server listening on hardcoded port instead of `$PORT`.      | Bind web server to dynamic port: `process.env.PORT`.            |
+| `Error H12 (Request timeout) -> Request took longer than 30 seconds`                | Synchronous request exceeded Heroku 30-second router limit. | Offload long-running operations to background worker dynos.     |
+| `Error R14 (Memory quota exceeded)`                                                 | Memory usage exceeded dyno limits (512MB on Standard-1X).   | Optimize memory or upgrade to Standard-2X or Performance dynos. |
 
 ## References
 

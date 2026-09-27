@@ -1,6 +1,6 @@
 ---
 name: hono
-description: Hono ultrafast web framework for edge computing. Use for edge APIs.
+description: Expert Hono framework assistance covering ultra-fast routing, Web Standards, multi-runtime support (Cloudflare Workers, Deno, Bun, Node), and RPC. Use when developing edge APIs and lightweight microservices.
 ---
 
 # Hono
@@ -9,9 +9,10 @@ Hono (Japanese for "Flame") is a small, simple, and ultrafast web framework buil
 
 ## When to Use
 
-- **Edge Computing**: Explicitly designed for Cloudflare Workers / Edge runtimes.
-- **Performance**: Uses `RegExpRouter`, making it significantly faster than Express.
-- **Single File API**: Perfect for small microservices or proxy servers.
+- **Multi-Runtime Edge Web Applications**: Running seamlessly on Cloudflare Workers, Deno, Bun, Fastly, AWS Lambda, or Node.js.
+- **Ultrafast Microservices**: Sub-millisecond routing with RegExpRouter and zero external dependencies.
+- **End-to-End Type Safety (Hono RPC)**: Sharing API client types with frontend web applications without code generation.
+- **Web Standard APIs**: Building on native `Request` and `Response` web standard interfaces.
 
 ## Quick Start
 
@@ -31,28 +32,124 @@ export default app;
 
 ## Core Concepts
 
-### Web Standards
+#Multi-Runtime API with RegExpRouter
 
-Hono uses standard `Request` and `Response` objects. No proprietary API wrapper.
+Lightweight REST API with path parameter extraction:
 
-### Middleware
+```typescript
+import { Hono } from "hono";
+import { logger } from "hono/logger";
+import { cors } from "hono/cors";
 
-Similar to Express but `await next()`. Batteries included: CORS, JWT, Basic Auth, Cache.
+const app = new Hono();
 
-### RPC (Hono RPC)
+app.use("*", logger());
+app.use("/api/*", cors());
 
-Share types between client and server for end-to-end type safety without GraphQL.
+app.get("/api/users/:id", (c) => {
+  const id = c.req.param("id");
+  const role = c.req.query("role") || "member";
 
-## Best Practices (2025)
+  return c.json({
+    id,
+    role,
+    runtime: "Cloudflare / Edge / Bun / Node",
+    timestamp: Date.now(),
+  });
+});
 
-**Do**:
+export default app;
+```
 
-- **Use Hono RPC**: If you control both client and server, the typed client is amazing.
-- **Run on Bun**: Hono + Bun is currently one of the fastest combinations for JS backends.
+#Type-Safe Request Validation with Zod Validator
 
-**Don't**:
+Validating request bodies, headers, and query strings:
 
-- **Don't use heavy Node.js dependencies**: If targeting Cloudflare Workers, avoid packages that rely on `fs` or native Node modules.
+```typescript
+import { Hono } from "hono";
+import { zValidator } from "@hono/zod-validator";
+import { z } from "zod";
+
+const app = new Hono();
+
+const userSchema = z.object({
+  username: z.string().min(3),
+  email: z.string().email(),
+  age: z.number().int().positive().optional(),
+});
+
+app.post("/api/users", zValidator("json", userSchema), (c) => {
+  // c.req.valid('json') is fully typed according to userSchema
+  const data = c.req.valid("json");
+  return c.json({ success: true, user: data }, 201);
+});
+```
+
+#Hono RPC: Type-Safe Client Sharing
+
+Exporting API routes for direct consumption in frontend clients:
+
+```typescript
+// server.ts
+import { Hono } from "hono";
+const app = new Hono().get("/api/posts", (c) =>
+  c.json([{ id: 1, title: "Hono Edge" }]),
+);
+
+export type AppType = typeof app;
+
+// client.ts (In React / Next.js)
+import { hc } from "hono/client";
+import type { AppType } from "./server";
+
+const client = hc<AppType>("https://api.example.com");
+const res = await client.api.posts.$get();
+const posts = await res.json(); // Fully typed!
+```
+
+## Common Patterns
+
+### End-to-End Type-Safe RPC Client
+
+**Problem**: Maintaining synchronized TypeScript API client contracts between edge backend and frontend.
+
+**Solution**:
+Export Hono AppType and consume with `hono/client`:
+
+```typescript
+// server.ts
+import { Hono } from "hono";
+const app = new Hono().get("/api/user/:id", (c) => {
+  return c.json({ id: c.req.param("id"), name: "Alice" });
+});
+export type AppType = typeof app;
+
+// client.ts
+import { hc } from "hono/client";
+import type { AppType } from "./server";
+
+const client = hc<AppType>("https://api.example.com");
+const res = await client.api.user[":id"].$get({ param: { id: "123" } });
+const data = await res.json(); // Strictly typed { id: string, name: string }
+```
+
+## Best Practices (2026)
+
+- **Do** leverage Hono RPC (`hc<AppType>`) to achieve end-to-end type safety between backend and frontend without tRPC overhead.
+- **Do** use `@hono/zod-validator` or `@hono/valibot-validator` to enforce strict validation at edges.
+- **Do** target Web Standards so the same application code deploys to Cloudflare Workers, Bun, and Node.js without modification.
+- **Do** chain router routes (`new Hono().get().post()`) to preserve full RPC type inference.
+- **Don't** use Node-specific globals (`process.env`) without polyfills if targeting edge runtimes; use `c.env`.
+- **Don't** instantiate heavy global state that assumes persistent memory across serverless edge invocations.
+- **Don't** omit error boundary handlers (`app.onError`) in production apps.
+
+## Troubleshooting
+
+| Error                                                   | Cause                                                          | Solution                                                                    |
+| :------------------------------------------------------ | :------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| `TypeError: c.req.json is not a function`               | Accessing body parsing as method rather than awaiting promise. | Use `const body = await c.req.json()`.                                      |
+| `Route not matching on sub-path`                        | Route prefix mismatch in `app.route('/prefix', subApp)`.       | Ensure subApp paths are relative to mount point (`/` instead of `/prefix`). |
+| `Environment variables undefined on Cloudflare Workers` | Accessing `process.env` instead of `c.env`.                    | Extract bindings from context: `c.env.MY_KV_STORE`.                         |
 
 ## References
 

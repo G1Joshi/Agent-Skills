@@ -1,6 +1,6 @@
 ---
 name: event-driven
-description: Event-driven architecture with pub/sub and message queues. Use for reactive systems.
+description: Expert Event-Driven Architecture assistance covering message brokers, pub/sub topologies, event stream processing, asynchronous workflows, and eventual consistency. Use when designing decoupled microservices, integrating Apache Kafka or RabbitMQ, or managing outbox patterns.
 ---
 
 # Event-Driven Architecture (EDA)
@@ -9,10 +9,10 @@ EDA is a software architecture paradigm promoting the production, detection, con
 
 ## When to Use
 
-- When strict decoupling is required (Producer doesn't know Consumer).
-- High-volume, bursty traffic (using buffering queues).
-- Asynchronous workflows (e.g., "User Signed Up" -> Send Email, Create Wallet, Analytics).
-- Real-time updates (WebSockets/Push).
+- **Decoupled Microservice Architectures**: Connecting distributed services through asynchronous events rather than fragile synchronous HTTP chains.
+- **High-Volume Asynchronous Processing**: Ingesting IoT telemetry, analytics events, and user activity logs with buffer-backed queues.
+- **Complex Cross-Service Workflows**: Coordinating order processing, inventory reservations, and notifications asynchronously.
+- **Zero-Downtime Resilience**: Ensuring systems continue functioning and queuing events even when consumer services are temporarily offline.
 
 ## Quick Start
 
@@ -40,50 +40,121 @@ messageBroker.subscribe("order.created", async (event) => {
 
 ## Core Concepts
 
-### Event
+#Pub/Sub Topology & Fan-Out
 
-A significant change in state (Immutable fact). "OrderCreated" not "CreateOrder".
+Producers publish events without knowing consumers; brokers fan out events to multiple subscriber queues:
 
-### Broker (Event Bus)
+```
+[ Order Service ] ──Publish(OrderPlaced)──→ [ Topic: orders.events ]
+                                                     ├──→ [ Queue: Inventory ] ──→ [ Inventory Service ]
+                                                     ├──→ [ Queue: Billing ]   ──→ [ Payment Service ]
+                                                     └──→ [ Queue: Email ]     ──→ [ Notification Service ]
+```
 
-The middleware (Kafka, RabbitMQ, SNS/SQS) that receives, stores, and routes events.
+#CloudEvents Specification Standard
 
-### Pub/Sub
+Standardizes event metadata across distributed platforms:
 
-Pattern where publishers send messages to a topic, and multiple subscribers receive them independently.
+```json
+{
+  "specversion": "1.0",
+  "type": "com.ecommerce.order.placed.v1",
+  "source": "/orders/service",
+  "id": "A234-1234-1234",
+  "time": "2026-09-27T10:00:00Z",
+  "datacontenttype": "application/json",
+  "data": {
+    "orderId": "ord_91823",
+    "customerId": "cust_481",
+    "totalCents": 4999
+  }
+}
+```
+
+#Idempotent Event Consumer Pattern
+
+Guarantees safety against message broker duplicate deliveries:
+
+```typescript
+// consumers/order-placed.consumer.ts
+export async function handleOrderPlaced(event: CloudEvent) {
+  const isProcessed = await redis.set(
+    `processed_event:${event.id}`,
+    "true",
+    "NX",
+    "EX",
+    86400,
+  );
+  if (!isProcessed) {
+    console.log(`Event ${event.id} already processed. Skipping.`);
+    return; // Idempotent exit
+  }
+
+  // Execute actual business logic
+  await processPayment(event.data);
+}
+```
 
 ## Common Patterns
 
-### Event Sourcing
+#Transactional Outbox Pattern
+**Problem**: Dual-write hazard: saving database entity succeeds, but message broker publish fails.  
+**Solution**: Write outgoing domain events to an outbox table within the same database transaction.
 
-Storing the state of an entity as a sequence of state-changing events rather than the current snapshot.
+```sql
+-- Outbox Table definition
+CREATE TABLE outbox_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  aggregate_type VARCHAR(64) NOT NULL,
+  aggregate_id VARCHAR(64) NOT NULL,
+  event_type VARCHAR(64) NOT NULL,
+  payload JSONB NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  processed_at TIMESTAMPTZ NULL
+);
+```
 
-### CQRS (Command Query Responsibility Segregation)
+```typescript
+// Atomic database write + event staging
+await db.transaction(async (tx) => {
+  await tx.insert(orders).values(orderData);
+  await tx.insert(outboxEvents).values({
+    aggregateType: "Order",
+    aggregateId: orderData.id,
+    eventType: "OrderCreated",
+    payload: JSON.stringify(orderData),
+  });
+});
+```
 
-Separating the Read and Write models. Writes publish events; Reads update a denormalized view based on those events.
-
-### Transactional Outbox
-
-Ensuring data consistency. Write the event to a DB table _in the same transaction_ as the business logic, then a background worker pushes it to the broker.
-
-## Best Practices
+## Best Practices (2026)
 
 **Do**:
 
-- Use **Schemas** (Avro, Protobuf, JSON Schema) to govern event structure (Schema Registry).
-- Ensure **Idempotency** in consumers (handling the same message twice safely).
-- Monitor **Lag** (how far behind consumers are).
+- **Use the Transactional Outbox Pattern**: Prevent dual-write anomalies by saving domain entities and outbox events in one database transaction.
+- **Design Every Consumer to be Idempotent**: Always record processed message IDs to handle at-least-once message broker retries safely.
+- **Version Your Event Schemas**: Evolve schemas using backwards-compatible additions; use Protobuf or JSON Schema registries.
+- **Implement Dead Letter Queues (DLQ)**: Route malformed or persistently failing messages to a DLQ for operational inspection.
 
 **Don't**:
 
-- Don't use events for synchronous queries (Request/Response via queues is painful).
-- Don't put huge payloads in events (Pass ID + Metadata, reference Blob Storage if needed).
+- **Don't use events for RPC / Request-Response queries**: Do not simulate synchronous HTTP calls using two-way event streams.
+- **Don't broadcast massive binary payloads in events**: Send lightweight event notifications with a resource URL/ID (Claim Check pattern).
+- **Don't ignore message ordering limitations**: Remember that partition keys determine ordering in Kafka/Kinesis; global ordering is not guaranteed.
 
 ## Tools
 
 - **Kafka / Redpanda**: High throughput, log-based (replayable).
 - **RabbitMQ / ActiveMQ**: Queue-based, complex routing.
 - **AWS SNS/SQS / Google PubSub**: Cloud native.
+
+## Troubleshooting
+
+| Error                         | Cause                                                    | Solution                                                                             |
+| :---------------------------- | :------------------------------------------------------- | :----------------------------------------------------------------------------------- |
+| `Out-of-order event delivery` | Partition key missing or concurrent consumer processing. | Assign consistent partition keys (e.g. `order_id`) and enforce monotonic sequencing. |
+| `Duplicate event consumption` | Consumer retries after network timeout before ack.       | Implement idempotency checks using unique event IDs in a deduplication store.        |
+| `Poison pill message block`   | Unhandled payload serialization or validation failure.   | Route malformed messages to a Dead Letter Queue (DLQ) after retry limit.             |
 
 ## References
 

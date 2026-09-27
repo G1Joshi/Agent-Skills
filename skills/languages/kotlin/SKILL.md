@@ -1,6 +1,6 @@
 ---
 name: kotlin
-description: Kotlin programming for Android, coroutines, and JVM development. Use for .kt files.
+description: Expert Kotlin assistance covering coroutines, Flow, null safety, extension functions, sealed classes/interfaces, and Kotlin Multiplatform. Use when developing Android applications, server-side Kotlin services with Ktor/Spring, or sharing cross-platform business logic.
 ---
 
 # Kotlin
@@ -9,10 +9,10 @@ Modern Kotlin development with coroutines, null safety, and idiomatic patterns.
 
 ## When to Use
 
-- Working with `.kt` files
-- Android app development
-- JVM backend with Spring Boot/Ktor
-- Multiplatform projects (KMP)
+- **Modern Android Application Development**: Google's official, primary language for native Android and Jetpack Compose.
+- **Server-Side Microservices (Ktor / Spring Boot)**: Writing expressive, concise, null-safe enterprise web backends.
+- **Kotlin Multiplatform (KMP)**: Sharing business logic, data models, and networking across Android, iOS, Desktop, and Web.
+- **Asynchronous Coroutines & Reactive Flows**: Managing concurrent background tasks and streams without callback hell.
 
 ## Quick Start
 
@@ -31,47 +31,52 @@ suspend fun fetchUser(id: String): User? {
 
 ## Core Concepts
 
-### Null Safety
+#Kotlin Coroutines & Structured Concurrency
+
+Lightweight cooperative multitasking with automated cancellation propagation:
 
 ```kotlin
-// Nullable types
-val name: String? = null
+import kotlinx.coroutines.*
 
-// Safe calls
-val length = name?.length
+suspend fun fetchUserProfile(userId: String): UserProfile = coroutineScope {
+    // Run two network fetches in parallel
+    val profileDeferred = async { api.getProfile(userId) }
+    val ordersDeferred = async { api.getOrders(userId) }
 
-// Elvis operator
-val len = name?.length ?: 0
-
-// Smart casts
-if (name != null) {
-    println(name.length) // Smart cast to String
+    val profile = profileDeferred.await()
+    val orders = ordersDeferred.await()
+    profile.copy(orders = orders)
 }
-
-// Not-null assertion (use sparingly)
-val len = name!!.length
 ```
 
-### Data Classes & Sealed Classes
+#Kotlin Flow (Asynchronous Cold Streams)
+
+Reactive streams with built-in backpressure and transformation operators:
 
 ```kotlin
-data class User(
-    val id: String,
-    val name: String,
-    val email: String
-)
+import kotlinx.coroutines.flow.*
 
-sealed class Result<out T> {
-    data class Success<T>(val data: T) : Result<T>()
-    data class Error(val message: String) : Result<Nothing>()
-    object Loading : Result<Nothing>()
-}
+fun streamStockPrices(symbol: String): Flow<Double> = flow {
+    while (true) {
+        emit(api.getCurrentPrice(symbol))
+        delay(1000)
+    }
+}.map { it * 1.05 } // Apply transformation
+ .flowOn(Dispatchers.IO)
+```
 
-// Exhaustive when
-fun handleResult(result: Result<User>) = when (result) {
-    is Result.Success -> println(result.data)
-    is Result.Error -> println(result.message)
-    Result.Loading -> println("Loading...")
+#Extension Functions & Scope Functions
+
+Extends existing classes without inheritance and scopes variable operations:
+
+```kotlin
+// Extension function on String
+fun String.toSlug(): String = lowercase().replace(" ", "-").replace(Regex("[^a-z0-9-]"), "")
+
+// Scope function (let, apply, run, also)
+val user = User().apply {
+    name = "Alex"
+    role = "Lead"
 }
 ```
 
@@ -120,21 +125,20 @@ inline fun <T> Result<T>.onSuccess(action: (T) -> Unit): Result<T> {
 }
 ```
 
-## Best Practices
+## Best Practices (2026)
 
 **Do**:
 
-- Use data classes for DTOs
-- Prefer immutability (`val` over `var`)
-- Use sealed classes for state
-- Use coroutines for async work
+- **Leverage Kotlin Coroutines over Reactive Streams**: Replace complex RxJava pipelines with clean coroutines and Flow.
+- **Use Sealed Interfaces for UI State**: Model UI and domain state using `sealed interface` for exhaustive `when` expressions.
+- **Specify Dispatchers Explicitly**: Use `Dispatchers.IO` for disk/network I/O, `Dispatchers.Default` for CPU math, and `Dispatchers.Main` for UI.
+- **Prefer Value Classes (`@JvmInline value class`)**: Create zero-allocation domain primitives for IDs and units of measure.
 
 **Don't**:
 
-- Use `!!` without null check
-- Create utility classes (use extensions)
-- Block main thread with `runBlocking`
-- Ignore cancellation in coroutines
+- **Don't use `GlobalScope.launch`**: Always use structured concurrency with scoped lifecycles to prevent goroutine/coroutine leaks.
+- **Don't use the `!!` force-unwrap operator**: Handle nullables cleanly using `?.let { ... }` or Elvis operator `?:`.
+- **Don't expose mutable collections**: Expose read-only `List<T>` interfaces; keep `MutableList<T>` private inside classes.
 
 ## Troubleshooting
 

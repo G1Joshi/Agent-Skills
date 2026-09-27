@@ -1,6 +1,6 @@
 ---
 name: deepseek
-description: DeepSeek AI models for coding. Use for code AI.
+description: Expert DeepSeek AI assistance covering DeepSeek-R1 reasoning models, DeepSeek-V3, API integration, and local quantization. Use when building cost-effective reasoning agents, code generation, or math/logic solvers.
 ---
 
 # DeepSeek
@@ -9,30 +9,140 @@ DeepSeek (from China) disrupted the market in late 2024/2025 by releasing **Deep
 
 ## When to Use
 
-- **Cost Efficiency**: The API is incredibly cheap.
-- **Reasoning**: **DeepSeek-R1** uses Chain-of-Thought reinforcement learning (like OpenAI o1) but is open weights.
-- **Coding**: DeepSeek-Coder-V2 is a top-tier coding model.
+- **High-Performance Open-Weights Reasoning & Coding**: DeepSeek-R1 and DeepSeek-V3 for mathematical reasoning, agentic logic, and code generation.
+- **Self-Hosted & Private LLM Deployments**: Running enterprise reasoning models locally using vLLM, SGLang, or Ollama.
+- **Cost-Efficient API Scaling**: Accessing state-of-the-art reasoning at a fraction of proprietary API costs.
+- **Chain-of-Thought (CoT) Verification**: Parsing detailed `<think>` reasoning traces for auditability and verification.
+
+## Quick Start
+
+```python
+from openai import OpenAI
+
+# DeepSeek exposes an OpenAI-compatible API endpoint
+client = OpenAI(
+    api_key="your-deepseek-api-key",
+    base_url="https://api.deepseek.com"
+)
+
+response = client.chat.completions.create(
+    model="deepseek-reasoner", # DeepSeek-R1
+    messages=[
+        {"role": "user", "content": "Solve: How many r's are in strawberry? Think step by step."}
+    ]
+)
+
+# Reasoning output is provided in reasoning_content
+print("Thinking Process:\n", response.choices[0].message.reasoning_content)
+print("Final Answer:\n", response.choices[0].message.content)
+```
 
 ## Core Concepts
 
-### MLA (Multi-Head Latent Attention)
+#Consuming DeepSeek API with OpenAI SDK Compatibility
 
-Architectural innovation that drastically reduces KV cache memory usage (allowing huge context).
+Querying DeepSeek models with reasoning token handling:
 
-### DeepSeek-R1
+```python
+import os
+from openai import OpenAI
 
-A reasoning model that outputs its "thought process" before the final answer.
+client = OpenAI(
+    api_key=os.environ.get("DEEPSEEK_API_KEY"),
+    base_url="https://api.deepseek.com"
+)
 
-## Best Practices (2025)
+response = client.chat.completions.create(
+    model="deepseek-reasoner", # DeepSeek-R1 reasoning model
+    messages=[
+        {"role": "system", "content": "You are a quantitative systems engineer."},
+        {"role": "user", "content": "Design an optimal concurrent lock-free queue algorithm in C++."}
+    ],
+    max_tokens=4096,
+    temperature=0.6,
+)
 
-**Do**:
+# DeepSeek-R1 returns reasoning content separately
+reasoning = getattr(response.choices[0].message, 'reasoning_content', None)
+final_answer = response.choices[0].message.content
 
-- **Use R1 for Math/Logic**: It rivals o1-preview in math benchmarks.
-- **Local Distillations**: Run `DeepSeek-R1-Distill-Llama-70B` locally for private reasoning.
+if reasoning:
+    print(f"=== Thinking Process ({len(reasoning)} chars) ===")
+    print(reasoning[:500] + "...")
 
-**Don't**:
+print("\n=== Final Response ===")
+print(final_answer)
+```
 
-- **Don't suppress thoughts**: When using R1, the "thought" trace is valuable for debugging the model's logic.
+#High-Throughput Self-Hosting with vLLM
+
+Deploying DeepSeek-V3 / R1 on multi-GPU nodes with PagedAttention:
+
+```bash
+# Launch vLLM server with tensor parallelism across 8 H100 GPUs
+vllm serve deepseek-ai/DeepSeek-R1 \
+  --tensor-parallel-size 8 \
+  --max-model-len 32768 \
+  --trust-remote-code \
+  --gpu-memory-utilization 0.95 \
+  --port 8000
+```
+
+#Streaming Reasoning Tokens
+
+Streaming live thinking tokens to the client interface:
+
+```python
+response = client.chat.completions.create(
+    model="deepseek-reasoner",
+    messages=[{"role": "user", "content": "Solve this riddle: ..."}],
+    stream=True
+)
+
+for chunk in response:
+    delta = chunk.choices[0].delta
+    if hasattr(delta, 'reasoning_content') and delta.reasoning_content:
+        print(f"[Thinking]: {delta.reasoning_content}", end="", flush=True)
+    elif delta.content:
+        print(delta.content, end="", flush=True)
+```
+
+## Common Patterns
+
+### DeepSeek-R1 Reasoning Extraction with Fallback
+
+**Problem**: Handling reasoning steps separately from final response text in client applications.
+
+**Solution**:
+Access `reasoning_content` with safe attribute fallback:
+
+```python
+msg = response.choices[0].message
+thought_process = getattr(msg, 'reasoning_content', None)
+final_text = msg.content
+
+if thought_process:
+    print(f"Step-by-step logic: {thought_process}")
+print(f"Output: {final_text}")
+```
+
+## Best Practices (2026)
+
+- **Do** separate reasoning output (`reasoning_content`) from final output (`content`) when rendering responses to users.
+- **Do** use `temperature=0.6` (recommended default for DeepSeek-R1) to balance logical rigor and exploration.
+- **Do** use FP8 or AWQ 4-bit quantizations when self-hosting on hardware with limited VRAM.
+- **Do** implement retries with exponential backoff on API endpoints during peak network congestion.
+- **Don't** strip `<think>` tags prematurely if debugging algorithmic reasoning failures.
+- **Don't** provide overly verbose system prompts for DeepSeek-R1; it is trained to reason autonomously.
+- **Don't** use `temperature=0` with DeepSeek reasoning models; it may cause repetitive reasoning loops.
+
+## Troubleshooting
+
+| Error                                             | Cause                                                              | Solution                                                      |
+| :------------------------------------------------ | :----------------------------------------------------------------- | :------------------------------------------------------------ |
+| `401 Unauthorized: Invalid API Key`               | Missing or incorrect DeepSeek API key.                             | Verify key at `platform.deepseek.com` and pass via `api_key`. |
+| `Base URL not recognized`                         | Client connecting to standard OpenAI endpoint instead of DeepSeek. | Set `base_url="https://api.deepseek.com"`.                    |
+| `Timeout / 504 Gateway error during R1 reasoning` | Complex reasoning query exceeding standard client HTTP timeout.    | Increase timeout: `OpenAI(timeout=120.0, ...)`.               |
 
 ## References
 

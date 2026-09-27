@@ -1,6 +1,6 @@
 ---
 name: vscode
-description: Visual Studio Code editor with extensions and debugging. Use for code editing.
+description: Expert Visual Studio Code assistance covering settings.json, launch.json debugging, tasks.json automation, dev containers, and workspace extensions. Use when configuring VS Code environments, setting up multi-language debuggers, automating tasks, or configuring devcontainer environments.
 ---
 
 # Visual Studio Code
@@ -9,9 +9,10 @@ VS Code is the industry standard editor. In 2025, it has evolved into an **AI-Fi
 
 ## When to Use
 
-- **Everyday Coding**: TypeScript, Python, Go, Rust. It wins almost everywhere.
-- **Remote Dev**: `Remote - SSH` and `Dev Containers` are best-in-class.
-- **AI-Assisted**: GitHub Copilot integration is deepest here.
+- **Polyglot Development Workspace**: Full-featured IDE for TypeScript, Python, Go, Rust, C#, and Cloud Native development.
+- **Standardized Team Workspace Configuration**: Enforcing shared settings, linter rules, and extensions across engineering teams.
+- **Container & Remote Development**: Developing inside Docker containers, WSL2, or remote servers via Remote - SSH / Dev Containers.
+- **Interactive Multi-Target Debugging**: Setting conditional breakpoints, inspecting variables, and debugging full-stack architectures.
 
 ## Quick Start
 
@@ -26,33 +27,148 @@ VS Code is the industry standard editor. In 2025, it has evolved into an **AI-Fi
 
 ## Core Concepts
 
-### Extensions
+### Enterprise Workspace Settings (`.vscode/settings.json`)
 
-The ecosystem is the key. 50k+ extensions.
+Standardizing format-on-save, linter integrations, and search exclusions:
 
-- `Python` (Microsoft)
-- `ESLint` (Microsoft)
-- `GitLens`
+```json
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "editor.fontFamily": "'JetBrains Mono', 'Fira Code', monospace",
+  "editor.fontLigatures": true,
+  "editor.tabSize": 2,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.DS_Store": true,
+    "**/node_modules": true
+  },
+  "search.exclude": {
+    "**/dist": true,
+    "**/build": true,
+    "**/.next": true
+  }
+}
+```
 
-### Dev Containers
+### Full-Stack Debugging Configuration (`.vscode/launch.json`)
 
-Define your dev environment in `.devcontainer/devcontainer.json`. VS Code spins up a Docker container and connects to it. 100% reproducible dev environments.
+Debugging Next.js server and client simultaneously:
 
-### Profiles (2025)
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Next.js: Node Server",
+      "type": "node",
+      "request": "launch",
+      "command": "npm run dev",
+      "serverReadyAction": {
+        "pattern": "- Local:.+(https?://.+)",
+        "uriFormat": "%s",
+        "action": "debugWithEdge"
+      }
+    },
+    {
+      "name": "Next.js: Chrome Client",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Full-Stack Next.js",
+      "configurations": ["Next.js: Node Server", "Next.js: Chrome Client"]
+    }
+  ]
+}
+```
 
-Switch between "Work", "Personal", and "Demo" profiles with different settings/extensions enabled.
+### Recommended Team Extensions (`.vscode/extensions.json`)
 
-## Best Practices (2025)
+Prompting developers to install essential project plugins:
 
-**Do**:
+```json
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "ms-azuretools.vscode-docker",
+    "github.copilot",
+    "eamodio.gitlens"
+  ]
+}
+```
 
-- **Use Sync**: Turn on Settings Sync (`GitHub` account) to keep keybindings across machines.
-- **Use `code .`**: Launch from terminal.
-- **Use Inline Chat**: `Cmd+I` to ask Copilot to refactor code in-place.
+## Common Patterns
 
-**Don't**:
+### Dev Container Configuration
 
-- **Don't minimalize too much**: Hiding the sidebar/activity bar makes you slower. Learn the toggle shortcuts (`Cmd+B`) instead.
+**Problem**: Standardize development environment across entire team inside Docker.  
+**Solution**: Define `.devcontainer/devcontainer.json`.
+
+```json
+{
+  "name": "Node & TypeScript Container",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:20",
+  "customizations": {
+    "vscode": {
+      "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"],
+      "settings": {
+        "editor.formatOnSave": true
+      }
+    }
+  },
+  "forwardPorts": [3000]
+}
+```
+
+### Workspace Tasks Automation (.vscode/tasks.json)
+
+**Problem**: Run build or test scripts via standard `Ctrl + Shift + B` build shortcut.  
+**Solution**: Configure tasks.json.
+
+```json
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "build",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": ["$tsc"]
+    }
+  ]
+}
+```
+
+## Best Practices (2026)
+
+- **Do** commit `.vscode/settings.json`, `.vscode/launch.json`, and `.vscode/extensions.json` to version control for team alignment.
+- **Do** configure **Dev Containers** (`.devcontainer/devcontainer.json`) for instant, reproducible containerized onboarding.
+- **Do** use `editor.formatOnSave: true` with a defined `editor.defaultFormatter` to maintain clean git diffs.
+- **Do** define task workflows in `.vscode/tasks.json` to run tests and linters via unified keybindings (`Cmd+Shift+B`).
+- **Don't** install hundreds of unnecessary extensions; disable extensions globally and enable them per workspace.
+- **Don't** commit `.vscode/settings.json` with machine-specific hardcoded local file paths.
+- **Don't** ignore VS Code security prompts when opening untrusted repositories in Workspace Trust mode.
+
+## Troubleshooting
+
+| Error / Symptom                         | Cause                                                               | Solution                                                                         |
+| --------------------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Format on save not executing            | Multiple formatters installed without default specified             | Set `"editor.defaultFormatter"` explicitly in `settings.json`.                   |
+| Remote - SSH disconnects frequently     | Keepalive packets timing out over unstable connection               | Add `"ServerAliveInterval 60"` to `~/.ssh/config` for target host.               |
+| High CPU usage by `Code Helper` or `rg` | Searching or watching ignored folders like `node_modules` or `.git` | Add paths to `"files.watcherExclude"` and `"search.exclude"` in `settings.json`. |
 
 ## References
 

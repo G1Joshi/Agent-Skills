@@ -1,6 +1,6 @@
 ---
 name: packer
-description: HashiCorp Packer image building. Use for machine images.
+description: Expert HashiCorp Packer assistance covering HCL2 templates, builders (AWS AMI, GCP, Azure, Docker), and provisioners. Use when automating immutable machine image creation for cloud and virtualization.
 ---
 
 # Packer
@@ -9,11 +9,12 @@ Packer automates the creation of Machine Images (AMI, VMDK, ISO) for multiple pl
 
 ## When to Use
 
-- **Immutable Infrastructure**: Bake your app code into the OS image. Booting a pre-baked AMI is faster than running Ansible on boot.
-- **Golden Images**: Create hardened, secure base images for your organization.
-- **Multi-Cloud**: Build an AMI for AWS and a VHD for Azure from the same script.
+- **Automated Golden Image Creation**: Building standardized, hardened virtual machine images across AWS AMIs, Azure VMs, and GCP.
+- **Immutable Infrastructure Pipelines**: Pre-baking operating systems, security patches, and application runtimes into images.
+- **Multi-Cloud Image Synchronization**: Generating identical VM images for multiple clouds from a single HCL template.
+- **Compliance & Security Hardening**: Running CIS benchmark Ansible playbooks during image build pipelines.
 
-## Quick Start (HCL2)
+## Quick Start
 
 ```hcl
 source "amazon-ebs" "ubuntu" {
@@ -43,29 +44,148 @@ build {
 
 ## Core Concepts
 
-### Builders
+#Modern HCL2 Template for AWS Golden AMI
 
-Cloud-specific components (e.g., `amazon-ebs`, `azure-arm`) that launch a VM.
+Building an encrypted, hardened Ubuntu AMI:
 
-### Provisioners
+```hcl
+# ubuntu_ami.pkr.hcl
+packer {
+  required_plugins {
+    amazon = {
+      version = ">= 1.2.8"
+      source  = "github.com/hashicorp/amazon"
+    }
+  }
+}
 
-Tools to configure the VM (Shell, Ansible, Chef) before it is turned into an image.
+variable "aws_region" {
+  type    = string
+  default = "us-east-1"
+}
 
-### Post-Processors
+source "amazon-ebs" "hardened_ubuntu" {
+  ami_name      = "golden-ubuntu-24-04-{{timestamp}}"
+  instance_type = "t3.medium"
+  region        = var.aws_region
+  encrypt_boot  = true
 
-What to do with the image (Upload to S3, Vagrant Box, Docker Push).
+  source_ami_filter {
+    filters = {
+      name                = "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"
+      root-device-type    = "ebs"
+      virtualization-type = "hvm"
+    }
+    most_recent = true
+    owners      = ["099720109477"] # Canonical
+  }
 
-## Best Practices (2025)
+  ssh_username = "ubuntu"
+  tags = {
+    OS          = "Ubuntu 24.04"
+    Environment = "Golden-Images"
+    BuildTime   = "{{timestamp}}"
+  }
+}
 
-**Do**:
+build {
+  sources = ["source.amazon-ebs.hardened_ubuntu"]
 
-- **Use HCL2**: JSON templates are legacy. HCL2 supports variables and logic.
-- **CI Integration**: Run Packer in CI pipeline to produce new AMIs on every release.
-- **Cleanup**: Ensure Packer cleans up temporary resources (Security Groups, Key Pairs) after build.
+  # Step 1: Update and install security packages
+  provisioner "shell" {
+    inline = [
+      "sudo apt-get update",
+      "sudo apt-get upgrade -y",
+      "sudo apt-get install -y fail2ban ufw unattended-upgrades"
+    ]
+  }
 
-**Don't**:
+  # Step 2: Apply Ansible hardening playbook
+  provisioner "ansible" {
+    playbook_file = "./playbooks/cis_hardening.yml"
+  }
+}
+```
 
-- **Don't bake secrets**: Never put passwords in the image. Use Cloud-init or User Data to inject them at runtime.
+#Validating, Formatting and Building Images
+
+Executing Packer CLI build workflow:
+
+```bash
+# Format template
+packer fmt ubuntu_ami.pkr.hcl
+
+# Validate template syntax and credentials
+packer validate ubuntu_ami.pkr.hcl
+
+# Build golden AMI with variable override
+packer build -var "aws_region=us-east-1" ubuntu_ami.pkr.hcl
+```
+
+## Common Patterns
+
+### Automated AWS AMI Builder with Shell Provisioning
+
+**Problem**: Manual server hardening creates configuration drift and slow auto-scaling boot times.
+
+**Solution**:
+Build pre-baked immutable AMIs with Packer HCL2:
+
+```hcl
+packer {
+  required_plugins {
+    amazon = {
+      version = ">= 1.2.0"
+      source  = "github.com/hashicorp/amazon"
+    }
+  }
+}
+
+source "amazon-ebs" "ubuntu" {
+  ami_name      = "hardened-ubuntu-24-04-{{timestamp}}"
+  instance_type = "t3.small"
+  region        = "us-east-1"
+  source_ami_filter {
+    filters = {
+      name                = "ubuntu/images/hvm-ssd/ubuntu-noble-24.04-amd64-server-*"
+      root-device-type    = "ebs"
+      virtualization-type = "hvm"
+    }
+    most_recent = true
+    owners      = ["099720109477"]
+  }
+  ssh_username = "ubuntu"
+}
+
+build {
+  sources = ["source.amazon-ebs.ubuntu"]
+  provisioner "shell" {
+    inline = [
+      "sudo apt-get update",
+      "sudo apt-get install -y docker.io nginx",
+      "sudo systemctl enable docker"
+    ]
+  }
+}
+```
+
+## Best Practices (2026)
+
+- **Do** target modern HCL2 templates (`.pkr.hcl`) instead of legacy deprecated JSON Packer templates.
+- **Do** set `encrypt_boot = true` on EBS volumes to ensure golden images are encrypted at rest with KMS.
+- **Do** use `source_ami_filter` with `most_recent = true` and official owner IDs to build on verified vendor base images.
+- **Do** clean up temporary shell history and SSH host keys before the image is finalized.
+- **Don't** bake sensitive production secrets or private API tokens into golden images; inject secrets at runtime.
+- **Don't** leave default administrative passwords set in base images.
+- **Don't** run Packer without `packer validate` in continuous integration builds.
+
+## Troubleshooting
+
+| Error                                               | Cause                                                                             | Solution                                                       |
+| :-------------------------------------------------- | :-------------------------------------------------------------------------------- | :------------------------------------------------------------- |
+| `Error: Timeout waiting for SSH`                    | Security group blocks port 22 or SSH key pair mismatch during build.              | Verify subnet has public IP assignment and allows inbound SSH. |
+| `Failed to initialize plugins`                      | Required plugin not installed on host.                                            | Run `packer init <config.pkr.hcl>` before executing build.     |
+| `Amazon Elastic Block Store: UnauthorizedOperation` | IAM role running Packer lacks permissions to create EC2 keys, instances, or AMIs. | Grant required EC2 permissions in AWS IAM policy.              |
 
 ## References
 

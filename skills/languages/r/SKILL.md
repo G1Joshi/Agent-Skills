@@ -1,6 +1,6 @@
 ---
 name: r
-description: R statistical programming for data analysis, visualization, and modeling. Use for .r files.
+description: Expert R language assistance covering tidyverse, data.table, ggplot2, statistical modeling, and vectorized dataframes. Use when analyzing datasets, building statistical models, or generating research visualizations.
 ---
 
 # R
@@ -9,10 +9,10 @@ A language and environment for statistical computing and graphics.
 
 ## When to Use
 
-- Statistical Analysis
-- Data Visualization (ggplot2)
-- Bioinformatics
-- Academic research
+- **Statistical Analysis & Econometrics**: Hypothesis testing, regression modeling, survival analysis, and statistical research.
+- **Publication-Ready Data Visualization (ggplot2)**: Creating high-fidelity, publication-quality statistical charts and graphics.
+- **Data Wrangling with the Tidyverse**: Transforming and aggregating complex datasets using `dplyr`, `tidyr`, and pipes (`|>`).
+- **Interactive Dashboards & Reports (Shiny / Quarto)**: Publishing dynamic web dashboards and reproducible scientific documents.
 
 ## Quick Start
 
@@ -34,37 +34,101 @@ df <- data.frame(
 
 ## Core Concepts
 
-### Vectorization
+#The Grammar of Graphics (ggplot2)
 
-R operations are designed to work on entire vectors at once, avoiding explicit loops.
-
-```r
-x + 1 # Adds 1 to every element in x
-```
-
-### Pipe Operator `%>%`
-
-Used to clean code by passing output of one function as input to the next (Tidyverse).
+Composes statistical visualizations by layering data, aesthetic mappings, geometries, and facets:
 
 ```r
-data %>%
-  filter(users > 100) %>%
-  group_by(region) %>%
-  summarize(total = sum(users))
+library(ggplot2)
+
+# Compose visual layers declaratively
+ggplot(mpg, aes(x = displ, y = hwy, color = class)) +
+  geom_point(size = 3, alpha = 0.8) +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    title = "Engine Displacement vs Highway Fuel Economy",
+    x = "Displacement (Liters)",
+    y = "Highway MPG"
+  ) +
+  theme_minimal()
 ```
 
-## Best Practices
+#Tidy Data Transformations with `dplyr` and Native Pipe (`|>`)
+
+Transforms tables using standardized verbs and R 4.1+ native forward pipes:
+
+```r
+library(dplyr)
+
+summary_stats <- starwars |>
+  filter(!is.na(height), !is.na(mass)) |>
+  group_by(species) |>
+  summarise(
+    count = n(),
+    avg_height = mean(height),
+    median_mass = median(mass)
+  ) |>
+  filter(count >= 2) |>
+  arrange(desc(avg_height))
+```
+
+#Fast Columnar In-Memory Processing with `data.table`
+
+Blazing fast processing of multi-gigabyte datasets:
+
+```r
+library(data.table)
+dt <- data.table(iris)
+dt[Species == "setosa", .(Avg_Petal_Length = mean(Petal.Length)), by = Species]
+```
+
+## Common Patterns
+
+### Tidyverse Data Transformation Pipeline
+
+**Problem**: Multiple intermediate dataframe copies cluttering memory during analysis.
+
+**Solution**:
+Use dplyr pipe operator (`%>%` or `|>`) for stream processing:
+
+```r
+library(dplyr)
+
+summary_stats <- mtcars %>%
+  filter(mpg > 15) %>%
+  group_by(cyl) %>%
+  summarise(
+    mean_mpg = mean(mpg),
+    mean_hp = mean(hp),
+    count = n()
+  ) %>%
+  arrange(desc(mean_mpg))
+
+print(summary_stats)
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- Use the Tidyverse (dplyr, ggplot2) for modern R
-- Document functions with Roxygen2
-- Use RStudio IDE
+- **Use the Native Pipe (`|>`)**: Standardize on R 4.1+ native pipe (`|>`) over legacy `magrittr` (`%>%`).
+- **Use `renv` for Reproducible Environments**: Lock exact package versions in `renv.lock` to ensure reproducible research.
+- **Adopt `data.table` or `arrow` for Big Data**: Avoid out-of-memory crashes on multi-million row datasets.
+- **Publish with Quarto**: Author reproducible reports, slides, and websites using modern Quarto (`.qmd`).
 
 **Don't**:
 
-- Use explicit `for` loops if vectorization is possible (performance)
-- Mix naming conventions (snake_case is preferred in tidyverse)
+- **Don't use `attach()`**: `attach()` pollutes search namespaces and causes silent variable masking bugs.
+- **Don't grow arrays inside iterative loops**: Pre-allocate vector sizes or use vectorized vectorized functions (`lapply`, `purrr::map`).
+- **Don't use `1:length(x)`**: If `x` is empty, `1:0` creates an invalid 2-element vector; use `seq_along(x)` instead.
+
+## Troubleshooting
+
+| Error                                                | Cause                                                            | Solution                                                          |
+| :--------------------------------------------------- | :--------------------------------------------------------------- | :---------------------------------------------------------------- |
+| `Error in ... : could not find function "%>%"`       | Pipe operator used without loading `magrittr` or `dplyr`.        | Add `library(dplyr)` or use native R 4.1+ pipe `                  | >`. |
+| `cannot allocate vector of size ... (Out of memory)` | Dataset exceeds available RAM.                                   | Use `data.table` or chunk analysis with the `arrow` package.      |
+| `object '...' not found`                             | Variable evaluated before declaration or misspelled column name. | Verify spelling and check active environment objects with `ls()`. |
 
 ## References
 

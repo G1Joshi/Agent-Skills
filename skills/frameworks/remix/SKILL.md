@@ -1,6 +1,6 @@
 ---
 name: remix
-description: Remix React framework with nested routing and data loading. Use for full-stack React.
+description: Expert Remix (React Router v7) assistance covering Loaders, Actions, nested routing, optimistic UI, and Web Fetch standards. Use when developing resilient, full-stack React web applications.
 ---
 
 # Remix
@@ -9,11 +9,12 @@ Remix is a full-stack web framework that focuses on web standards (Fetch API, Fo
 
 ## When to Use
 
-- **Data-Heavy Apps**: Excellent handling of nested data loading and parallel fetching.
-- **Web Standards**: If you like standard `<form>` and `FormData` over complex RPC layers.
-- **Optimistic UI**: Built-in support for optimistic UI makes apps feel instant.
+- **Web Standards-First Full-Stack Applications**: Utilizing standard `Request`, `Response`, and HTML forms via Remix / React Router v7.
+- **High-Performance Server-Rendered Applications**: Instant page transitions with nested routing and parallel data loading.
+- **Resilient Web Apps with Progressive Enhancement**: Applications that function reliably before JavaScript has loaded.
+- **Optimistic UI & Mutation Heavy Interfaces**: Using `useFetcher` and server actions without bespoke client state machines.
 
-## Quick Start (Loader/Action)
+## Quick Start
 
 ```tsx
 import { json } from "@remix-run/node";
@@ -44,29 +45,163 @@ export default function Tasks() {
 
 ## Core Concepts
 
-### Nested Routing
+#Nested Routing & Parallel Loader Data Loading
 
-Remix loads data _in parallel_ for every segment of the URL. `/sales/invoices/1023` loads data for Sales Layout, Invoices List, and Invoice Details simultaneously.
+Fetching server-side data per route segment in parallel:
 
-### Progressive Enhancement
+```tsx
+// app/routes/users.$id.tsx
+import { json, type LoaderFunctionArgs } from "@remix-run/node";
+import { useLoaderData, Link } from "@remix-run/react";
 
-Apps work without JavaScript by default (mostly). Form submissions work via standard browser POST if JS fails.
+export async function loader({ params }: LoaderFunctionArgs) {
+  const userId = params.id;
+  const user = await db.user.findUnique({ where: { id: userId } });
 
-### Actions & Loaders
+  if (!user) {
+    throw new Response("User Not Found", { status: 404 });
+  }
 
-The "Backend for Frontend" is co-located in the same file as the UI.
+  return json({ user });
+}
 
-## Best Practices (2025)
+export default function UserDetailRoute() {
+  const { user } = useLoaderData<typeof loader>();
 
-**Do**:
+  return (
+    <div className="user-card">
+      <h2>{user.name}</h2>
+      <p>{user.email}</p>
+      <Link to="edit">Edit Profile</Link>
+    </div>
+  );
+}
+```
 
-- **Use Single Fetch**: The new 2025 data loading pattern that combines multiple loaders into one HTTP request.
-- **Flat Routes**: Use the flat file convention (`routes/dashboard.settings.tsx`) to avoid deep folder nesting.
-- **Use `defer`**: Stream slow data (like third party APIs) while showing the critical UI immediately.
+#Route Actions & HTML Form Submission
 
-**Don't**:
+Standard HTTP POST handling with automatic revalidation:
 
-- **Don't manage global state for server data**: `useLoaderData` _is_ your state manager. You don't often need Redux/Context.
+```tsx
+// app/routes/users.$id.edit.tsx
+import { redirect, type ActionFunctionArgs } from "@remix-run/node";
+import { Form, useActionData } from "@remix-run/react";
+
+export async function action({ request, params }: ActionFunctionArgs) {
+  const formData = await request.formData();
+  const name = formData.get("name") as string;
+
+  if (!name || name.length < 3) {
+    return { error: "Name must be at least 3 characters" };
+  }
+
+  await db.user.update({ where: { id: params.id }, data: { name } });
+  return redirect(`/users/${params.id}`);
+}
+
+export default function EditUserRoute() {
+  const actionData = useActionData<typeof action>();
+
+  return (
+    <Form method="post">
+      <input name="name" placeholder="Full Name" />
+      {actionData?.error && <span className="error">{actionData.error}</span>}
+      <button type="submit">Update</button>
+    </Form>
+  );
+}
+```
+
+#Granular ErrorBoundaries per Route Segment
+
+Isolating errors without crashing the entire page hierarchy:
+
+```tsx
+import { isRouteErrorResponse, useRouteError } from "@remix-run/react";
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  if (isRouteErrorResponse(error)) {
+    return (
+      <div className="route-error">
+        <h1>
+          {error.status} {error.statusText}
+        </h1>
+        <p>{error.data}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="route-error">Unexpected application error occurred.</div>
+  );
+}
+```
+
+## Common Patterns
+
+### Loader and Action Data Cycle
+
+**Problem**: Managing separate state stores, loading states, and error handling for form submissions.
+
+**Solution**:
+Use Remix loaders and actions for declarative data synchronization:
+
+```tsx
+import {
+  json,
+  type LoaderFunctionArgs,
+  type ActionFunctionArgs,
+} from "@remix-run/node";
+import { useLoaderData, Form } from "@remix-run/react";
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const todos = await db.todos.findMany();
+  return json({ todos });
+}
+
+export async function action({ request }: ActionFunctionArgs) {
+  const formData = await request.formData();
+  await db.todos.create({ title: formData.get("title") });
+  return json({ ok: true });
+}
+
+export default function TodosPage() {
+  const { todos } = useLoaderData<typeof loader>();
+  return (
+    <div>
+      <Form method="post">
+        <input name="title" required />
+        <button type="submit">Add Todo</button>
+      </Form>
+      <ul>
+        {todos.map((t) => (
+          <li key={t.id}>{t.title}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+## Best Practices (2026)
+
+- **Do** leverage Remix / React Router v7 unified framework features for universal full-stack execution.
+- **Do** build mutations with native `<Form>` components to guarantee progressive enhancement.
+- **Do** co-locate `loader`, `action`, and component in the same route file for atomic cohesion.
+- **Do** use `useFetcher` for mutations that do not require full page navigation (e.g. upvotes, inline toggles).
+- **Don't** manage client cache state manually; Remix automatically revalidates loader data after actions.
+- **Don't** return huge, unneeded relational payloads from loaders; return lean, serialized data.
+- **Don't** use client-side `useEffect` for data fetching when `loader` functions exist.
+
+## Troubleshooting
+
+| Error                                                  | Cause                                                          | Solution                                                              |
+| :----------------------------------------------------- | :------------------------------------------------------------- | :-------------------------------------------------------------------- |
+| `Error: You must return a Response from loader/action` | Loader or action did not return a value or returned undefined. | Return `json({ data })` or `new Response(...)`.                       |
+| `Form data empty in action`                            | Form inputs missing `name` attribute.                          | Ensure every `<input>` inside `<Form>` has a unique `name` attribute. |
+| `Root boundary caught error`                           | Unhandled error in child route without local ErrorBoundary.    | Export `ErrorBoundary` component in route to catch local exceptions.  |
 
 ## References
 

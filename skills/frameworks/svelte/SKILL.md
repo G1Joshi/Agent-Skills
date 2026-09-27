@@ -1,6 +1,6 @@
 ---
 name: svelte
-description: Svelte compile-time framework with reactive declarations. Use for .svelte files.
+description: Expert Svelte assistance covering Svelte 5 Runes, reactive declarations, stores, animations, and transitions. Use when building fast, reactive web UIs with minimal boilerplate.
 ---
 
 # Svelte
@@ -13,7 +13,7 @@ Svelte is a component framework that compiles your code to tiny, framework-less 
 - **Embedded Apps**: Great for widgets/embeds because of small bundle size.
 - **Simplicity**: HTML, CSS, and JS in one file, with very little boilerplate.
 
-## Quick Start (Runes)
+## Quick Start
 
 ```svelte
 <script>
@@ -56,7 +56,31 @@ Reusable chunks of markup within a component.
 {@render figure(imageSrc, "A nice image")}
 ```
 
-## Best Practices (2025)
+## Common Patterns
+
+### Svelte 5 Runes for Fine-Grained Reactive State
+
+**Problem**: Legacy Svelte 3/4 `let` bindings and `$: ` labels lack universal TypeScript ergonomics across `.svelte.ts` modules.
+
+**Solution**:
+Use modern Svelte 5 Runes (`$state`, `$derived`, `$effect`):
+
+```svelte
+<script lang="ts">
+  let count = $state(0);
+  let double = $derived(count * 2);
+
+  $effect(() => {
+    console.log(`Count changed to: ${count}`);
+  });
+</script>
+
+<button on:click={() => count++}>
+  Count: {count} (Double: {double})
+</button>
+```
+
+## Best Practices (2026)
 
 **Do**:
 
@@ -67,6 +91,14 @@ Reusable chunks of markup within a component.
 **Don't**:
 
 - **Don't rely on auto-reactivity (Legacy)**: In Svelte 5 settings, opting into Runes disables the "magic" assignment tracking of Svelte 3/4. This is good for predictability.
+
+## Troubleshooting
+
+| Error                                                       | Cause                                                             | Solution                                                                                 |
+| :---------------------------------------------------------- | :---------------------------------------------------------------- | :--------------------------------------------------------------------------------------- |
+| `Array/Object mutation not triggering update in Svelte 3/4` | Mutating array in-place without reassignment (`arr.push(x)`).     | Reassign array: `arr = [...arr, x]` or upgrade to Svelte 5 `$state()`.                   |
+| `Cannot bind to undefined property`                         | Missing `export let propName` in child component definition.      | Declare `export let propName;` (Svelte 3/4) or `let { propName } = $props()` (Svelte 5). |
+| `Component is not defined in script`                        | Typo in import or relative path missing `.svelte` file extension. | Include explicit `.svelte` extension on component imports.                               |
 
 ## References
 

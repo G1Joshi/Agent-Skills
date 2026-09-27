@@ -1,6 +1,6 @@
 ---
 name: cargo
-description: Cargo Rust package manager and build system. Use for Rust crates.
+description: Expert Cargo Rust package manager assistance covering workspaces, dependencies, feature flags, cross-compilation, and release profiles. Use when building, testing, and packaging Rust projects.
 ---
 
 # Cargo
@@ -9,9 +9,10 @@ Cargo is Rust's build system and package manager. It is famous for its reliabili
 
 ## When to Use
 
-- **Rust Projects**: Mandatory.
-- **Formatting/Linting**: `cargo fmt`, `cargo clippy`.
-- **Testing**: `cargo test` is built-in.
+- **Rust Dependency & Build Management**: Compiling, building, packaging, and publishing Rust packages and crates.
+- **Workspace Multi-Crate Architectures**: Managing monorepos with shared dependencies and unified lockfiles.
+- **Continuous Integration & Static Analysis**: Running `cargo test`, `cargo clippy`, `cargo fmt`, and `cargo audit`.
+- **Release Optimization & Cross-Compilation**: Building stripped, LTO-optimized release binaries for production.
 
 ## Quick Start
 
@@ -29,29 +30,102 @@ serde = "1.0"
 
 ## Core Concepts
 
-### Crates
+#Cargo Workspace Configuration (Cargo.toml)
 
-Packages. Published to crates.io.
+Managing multiple interdependent crates in a monorepo:
 
-### Cargo.lock
+```toml
+# /Cargo.toml (Workspace Root)
+[workspace]
+members = [
+    "crates/api-server",
+    "crates/core-domain",
+    "crates/db-migrations",
+]
+resolver = "2"
 
-Ensures reproducible builds. Always commit for binaries, ignore for libraries.
+[workspace.dependencies]
+tokio = { version = "1.40", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tracing = "0.1"
+thiserror = "1.0"
 
-### Workspaces
+[profile.release]
+opt-level = 3
+lto = "fat"            # Link-time optimization
+codegen-units = 1      # Maximize optimizations across units
+panic = "abort"        # Eliminate unwinding code overhead
+strip = true           # Automatically strip symbols from binary
+```
 
-Manage multiple packages in one repo. `[workspace]` in root `Cargo.toml`.
+#High-Speed Testing, Benchmarking & Lints
 
-## Best Practices (2025)
+Automating quality checks in CI/CD pipelines:
 
-**Do**:
+```bash
+# Format check
+cargo fmt --all -- --check
 
-- **Use `cargo check`**: Faster than `build` for checking syntax during dev.
-- **Use `clippy`**: Listen to the linter. It teaches you Rust.
-- **Use `cargo-deny`**: Scan dependency tree for licenses and bans.
+# Clippy linter with strict warning enforcement
+cargo clippy --all-targets --all-features -- -D warnings
 
-**Don't**:
+# Execute all workspace unit and integration tests in parallel
+cargo test --workspace --all-features
 
-- **Don't bloat**: Rust binaries can get huge. Use `cargo-bloat` to analyze size.
+# Security audit against RustSec advisory database
+cargo audit
+```
+
+#Adding and Managing Dependencies
+
+Adding pinned crates with specific feature sets:
+
+```bash
+# Add dependency with targeted features
+cargo add tokio --features full
+cargo add serde --features derive
+cargo add axum --features ws
+
+# Update dependencies adhering to SemVer
+cargo update
+```
+
+## Common Patterns
+
+### Optimized Release Profile with LTO and Symbol Stripping
+
+**Problem**: Default Rust release binaries are bloated and larger than necessary for container deployment.
+
+**Solution**:
+Configure release profile optimizations in `Cargo.toml`:
+
+```toml
+[profile.release]
+opt-level = 3          # Maximum optimization
+lto = "fat"            # Link-time optimization across all crates
+codegen-units = 1      # Maximize LTO optimization (slower compile, faster binary)
+panic = "abort"        # Strip unwind tables
+strip = true           # Strip all debug symbols
+```
+
+## Best Practices (2026)
+
+- **Do** use `lto = "fat"`, `codegen-units = 1`, and `strip = true` in release profiles to minimize binary size.
+- **Do** commit `Cargo.lock` for all binary application crates to guarantee reproducible builds.
+- **Do** run `cargo clippy -- -D warnings` and `cargo audit` in all CI pipelines.
+- **Do** leverage workspace-level dependencies (`workspace.dependencies`) to synchronize versions across crates.
+- **Don't** ignore `Cargo.lock` in application repositories (only libraries should consider omitting it).
+- **Don't** enable heavy, unneeded crate features; include only the specific feature flags your application uses.
+- **Don't** deploy debug build artifacts (`target/debug`); always compile production releases with `cargo build --release`.
+
+## Troubleshooting
+
+| Error                                                   | Cause                                                           | Solution                                                             |
+| :------------------------------------------------------ | :-------------------------------------------------------------- | :------------------------------------------------------------------- |
+| `error: failed to select a version for the requirement` | Incompatible dependency version constraints in `Cargo.toml`.    | Run `cargo update` or inspect conflicts in `Cargo.lock`.             |
+| `error: could not compile ... (exit status: 101)`       | Compile error in code or missing native C library dependencies. | Install missing system packages (e.g. `libssl-dev` or `pkg-config`). |
+| `linking with cc failed: exit code: 1`                  | Missing linker or C toolchain on host system.                   | Install build essentials: `sudo apt-get install build-essential`.    |
 
 ## References
 

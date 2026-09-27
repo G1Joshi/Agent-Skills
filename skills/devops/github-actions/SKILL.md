@@ -1,6 +1,6 @@
 ---
 name: github-actions
-description: GitHub Actions CI/CD workflows with reusable actions. Use for GitHub automation.
+description: Expert GitHub Actions assistance covering workflow syntax, matrices, composite actions, caching, environments, and OIDC AWS/GCP auth. Use when building robust CI/CD automation pipelines.
 ---
 
 # GitHub Actions
@@ -9,9 +9,10 @@ GitHub Actions is the CI/CD platform native to GitHub. In 2025, it is the domina
 
 ## When to Use
 
-- **GitHub-Hosted**: Your code is already on GitHub. Deep integration with Issues/PRs.
-- **Simplicity**: No servers to manage (unlike Jenkins).
-- **Marketplace**: Thousands of pre-built actions (setup-node, docker-build-push).
+- **Cloud CI/CD Integrated with GitHub**: Building, testing, and releasing software directly inside GitHub repositories.
+- **Automated Pull Request Checks**: Enforcing linting, type-checking, unit tests, and security scans on PR branches.
+- **OIDC Cloud Deployments**: Deploying to AWS, Azure, and GCP securely without storing permanent cloud access keys.
+- **Matrix Multi-Platform Builds**: Testing packages across OS matrices (Ubuntu, macOS, Windows) and language versions.
 
 ## Quick Start
 
@@ -34,30 +35,151 @@ jobs:
 
 ## Core Concepts
 
-### Workflows
+#Production CI/CD Workflow with Dependency Caching
 
-Defined in `.github/workflows/*.yml`. Triggered by events (`push`, `release`, `schedule`).
+Comprehensive workflow for testing and publishing:
 
-### Runners
+```yaml
+# .github/workflows/ci.yml
+name: CI Pipeline
 
-Virtual machines (Ubuntu/Windows/MacOS) that run your jobs. You can also host **Self-Hosted Runners** for cheaper/faster builds in your VPC.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
-### Actions
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
-Reusable steps. `actions/checkout` is an action. You can write your own in JS or Docker.
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-## Best Practices (2025)
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
 
-**Do**:
+      - name: Install Dependencies
+        run: npm ci
 
-- **Use Reusable Workflows**: Define a standard "Deploy to Prod" workflow in one repo, and call it from 50 microservices.
-- **Use OIDC**: Authenticate to AWS/Azure/GCP using `permissions: id-token: write` instead of long-lived secrets.
-- **Pin Actions**: Use `actions/checkout@v4` or a specific SHA for immutability.
+      - name: Static Analysis & Tests
+        run: |
+          npm run lint
+          npm run typecheck
+          npm test -- --coverage
 
-**Don't**:
+      - name: Upload Test Coverage Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+```
 
-- **Don't hardcode secrets**: Use Repository Secrets or Environment Secrets.
-- **Don't write huge shell scripts**: If a step is >10 lines of bash, move it to a script file or a custom Action.
+#OIDC Authentication with Cloud Providers (AWS / GCP)
+
+Deploying securely without long-lived secret keys:
+
+```yaml
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      id-token: write # Required for requesting OIDC JWT
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsDeployRole
+          aws-region: us-east-1
+
+      - name: Deploy Infrastructure
+        run: |
+          aws s3 sync dist/ s3://my-prod-bucket/ --delete
+```
+
+#Matrix Builds Across OS and Versions
+
+Testing compatibility across platforms:
+
+```yaml
+jobs:
+  matrix-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node-version: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm test
+```
+
+## Common Patterns
+
+### OIDC Authentication with AWS / GCP (Keyless Deployments)
+
+**Problem**: Storing long-lived cloud credentials in GitHub Secrets creates security risks.
+
+**Solution**:
+Use GitHub OpenID Connect (OIDC) token exchange:
+
+```yaml
+name: Deploy to Production
+on:
+  push:
+    branches: [main]
+
+permissions:
+  id-token: write # Required for requesting OIDC JWT token
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/GitHubDeployRole
+          aws-region: us-east-1
+      - run: aws s3 sync ./dist s3://my-prod-bucket
+```
+
+## Best Practices (2026)
+
+- **Do** pin third-party actions to explicit commit SHAs (or trusted `@v4` releases) to protect against supply chain tampering.
+- **Do** use `concurrency` with `cancel-in-progress: true` to abort outdated CI runs on subsequent pushes.
+- **Do** authenticate to cloud infrastructure via OIDC (`permissions: id-token: write`) rather than long-lived API keys.
+- **Do** restrict workflow permissions explicitly with top-level `permissions` block following least privilege.
+- **Don't** use `pull_request_target` without strict sanitization of untrusted code from public repository forks.
+- **Don't** log sensitive variables or secrets in shell execution steps.
+- **Don't** run CI without dependency caching (`setup-node`, `setup-python`, `cache-action`); caching cuts runtime in half.
+
+## Troubleshooting
+
+| Error                                                  | Cause                                                                | Solution                                                                |
+| :----------------------------------------------------- | :------------------------------------------------------------------- | :---------------------------------------------------------------------- |
+| `Error: Resource not accessible by integration`        | Workflow missing required permissions block for GITHUB_TOKEN.        | Add explicit `permissions: { contents: write, id-token: write }` block. |
+| `Action failed: Node.js 16 actions are deprecated`     | Workflow uses outdated action version relying on Node 16 runner.     | Upgrade action versions to `@v4` (e.g. `actions/checkout@v4`).          |
+| `The process '/usr/bin/git' failed with exit code 128` | Submodule checkout or private repository clone missing access token. | Pass personal access token: `with: { token: secrets.GH_PAT }`.          |
 
 ## References
 

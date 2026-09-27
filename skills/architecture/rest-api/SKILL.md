@@ -1,6 +1,6 @@
 ---
 name: rest-api
-description: REST API design with HTTP methods and status codes. Use for web APIs.
+description: Expert REST API architecture assistance covering HTTP semantics, OpenAPI/Swagger specifications, idempotent methods, hypermedia (HATEOAS), and pagination patterns. Use when designing web APIs, structuring resource endpoints, standardizing error formats, or implementing RESTful conventions.
 ---
 
 # REST API
@@ -9,9 +9,10 @@ Representational State Transfer (REST) is the architectural style for distribute
 
 ## When to Use
 
-- **Public APIs**: The universal standard; easiest for 3rd parties to consume.
-- **Simple Resource Access**: Perfect for CRUD (Create, Read, Update, Delete) operations.
-- **Caching**: When you need to leverage HTTP caching (CDNs, Browsers).
+- **Universal Public Web APIs**: Building open, standardized APIs intended for third-party developers, webhooks, and partner integrations.
+- **HTTP Caching & CDN Optimization**: Maximizing cacheability using standard HTTP response headers (`Cache-Control`, `ETag`, `Last-Modified`).
+- **Resource-Oriented CRUD Operations**: Designing intuitive resource hierarchies with standard HTTP semantics (GET, POST, PUT, PATCH, DELETE).
+- **Stateless Integration**: Delivering scalable stateless APIs consumed effortlessly by any HTTP client on any platform.
 
 ## Quick Start
 
@@ -34,47 +35,100 @@ app.get("/users/:id", async (req, res) => {
 
 ## Core Concepts
 
-### Resources
+#HTTP Semantics & Idempotency
 
-Everything is a resource identified by a URI (`/users/123`).
+Different HTTP verbs carry formal idempotency and safety guarantees:
 
-### HTTP Verbs
+| Method   | Safe | Idempotent | Usage                                 |
+| :------- | :--- | :--------- | :------------------------------------ |
+| `GET`    | Yes  | Yes        | Retrieve resource representation      |
+| `POST`   | No   | No         | Create new resource or trigger action |
+| `PUT`    | No   | Yes        | Replace resource entirely             |
+| `PATCH`  | No   | No / Yes   | Partially update resource             |
+| `DELETE` | No   | Yes        | Remove resource                       |
 
-Use verbs to define actions, not URIs.
+#Standardized Error Representations (RFC 7807 / 9457)
 
-- `GET /orders` (List)
-- `POST /orders` (Create)
-- `PATCH /orders/1` (Update partial)
-- `DELETE /orders/1` (Remove)
+Returns machine-readable `application/problem+json` error responses:
 
-### Statelessness
+```json
+{
+  "type": "https://api.example.com/errors/invalid-payment",
+  "title": "Invalid Payment Source",
+  "status": 422,
+  "detail": "The payment card provided has expired.",
+  "instance": "/orders/415/payments"
+}
+```
 
-Each request must contain all information necessary to understand the request. The server accepts no session state.
+#Content Negotiation & ETag Caching
+
+Validates whether cached client data is still fresh without resending full payloads:
+
+```typescript
+app.get("/api/v1/users/:id", async (req, res) => {
+  const user = await db.getUser(req.params.id);
+  const etag = crypto
+    .createHash("md5")
+    .update(JSON.stringify(user))
+    .digest("hex");
+
+  if (req.headers["if-none-match"] === etag) {
+    return res.status(304).end(); // Not Modified
+  }
+
+  res.setHeader("ETag", etag);
+  res.setHeader(
+    "Cache-Control",
+    "public, max-age=60, stale-while-revalidate=300",
+  );
+  res.json(user);
+});
+```
 
 ## Common Patterns
 
-### Filtering, Sorting, Pagination
+#Cursor-Based Pagination
+**Problem**: Offset-based pagination (`OFFSET 10000`) degrades database performance and skips items on concurrent writes.  
+**Solution**: Use monotonic cursor identifiers (e.g. `created_at` + `id`).
 
-Standard query params: `?sort=-created_at&limit=10&page=2&status=active`.
+```typescript
+// GET /api/v1/posts?cursor=2026-09-27T10:00:00Z&limit=20
+app.get("/api/v1/posts", async (req, res) => {
+  const { cursor, limit = 20 } = req.query;
+  const posts = await db
+    .select()
+    .from(postsTable)
+    .where(
+      cursor ? lt(postsTable.createdAt, new Date(cursor as string)) : undefined,
+    )
+    .orderBy(desc(postsTable.createdAt))
+    .limit(Number(limit) + 1);
 
-### Versioning
+  const hasMore = posts.length > Number(limit);
+  const data = hasMore ? posts.slice(0, -1) : posts;
+  const nextCursor = hasMore
+    ? data[data.length - 1].createdAt.toISOString()
+    : null;
 
-- URI Versioning: `/v1/users` (Most common).
-- Header Versioning: `Accept: application/vnd.myapi.v1+json`.
+  res.json({ data, pagination: { hasMore, nextCursor } });
+});
+```
 
-## Best Practices
+## Best Practices (2026)
 
 **Do**:
 
-- Use proper **HTTP Status Codes** (200 OK, 201 Created, 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 500 Server Error).
-- Use **Snake Case** (`user_id`) in JSON responses (standard convention) or camelCase if consistent with JS ecosystem.
-- Implement **Rate Limiting** to protect resources.
+- **Use Nouns for Resource URIs**: Use `/api/v1/orders` rather than action verbs like `/api/v1/getOrders` or `/api/v1/createOrder`.
+- **Implement Idempotency Keys on Mutating Requests**: Require `Idempotency-Key` headers on POST/PATCH requests to prevent duplicate charges.
+- **Document with OpenAPI 3.1**: Generate automated Swagger docs, SDK clients, and request validation schemas from OpenAPI specs.
+- **Implement Monotonic Cursor Pagination**: Use `limit` and `starting_after` cursor pagination for high-volume datasets.
 
 **Don't**:
 
-- Don't use GET for state-changing operations.
-- Don't return 200 OK for errors (e.g., `{ "error": "failed" }` with status 200).
-- Don't expose database IDs if possible (use UUIDs).
+- **Don't return HTTP 200 with `{ "error": "..." }`**: Always return correct HTTP status codes (`400`, `401`, `403`, `404`, `422`, `500`).
+- **Don't break API contracts without versioning**: Prefix endpoints with `/v1/` or use header versioning when introducing breaking changes.
+- **Don't expose raw internal database column names**: Map private column names to clean, camelCased JSON fields.
 
 ## Troubleshooting
 

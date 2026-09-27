@@ -1,6 +1,6 @@
 ---
 name: trivy
-description: Trivy container security scanner. Use for container security.
+description: Expert Trivy security scanner assistance covering container image scanning, filesystem CVEs, git repositories, and IaC misconfigs. Use when scanning Docker images, auditing Kubernetes manifests, or running security checks in CI.
 ---
 
 # Trivy
@@ -9,9 +9,10 @@ Trivy (by Aqua Security) is a comprehensive and versatile security scanner. It i
 
 ## When to Use
 
-- **Docker Image Scanning**: The gold standard for fast image scanning in CI.
-- **Kubernetes Scanning**: Scanning a running cluster for vulnerabilities.
-- **SBOM Generation**: Creating a Software Bill of Materials (CycloneDX/SPDX).
+- **Comprehensive Security Scanner for Containers**: Scanning container images for OS package vulnerabilities (Debian, Alpine, RedHat) and language packages.
+- **Kubernetes Cluster Misconfiguration Scanning**: Auditing live Kubernetes workloads against CIS benchmarks and security standards.
+- **Git Repository & Secrets Auditing**: Scanning codebases for hardcoded credentials, API keys, and sensitive tokens.
+- **Software Bill of Materials (SBOM) Generation**: Generating CycloneDX and SPDX format SBOMs for software supply chain compliance.
 
 ## Quick Start
 
@@ -28,31 +29,78 @@ trivy repo https://github.com/knqyf263/trivy
 
 ## Core Concepts
 
-### Scanners
+#Multi-Target Scanning Architecture
 
-Trivy runs multiple scanners in parallel:
+Trivy scans container images, filesystems, Git repositories, AWS accounts, and Kubernetes clusters using a unified engine:
 
-- **Vuln**: CVEs in OS packages (apk, deb, rpm) and language deps (npm, pip, go.mod).
-- **Misconfig**: IaC scans (Terraform, CloudFormation, K8s manifests).
-- **Secret**: Hardcoded passwords/keys.
-- **License**: License compliance.
+```bash
+# 1. Scan Container Image
+trivy image --severity HIGH,CRITICAL node:20-alpine
 
-### Client/Server Mode
+# 2. Scan Local Filesystem & Dependencies
+trivy fs --scanners vuln,secret,misconfig .
 
-Trivy can run standalone (Download DB -> Scan) or in Client/Server mode (Server holds DB, Client connects) for faster CI runs.
+# 3. Scan Kubernetes Cluster
+trivy k8s --report summary cluster
+```
 
-## Best Practices (2025)
+#Software Bill of Materials (SBOM) Export
+
+Generates standardized inventory of all components and licenses in container images:
+
+```bash
+# Export CycloneDX JSON SBOM
+trivy image --format cyclonedx --output sbom.json my-org/api:latest
+```
+
+#GitHub Actions CI Security Gate
+
+Blocks container builds containing unpatched critical CVEs:
+
+```yaml
+# .github/workflows/container-scan.yml
+- name: Run Trivy Vulnerability Scanner
+  uses: aquasecurity/trivy-action@master
+  with:
+    image-ref: "my-org/api:${{ github.sha }}"
+    format: "sarif"
+    output: "trivy-results.sarif"
+    severity: "CRITICAL,HIGH"
+    exit-code: "1"
+```
+
+## Common Patterns
+
+### Container Image Vulnerability Scanning with Exit Code Gates
+
+**Problem**: Unvetted base images introduce known Remote Code Execution (RCE) flaws into cloud deployments.
+
+**Solution**:
+Execute Trivy container scans in CI with automated blocking on critical vulnerabilities:
+
+```bash
+# Scan container image and exit with error code 1 if CRITICAL CVEs exist
+trivy image \
+  --severity CRITICAL,HIGH \
+  --exit-code 1 \
+  --ignore-unfixed \
+  myapp:latest
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Use `.trivyignore`**: To suppress false positives or accepted risks.
-- **Scan Base Images**: Ensure your `FROM` image is clean (e.g., use `alpine` or `distroless`).
-- **Generate SBOM**: Run `trivy image --format cyclonedx` to export an SBOM for compliance.
+- **Use Distroless / Chainguard Minimal Images**: Reduce container vulnerabilities by 90%+ by stripping out package managers and shells.
+- **Integrate Trivy in Container Build Pipelines**: Run Trivy immediately after `docker build` before pushing images to container registries.
+- **Generate SBOMs for Releases**: Attach SPDX or CycloneDX SBOMs to GitHub releases for supply chain transparency.
+- **Leverage `.trivyignore` Conservatively**: Document justifiable reasons and expiration dates when ignoring specific CVEs.
 
 **Don't**:
 
-- **Don't run full scans on every commit**: It might be slow on huge repos. Scan on Push/PR and nightly.
-- **Don't ignore Misconfigurations**: Trivy creates alerts for running as root in Docker; fix these.
+- **Don't scan without updating vulnerability DBs**: Ensure Trivy has access to download the latest vulnerability database cache before scanning.
+- **Don't ignore hardcoded secret alerts**: Treat leaked API keys flagged by Trivy secret scanning as compromised immediately.
+- **Don't allow unmitigated Critical CVEs into production**: Patch base images or update libraries when active exploits exist.
 
 ## Troubleshooting
 

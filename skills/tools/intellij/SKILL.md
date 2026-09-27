@@ -1,6 +1,6 @@
 ---
 name: intellij
-description: IntelliJ IDEA JetBrains IDE with smart completion. Use for JVM development.
+description: Expert IntelliJ IDEA assistance covering Java/Kotlin, project SDKs, debugging, refactoring, run configurations, and plugins. Use when building enterprise JVM applications with maximum productivity.
 ---
 
 # IntelliJ IDEA
@@ -9,35 +9,97 @@ IntelliJ IDEA is the premier IDE for Java and Kotlin. v2025.1 introduces **Java 
 
 ## When to Use
 
-- **Java/Kotlin**: Unbeatable refactoring and static analysis.
-- **Spring Boot**: Deep understanding of Spring beans and endpoints.
-- **Large Monorepos**: Indexing is smarter and incremental.
+- **Enterprise JVM Development**: Building Java, Kotlin, Scala, and Groovy applications with unmatched code intelligence.
+- **Spring Boot & Microservice Tooling**: Visualizing bean dependencies, endpoint mappings, and Spring Data repositories.
+- **Advanced Automated Refactoring**: Safe across-the-board method extraction, interface implementation, and symbol renaming.
+- **Integrated Profiler & Debugger**: Memory snapshots, async stack traces, thread dump analysis, and CPU profiling.
+
+## Quick Start
+
+```bash
+# Run Maven or Gradle build using wrapper
+./gradlew bootRun
+
+# Useful keyboard shortcuts:
+# Shift+Shift: Search Everywhere
+# Ctrl+Alt+L / Cmd+Option+L: Reformat Code
+# Shift+F10 / Ctrl+R: Run Application
+```
 
 ## Core Concepts
 
-### Indexing
+#Run / Debug Configuration with VM Options
 
-IntelliJ builds a massive index of your code. This enables "Find Usages" to be instant and 100% accurate.
+Configuring production-grade local execution:
 
-### Intentions (Alt+Enter)
+```xml
+<!-- .run/ApiApplication.run.xml -->
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ApiApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="api-service.main" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.company.api.ApiApplication" />
+    <option name="VM_PARAMETERS" value="-Xms512m -Xmx2048m -XX:+UseG1GC -Dspring.profiles.active=local" />
+    <extension name="coverage" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
+```
 
-The magic key. Fixes warnings, optimizes imports, converts Java to Kotlin.
+#Inspecting Memory & Thread Dumps with IntelliJ Profiler
 
-### Run Configurations
+Diagnosing memory leaks and deadlocks:
 
-Powerful system to launch apps, tests, and docker containers.
+- Click **Run with IntelliJ Profiler** or attach to running JVM process.
+- Open **Memory** tab to inspect heap allocation by class.
+- Click **Capture Memory Snapshot** (`.hprof`) to find instances retaining large byte arrays.
+- Inspect **Threads** view to detect thread synchronization bottlenecks.
 
-## Best Practices (2025)
+#Structural Search & Replace (SSR)
 
-**Do**:
+Finding and modifying patterns across entire codebases:
 
-- **Enable K2 Mode**: If using Kotlin, the new frontend compiler is much faster.
-- **Use "Search Everywhere"**: Double-shift (`Shift-Shift`) finds files, classes, actions, and settings.
-- **Share Run Configs**: Check `.run/` configurations into Git so the team shares launch setups.
+```text
+// Search Template: Catch blocks catching raw generic Exception
+catch ($ExceptionType$ $e$) {
+    $Statements$;
+}
+// Constraint: $ExceptionType$ = java.lang.Exception
+// Replace Template: Narrow to specific checked domain exceptions
+```
 
-**Don't**:
+## Common Patterns
 
-- **Don't disable indexing**: Let it finish. The IDE is dumb without it.
+#JVM Memory Profiling and Heap Dump Analysis
+**Problem**: Diagnose memory leaks and high GC overhead in Spring Boot applications.  
+**Solution**: Launch app with JVM profiling arguments.
+
+```bash
+# JVM options for heap profiling
+-XX:+HeapDumpOnOutOfMemoryError
+-XX:HeapDumpPath=/var/log/heapdump.hprof
+-XX:+UseG1GC
+-Xms2g -Xmx4g
+```
+
+## Best Practices (2026)
+
+- **Do** share standardized team run configurations by checking **Store as project file** (`.run/*.run.xml`).
+- **Do** use IntelliJ's built-in Git client with visual 3-way merge conflict resolution.
+- **Do** allocate sufficient memory to the IDE in `Help -> Change Memory Settings` (typically 3GB-4GB).
+- **Do** use IntelliJ inspections and run **Analyze Code -> Inspect Code...** before merging PRs.
+- **Don't** commit the entire `.idea/` folder; maintain a proper `.gitignore` excluding `workspace.xml` and user caches.
+- **Don't** disable annotation processing when using Lombok or MapStruct; enable in **Settings -> Annotation Processors**.
+- **Don't** ignore yellow inspection warnings in Java/Kotlin code; address warnings to keep code maintainable.
+
+## Troubleshooting
+
+| Error                                            | Cause                                                               | Solution                                                                                                            |
+| :----------------------------------------------- | :------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------ |
+| `Cannot resolve symbol '...' in editor`          | Project SDK not configured or Maven/Gradle dependencies not loaded. | Open Project Structure > SDKs and ensure JDK is selected, then sync Gradle.                                         |
+| `OutOfMemoryError: Java heap space during build` | IntelliJ build process allocated insufficient memory.               | Increase memory: **Settings > Build, Execution, Deployment > Compiler > Shared build process heap size (2048 MB)**. |
+| `Red code everywhere after git pull`             | Indices corrupted.                                                  | Click **File > Invalidate Caches... > Invalidate and Restart**.                                                     |
 
 ## References
 

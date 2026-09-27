@@ -1,6 +1,6 @@
 ---
 name: burpsuite
-description: Burp Suite web security testing. Use for penetration testing.
+description: Expert Burp Suite web penetration testing covering proxy interception, repeater, intruder fuzzing, and scan automation. Use when auditing web vulnerabilities, inspecting HTTP traffic, or testing web security.
 ---
 
 # Burp Suite
@@ -9,36 +9,88 @@ Burp Suite is an integrated platform for performing security testing of web appl
 
 ## When to Use
 
-- **Penetration Testing**: The #1 tool for manual security assessments.
-- **Advanced Attack Simulation**: When you need to intercept, modify, and replay requests manually.
-- **Fuzzing**: Sending thousands of payloads to find SQLi, XSS, or logic bugs (Intruder).
+- **Web Application Penetration Testing**: Auditing web applications for OWASP Top 10 vulnerabilities (SQLi, XSS, SSRF, IDOR).
+- **HTTP Traffic Interception & Modification**: Inspecting and tampering with web and mobile app API requests in real time.
+- **Automated Vulnerability Scanning**: Running active and passive scans using Burp Scanner against staging environments.
+- **Custom Security Automation**: Writing custom security extensions via the Montoya API or Python/Java extensions.
+
+## Quick Start
+
+```bash
+# Configure local browser to forward traffic through Burp Proxy
+# Default proxy listener: 127.0.0.1:8080
+
+# 1. Start Burp Suite and verify Proxy Listener is active on 8080
+# 2. Export Burp CA Certificate from http://burp and install into OS trust store
+# 3. Launch target browser with custom proxy:
+chromium --proxy-server="http://127.0.0.1:8080" --ignore-certificate-errors
+```
 
 ## Core Concepts
 
-### Proxy
+#Intercepting Proxy Architecture
 
-Intersects HTTP/S traffic between your browser and the target app. Allows you to pause, inspect, and modify requests on the fly.
+Burp Suite positions itself as a man-in-the-middle (MitM) HTTP/HTTPS proxy between client browsers and backend targets:
 
-### Repeater
+```
+[ Browser / Mobile Device ] ──(Proxy: 127.0.0.1:8080)──→ [ Burp Proxy (Intercept ON/OFF) ] ──→ [ Target API Server ]
+```
 
-Lets you manually modify a request and resend it over and over to test how the server responds to different inputs.
+#Burp Repeater & Manual Request Crafting
 
-### Intruder
+Allows isolating individual requests and replaying modified payloads to analyze server responses:
 
-Automated fuzzing tool. You define payload positions (e.g., a query param), and Burp iterates through a list of payloads (SQL injection strings, XSS vectors).
+```http
+POST /api/v1/user/update-email HTTP/1.1
+Host: staging.example.com
+Authorization: Bearer <test_token>
+Content-Type: application/json
 
-## Best Practices (2025)
+{"email": "attacker@exploit.com", "user_id": 415}
+```
+
+#Burp Intruder Parameter Fuzzing
+
+Automates payload injection across specified positions to discover injection flaws and hidden endpoints:
+
+```http
+GET /api/v1/documents/§doc_id§ HTTP/1.1
+Host: staging.example.com
+Cookie: session=§session_token§
+```
+
+## Common Patterns
+
+### Automated Request Fuzzing with Match/Replace
+
+**Problem**: Testing parameter tampering across repetitive API flows manually is slow and prone to oversights.
+
+**Solution**:
+Configure Proxy Match & Replace rules or Intruder sniper attacks to test injection payloads across designated parameters:
+
+```http
+POST /api/v1/checkout HTTP/1.1
+Host: target.example.com
+Authorization: Bearer §TOKEN§
+Content-Type: application/json
+
+{"coupon": "§PROMO§", "quantity": 1}
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Install the CA Certificate**: Essential for intercepting HTTPS traffic.
-- **Scope Your Target**: STRICTLY define the scope to avoid accidentally attacking 3rd party services (Google Analytics, CDNs).
-- **Use Extensions**: Determine usage of the "BApp Store" (e.g., Turbo Intruder, Logger++).
+- **Install Burp CA Certificate Safely**: Trust the PortSwigger CA certificate only in dedicated testing browser profiles, never system-wide.
+- **Scope Target URLs Strictly**: Add target hostnames to **Target > Scope** and toggle "Show only in-scope items" to prevent scanning out-of-scope third parties.
+- **Rate-Limit Automated Intruder Attacks**: Throttle requests per second to avoid triggering WAF blocks or taking down staging databases.
+- **Leverage Burp Match and Replace**: Automatically replace authorization headers or user agents across all proxied traffic.
 
 **Don't**:
 
-- **Don't Scan Production** without permission/backup. Automated scanners can trigger "Delete All" endpoints or flood databases.
-- **Don't Ignore CSRF**: Burp's macros can handle CSRF tokens during automated scans; configure them properly.
+- **Don't run active scans against production environments without authorization**: Automated scanning can trigger destructive mutations or account lockouts.
+- **Don't leave Burp proxy listening on public interfaces (`0.0.0.0`)**: Bind proxy listeners strictly to `127.0.0.1` to prevent unauthorized proxy relay.
+- **Don't ignore Burp Logger / Event Log**: Monitor the event log to identify upstream connection timeouts and SSL negotiation failures.
 
 ## Troubleshooting
 

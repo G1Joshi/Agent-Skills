@@ -1,6 +1,6 @@
 ---
 name: android-sdk
-description: Android SDK development tools. Use for native Android.
+description: Expert Android SDK assistance covering Android architecture components, Activity/Fragment lifecycles, permissions, background work with WorkManager, and Gradle build optimizations. Use when building native Android applications, configuring ProGuard/R8, or interacting with platform SDK APIs.
 ---
 
 # Android SDK
@@ -9,9 +9,10 @@ The traditional Android development toolkit (Views, Activities, Fragments, XML) 
 
 ## When to Use
 
-- Maintaining legacy Android applications (Views/XML).
-- Building features requiring low-level system interactions not yet wrapped by Compose.
-- Using libraries that strictly require Fragment/View interoperability.
+- **Native Android Development**: Building high-performance, platform-specific Android applications using Java or Kotlin.
+- **Hardware & Sensor Access**: Interfacing with Bluetooth Low Energy, camera hardware, biometric sensors, and NFC directly.
+- **Background Task Scheduling**: Managing deferred, periodic, or guaranteed background jobs using WorkManager and foreground services.
+- **Deep System Integration**: Implementing custom launcher widgets, notification channels, accessibility services, and device admin policies.
 
 ## Quick Start
 
@@ -35,51 +36,111 @@ class MainActivity : AppCompatActivity() {
 
 ## Core Concepts
 
-### Lifecycle
+#Activity & Fragment Lifecycles
 
-Understanding the complex lifecycle of Activities (`onCreate`, `onPause`, `onDestroy`) and Fragments is the hardest but most important part of legacy Android dev to prevent crashes and data loss.
+Activities represent single screens with user interfaces; lifecycle callbacks manage resource acquisition and release to prevent memory leaks during configuration changes:
 
-### Intents
+```kotlin
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_main)
+    }
 
-The messaging object used to request an action from another app component (starting activities, services, broadcasting).
+    override fun onStart() {
+        super.onStart()
+        // Connect sensors, start location listener
+    }
 
-### XML Layouts
+    override fun onStop() {
+        super.onStop()
+        // Release heavy sensor streams to preserve battery
+    }
+}
+```
 
-Defining UI structure in XML files (`res/layout/activity_main.xml`).
+#Dependency Injection with Hilt
+
+Hilt standardizes Dagger dependency injection across Android components with predefined scopes tied to Android lifecycles:
+
+```kotlin
+@HiltAndroidApp
+class MainApplication : Application()
+
+@AndroidEntryPoint
+class UserProfileFragment : Fragment() {
+    @Inject lateinit var analyticsTracker: AnalyticsTracker
+    private val viewModel: UserViewModel by viewModels()
+}
+```
+
+#Permissions Architecture & Runtime Requests
+
+Modern Android requires fine-grained runtime permission requests before accessing sensitive hardware or user records:
+
+```kotlin
+val requestPermissionLauncher = registerForActivityResult(
+    ActivityResultContracts.RequestPermission()
+) { isGranted: Boolean ->
+    if (isGranted) {
+        openCamera()
+    } else {
+        showPermissionRationaleDialog()
+    }
+}
+
+// Request permission when user triggers action
+requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+```
 
 ## Common Patterns
 
-### View Binding
+#Background Processing with WorkManager
+**Problem**: Long-running background sync operations get terminated by modern Android battery optimization (Doze mode).  
+**Solution**: Schedule persistent background jobs with WorkManager and constraints.
 
-Replaces `findViewById`. Generates type-safe binding classes for XML layouts.
+```kotlin
+class SyncWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, params) {
+    override suspend fun doWork(): Result {
+        return try {
+            repository.syncData()
+            Result.success()
+        } catch (e: Exception) {
+            Result.retry()
+        }
+    }
+}
 
-- **Null Safety**: View references are nullable if they verify across configs.
-- **Type Safety**: No casting required.
+// Enqueue with network constraint
+val constraints = Constraints.Builder()
+    .setRequiredNetworkType(NetworkType.CONNECTED)
+    .setRequiresBatteryNotLow(true)
+    .build()
 
-### Repository Pattern (Clean Architecture)
+val syncRequest = PeriodicWorkRequestBuilder<SyncWorker>(1, TimeUnit.HOURS)
+    .setConstraints(constraints)
+    .build()
 
-separating data sources (Room, Retrofit) from UI logic (ViewModel).
+WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+    "DataSync", ExistingPeriodicWorkPolicy.KEEP, syncRequest
+)
+```
 
-### Coroutines (Structured Concurrency)
-
-Replacing `AsyncTask` and `Threads`.
-
-- Use `lifecycleScope` and `viewModelScope` to automatically cancel tasks when the UI is destroyed.
-
-## Best Practices
+## Best Practices (2026)
 
 **Do**:
 
-- Use **ViewBinding** instead of `findViewById` or Kotlin Synthetics (Deprecated).
-- Use **Coroutines** for background tasks.
-- Use **Dependency Injection** (Hilt) to manage complex graphs.
-- Handle **Configuration Changes** (Rotation) using ViewModels.
+- **Adopt Edge-to-Edge Display**: Target Android 15+ edge-to-edge system bars using WindowInsetsCompat.
+- **Use WorkManager for Background Tasks**: Never spawn unmanaged background threads that get killed by battery optimizations (Doze).
+- **Enforce ViewBinding / Compose**: Eliminate error-prone `findViewById` lookups by using ViewBinding or modern Jetpack Compose.
+- **Validate Scoped Storage**: Store application files in private app storage (`context.filesDir`) or use the Storage Access Framework for public files.
 
 **Don't**:
 
-- Don't block the **Main Thread** (ANR Risk).
-- Don't put business logic in Activities/Fragments (God Class anti-pattern).
-- Don't ignore Fragment lifecycle (don't access views in `onDestroyView`).
+- **Don't block the Main (UI) Thread**: Keep networking, JSON parsing, and database transactions strictly on IO coroutine dispatchers.
+- **Don't hardcode dimensions or text**: Always use `res/values/strings.xml` for localization and `res/values/dimens.xml` or density-independent pixels (`dp`).
+- **Don't hold static references to Context**: Retaining an Activity context in static singletons causes permanent memory leaks.
 
 ## Troubleshooting
 

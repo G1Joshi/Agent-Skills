@@ -1,6 +1,6 @@
 ---
 name: sqlite
-description: SQLite embedded database for local storage and mobile apps. Use for lightweight database needs.
+description: Expert SQLite embedded database assistance covering WAL mode, PRAGMA tuning, full-text search (FTS5), and concurrency. Use when building desktop/mobile apps, local databases, or high-performance embedded systems.
 ---
 
 # SQLite
@@ -9,10 +9,10 @@ SQLite is an embedded SQL database engine. Unlike most other SQL databases, SQLi
 
 ## When to Use
 
-- **Mobile Apps**: The standard for iOS/Android local storage.
-- **Edge/IoT**: Low memory footprint.
-- **App File Format**: Instead of a custom `config.xml`, just use a SQLite db file.
-- **Small/Medium Web Apps**: With WAL mode, it handles surprising concurrency (PocketBase, Castopod).
+- **Embedded Mobile & Desktop Client Applications**: The standard embedded database engine for iOS, Android, macOS, Windows, and Linux apps.
+- **Edge Computing & Local Cache**: Running fast relational databases inside Cloudflare D1, Turso, or local container storage.
+- **Zero-Configuration Local Development**: Powering unit tests and local prototypes without spinning up external database servers.
+- **High-Read Single-Server Web Applications**: Serving millions of read queries per day with SQLite Write-Ahead-Logging (WAL) mode enabled.
 
 ## Quick Start
 
@@ -32,30 +32,92 @@ CREATE TABLE contacts (
 
 ## Core Concepts
 
-### Serverless
+#Single-File Serverless Engine
 
-There is no "connection" in the TCP sense. You just open the file.
+SQLite runs directly in the host application's memory space, reading and writing to a single cross-platform disk file:
 
-### Dynamic Typing
+```
+[ Application Process (Python / Go / Node / Swift) ] ──Direct In-Memory Access──→ [ database.sqlite (Single File) ]
+```
 
-SQLite uses dynamic typing. A column declared `INTEGER` can actually store a string (though strict tables are now an option).
+#Write-Ahead Logging (WAL Mode)
 
-### WAL Mode (Write-Ahead Logging)
+Enables concurrent readers while a writer commits changes simultaneously:
 
-Significantly improves concurrency. Allows multiple readers and one writer simultaneously.
+```sql
+-- Essential production pragmas for web apps
+PRAGMA journal_mode = WAL;          -- Concurrent reads while writing
+PRAGMA synchronous = NORMAL;        -- 2-3x write acceleration with durable safety
+PRAGMA busy_timeout = 5000;         -- Wait up to 5s on busy locks before erroring
+PRAGMA foreign_keys = ON;           -- Enforce relational foreign key constraints
+PRAGMA cache_size = -64000;         -- Allocate 64MB memory page cache
+```
 
-## Best Practices (2025)
+#Full-Text Search with FTS5
+
+Built-in full-text search engine with BM25 relevancy ranking:
+
+```sql
+CREATE VIRTUAL TABLE document_search USING fts5(title, body);
+
+INSERT INTO document_search (title, body) VALUES
+('Distributed Systems', 'Consensus protocols and Raft algorithms in modern software.');
+
+-- Fast full-text search
+SELECT title, bm25(document_search) AS rank
+FROM document_search
+WHERE document_search MATCH 'Raft OR Consensus'
+ORDER BY rank;
+```
+
+## Common Patterns
+
+### WAL Mode and Concurrency Performance PRAGMAs
+
+**Problem**: Default rollback journal locks entire database during writes, causing `database is locked` errors during concurrent reads.
+
+**Solution**:
+Enable Write-Ahead Logging (WAL) and memory optimizations at connection initialization:
+
+```sql
+-- Enable concurrent readers and writer
+PRAGMA journal_mode = WAL;
+
+-- Optimize disk sync frequency for higher write throughput
+PRAGMA synchronous = NORMAL;
+
+-- Cache pages in memory (e.g. 64MB)
+PRAGMA cache_size = -64000;
+
+-- Store temporary tables and indexes in memory
+PRAGMA temp_store = MEMORY;
+
+-- Enable foreign key constraint checking
+PRAGMA foreign_keys = ON;
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Use `PRAGMA foreign_keys = ON`**: They are off by default.
-- **Use JSONB (SQLite 3.45+)**: Store JSON as efficient binary blobs (`jsonb()`) for 3x faster processing.
-- **Use STRICT Tables**: `CREATE TABLE t (...) STRICT` enforces types like a traditional DB.
+- **Always Enable WAL Mode in Production**: Run `PRAGMA journal_mode = WAL;` to prevent writers from blocking readers.
+- **Set a `busy_timeout`**: Configure `PRAGMA busy_timeout = 5000;` to avoid `SQLITE_BUSY` errors during concurrent transactions.
+- **Enable Foreign Keys Explicitly**: SQLite disables foreign keys by default; execute `PRAGMA foreign_keys = ON;` on every connection.
+- **Use Prepared Statements**: Eliminate SQL injection and optimize query plan reuse.
 
 **Don't**:
 
-- **Don't use over NFS**: File locking on network shares is buggy. Keep the DB file on local disk.
-- **Don't use for high-write webservices**: If you have hundreds of concurrent writes, move to Postgres.
+- **Don't run multiple concurrent write transactions**: SQLite supports only one writer at a time; queue writes or serialize them.
+- **Don't use SQLite over Network Filesystems (NFS/SMB)**: Network file locking bugs can corrupt SQLite database files.
+- **Don't store multi-gigabyte binary files directly**: Store media in filesystem directories or object storage; store file paths in SQLite.
+
+## Troubleshooting
+
+| Error                                               | Cause                                                                        | Solution                                                                            |
+| :-------------------------------------------------- | :--------------------------------------------------------------------------- | :---------------------------------------------------------------------------------- |
+| `database is locked (SQLITE_BUSY)`                  | Another connection holds a write lock or transaction open too long.          | Enable WAL mode and set busy timeout: `PRAGMA busy_timeout = 5000;`.                |
+| `database disk image is malformed (SQLITE_CORRUPT)` | Power loss during non-sync write, hardware fault, or concurrent file access. | Restore from backup, or dump readable rows using `.recover` command in sqlite3 CLI. |
+| `FOREIGN KEY constraint failed`                     | Inserted row references non-existent parent foreign key.                     | Verify parent row exists before inserting child row.                                |
 
 ## References
 

@@ -1,6 +1,6 @@
 ---
 name: istio
-description: Istio service mesh for Kubernetes. Use for service networking.
+description: Expert Istio service mesh assistance covering VirtualServices, DestinationRules, mTLS policies, Envoy sidecars, and ingress gateways. Use when managing microservice networking, traffic splitting, and zero-trust security on Kubernetes.
 ---
 
 # Istio
@@ -9,35 +9,169 @@ Istio is a Service Mesh. It adds observability, security (mTLS), and traffic con
 
 ## When to Use
 
-- **Zero Trust**: Automatic mTLS between all services without code changes.
-- **Traffic Splitting**: Canary deployments (send 1% of traffic to v2).
-- **Observability**: Golden metrics (Request rate, Error rate, Latency) for every service automatically.
+- **Enterprise Kubernetes Service Mesh**: Zero-trust mTLS encryption, traffic management, and telemetry across microservices.
+- **Canary & Blue-Green Traffic Splitting**: Shifting percentage-based traffic smoothly using VirtualService and DestinationRule.
+- **Fault Injection & Chaos Testing**: Injecting synthetic HTTP delays and abort errors to test microservice resilience.
+- **Egress & Ingress Traffic Governance**: Restricting outbound network connections and securing inbound traffic via Istio Ingress Gateway.
+
+## Quick Start
+
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: reviews-route
+spec:
+  hosts:
+    - reviews
+  http:
+    - route:
+        - destination:
+            host: reviews
+            subset: v1
+          weight: 80
+        - destination:
+            host: reviews
+            subset: v2
+          weight: 20
+```
 
 ## Core Concepts
 
-### Sidecar Mode (Classic)
+#Traffic Shifting with VirtualService & DestinationRule
 
-Injects an Envoy proxy container into every Pod. Captures all traffic. High resource usage.
+Implementing a 90/10 Canary release rollout:
 
-### Ambient Mode (2025)
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: payment-service
+  namespace: default
+spec:
+  host: payment-service
+  subsets:
+    - name: v1
+      labels:
+        version: "1.0"
+    - name: v2
+      labels:
+        version: "2.0"
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN
+    tls:
+      mode: ISTIO_MUTUAL # Strict mTLS within mesh
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: payment-service
+  namespace: default
+spec:
+  hosts:
+    - payment-service
+  http:
+    - route:
+        - destination:
+            host: payment-service
+            subset: v1
+          weight: 90
+        - destination:
+            host: payment-service
+            subset: v2
+          weight: 10
+      timeout: 3s
+      retries:
+        attempts: 3
+        perTryTimeout: 1s
+        retryOn: 5xx,connect-failure
+```
 
-Uses a per-node layer 4 proxy (`ztunnel`) and optional per-service layer 7 proxies (`waypoint`). Reduced cost and complexity.
+#Strict Mutual TLS (mTLS) PeerAuthentication
 
-### VirtualService / DestinationRule
+Enforcing encryption for all inter-service pod communication:
 
-CRDs to configure routing and policies.
+```yaml
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: istio-system
+spec:
+  mtls:
+    mode: STRICT # Rejects all non-mTLS plain-text connections
+```
 
-## Best Practices (2025)
+#Fault Injection for Resiliency Verification
 
-**Do**:
+Testing application tolerance against downstream latencies:
 
-- **Use Ambient Mesh**: If starting new, Ambient checks most boxes with less overhead.
-- **Use Strict mTLS**: Enforce authenticated communication everywhere.
-- **Use Gateway API**: Istio fully supports the K8s Gateway API standard.
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ratings-delay
+spec:
+  hosts:
+    - ratings
+  http:
+    - fault:
+        delay:
+          percentage:
+            value: 20.0
+          fixedDelay: 5s
+      route:
+        - destination:
+            host: ratings
+```
 
-**Don't**:
+## Common Patterns
 
-- **Don't use for simple apps**: If you just need Ingress, use an Ingress Controller. Istio is for complex service-to-service communication.
+### Circuit Breaking with Outlier Detection in DestinationRule
+
+**Problem**: Slow or failing pod replicas drag down the response times of the entire service.
+
+**Solution**:
+Eject consecutive failing pods automatically:
+
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: backend-circuit-breaker
+spec:
+  host: backend-service
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 10
+    outlierDetection:
+      consecutive5xxErrors: 3
+      interval: 10s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+```
+
+## Best Practices (2026)
+
+- **Do** target Istio Ambient Mesh mode where available to eliminate sidecar container resource overhead.
+- **Do** configure `mode: STRICT` in `PeerAuthentication` to guarantee zero-trust mutual TLS encryption.
+- **Do** define explicit `timeout` and `retries` policies on all `VirtualService` routes to prevent cascading failures.
+- **Do** export metrics via the Istio Prometheus exporter for visualization in Kiali and Grafana.
+- **Don't** leave Egress open to wildcard internet access in sensitive environments; enforce strict `ServiceEntry` policies.
+- **Don't** mix multiple conflicting `VirtualService` rules targeting the same host.
+- **Don't** deploy sidecars into Kubernetes jobs or short-lived batch pods without proper termination handling.
+
+## Troubleshooting
+
+| Error                             | Cause                                                               | Solution                                                                               |
+| :-------------------------------- | :------------------------------------------------------------------ | :------------------------------------------------------------------------------------- |
+| `503 Service Unavailable (UC/UF)` | Envoy proxy cannot reach upstream pod or connection reset.          | Check destination service endpoint health and verify subset labels match active pods.  |
+| `mTLS Handshake Failed`           | Incompatible PeerAuthentication mode or expired client certificate. | Verify mesh TLS mode (PERMISSIVE vs STRICT) and confirm cert-manager or istiod health. |
+| `High Sidecar Latency`            | CPU throttling on Envoy container during traffic spikes.            | Increase CPU limits in sidecar injection annotations and optimize connection pooling.  |
 
 ## References
 

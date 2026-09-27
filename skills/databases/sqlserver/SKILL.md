@@ -1,6 +1,6 @@
 ---
 name: sqlserver
-description: Microsoft SQL Server with T-SQL, SSMS, and enterprise features. Use for Windows/Azure.
+description: Expert Microsoft SQL Server assistance covering T-SQL, execution plans, index tuning, Always On availability groups, and DMV profiling. Use when developing enterprise .NET applications, administering SQL Server, or optimizing T-SQL.
 ---
 
 # SQL Server (MSSQL)
@@ -9,11 +9,12 @@ Microsoft SQL Server is an enterprise-grade RDBMS. It uses T-SQL (Transact-SQL),
 
 ## When to Use
 
-- **Enterprise .NET Stack**: Deep integration with C#, Azure, and Visual Studio.
-- **Complex Analytics**: Built-in Analysis Services (SSAS) and Reporting (SSRS).
-- **Corporate Environments**: Active Directory integration for security.
+- **Enterprise Microsoft Ecosystems**: The primary relational database for .NET, C#, Azure SQL, and Windows Server infrastructure.
+- **Complex Financial & ERP Transaction Processing**: Running mission-critical workloads with Advanced Data Security and Always On Availability Groups.
+- **In-Memory OLTP & Temporal Tables**: High-throughput memory-optimized tables and automated system-versioned temporal audit tracking.
+- **Automated Performance Tuning**: Utilizing Query Store to analyze execution plan regressions and force optimal query plans.
 
-## Quick Start (T-SQL)
+## Quick Start
 
 ```sql
 -- CTE and Window Function
@@ -29,39 +30,92 @@ FROM Sales_CTE;
 
 ## Core Concepts
 
-### T-SQL
+#System-Versioned Temporal Tables
 
-Powerful procedural extensions.
+Automatically captures complete historical audit trails for every row mutation:
 
 ```sql
-DECLARE @Counter INT = 1;
-WHILE @Counter <= 10
-BEGIN
-   PRINT @Counter;
-   SET @Counter = @Counter + 1;
-END
+CREATE TABLE dbo.Employee (
+    EmployeeID INT IDENTITY(1,1) PRIMARY KEY,
+    FullName NVARCHAR(100) NOT NULL,
+    Department NVARCHAR(50) NOT NULL,
+    Salary DECIMAL(10,2) NOT NULL,
+    SysStartTime DATETIME2 GENERATED ALWAYS AS ROW START HIDDEN,
+    SysEndTime DATETIME2 GENERATED ALWAYS AS ROW END HIDDEN,
+    PERIOD FOR SYSTEM_TIME (SysStartTime, SysEndTime)
+) WITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = dbo.EmployeeHistory));
+
+-- Query row state as of specific point in time
+SELECT * FROM dbo.Employee
+FOR SYSTEM_TIME AS OF '2026-01-15 12:00:00'
+WHERE EmployeeID = 101;
 ```
 
-### SQL Agent
+#Always On Availability Groups
 
-Built-in job scheduler for backups, maintenance, and scripts.
+Synchronous and asynchronous multi-database replication across high-availability failover nodes:
 
-### Clustered Index
+```
+[ Primary Replica (Read/Write) ] ──Synchronous Commit──→ [ Secondary Replica (Readable) ]
+                                          │
+                                          ▼
+                               [ Disaster Recovery Replica (Async) ]
+```
 
-Organizes the data in the table physically. Usually the Primary Key. A table can likely have only one.
+#Query Store & Plan Forcing
 
-## Best Practices (2025)
+Captures query performance history, runtime statistics, and forces stable execution plans:
+
+```sql
+-- Enable Query Store
+ALTER DATABASE EnterpriseDB SET QUERY_STORE = ON;
+
+-- Force specific compiled execution plan to stop regression
+EXEC sp_query_store_force_plan @query_id = 42, @plan_id = 108;
+```
+
+## Common Patterns
+
+### Index with Included Columns for Covering Queries
+
+**Problem**: Wide indexes waste storage and index page space, while narrow indexes trigger expensive Key Lookups.
+
+**Solution**:
+Create index with search columns in key and projection columns in `INCLUDE`:
+
+```sql
+CREATE NONCLUSTERED INDEX IX_Orders_CustomerId_Status
+ON Sales.Orders (CustomerId, OrderStatus)
+INCLUDE (OrderDate, TotalAmount);
+
+-- Covering query executes purely from index pages without Key Lookup
+SELECT OrderDate, TotalAmount
+FROM Sales.Orders
+WHERE CustomerId = 1205 AND OrderStatus = 'Shipped';
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Use AI Integration (2025)**: Call `sp_invoke_external_rest_endpoint` to integrate Azure OpenAI directly into queries.
-- **Use `APPLY` operator**: `CROSS APPLY` is powerful for joining a table to a table-valued function.
-- **Query Store**: Enable Query Store to track performance regressions over time automatically.
+- **Enable Query Store on All Production Databases**: Track execution plan regressions and runtime latency metrics automatically.
+- **Use Parameterized Queries**: Prevent parameter sniffing regressions and eliminate SQL injection vulnerabilities.
+- **Index Foreign Keys**: Manually index foreign key columns to prevent table locks during cascades and deletions.
+- **Use Read-Intent Routing**: Direct reporting queries to readable secondary replicas (`ApplicationIntent=ReadOnly`).
 
 **Don't**:
 
-- **Don't use cursors**: T-SQL set-based operations are almost always faster.
-- **Don't use `NOLOCK` blindly**: It causes dirty reads. Use `READ COMMITTED SNAPSHOT` isolation instead.
+- **Don't use `NOLOCK` indiscriminately**: `WITH (NOLOCK)` causes dirty reads, phantom records, and duplicate row scans.
+- **Don't use generic `VARCHAR(MAX)` everywhere**: Oversized LOB types bypass memory optimization and degrade performance.
+- **Don't perform row-by-row cursor processing**: Replace procedural cursors with set-based SQL queries.
+
+## Troubleshooting
+
+| Error                                                                 | Cause                                                           | Solution                                                                          |
+| :-------------------------------------------------------------------- | :-------------------------------------------------------------- | :-------------------------------------------------------------------------------- |
+| `Transaction (Process ID ...) was deadlocked on lock resources`       | Two transactions competing for locks in reverse sequence.       | Implement try-catch retry logic; ensure consistent object access order.           |
+| `Could not allocate space for object in database ... tablespace full` | Datafile or transaction log disk storage exhausted.             | Check autogrowth settings, backup transaction log (`BACKUP LOG`), or expand disk. |
+| `Implicit conversion causing index scan`                              | Data type mismatch (e.g. VARCHAR comparing to NVARCHAR column). | Align parameter types with column definitions in application queries.             |
 
 ## References
 

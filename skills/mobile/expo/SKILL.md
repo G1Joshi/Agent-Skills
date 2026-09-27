@@ -1,6 +1,6 @@
 ---
 name: expo
-description: Expo React Native development platform. Use for React Native apps.
+description: Expert Expo assistance covering EAS Build, file-based routing via Expo Router, prebuild workflows, config plugins, and OTA updates. Use when bootstrapping React Native applications, managing native dependencies without Xcode/Android Studio, or deploying via EAS.
 ---
 
 # Expo
@@ -9,10 +9,10 @@ Expo is an open-source framework for apps that run natively on Android, iOS, and
 
 ## When to Use
 
-- Building React Native apps without managing Xcode/Android Studio projects manually.
-- Needing fast Over-the-Air (OTA) updates via EAS Update.
-- Rapid prototyping with the Expo Go app.
-- Teams that prefer a "Managed" workflow but still need native capabilities (via Config Plugins).
+- **Modern React Native Development**: The official, recommended foundation for building React Native applications on iOS, Android, and Web.
+- **Cloud Build Automation (EAS)**: Compiling native application packages in the cloud without local Xcode or Android Studio installations.
+- **File-Based Routing**: Designing deeply linkable mobile navigation structures with Expo Router matching web URL semantics.
+- **Over-The-Air (OTA) Updates**: Shipping critical JavaScript bugfixes instantly to end users without App Store review cycles.
 
 ## Quick Start
 
@@ -65,49 +65,111 @@ const styles = StyleSheet.create({
 
 ## Core Concepts
 
-### Managed Workflow & Prebuild
+#Continuous Native Generation (Prebuild)
 
-Historically, Expo had a "ejected" vs "managed" split. Modern Expo uses **Prebuild** (Continuous Native Generation). You don't commit `android` or `ios` folders; instead, they are generated on demand from `app.json` configuration.
+Expo manages native `ios/` and `android/` directories as generated build artifacts via `app.json` config plugins, eliminating fragile manual native code edits:
 
-### EAS (Expo Application Services)
+```json
+// app.json
+{
+  "expo": {
+    "name": "MarketPulse",
+    "slug": "market-pulse",
+    "version": "1.0.0",
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow MarketPulse to access camera for barcode scanning."
+        }
+      ],
+      ["expo-secure-store"]
+    ]
+  }
+}
+```
 
-- **EAS Build**: Compiles your app in the cloud (or locally) into `.apk` / `.ipa`.
-- **EAS Submit**: Uploads binary to stores.
-- **EAS Update**: Pushes JS/asset fixes instantly to users.
+```bash
+# Generate or update ios/ and android/ based on config plugins
+npx expo prebuild --clean
+```
 
-### Config Plugins
+#Expo Router File-Based Navigation
 
-Functions that modify native files (`Info.plist`, `AndroidManifest.xml`) during prebuild. This allows you to use _any_ native library without "ejecting".
+Screens and nested navigation stacks correspond directly to directory structures in `app/`:
+
+```tsx
+// app/(tabs)/profile/[id].tsx
+import { useLocalSearchParams, Stack } from "expo-router";
+import { View, Text } from "react-native";
+
+export default function UserProfile() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+
+  return (
+    <View style={{ flex: 1, padding: 16 }}>
+      <Stack.Screen
+        options={{ title: `User: ${id}`, headerBackTitle: "Back" }}
+      />
+      <Text style={{ fontSize: 18 }}>Viewing Profile ID: {id}</Text>
+    </View>
+  );
+}
+```
+
+#Secure Storage & Native APIs
+
+Expo provides production-hardened cross-platform APIs designed with TypeScript first:
+
+```typescript
+import * as SecureStore from "expo-secure-store";
+import * as Haptics from "expo-haptics";
+
+export async function persistAuthToken(token: string) {
+  await SecureStore.setItemAsync("auth_jwt_token", token, {
+    keychainAccessible: SecureStore.WHEN_UNLOCKED,
+  });
+  await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+}
+```
 
 ## Common Patterns
 
-### Development Builds
+#Dynamic File-Based Routing (Expo Router)
+**Problem**: Managing complex mobile navigation stacks with manual navigator components.  
+**Solution**: Use Expo Router with file-based routing and deep linking out of the box.
 
-Instead of Expo Go (which has a fixed set of native code), create a **Development Build**. This is a custom version of Expo Go that includes _your_ specific native dependencies.
+```tsx
+// app/user/[id].tsx
+import { useLocalSearchParams, Stack } from "expo-router";
+import { View, Text } from "react-native";
 
-- `npx expo run:ios` or `npx eas build --profile development --platform ios`.
+export default function UserScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>();
 
-### Expo Router
+  return (
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <Stack.Screen options={{ title: `User #${id}` }} />
+      <Text>User Profile Details for: {id}</Text>
+    </View>
+  );
+}
+```
 
-File-system based routing (like Next.js).
-
-- `app/home.tsx` -> `/home`
-- `app/user/[id].tsx` -> `/user/123`
-
-## Best Practices
+## Best Practices (2026)
 
 **Do**:
 
-- Use `npx expo install` to install libraries (ensures version compatibility).
-- Use **Expo Image** (`expo-image`) for performant image loading and caching.
-- Use **EAS Build** for creating production binaries.
-- Use **Config Plugins** instead of manually editing native files.
+- **Use Expo Config Plugins**: Customize native project properties via config plugins rather than directly modifying `ios/` or `android/`.
+- **Adopt Expo Router v3+**: Leverage type-safe routes, layout routes (`_layout.tsx`), and automated deep linking.
+- **Use EAS Build for Remote CI/CD**: Build production `.ipa` and `.aab` packages with automated credential and certificate management.
+- **Implement Hermes Engine**: Run the Hermes JavaScript engine (default) for fast startup times and minimal memory footprints.
 
 **Don't**:
 
-- Don't use Expo Go if you need custom native code (use Dev Builds).
-- Don't commit `ios` and `android` directories if using CNG (Continuous Native Generation).
-- Don't ignore `npx expo doctor` warnings.
+- **Don't hardcode sensitive secrets in `app.json`**: Store API secrets in EAS Secrets or runtime environment variables.
+- **Don't use legacy `expo publish`**: Migrate to modern EAS Update (`eas update`) with rollout channels.
+- **Don't bypass Apple Privacy Manifests**: Ensure all third-party native libraries declare appropriate data collection reasons.
 
 ## Troubleshooting
 
