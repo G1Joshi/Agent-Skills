@@ -1,6 +1,6 @@
 ---
 name: owasp-zap
-description: OWASP ZAP security testing proxy. Use for security testing.
+description: Expert OWASP ZAP (Zed Attack Proxy) assistance covering automated vulnerability scanning, spidering, and DAST in CI/CD. Use when scanning web apps for OWASP Top 10 vulnerabilities, automating scans, or penetration testing.
 ---
 
 # OWASP ZAP (Zed Attack Proxy)
@@ -9,11 +9,12 @@ OWASP ZAP is the world's most widely used free web app scanner. It is perfect fo
 
 ## When to Use
 
-- **CI/CD Automation**: "DAST in the pipeline". Run a baseline scan on every PR.
-- **Budget constraints**: It's free and open-source (vs Burp Pro's license).
-- **Headless Scanning**: Controlling the scanner via API or CLI (Docker).
+- **Automated DAST in CI/CD Pipelines**: Running automated Dynamic Application Security Testing against deployed staging applications.
+- **Passive Traffic Security Auditing**: Analyzing HTTP traffic for missing security headers, insecure cookies, and information disclosure.
+- **Automated Spidering & API Fuzzing**: Crawling web applications and parsing OpenAPI/Swagger specs to discover unlinked endpoints.
+- **Open-Source Penetration Testing**: Providing a zero-cost, open-source alternative to commercial web vulnerability scanners.
 
-## Quick Start (Docker)
+## Quick Start
 
 ```bash
 # Run a quick scan against a URL
@@ -22,30 +23,82 @@ docker run -t owasp/zap2docker-stable zap-baseline.py -t https://www.example.com
 
 ## Core Concepts
 
-### Active Scan (Attack)
+#Active vs Passive Scanning
 
-ZAP modifies requests to attack the application (SQLi, XSS, Command Injection). Use with caution.
+- **Passive Scan**: Inspects proxied requests and responses without mutating data (safe for production; detects missing CSP, cookie flags).
+- **Active Scan**: Injects malicious payloads (SQLi, XSS, Path Traversal) to find exploitable vulnerabilities (mutates data; staging only):
 
-### Passive Scan
+```bash
+# Run ZAP Docker Baseline Scan (Passive Security Audit)
+docker run -v $(pwd):/zap/wrk/:rw -t ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
+  -t https://staging.example.com -r zap_report.html
+```
 
-ZAP watches traffic (via Proxy) and reports alerts without modifying requests (e.g., missing headers, cookie flags). Safe for production.
+#ZAP Automation Framework (YAML)
 
-### HUD (Heads Up Display)
+Declarative configuration for running complex automated security workflows in CI/CD:
 
-Injects the ZAP UI directly into your browser, allowing you to control the scan while browsing the target site.
+```yaml
+# zap-automation.yaml
+env:
+  contexts:
+    - name: "Staging App"
+      urls: ["https://staging.example.com"]
+jobs:
+  - type: spider
+    parameters:
+      maxDuration: 5
+  - type: activeScan
+    parameters:
+      maxScanDurationInMins: 15
+  - type: report
+    parameters:
+      template: traditional-html
+      reportDir: /zap/wrk/
+      reportFile: zap-active-report.html
+```
 
-## Best Practices (2025)
+#Automated API Scanning from OpenAPI Specification
+
+Imports OpenAPI / Swagger endpoints and tests each parameter for injection vulnerabilities:
+
+```bash
+docker run -v $(pwd):/zap/wrk/:rw -t ghcr.io/zaproxy/zaproxy:stable zap-api-scan.py \
+  -t https://staging.example.com/api/v1/swagger.json -f openapi -r api_security_report.html
+```
+
+## Common Patterns
+
+### Baseline DAST Scan in GitHub Actions
+
+**Problem**: Vulnerabilities like SQL injection or XSS are only detected after release to production.
+
+**Solution**:
+Run automated ZAP baseline container scans in CI/CD:
+
+```yaml
+- name: Run OWASP ZAP Baseline Scan
+  uses: zaproxy/action-baseline@v0.12.0
+  with:
+    target: "https://staging.example.com"
+    rules_file_name: ".zap/rules.tsv"
+    fail_action: true
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Automate Baseline Scans**: integrate `zap-baseline.py` in GitHub Actions for quick sanity checks.
-- **Authenticate**: Configure ZAP to handle login (Authentication Context) so it can scan authenticated routes.
-- **Filter False Positives**: DAST tools are noisy. Create a Context file to ignore irrelevant alerts.
+- **Incorporate ZAP Baseline Scan into Pull Request CI**: Fail builds if high-confidence vulnerabilities (e.g. SQLi) or critical missing headers appear.
+- **Authenticate Scans with Script-Based Authentication**: Provide ZAP with credentials to spider and scan authenticated user routes.
+- **Configure Scan Rulesets**: Ignore non-critical warnings or third-party tracking scripts by tuning ZAP alert thresholds.
+- **Archive HTML and SARIF Reports as CI Artifacts**: Upload SARIF scan results directly into GitHub Security Code Scanning alerts.
 
 **Don't**:
 
-- **Don't Attack Unauthorized Targets**: ZAP is a weapon. Ensure you have permission.
-- **Don't rely solely on DAST**: Combine with SAST (SonarQube) and SCA (Snyk).
+- **Don't run Active Scans against live production environments**: Active testing submits random payloads that can corrupt real database records.
+- **Don't rely solely on DAST**: Combine ZAP dynamic testing with SAST (Semgrep, SonarQube) and dependency scanning (Trivy).
+- **Don't scan external third-party services**: Constrain scanning strictly to your verified staging domain context.
 
 ## Troubleshooting
 

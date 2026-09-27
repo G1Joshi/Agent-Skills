@@ -1,6 +1,6 @@
 ---
 name: dependabot
-description: Dependabot dependency updates. Use for security updates.
+description: Expert Dependabot automated dependency management covering daily/weekly vulnerability alerts, grouped updates, and PR automation. Use when configuring `dependabot.yml`, updating packages, or fixing CVEs.
 ---
 
 # Dependabot
@@ -9,11 +9,12 @@ Dependabot creates pull requests to keep your dependencies secure and up-to-date
 
 ## When to Use
 
-- **GitHub Repos**: It's the default, easiest choice.
-- **Security Patches**: "Dependabot alert: Critical severity in lodash".
-- **Keeping deps fresh**: Automated weekly version bumps.
+- **Automated Dependency Updates**: Keeping npm, pip, Maven, Cargo, Go modules, and Docker images updated automatically via GitHub PRs.
+- **Security Vulnerability Remediation**: Generating automated pull requests to patch known Common Vulnerabilities and Exposures (CVEs).
+- **SemVer-Grouped Pull Requests**: Grouping minor and patch dependency updates into unified PRs to prevent developer review fatigue.
+- **Private Package Registry Scanning**: Scanning private npm or NuGet package registries for updates and security patches.
 
-## Quick Start (`dependabot.yml`)
+## Quick Start
 
 ```yaml
 # .github/dependabot.yml
@@ -32,30 +33,100 @@ updates:
 
 ## Core Concepts
 
-### Security Updates
+#Declarative dependabot.yml Manifest
 
-Triggered automatically when GitHub detects a vulnerability in your dependencies (via Dependency Graph). These are distinct from Version Updates.
+Configures ecosystem targets, schedules, directories, and grouping policies:
 
-### Version Updates
+```yaml
+# .github/dependabot.yml
+version: 2
+updates:
+  # Maintain production npm dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    open-pull-requests-limit: 10
+    groups:
+      production-dependencies:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+  # Track GitHub Actions workflow versions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+```
 
-Scheduled updates (Daily/Weekly) to newer versions, regardless of vulnerabilities. Driven by `dependabot.yml`.
+#Security-Only vs Version-Update Modes
 
-### Grouped Updates
+- **Security Updates**: Automatically triggered when a CVE alert is opened in GitHub Advisory Database.
+- **Version Updates**: Scheduled cron checks that propose upgrading dependencies to latest stable releases:
 
-Combining multiple package updates into a single PR (e.g., "Bump 5 dependencies"). Drastically reduces PR noise.
+```yaml
+# Target security vulnerabilities only
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    # Security updates trigger automatically; version updates restricted:
+    open-pull-requests-limit: 0
+```
 
-## Best Practices (2025)
+#GitHub Actions Integration with Dependabot Secrets
+
+Injects credentials for private artifactory and npm package registries:
+
+```yaml
+registries:
+  enterprise-npm:
+    type: npm-registry
+    url: https://npm.pkg.github.com
+    token: ${{ secrets.DEPENDABOT_NPM_TOKEN }}
+```
+
+## Common Patterns
+
+### Grouped Security and Minor Updates
+
+**Problem**: Dozens of individual dependency PRs flood repositories and exhaust CI runners.
+
+**Solution**:
+Group minor and patch updates together in `.github/dependabot.yml`:
+
+```yaml
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      production-dependencies:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "major"
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Enable Grouping**: Group non-critical updates to avoid "PR Fatigue".
-- **Auto-Merge (safely)**: If tests pass and it's a minor/patch update, configure auto-merge to reduce manual review toil.
-- **Check Compatibility Scores**: GitHub shows "% of CI runs that passed" for an update. Trust the crowd usage data.
+- **Enable Grouped Updates**: Use `groups` in `dependabot.yml` to bundle minor/patch bumps into a single reviewable PR.
+- **Require Passing CI/CD Status Checks**: Ensure automated test suites pass on Dependabot branches before merging.
+- **Use Automated Merge Actions**: Combine Dependabot with GitHub Auto-Merge (`gh pr merge --auto --rebase`) for low-risk patch updates.
+- **Pin GitHub Actions to Full Commit SHAs**: Require Dependabot to pin GitHub Actions to immutable SHAs rather than mutable tags.
 
 **Don't**:
 
-- **Don't ignore Alerts**: A critical alert usually means an exploit exists.
-- **Don't blindly merge Major versions**: They usually contain breaking changes.
+- **Don't set daily intervals for all ecosystems**: Daily updates cause PR spam; use weekly or grouped schedules for production dependencies.
+- **Don't ignore Dependabot security alerts**: Treat critical security PRs with immediate priority.
+- **Don't merge major version bumps without manual regression testing**: Major version upgrades introduce breaking API changes.
 
 ## Troubleshooting
 

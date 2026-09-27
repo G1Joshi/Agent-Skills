@@ -1,6 +1,6 @@
 ---
 name: nextauth
-description: NextAuth.js authentication for Next.js. Use for Next.js auth.
+description: Expert NextAuth.js / Auth.js assistance covering OAuth providers, credentials auth, database adapters, and session callbacks. Use when implementing authentication in Next.js, securing pages, or managing user sessions.
 ---
 
 # NextAuth.js (Auth.js)
@@ -9,11 +9,12 @@ NextAuth (evolving into **Auth.js**) is a complete open-source authentication so
 
 ## When to Use
 
-- **Data Ownership**: You want to own the User/Session data in your own Database (Postgres, Prisma) rather than an external provider.
-- **Cost**: It's free/open-source. No MAU limits.
-- **Flexibility**: You need custom providers or complex session strategies.
+- **Next.js Full-Stack Authentication**: The standard, official authentication solution (Auth.js) for Next.js App Router and Pages Router.
+- **Universal Provider Integrations**: Supporting GitHub, Google, Apple, and corporate OIDC/SAML providers in minutes.
+- **Database Session Storage with Adapters**: Syncing user profiles and accounts to PostgreSQL, MySQL, or MongoDB via Prisma, Drizzle, or TypeORM.
+- **Lightweight JWT Cookie Sessions**: Running serverless, zero-database session verification entirely through encrypted cookies.
 
-## Quick Start (Next.js App Router - v5 Beta)
+## Quick Start
 
 ```typescript
 // auth.ts
@@ -31,27 +32,110 @@ export const { GET, POST } = handlers;
 
 ## Core Concepts
 
-### Database Adapters
+#Auth.js Configuration Structure (v5)
 
-NextAuth can persist users and sessions to your DB using adapters (Prisma, Drizzle, MongoDB).
+Unified server configuration declared in `auth.ts`:
 
-### Strategies
+```typescript
+// auth.ts (NextAuth v5 / Auth.js)
+import NextAuth from "next-auth";
+import GitHub from "next-auth/providers/github";
+import Google from "next-auth/providers/google";
+import { DrizzleAdapter } from "@auth/drizzle-adapter";
+import { db } from "@/db";
 
-- **JWT (Stateless)**: Default. Session data stored in an encrypted cookie. Good for scale.
-- **Database (Stateful)**: Session stored in DB. Good if you need to revoke sessions server-side immediately.
+export const { handlers, signIn, signOut, auth } = NextAuth({
+  adapter: DrizzleAdapter(db),
+  providers: [GitHub, Google],
+  session: { strategy: "jwt" },
+  callbacks: {
+    jwt({ token, user }) {
+      if (user) token.role = user.role;
+      return token;
+    },
+    session({ session, token }) {
+      session.user.role = token.role as string;
+      return session;
+    },
+  },
+});
+```
 
-## Best Practices (2025)
+#Route Handler Integration (App Router)
+
+Exports GET and POST handlers directly in the catch-all API route:
+
+```typescript
+// app/api/auth/[...nextauth]/route.ts
+import { handlers } from "@/auth";
+export const { GET, POST } = handlers;
+```
+
+#Server Component Authentication (`auth()`)
+
+Inspects user session directly inside Server Components without client-side hooks:
+
+```tsx
+// app/dashboard/page.tsx
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+
+export default async function DashboardPage() {
+  const session = await auth();
+  if (!session?.user) redirect("/api/auth/signin");
+
+  return (
+    <div>
+      Welcome back, {session.user.name}! (Role: {session.user.role})
+    </div>
+  );
+}
+```
+
+## Common Patterns
+
+### Session Enrichment via JWT Callbacks
+
+**Problem**: The frontend session object misses custom user fields like roles or database IDs.
+
+**Solution**:
+Populate custom claims in `jwt` and forward them to the `session` callback:
+
+```typescript
+export const authOptions: NextAuthOptions = {
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = user.role;
+        token.userId = user.id;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.role = token.role as string;
+        session.user.id = token.userId as string;
+      }
+      return session;
+    },
+  },
+};
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- Use the **Prisma Adapter** (or Drizzle) if you have a database.
-- Set a strong `AUTH_SECRET` (auto-generated in Vercel, manual elsewhere).
-- Use **Middleware** to protect routes at the edge.
+- **Adopt Auth.js v5**: Migrate from legacy v4 `getServerSession` to modern unified `auth()` methods in Next.js 14/15.
+- **Set a Cryptographically Secure `AUTH_SECRET`**: Generate using `openssl rand -base64 33` and store in `.env.local`.
+- **Enforce Edge Middleware Route Protection**: Protect private routes in `middleware.ts` before requests reach Server Components.
+- **Use TypeScript Module Augmentation**: Extend `next-auth` types to ensure custom session fields (`role`, `id`) are strongly typed.
 
 **Don't**:
 
-- Don't store large objects in the Session (The JWT cookie has a 4kb limit).
-- Don't commit provider secrets (Client ID/Secret) to Git.
+- **Don't fetch session data using client hooks in Server Components**: Use server-side `await auth()` to avoid client waterfall delays.
+- **Don't store sensitive database credentials in session callbacks**: The session object is transmitted to client browsers; keep it lightweight.
+- **Don't forget to configure production trust host**: Set `AUTH_TRUST_HOST=true` when hosting on Docker, Kubernetes, or AWS behind reverse proxies.
 
 ## Troubleshooting
 

@@ -1,6 +1,6 @@
 ---
 name: vault
-description: HashiCorp Vault secrets management. Use for secrets.
+description: Expert HashiCorp Vault assistance covering secret engines, dynamic secrets, transit encryption, and AppRole auth. Use when managing secrets, rotating database credentials, or securing cloud infrastructure.
 ---
 
 # HashiCorp Vault
@@ -9,11 +9,12 @@ Vault is a tool for securely accessing secrets. A secret is anything that you wa
 
 ## When to Use
 
-- **Dynamic Secrets**: Generating temporary AWS credentials (TTL 15m) for a specific task.
-- **Encryption as a Service**: Encrypting application data (Credit Cards) without the app managing the keys (Transit Engine).
-- **Kubernetes Secrets**: Injecting secrets into pods securely without Etcd.
+- **Centralized Secrets Management**: Securely storing and accessing API keys, database credentials, certificates, and encryption keys.
+- **Dynamic On-Demand Credentials**: Generating short-lived, unique database credentials that expire automatically after task completion.
+- **Data Encryption as a Service (Transit Engine)**: Encrypting sensitive data in transit and at rest without exposing cryptographic keys to applications.
+- **PKI & Certificate Authority Automation**: Issuing short-lived X.509 certificates for microservices and internal domains.
 
-## Quick Start (Dev Mode)
+## Quick Start
 
 ```bash
 vault server -dev
@@ -28,34 +29,96 @@ vault kv get secret/hello
 
 ## Core Concepts
 
-### Sealing
+#Secret Engines & Path-Based Access
 
-Vault data is encrypted at rest. When Vault starts, it is "Sealed". Unsealing requires a threshold of keys (Shamir's Secret Sharing) to reconstruct the master key.
+Vault organizes capabilities under hierarchical mount paths:
 
-### Engines
+```
+secret/data/my-app/config     -> Key-Value (KV v2) persistent secrets
+database/creds/readonly-user  -> Dynamic on-demand temporary database roles
+transit/encrypt/customer-pii  -> Encryption-as-a-Service without key export
+pki/issue/internal-domain     -> Dynamic TLS certificate generation
+```
 
-Modules that handle different types of secrets:
+#Dynamic Database Credential Generation
 
-- `kv`: Key-Value storage (static).
-- `aws`: Dynamic AWS IAM users.
-- `pki`: Dynamic x.509 Certificates.
+Vault connects to PostgreSQL/MySQL and creates unique users on the fly with automatic lease expiration:
 
-### Auth Methods
+```bash
+# Application requests temporary credentials
+vault read database/creds/readonly-role
 
-How you log in to Vault: Token, AppRole (Machines), Kubernetes (Pods), GitHub (Humans).
+# Output:
+# lease_id: database/creds/readonly-role/h712398
+# lease_duration: 1h
+# username: v-token-readonly-1727420400
+# password: A1b2C3d4E5f6G7h8
+```
 
-## Best Practices (2025)
+#Application Authentication via Kubernetes Auth
+
+Applications running in Kubernetes authenticate using their native ServiceAccount tokens:
+
+```typescript
+import vault from "node-vault";
+import fs from "fs";
+
+const jwt = fs.readFileSync(
+  "/var/run/secrets/kubernetes.io/serviceaccount/token",
+  "utf8",
+);
+
+const client = vault({ endpoint: "https://vault.internal.corp:8200" });
+const result = await client.kubernetesLogin({
+  role: "billing-service-role",
+  jwt: jwt,
+});
+
+// Read secret using authenticated client token
+client.token = result.auth.client_token;
+const secret = await client.read("secret/data/billing/api-keys");
+console.log("Stripe Secret:", secret.data.data.STRIPE_KEY);
+```
+
+## Common Patterns
+
+### Dynamic PostgreSQL Database Credential Generation
+
+**Problem**: Long-lived, shared database passwords hardcoded in application config leak over time.
+
+**Solution**:
+Request short-lived dynamic credentials with automatic TTL revocation:
+
+```bash
+# Read dynamic database credentials with 1-hour lease
+vault read database/creds/readonly-app
+
+# Key-Value v2 secret read with JSON output
+vault kv get -format=json secret/data/payments/stripe | jq '.data.data.api_key'
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Use Auto-Unseal**: Integrate with AWS KMS / Azure Key Vault to unseal automatically (Manual unsealing is painful for uptime).
-- **Inject via Sidecar**: In K8s, use the Vault Agent Injector to drop secrets into `/vault/secrets/config` rather than calling the API directly.
-- **Enable Audit Logs**: Essential for knowing "Who read the database password?".
+- **Use Dynamic Database Credentials**: Never share static database passwords across services; let Vault issue short-lived credentials.
+- **Authenticate via Cloud / Platform Identity**: Use Kubernetes Auth, AWS IAM Auth, or Azure Managed Identity instead of static root tokens.
+- **Enable Transit Secret Engine for Sensitive PII**: Offload encryption and key rotation to Vault; keep private keys out of application memory.
+- **Automate Lease Renewal**: Ensure background tasks renew long-running leases or re-authenticate prior to token expiration.
 
 **Don't**:
 
-- **Don't use Root Token**: Generate it, configure auth methods, then revoke it.
-- **Don't store huge files**: Vault is for secrets (KB), not files (MB).
+- **Don't store the Vault Root Token**: Revoke the root token immediately after initial setup and cluster unsealing.
+- **Don't disable TLS on the Vault API**: Never communicate with Vault over unencrypted HTTP.
+- **Don't grant broad wildcard policies**: Follow least privilege; grant read access only to specific secret paths needed by each microservice.
+
+## Troubleshooting
+
+| Error                                 | Cause                                                           | Solution                                                                                                |
+| :------------------------------------ | :-------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------ |
+| `Error: Vault is sealed`              | Vault restarted or initialized without unsealing keys.          | Run `vault operator unseal` with threshold Shamir key shards or use auto-unseal.                        |
+| `permission denied (403)`             | Token or AppRole policy lacks read permission on specific path. | Inspect associated HCL policy and ensure `path "secret/data/*" { capabilities = ["read"] }` is granted. |
+| `token expired and cannot be renewed` | Lease duration reached maximum TTL limit.                       | Re-authenticate client AppRole to obtain a fresh token.                                                 |
 
 ## References
 

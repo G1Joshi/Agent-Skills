@@ -1,6 +1,6 @@
 ---
 name: auth0
-description: Auth0 identity platform. Use for authentication.
+description: Expert Auth0 authentication assistance covering OAuth2, OpenID Connect, JWT validation, and RBAC. Use when integrating Auth0 into web/mobile apps, configuring Universal Login, or securing APIs.
 ---
 
 # Auth0
@@ -9,11 +9,12 @@ Auth0 is a platform for authentication and authorization. It provides a Universa
 
 ## When to Use
 
-- **Enterprise Apps**: Application requiring intricate B2B Identity (SSO, SAML, AD).
-- **Complex Rules**: When you need programmable pipelines (Actions) during login (e.g., "Add Role to ID Token if email ends in @corp.com").
-- **Speed**: Wanting a login page working in 5 minutes.
+- **Enterprise Universal Login**: Outsourcing authentication, MFA, and social/enterprise federated logins to managed Auth0 infrastructure.
+- **B2B Multi-Tenant Identity**: Managing distinct organizational customer portals with custom domains, SAML/WS-Fed, and SCIM provisioning.
+- **Fine-Grained Role-Based Access Control**: Defining custom roles, permissions, and claims enforced across APIs and frontends.
+- **Machine-to-Machine (M2M) Authorization**: Securing daemon background services using OAuth 2.0 Client Credentials grants.
 
-## Quick Start (Next.js)
+## Quick Start
 
 ```bash
 npm install @auth0/nextjs-auth0
@@ -37,29 +38,111 @@ export default function Profile() {
 
 ## Core Concepts
 
-### Universal Login
+#Auth0 Universal Login & OIDC Handshake
 
-Redirects user to `your-tenant.auth0.com`. Secure, centralized, and hosted by Auth0. Avoids "Embedded Login" (inputs on your own page) for better security against credential stuffing.
+Clients redirect to centralized Auth0 login pages, preventing direct credential exposure to frontend applications:
 
-### Actions (formerly Rules/Hooks)
+```typescript
+// Next.js App Router Auth0 SDK (v3)
+import { handleAuth, handleLogin } from "@auth0/nextjs-auth0";
 
-Serverless functions that execute during the auth pipeline.
+export const GET = handleAuth({
+  login: handleLogin({
+    authorizationParams: {
+      audience: "https://api.myenterprise.com",
+      scope: "openid profile email read:reports",
+    },
+    returnTo: "/dashboard",
+  }),
+});
+```
 
-- _Post-Login_: Add claims, Call external API, Deny access.
-- _Machine-to-Machine_: Enrich tokens.
+#Auth0 Actions (Extensibility Pipeline)
 
-## Best Practices (2025)
+Node.js event handlers executed during the authentication pipeline to enrich claims, enforce MFA, or check blocklists:
+
+```javascript
+// Auth0 Post-Login Action
+exports.onExecutePostLogin = async (event, api) => {
+  const namespace = "https://myenterprise.com/claims";
+  // Add custom roles to the ID and Access Tokens
+  if (event.authorization?.roles) {
+    api.idToken.setCustomClaim(`${namespace}/roles`, event.authorization.roles);
+    api.accessToken.setCustomClaim(
+      `${namespace}/roles`,
+      event.authorization.roles,
+    );
+  }
+
+  // Conditionally trigger MFA for external networks
+  if (!event.request.ip.startsWith("10.0.")) {
+    api.multifactor.enable("any");
+  }
+};
+```
+
+#Machine-to-Machine JWT Verification in Backend APIs
+
+Validates JWT access tokens against the Auth0 JWKS endpoint:
+
+```typescript
+import { expressjwt as jwt } from "express-jwt";
+import jwksRsa from "jwks-rsa";
+
+export const checkJwt = jwt({
+  secret: jwksRsa.expressJwtSecret({
+    cache: true,
+    rateLimit: true,
+    jwksRequestsPerMinute: 5,
+    jwksUri: `https://my-tenant.us.auth0.com/.well-known/jwks.json`,
+  }),
+  audience: "https://api.myenterprise.com",
+  issuer: `https://my-tenant.us.auth0.com/`,
+  algorithms: ["RS256"],
+});
+```
+
+## Common Patterns
+
+### Express JWT Verification Middleware
+
+**Problem**: Securing backend API routes against unauthorized or tampered Auth0 access tokens.
+
+**Solution**:
+Use `express-oauth2-jwt-bearer` with audience and issuer verification:
+
+```javascript
+import { auth } from "express-oauth2-jwt-bearer";
+
+export const checkJwt = auth({
+  audience: "https://api.mycompany.com",
+  issuerBaseURL: "https://mytenant.us.auth0.com/",
+  tokenSigningAlg: "RS256",
+});
+
+// Protect routes
+app.get("/api/private", checkJwt, (req, res) => {
+  res.json({
+    message: "Protected endpoint access granted",
+    user: req.auth.payload,
+  });
+});
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- Use **Universal Login**.
-- Enable **Brute Force Protection** and **Breach Password Detection** (built-in).
-- Use **Custom Domains** (`auth.myapp.com`) to avoid 3rd party cookie issues.
+- **Always Verify the `audience` and `issuer` Claims**: Never validate token signatures without verifying that the audience matches your specific API identifier.
+- **Use Auth0 Actions instead of Legacy Rules/Hooks**: Actions provide modern TypeScript runtimes, secret management, and version history.
+- **Rotate Signing Secrets Regularly**: Use RS256 asymmetric keys with automated JWKS rotation rather than static HS256 shared secrets.
+- **Enable Anomaly Detection**: Turn on brute-force protection, credential stuffing guards, and breached password detection in the Auth0 console.
 
 **Don't**:
 
-- Don't use the Management API tokens in the frontend.
-- Don't skip **MFA**. Enable Adaptive MFA for high-risk logins.
+- **Don't store sensitive user data in client-side localStorage**: Store tokens in secure HttpOnly cookies or use the Auth0 refresh token rotation flow.
+- **Don't hardcode client secrets in frontend or mobile apps**: Use the Authorization Code Flow with PKCE for single-page and mobile apps.
+- **Don't use Auth0 Management API tokens in client code**: Keep Management API tokens strictly within secure backend servers.
 
 ## Troubleshooting
 

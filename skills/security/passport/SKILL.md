@@ -1,6 +1,6 @@
 ---
 name: passport
-description: Passport.js authentication middleware. Use for Node.js auth.
+description: Expert Passport.js authentication assistance covering Local, JWT, and OAuth strategies for Node.js / Express. Use when structuring Express authentication middleware, session handling, or multi-provider logins.
 ---
 
 # Passport.js
@@ -9,9 +9,10 @@ Passport is authentication middleware for Node.js. It is designed to serve a uni
 
 ## When to Use
 
-- **Node.js/Express Apps**: The de-facto standard for Express auth.
-- **Multiple Strategies**: Supporting Local (Username/Password), Google, Facebook, and Twitter login all in one app.
-- **Legacy/Established Codebases**: widely used in existing Mean/Mern stacks.
+- **Node.js Express Authentication Middleware**: Integrating authentication into Node.js Express, Koa, or NestJS backend services.
+- **Pluggable Multi-Strategy Authentication**: Combining Local username/password, JWT bearer tokens, and OAuth2 strategies under one interface.
+- **Established Express Monoliths**: Adding authentication to existing enterprise Express codebases with mature session infrastructures.
+- **Custom Authentication Protocols**: Authoring tailored authentication strategies using Passport's clean middleware contract.
 
 ## Quick Start
 
@@ -41,29 +42,130 @@ app.post(
 
 ## Core Concepts
 
-### Strategies
+#Pluggable Strategy Architecture
 
-Modules that allow you to authenticate with a specific provider (`passport-local`, `passport-google-oauth20`, `passport-jwt`).
+Passport delegates credential verification to specialized Strategy plugins (`passport-local`, `passport-jwt`, `passport-google-oauth20`):
 
-### Serialize/Deserialize
+```typescript
+import passport from "passport";
+import { Strategy as LocalStrategy } from "passport-local";
+import bcrypt from "bcrypt";
 
-How Passport maintains the user session.
+passport.use(
+  new LocalStrategy(
+    { usernameField: "email" },
+    async (email, password, done) => {
+      try {
+        const user = await db.findUserByEmail(email);
+        if (!user) return done(null, false, { message: "Invalid credentials" });
 
-- `serializeUser`: Saves User ID to the session.
-- `deserializeUser`: Uses User ID to fetch the full User object on subsequent requests.
+        const isValid = await bcrypt.compare(password, user.passwordHash);
+        if (!isValid)
+          return done(null, false, { message: "Invalid credentials" });
 
-## Best Practices (2025)
+        return done(null, user);
+      } catch (err) {
+        return done(err);
+      }
+    },
+  ),
+);
+```
+
+#Session Serialization & Deserialization
+
+Coordinates storing minimal user identifiers in session cookies and hydrating full user entities on subsequent requests:
+
+```typescript
+// Serialize: Store only user ID in session store (Redis)
+passport.serializeUser((user: any, done) => {
+  done(null, user.id);
+});
+
+// Deserialize: Fetch user record on each incoming request
+passport.deserializeUser(async (id: string, done) => {
+  try {
+    const user = await db.findUserById(id);
+    done(null, user);
+  } catch (err) {
+    done(err);
+  }
+});
+```
+
+#Stateless JWT Strategy for APIs
+
+Validates bearer tokens without maintaining server-side session state:
+
+```typescript
+import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
+
+passport.use(
+  new JwtStrategy(
+    {
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      secretOrKey: process.env.JWT_SECRET!,
+    },
+    async (payload, done) => {
+      return done(null, { id: payload.sub, role: payload.role });
+    },
+  ),
+);
+```
+
+## Common Patterns
+
+### Modular JWT Strategy Configuration
+
+**Problem**: Replicating authentication middleware logic across multiple microservices.
+
+**Solution**:
+Configure standard Passport JWT extraction from authorization headers:
+
+```javascript
+import passport from "passport";
+import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
+
+const opts = {
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: process.env.JWT_SECRET,
+};
+
+passport.use(
+  new JwtStrategy(opts, async (jwtPayload, done) => {
+    try {
+      const user = await findUserById(jwtPayload.sub);
+      if (user) return done(null, user);
+      return done(null, false);
+    } catch (err) {
+      return done(err, false);
+    }
+  }),
+);
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Use `passport-jwt`** for stateless APIs (Microservices).
-- **Limit Session size**: Only serialize the User ID, not availability entire object.
-- **Maintenance Check**: Some strategies are unmaintained. Check the GitHub repo activity before picking a strategy.
+- **Store Only the User ID in `serializeUser`**: Keep session store payloads tiny; fetch updated permissions on deserialization.
+- **Use Stateless JWT Strategy for REST APIs**: Avoid heavy cookie-based session stores when servicing stateless mobile and frontend clients.
+- **Handle Async Errors Gracefully**: Always wrap database lookups in try/catch blocks and pass exceptions to `done(err)`.
+- **Combine with Express Session Stores (Redis)**: Use `connect-redis` to share session state horizontally across Node.js replicas.
 
 **Don't**:
 
-- **Don't mix Logic**: Keep the Strategy config separate from your Route logic.
-- **Don't rely solely on it**: Passport handles _Authentication_. You still need to handle _Authorization_ (Roles/Permissions) separately.
+- **Don't store full user objects in sessions**: Outdated permissions or changed passwords won't take effect until sessions expire.
+- **Don't use `passport.authenticate('local')` without rate limiting**: Protect authentication endpoints with `express-rate-limit` against brute-force attacks.
+- **Don't forget to call `done()`**: Failing to invoke `done()` leaves HTTP requests hanging until client connection timeouts.
+
+## Troubleshooting
+
+| Error                                                | Cause                                                                             | Solution                                                                 |
+| :--------------------------------------------------- | :-------------------------------------------------------------------------------- | :----------------------------------------------------------------------- |
+| `TypeError: passport.initialize() is not a function` | Incorrect import syntax or calling initialize before middleware stack is ready.   | Use `app.use(passport.initialize())` after body parsers.                 |
+| `Unauthorized: 401 on protected route`               | Authorization header missing `Bearer ` prefix or token expired.                   | Inspect inbound request header: must be `Authorization: Bearer <token>`. |
+| `Unknown authentication strategy`                    | Route attempting to authenticate with a strategy before calling `passport.use()`. | Initialize and register all strategy instances before mounting routes.   |
 
 ## References
 

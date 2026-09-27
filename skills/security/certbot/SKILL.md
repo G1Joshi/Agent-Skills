@@ -1,6 +1,6 @@
 ---
 name: certbot
-description: Certbot Let's Encrypt certificates. Use for SSL/TLS.
+description: Expert Certbot SSL/TLS certificate assistance covering Let's Encrypt, ACME DNS/HTTP validation, and auto-renewal. Use when provisioning SSL certificates, setting up HTTPS, or troubleshooting cert renewals.
 ---
 
 # Certbot
@@ -9,11 +9,12 @@ Certbot is a free, open-source software tool for automatically using Let's Encry
 
 ## When to Use
 
-- **VPS Hosting**: Running Nginx/Apache on a VM (EC2, DigitalOcean) and need SSL.
-- **Homelab**: Securing local services exposed via DDNS.
-- **Wildcards**: Issuing `*.example.com` certificates (requires DNS plugin).
+- **Automated SSL/TLS Certificate Issuance**: Provisioning free, trusted Let's Encrypt certificates for web servers.
+- **Automatic Certificate Renewal**: Configuring cron or systemd timers to renew expiring certificates without downtime.
+- **Wildcard Certificate Provisioning**: Generating wildcard certificates (`*.example.com`) via automated DNS-01 challenges.
+- **Web Server Configuration Automation**: Automatically configuring HTTPS directives, ciphers, and redirects in Nginx and Apache.
 
-## Quick Start (Nginx on Ubuntu)
+## Quick Start
 
 ```bash
 sudo snap install --classic certbot
@@ -25,33 +26,69 @@ sudo certbot --nginx
 
 ## Core Concepts
 
-### ACME Protocol
+#Automated Certificate Management Environment (ACME)
 
-Automatic Certificate Management Environment. The protocol Certbot uses to talk to the Let's Encrypt CA.
+Certbot proves domain ownership to the Let's Encrypt Certificate Authority through challenge-response protocols:
 
-### Challenges
+```
+[ Web Server (Certbot) ] ──1. Request Certificate──→ [ Let's Encrypt CA ]
+                         ←─2. Challenge (HTTP-01)───
+[ Let's Encrypt CA ]     ──3. Fetch /.well-known/acme-challenge/<token>──→ [ Web Server ]
+[ Let's Encrypt CA ]     ──4. Issue Signed Certificate (90 Days)─────────→ [ Web Server ]
+```
 
-To prove you own the domain:
+#HTTP-01 vs DNS-01 Challenge Types
 
-- **HTTP-01**: Certbot puts a file in `.well-known/acme-challenge`. (Requires port 80 open).
-- **DNS-01**: Certbot creates a TXT record. (Required for Wildcards).
+- **HTTP-01**: Serves a challenge file over port 80 at `/.well-known/acme-challenge/`. Simple, but cannot issue wildcard certificates.
+- **DNS-01**: Creates a TXT record `_acme-challenge.example.com`. Required for wildcard certificates and internal/private servers:
 
-### Renewal
+```bash
+# Issue Wildcard Certificate via Cloudflare DNS-01 Challenge
+certbot certonly \
+  --dns-cloudflare \
+  --dns-cloudflare-credentials ~/.secrets/cloudflare.ini \
+  -d "example.com" -d "*.example.com"
+```
 
-Let's Encrypt certs last 90 days. Certbot installs a timer (`systemd`) to check twice daily and renew any cert expiring in <30 days.
+#Non-Interactive Standalone Mode
 
-## Best Practices (2025)
+Spins up a temporary standalone web server to validate domain control on machines without existing web servers:
+
+```bash
+certbot certonly --standalone -d api.example.com --non-interactive --agree-tos -m admin@example.com
+```
+
+## Common Patterns
+
+### Automated Nginx Wildcard Certificate via DNS Challenge
+
+**Problem**: HTTP-01 challenges fail on private services, firewalled servers, or wildcard subdomains.
+
+**Solution**:
+Use the DNS-01 validation plugin for automated wildcard provisioning:
+
+```bash
+certbot certonly \
+  --dns-cloudflare \
+  --dns-cloudflare-credentials /etc/letsencrypt/cloudflare.ini \
+  -d "*.example.com" -d "example.com" \
+  --agree-tos --email security@example.com --non-interactive
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Use DNS plugins**: If using Cloudflare/Route53, use `certbot-dns-cloudflare`. It's robust and supports wildcards.
-- **Test with Staging**: Use `--dry-run` or `--test-cert` to differentiate testing from production (Rate limits apply).
-- **Reload Web Server**: Ensure the renewal hook (`--deploy-hook`) reloads Nginx/Apache so it picks up the new cert.
+- **Test with `--dry-run` First**: Always test issuance and renewal against the Let's Encrypt staging environment to avoid hitting production rate limits.
+- **Automate Service Reloads with Deploy Hooks**: Use `--deploy-hook "systemctl reload nginx"` so web servers reload new certificates upon renewal.
+- **Retain Port 80 Open**: Keep HTTP port 80 open to allow HTTP-01 renewal challenges to succeed smoothly.
+- **Monitor Expiration Dates with Prometheus / Datadog**: Set up alerts if certificates have fewer than 20 days remaining.
 
 **Don't**:
 
-- **Don't Run as Root (custom)**: The default runs as root, but for custom hooks, drop privileges if possible.
-- **Don't Hardcode IP**: ACME verification usually requires a Domain Name.
+- **Don't forget to configure renewal timers**: Verify that `systemctl list-timers | grep certbot` is active and running twice daily.
+- **Don't hardcode DNS provider API tokens with global write access**: Restrict cloud DNS API tokens to modify only the `_acme-challenge` TXT records.
+- **Don't delete `/etc/letsencrypt/` files manually**: Use `certbot delete --cert-name <domain>` to remove decommissioned certificate configs.
 
 ## Troubleshooting
 
