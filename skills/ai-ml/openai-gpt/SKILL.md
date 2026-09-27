@@ -1,6 +1,6 @@
 ---
 name: openai-gpt
-description: OpenAI GPT models API for chat, completion, and embeddings. Use for AI integration.
+description: Expert OpenAI API assistance covering GPT-4o, GPT-4o-mini, o1/o3 reasoning models, structured outputs, and Function Calling. Use when building enterprise generative AI systems with OpenAI models.
 ---
 
 # OpenAI GPT
@@ -9,37 +9,173 @@ GPT (Generative Pre-trained Transformer) is the foundation of the modern AI revo
 
 ## When to Use
 
-- **General Purpose**: It is the baseline for all AI tasks.
-- **Complex Reasoning**: GPT-5 excels at multi-step logic and planning.
-- **Vision/Voice**: Native "Omni" capabilities (GPT-4o/5) process audio and video with <300ms latency.
+- **State-of-the-Art Language & Reasoning Intelligence**: GPT-4o, GPT-4o mini, o1, and o3-mini for reasoning, coding, and comprehension.
+- **Guaranteed Structured Outputs**: Utilizing JSON Schema and Pydantic to ensure 100% adherence to complex response models.
+- **Autonomous Function Calling & Agentic Loops**: Executing multi-turn workflows invoking tools, APIs, and calculators.
+- **Streaming & High-Throughput Production Workloads**: Real-time token streaming with async clients and batch APIs.
+
+## Quick Start
+
+```python
+from openai import OpenAI
+from pydantic import BaseModel
+
+client = OpenAI()
+
+class EventDetails(BaseModel):
+    name: str
+    date: str
+    participants: list[str]
+
+# Strict structured outputs via Pydantic
+completion = client.beta.chat.completions.parse(
+    model="gpt-4o-2024-08-06",
+    messages=[
+        {"role": "user", "content": "Alice and Bob are meeting for quarterly planning on Nov 15th."}
+    ],
+    response_format=EventDetails,
+)
+
+event = completion.choices[0].message.parsed
+print(event.name, event.date, event.participants)
+```
 
 ## Core Concepts
 
-### Models
+#Guaranteed Structured Outputs with Pydantic
 
-- **GPT-5**: The frontier model. Slow but smartest.
-- **GPT-4o**: "Omni". Fast, multimodal, cheaper.
-- **o1 / o3**: "Reasoning" models that "think" before answering (Chain of Thought).
+Parsing responses with 100% schema reliability:
 
-### Assistants API
+```python
+import os
+from openai import OpenAI
+from pydantic import BaseModel, Field
 
-Stateful API for building agents. Manages threads, retrieval (RAG), and code interpreter.
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
-### Structured Outputs
+class StepByStepPlan(BaseModel):
+    summary: str
+    steps: list[str]
+    estimated_hours: int = Field(description="Estimated implementation effort")
+    requires_database_migration: bool
 
-Guarantees JSON schema compliance for API responses.
+completion = client.beta.chat.completions.parse(
+    model="gpt-4o-2024-08-06",
+    messages=[
+        {"role": "system", "content": "You are a principal software architect."},
+        {"role": "user", "content": "Outline the steps to migrate our user auth from session cookies to stateless JWTs."}
+    ],
+    response_format=StepByStepPlan,
+)
 
-## Best Practices (2025)
+plan: StepByStepPlan = completion.choices[0].message.parsed
+print(f"Summary: {plan.summary} (Est. {plan.estimated_hours}h)")
+for i, step in enumerate(plan.steps, 1):
+    print(f"{i}. {step}")
+```
 
-**Do**:
+#Multi-Tool Function Calling & Execution
 
-- **Use Structured Outputs**: Always define a Zod/JSON schema for production apps.
-- **Use `o3-mini` for Code**: It is cheaper and often better at coding than GPT-4o.
-- **Batch Requests**: Use the Batch API for 50% discount on non-urgent tasks.
+Supplying tools and handling tool call requests:
 
-**Don't**:
+```python
+import json
+from openai import OpenAI
 
-- **Don't use GPT-3.5**: It is obsolete. Use GPT-4o-mini for cheap tasks.
+client = OpenAI()
+
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "query_database_metrics",
+            "description": "Get current connection count and CPU utilization of a database instance.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "instance_id": {"type": "string"},
+                },
+                "required": ["instance_id"],
+            },
+        },
+    }
+]
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Check metrics for db-cluster-primary"}],
+    tools=tools,
+    tool_choice="auto"
+)
+
+tool_calls = response.choices[0].message.tool_calls
+if tool_calls:
+    for tc in tool_calls:
+        print(f"Tool to invoke: {tc.function.name} with args: {tc.function.arguments}")
+```
+
+#Streaming Responses with Async Client
+
+Processing tokens in real-time for responsive UIs:
+
+```python
+import asyncio
+from openai import AsyncOpenAI
+
+async def stream_output():
+    aclient = AsyncOpenAI()
+    stream = await aclient.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": "Explain zero-copy deserialization in Rust."}],
+        stream=True
+    )
+    async for chunk in stream:
+        content = chunk.choices[0].delta.content or ""
+        print(content, end="", flush=True)
+
+# asyncio.run(stream_output())
+```
+
+## Common Patterns
+
+### Function Calling with Parallel Tool Execution
+
+**Problem**: Executing multiple external API lookups sequentially slows down assistant responses.
+
+**Solution**:
+Handle parallel tool call requests in a single round-trip:
+
+```python
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "What's the stock price of Apple and Google?"}],
+    tools=stock_tools
+)
+
+tool_calls = response.choices[0].message.tool_calls
+if tool_calls:
+    # Execute lookups concurrently in client application
+    for tool_call in tool_calls:
+        print(f"Executing: {tool_call.function.name}({tool_call.function.arguments})")
+```
+
+## Best Practices (2026)
+
+- **Do** use `client.beta.chat.completions.parse` with Pydantic models for guaranteed structured responses.
+- **Do** choose `gpt-4o-mini` for fast, cost-effective high-volume tasks and `gpt-4o` / `o3-mini` for heavy reasoning.
+- **Do** use `temperature=1.0` or default for reasoning models (o1/o3-mini), and `0.0` for structured extraction with GPT-4o.
+- **Do** leverage the OpenAI Batch API for non-real-time jobs to reduce costs by 50%.
+- **Don't** embed API keys in client-side code; proxy all OpenAI requests through an authenticated backend.
+- **Don't** use standard completion parsing with regex when Structured Outputs guarantee exact JSON.
+- **Don't** omit error handling for rate limits (`openai.RateLimitError`); implement exponential backoff.
+
+## Troubleshooting
+
+| Error                                             | Cause                                                           | Solution                                                                         |
+| :------------------------------------------------ | :-------------------------------------------------------------- | :------------------------------------------------------------------------------- |
+| `openai.RateLimitError (429)`                     | Requests per minute (RPM) or tokens per minute (TPM) quota hit. | Implement exponential backoff or use tiered model fallback (e.g. `gpt-4o-mini`). |
+| `openai.BadRequestError: Context window exceeded` | Prompt tokens plus max_tokens exceed model context limit.       | Truncate conversation history or summarize previous messages.                    |
+| `Refusal error in message`                        | Safety guardrails rejected the query.                           | Check `choice.message.refusal` and adjust prompt framing.                        |
 
 ## References
 
