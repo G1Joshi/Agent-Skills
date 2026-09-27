@@ -1,6 +1,6 @@
 ---
 name: dart
-description: Dart programming for Flutter mobile and web development. Use for .dart files.
+description: Expert Dart programming assistance covering sound null safety, async/await futures, streams, pattern matching, records, and class constructors. Use when writing Dart logic, developing Flutter mobile/web apps, or building Dart CLI applications.
 ---
 
 # Dart
@@ -9,10 +9,10 @@ Modern Dart development with null safety, pattern matching, and Flutter integrat
 
 ## When to Use
 
-- Working with `.dart` files
-- Building Flutter mobile/web/desktop apps
-- Server-side Dart development
-- Creating packages for pub.dev
+- **Cross-Platform Flutter Development**: The primary language powering Flutter applications across iOS, Android, Web, and Desktop.
+- **Command-Line & Backend Services**: Writing fast CLI utilities, build scripts, and server-side Dart services with Shelf.
+- **Ahead-of-Time (AOT) & Just-in-Time (JIT) Compilation**: Rapid development via Stateful Hot Reload (JIT) and high-speed native release binaries (AOT).
+- **Multiplatform Code Sharing**: Sharing models, validation, and domain logic across mobile apps and web consoles.
 
 ## Quick Start
 
@@ -34,44 +34,45 @@ class User {
 
 ## Core Concepts
 
-### Null Safety
+#Sound Null Safety
+
+Variables cannot contain `null` unless explicitly declared with `?`; static analysis guarantees zero runtime null pointer crashes:
 
 ```dart
-// Non-nullable by default
-String name = 'John';
-
-// Nullable with ?
-String? maybeNull;
-
-// Late initialization
-late final String lazyInit;
-
-// Null-aware operators
-String greeting = person?.name ?? 'Guest';
-person?.address?.city;
+String formatGreeting(String name, String? title) {
+  // title is nullable, name is strictly non-nullable
+  final prefix = title != null ? '$title ' : '';
+  return 'Hello, $prefix$name!';
+}
 ```
 
-### Records & Pattern Matching (Dart 3)
+#Records and Pattern Matching (Dart 3)
+
+Returns multiple strongly-typed values and destructures patterns cleanly:
 
 ```dart
-// Records
-(String, int) getPerson() => ('John', 25);
+// Multi-return via Records
+(double lat, double lng) getCoordinates() {
+  return (40.7128, -74.0060);
+}
 
-// Destructuring
-final (name, age) = getPerson();
+void processLocation() {
+  final (lat, lng) = getCoordinates();
+  print('Latitude: $lat, Longitude: $lng');
+}
+```
 
-// Switch expressions with patterns
-String describe(Object obj) => switch (obj) {
-  int i when i < 0 => 'negative',
-  int i => 'positive: $i',
-  String s => 'string: $s',
-  _ => 'unknown',
-};
+#Asynchronous Streams & Reactive Pipelines
 
-// Sealed classes
-sealed class Result<T> {}
-class Success<T> extends Result<T> { final T value; Success(this.value); }
-class Failure<T> extends Result<T> { final String error; Failure(this.error); }
+Generates and consumes asynchronous streams of events:
+
+```dart
+Stream<int> countStream(int max) async* {
+  for (int i = 1; i <= max; i++) {
+    await Future.delayed(const Duration(milliseconds: 100));
+    yield i;
+  }
+}
 ```
 
 ## Common Patterns
@@ -116,21 +117,20 @@ extension StringExtension on String {
 }
 ```
 
-## Best Practices
+## Best Practices (2026)
 
 **Do**:
 
-- Use `const` constructors when possible
-- Prefer `final` for immutable variables
-- Use named parameters with `required`
-- Follow effective_dart lints
+- **Mark Immutable Widgets and Constants with `const`**: Allow the Flutter compiler to skip rebuilds for constant subtrees.
+- **Enforce Strict Linter Rules**: Configure `flutter_lints` or `very_good_analysis` in `analysis_options.yaml`.
+- **Use Sealed Classes for State Modeling**: Leverage `sealed class` to ensure exhaustive switch statements across UI states.
+- **Close Stream Controllers**: Always invoke `.close()` on `StreamController` instances inside dispose methods.
 
 **Don't**:
 
-- Use `dynamic` when type is known
-- Force unwrap with `!` unnecessarily
-- Create God classes (keep small)
-- Ignore `late` initialization errors
+- **Don't use the `!` null-assertion operator carelessly**: Unchecked `!` throws runtime exceptions; handle nulls with `??` or pattern matching.
+- **Don't execute heavy synchronous parsing in the main isolate**: Offload heavy JSON parsing or crypto to background isolates via `Isolate.run()`.
+- **Don't declare variables as `dynamic`**: Avoid `dynamic`; use `Object?` or explicit generic types to preserve compile-time safety.
 
 ## Troubleshooting
 

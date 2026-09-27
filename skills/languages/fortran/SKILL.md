@@ -1,6 +1,6 @@
 ---
 name: fortran
-description: Fortran for scientific and numerical computing. Use for .f90 files.
+description: Expert modern Fortran (Fortran 90/2008/2018) assistance covering array operations, OpenMP, and numerical libraries. Use when writing scientific simulations, physics calculations, or high-performance linear algebra.
 ---
 
 # Fortran
@@ -9,35 +9,131 @@ Fortran is not dead; it drives global weather forecasting and computational phys
 
 ## When to Use
 
-- **HPC**: High Performance Computing on supercomputers.
-- **Legacy**: 50 years of tested scientific libraries (LAPACK, BLAS).
-- **Arrays**: Native multi-dimensional array slicing is superior to C.
+- **High-Performance Numerical & Scientific Computing**: Weather forecasting, computational fluid dynamics (CFD), and physics simulations.
+- **Supercomputing & HPC Clusters (MPI / OpenMP)**: Running petascale simulation workloads across thousands of distributed GPU/CPU nodes.
+- **Linear Algebra BLAS/LAPACK Libraries**: Maximizing raw floating-point computation speed on multidimensional matrix operations.
+- **Legacy Aerospace & Nuclear Engineering**: Maintaining and extending battle-tested mathematical modeling libraries.
+
+## Quick Start
+
+```fortran
+program main
+    implicit none
+    integer, parameter :: dp = kind(1.0d0)
+    real(dp) :: x = 2.0_dp, y = 3.0_dp, z
+
+    z = x ** y
+    print *, "Result of 2^3 is:", z
+end program main
+```
 
 ## Core Concepts
 
-### Modules
+#Array Slicing & Pure Mathematical Syntax
 
-Modern encapsulation. `USE my_module`.
+Fortran treats multi-dimensional arrays as first-class primitives with native vector slicing:
 
-### Coarrays
+```fortran
+program matrix_ops
+  implicit none
+  real, dimension(3, 3) :: A, B, C
 
-Native parallel programming syntax created for supercomputers.
+  ! Initialize array
+  A = 2.0
+  B = 3.0
 
-### Implicit None
+  ! Element-wise matrix multiplication in single line
+  C = A * B + 1.0
 
-Always required to disable legacy variable typing.
+  print *, "Result Matrix (1,1):", C(1, 1)
+end program matrix_ops
+```
 
-## Best Practices (2025)
+#Modern Fortran Modules (Fortran 2018/2023)
+
+Encapsulates data, interfaces, and subroutines cleanly:
+
+```fortran
+module physics_engine
+  implicit none
+  private
+  public :: calculate_kinetic_energy
+
+contains
+
+  pure function calculate_kinetic_energy(mass, velocity) result(energy)
+    real, intent(in) :: mass, velocity
+    real :: energy
+    energy = 0.5 * mass * (velocity ** 2)
+  end function calculate_kinetic_energy
+
+end module physics_engine
+```
+
+#Coarray Parallelism for High-Performance Computing (HPC)
+
+Built-in SPMD (Single Program, Multiple Data) parallel syntax without external MPI library calls:
+
+```fortran
+program coarray_demo
+  implicit none
+  integer :: val[*]
+
+  val = this_image() ! Each parallel CPU core assigns its own image ID
+  sync all
+
+  if (this_image() == 1) then
+    print *, "Image 1 read from Image 2:", val[2]
+  end if
+end program coarray_demo
+```
+
+## Common Patterns
+
+### Vectorized Array Operations and Slicing
+
+**Problem**: Writing nested DO loops for large matrix calculations is slow and error-prone.
+
+**Solution**:
+Use Fortran's native array syntax for automatic vectorization:
+
+```fortran
+program matrix_math
+    implicit none
+    real, dimension(100, 100) :: A, B, C
+
+    call random_number(A)
+    call random_number(B)
+
+    ! Array-level element-wise operation (vectorized)
+    C = A * B + sin(A)
+
+    print *, "Sum of C matrix:", sum(C)
+end program matrix_math
+```
+
+## Best Practices (2026)
 
 **Do**:
 
-- **Use `fpm`**: The Fortran Package Manager (modern tooling!).
-- **Use `iso_c_binding`**: To call Fortran from C/Python.
-- **Use `do concurrent`**: To hint optimizations to the compiler.
+- **Always Declare `implicit none`**: Eliminate dangerous legacy implicit typing by placing `implicit none` at the top of every module.
+- **Use Modern Fortran Standards (2008/2018/2023)**: Avoid obsolete fixed-format Fortran 77; write clean free-format code.
+- **Mark Side-Effect-Free Functions as `pure`**: Enable aggressive compiler parallelization and optimization.
+- **Use `intent(in)`, `intent(out)`, and `intent(inout)`**: Explicitly document and enforce parameter passing semantics.
 
 **Don't**:
 
-- **Don't use fixed form**: No `.f` (77). Use `.f90` (free form).
+- **Don't use common blocks (`COMMON`) or equivalence (`EQUIVALENCE`)**: Replace legacy shared memory with modern modules.
+- **Don't use fixed-form (column 7) syntax**: Modern Fortran files should use `.f90`, `.f08`, or `.f18` extensions with free-format layout.
+- **Don't ignore array bounds checking during development**: Compile with `-fcheck=all -Wall` during debugging.
+
+## Troubleshooting
+
+| Error                                              | Cause                                                                     | Solution                                                                                 |
+| :------------------------------------------------- | :------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------- |
+| `Segmentation fault in array operation`            | Out of bounds array indexing or stack exhaustion from large local arrays. | Allocate large arrays on the heap using `allocatable` and compile with `-fcheck=bounds`. |
+| `Type mismatch in argument '...'`                  | Passing default real/integer to function expecting double precision.      | Specify explicit precision kind (e.g. `1.0_dp`) on literals.                             |
+| `implicit none error: symbol has no IMPLICIT type` | Undeclared variable used in program unit.                                 | Declare all variables explicitly with type and kind parameters.                          |
 
 ## References
 

@@ -1,6 +1,6 @@
 ---
 name: csharp
-description: C# programming for .NET, ASP.NET Core, LINQ, async patterns, and Entity Framework. Use for .cs files.
+description: Expert C# and .NET assistance covering LINQ, async/await patterns, pattern matching, records, Entity Framework Core, and ASP.NET Core web services. Use when writing idiomatic C#, designing .NET enterprise backends, building cross-platform services, or optimizing memory with span/memory types.
 ---
 
 # C#
@@ -9,10 +9,10 @@ Modern C# development with .NET 8+, async patterns, and Entity Framework.
 
 ## When to Use
 
-- Working with `.cs` files
-- Building ASP.NET Core web APIs
-- Unity game development
-- Desktop apps with WPF/MAUI
+- **Enterprise Web Backends & Microservices**: Building high-throughput ASP.NET Core web APIs and gRPC microservices on modern .NET 8/9.
+- **Cross-Platform Mobile & Desktop (MAUI)**: Compiling native iOS, Android, macOS, and Windows applications from a single C# codebase.
+- **Cloud-Native AWS & Azure Infrastructure**: Deploying scalable serverless functions, containerized workers, and event-driven apps.
+- **Game Development with Unity / Godot**: Developing gameplay logic, physics, and state machines in leading game engines.
 
 ## Quick Start
 
@@ -30,49 +30,50 @@ public class UserService
 
 ## Core Concepts
 
-### Records & Nullable
+#Records & Pattern Matching (C# 12/13)
+
+Immutable data structures with value equality and expressive switch expressions:
 
 ```csharp
-// Records for immutable data
-public record User(string Id, string Name, string Email)
-{
-    public string DisplayName => Name.ToUpperInvariant();
-}
+// Positional Record with built-in value equality
+public record Order(string Id, decimal Amount, string Status);
 
-// With-expressions for copies
-var updated = user with { Name = "New Name" };
-
-// Nullable reference types
-public User? FindUser(string id)
+public static class OrderClassifier
 {
-    return users.FirstOrDefault(u => u.Id == id);
+    public static string Evaluate(Order order) => order switch
+    {
+        { Status: "PAID", Amount: > 1000 } => "High-Value Order",
+        { Status: "PAID" }                 => "Standard Order",
+        { Status: "CANCELLED" }            => "Void Order",
+        _                                  => "Pending Review"
+    };
 }
 ```
 
-### Async/Await
+#Memory Optimization with `Span<T>` and `ReadOnlySpan<T>`
+
+Allocates and slices continuous memory buffers on the stack without heap GC allocations:
 
 ```csharp
-public async Task<List<User>> GetUsersAsync()
+public static bool TryParseYear(ReadOnlySpan<char> dateSpan, out int year)
 {
-    // Parallel async operations
-    var tasks = ids.Select(id => GetUserAsync(id));
-    var users = await Task.WhenAll(tasks);
-    return users.ToList();
+    // Slice without allocating new sub-strings
+    ReadOnlySpan<char> yearSpan = dateSpan.Slice(0, 4);
+    return int.TryParse(yearSpan, out year);
 }
+```
 
-// Async streams
-public async IAsyncEnumerable<User> StreamUsersAsync()
-{
-    await foreach (var user in _repository.GetAllAsync())
-    {
-        yield return user;
-    }
-}
+#Async / Await with `ValueTask`
 
-// Cancellation
-public async Task<User> GetUserAsync(string id, CancellationToken ct)
+Efficient asynchronous programming minimizing task object allocations on hot paths:
+
+```csharp
+public async ValueTask<UserProfile> GetUserProfileAsync(string userId)
 {
-    return await _client.GetFromJsonAsync<User>($"/users/{id}", ct);
+    if (_cache.TryGetValue(userId, out var cached))
+        return cached; // Synchronous return allocates zero task objects
+
+    return await _repository.FetchFromDatabaseAsync(userId);
 }
 ```
 
@@ -118,21 +119,20 @@ if (numbers is [var first, _, var last])
 }
 ```
 
-## Best Practices
+## Best Practices (2026)
 
 **Do**:
 
-- Use `record` for DTOs and value objects
-- Enable nullable reference types
-- Use async/await for I/O operations
-- Use dependency injection
+- **Enable Nullable Reference Types (`<Nullable>enable</Nullable>`)**: Catch null reference exceptions at compile time across the codebase.
+- **Use Dependency Injection & Options Pattern**: Inject strongly-typed configurations via `IOptions<T>` and constructor injection.
+- **Use `ValueTask<T>` on Frequently Cached Code Paths**: Reduce GC allocations by returning `ValueTask` when operations often complete synchronously.
+- **Leverage Native AOT Compilation**: Compile .NET applications to native machine code (`PublishAot=true`) for sub-10ms startup and tiny memory footprints.
 
 **Don't**:
 
-- Block async code with `.Result` or `.Wait()`
-- Ignore cancellation tokens
-- Use `dynamic` when type is known
-- Create God classes
+- **Don't block async code with `.Result` or `.Wait()`**: Synchronous blocking on asynchronous tasks causes immediate thread pool deadlocks.
+- **Don't use mutable shared singletons without thread safety**: Use `ConcurrentDictionary` or proper synchronization primitives.
+- **Don't instantiate `HttpClient` per request**: Use `IHttpClientFactory` to prevent socket exhaustion.
 
 ## Troubleshooting
 

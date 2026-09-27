@@ -1,6 +1,6 @@
 ---
 name: cpp
-description: C++ modern C++17/20/23 with STL, smart pointers, and performance optimization. Use for .cpp files.
+description: Expert modern C++ (C++17/C++20/C++23) assistance covering RAII, smart pointers, template metaprogramming, STL containers, move semantics, and memory profiling. Use when developing high-performance native systems, low-latency algorithms, game engines, or embedded C++ codebases.
 ---
 
 # C++
@@ -9,10 +9,10 @@ Modern C++ development with smart pointers, RAII, and performance optimization.
 
 ## When to Use
 
-- Working with `.cpp` or `.hpp` files
-- Systems programming and embedded
-- Game development with Unreal Engine
-- Performance-critical applications
+- **High-Performance Game Engine & Graphics Development**: Unreal Engine, Vulkan, DirectX 12, and real-time ray tracing pipelines.
+- **Low-Latency Quantitative Finance**: Writing high-frequency trading (HFT) engines with microsecond and nanosecond execution SLAs.
+- **Systems & Database Infrastructure**: Building foundational engines (Chromium, ClickHouse, RocksDB, MongoDB).
+- **Embedded & Autonomous Robotics**: ROS 2, computer vision pipelines, and self-driving automotive control systems.
 
 ## Quick Start
 
@@ -39,57 +39,59 @@ auto user = std::make_unique<User>("John", "john@example.com");
 
 ## Core Concepts
 
-### Smart Pointers
+#RAII & Modern Smart Pointers (C++20/C++23)
+
+Resource Acquisition Is Initialization (RAII) ties resource management directly to object lifetime:
 
 ```cpp
-// unique_ptr - exclusive ownership
-auto user = std::make_unique<User>("John");
+#include <iostream>
+#include <memory>
+#include <string>
 
-// shared_ptr - shared ownership
-auto shared = std::make_shared<Resource>();
-auto copy = shared;  // ref count increases
+class DatabaseConnection {
+public:
+    explicit DatabaseConnection(std::string conn_str) { std::cout << "Connected
+"; }
+    ~DatabaseConnection() { std::cout << "Closed connection safely
+"; }
+    void query(std::string sql) { std::cout << "Executing: " << sql << "
+"; }
+};
 
-// weak_ptr - non-owning observer
-std::weak_ptr<Resource> observer = shared;
-if (auto locked = observer.lock()) {
-    // safe to use
-}
-
-// Never use raw new/delete for ownership
+void execute_task() {
+    // std::unique_ptr automatically destructs and frees resource when exiting scope
+    auto conn = std::make_unique<DatabaseConnection>("postgres://localhost");
+    conn->query("SELECT 1;");
+} // conn goes out of scope here; destructor executes automatically
 ```
 
-### Move Semantics
+#Move Semantics & `std::move`
+
+Transfers ownership of heavy heap resources without expensive deep memory copying:
 
 ```cpp
-class Buffer {
-public:
-    Buffer(size_t size) : data_(new char[size]), size_(size) {}
+#include <vector>
 
-    // Move constructor
-    Buffer(Buffer&& other) noexcept
-        : data_(other.data_), size_(other.size_) {
-        other.data_ = nullptr;
-        other.size_ = 0;
-    }
+std::vector<int> generate_data() {
+    std::vector<int> large_vector(1'000'000, 42);
+    return large_vector; // Move semantics (or RVO) avoids copying 1M integers
+}
+```
 
-    // Move assignment
-    Buffer& operator=(Buffer&& other) noexcept {
-        if (this != &other) {
-            delete[] data_;
-            data_ = other.data_;
-            size_ = other.size_;
-            other.data_ = nullptr;
-            other.size_ = 0;
-        }
-        return *this;
-    }
+#C++20 Concepts & Constexpr Metaprogramming
 
-    ~Buffer() { delete[] data_; }
+Constrains template arguments with readable compile-time predicates:
 
-private:
-    char* data_;
-    size_t size_;
-};
+```cpp
+#include <concepts>
+
+template<typename T>
+concept Numeric = std::integral<T> || std::floating_point<T>;
+
+template<Numeric T>
+T calculate_mean(T a, T b) {
+    return (a + b) / 2;
+}
 ```
 
 ## Common Patterns
@@ -146,21 +148,20 @@ private:
 };
 ```
 
-## Best Practices
+## Best Practices (2026)
 
 **Do**:
 
-- Use smart pointers for ownership
-- Apply RAII for resource management
-- Use `const` and `constexpr` liberally
-- Prefer `std::string_view` for read-only strings
+- **Use Smart Pointers (`std::unique_ptr`, `std::shared_ptr`)**: Completely avoid raw `new` and `delete` expressions.
+- **Pass Heavy Read-Only Objects by `const&`**: Prevent accidental copy overhead (`void process(const std::string& data)`).
+- **Use `std::string_view` and `std::span`**: Reference continuous memory without copying or allocating heap strings.
+- **Enable Clang-Tidy & AddressSanitizer in CI**: Enforce modern standards and catch memory leaks automatically.
 
 **Don't**:
 
-- Use raw `new`/`delete` for ownership
-- Return raw pointers from functions
-- Use C-style casts (use `static_cast`)
-- Ignore compiler warnings
+- **Don't use C-style casts (`(int)x`)**: Use explicit C++ casts (`static_cast`, `reinterpret_cast`) to retain compiler safety checks.
+- **Don't return references to local stack variables**: Returning local references causes dangling pointers and immediate undefined behavior.
+- **Don't use macros (`#define`) for constants**: Use `constexpr` or `inline constexpr` variables.
 
 ## Troubleshooting
 

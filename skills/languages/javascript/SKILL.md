@@ -1,6 +1,6 @@
 ---
 name: javascript
-description: JavaScript ES6+ programming including async/await, DOM manipulation, modules, and Node.js. Use for .js files and web development.
+description: Expert modern JavaScript (ES2024+) assistance covering closures, async/await, promises, modules, event loop concurrency, and DOM manipulation. Use when writing frontend or Node.js code, designing clean asynchronous flows, or modernizing legacy JavaScript.
 ---
 
 # JavaScript
@@ -9,10 +9,10 @@ Modern JavaScript development with ES6+ features, async patterns, and best pract
 
 ## When to Use
 
-- Working with `.js` files in web or Node.js projects
-- Implementing async/await patterns and promises
-- DOM manipulation and event handling
-- Building frontend applications
+- **Universal Full-Stack Web Development**: The foundational language of the web, executing across browsers, Node.js, Bun, Deno, and Edge workers.
+- **Event-Driven Asynchronous Backends**: Serving high-concurrency microservices, real-time WebSockets, and serverless functions.
+- **Interactive Browser User Interfaces**: Manipulating the DOM, capturing browser events, and orchestrating client-side component state.
+- **Cross-Platform Scripting & Tooling**: Building developer tools, CLI scripts, and build plugins with npm/npx.
 
 ## Quick Start
 
@@ -32,34 +32,60 @@ async function fetchData(url) {
 
 ## Core Concepts
 
-### Destructuring & Spread
+#Event Loop & Microtask Concurrency
+
+JavaScript is single-threaded; asynchronous operations queue callbacks across Macrotasks and Microtasks:
 
 ```javascript
-// Object destructuring with defaults
-const { name, age = 18, ...rest } = user;
+console.log("1: Synchronous start");
 
-// Array destructuring
-const [first, second, ...remaining] = items;
+setTimeout(() => console.log("4: Macrotask (setTimeout)"), 0);
 
-// Spread for immutable updates
-const updated = { ...user, name: "New Name" };
-const combined = [...array1, ...array2];
+Promise.resolve().then(() => console.log("3: Microtask (Promise)"));
+
+console.log("2: Synchronous end");
+// Output Order: 1 -> 2 -> 3 -> 4
 ```
 
-### Optional Chaining & Nullish Coalescing
+#Modern ECMAScript (ES2024+) Features
+
+Leverages modern language primitives for concise, safe data handling:
 
 ```javascript
-// Safe property access
-const city = user?.address?.city;
-const firstItem = items?.[0];
-const result = callback?.();
+// Structured Clone for deep copying
+const original = { user: { name: "Alice" }, tags: new Set(["admin"]) };
+const deepCopy = structuredClone(original);
 
-// Nullish coalescing (null/undefined only)
-const value = input ?? defaultValue;
+// Array grouping (Object.groupBy)
+const inventory = [
+  { name: "Apples", category: "Fruit" },
+  { name: "Carrots", category: "Vegetable" },
+  { name: "Bananas", category: "Fruit" },
+];
+const grouped = Object.groupBy(inventory, (item) => item.category);
 
-// Logical assignment
-user.name ??= "Anonymous";
-user.permissions ||= [];
+// Safe Object hasOwn
+if (Object.hasOwn(original, "user")) {
+  console.log("User property exists safely");
+}
+```
+
+#Async / Await with Concurrent `Promise.allSettled`
+
+Handles batch asynchronous requests safely without failing fast on single errors:
+
+```javascript
+async function fetchUserDashboard(userId) {
+  const results = await Promise.allSettled([
+    fetch(`/api/users/${userId}`).then((r) => r.json()),
+    fetch(`/api/users/${userId}/notifications`).then((r) => r.json()),
+  ]);
+
+  const user = results[0].status === "fulfilled" ? results[0].value : null;
+  const notifications =
+    results[1].status === "fulfilled" ? results[1].value : [];
+  return { user, notifications };
+}
 ```
 
 ## Common Patterns
@@ -123,21 +149,20 @@ export * from "./utils.js";
 const module = await import(`./features/${feature}.js`);
 ```
 
-## Best Practices
+## Best Practices (2026)
 
 **Do**:
 
-- Use `const` by default, `let` when reassignment needed
-- Use optional chaining (`?.`) for safe property access
-- Use `Promise.allSettled()` for independent async operations
-- Use named exports for better tree-shaking
+- **Always Use Strict Equality (`===`)**: Avoid implicit type coercion bugs by using `===` and `!==`.
+- **Use `const` by Default and `let` for Reassignment**: Never use legacy function-scoped `var`.
+- **Adopt Native ESM Modules**: Use `import` and `export` statements; deprecate CommonJS `require()` in modern projects.
+- **Handle Rejected Promises with `try...catch`**: Always wrap `await` calls in error handling blocks to avoid unhandled rejection crashes.
 
 **Don't**:
 
-- Use `var` (prefer `const`/`let`)
-- Use `== ` for comparison (use `===`)
-- Nest callbacks deeply (use async/await)
-- Mutate arrays/objects directly (use spread/map/filter)
+- **Don't block the Event Loop**: Never execute heavy synchronous loops or CPU-intensive math on the main thread; offload to Web Workers.
+- **Don't pollute global prototypes**: Never modify `Array.prototype` or `Object.prototype`.
+- **Don't use `eval()` or `new Function()`**: Dynamic code evaluation opens critical remote code execution (RCE) vectors.
 
 ## Troubleshooting
 

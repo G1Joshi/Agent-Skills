@@ -1,6 +1,6 @@
 ---
 name: python
-description: Python programming with type hints, async/await, decorators, and package management. Use for .py files and data science.
+description: Expert modern Python (3.11+) assistance covering type annotations, async/await, generators, dataclasses, context managers, and virtual environment tooling. Use when writing idiomatic Python, building web backends, structuring data science pipelines, or optimizing Python performance.
 ---
 
 # Python
@@ -9,10 +9,10 @@ Modern Python development with type hints, async/await, and best practices.
 
 ## When to Use
 
-- Working with `.py` files
-- Building APIs with FastAPI/Django
-- Data analysis with pandas/numpy
-- Scripting and automation
+- **Artificial Intelligence, Machine Learning & LLMs**: Developing AI models with PyTorch, TensorFlow, Hugging Face, LangChain, and vLLM.
+- **High-Performance Web APIs (FastAPI / Django)**: Building async web backends, microservices, and enterprise applications.
+- **Data Engineering & Analytics**: Processing data pipelines using Pandas, Polars, PySpark, and DuckDB.
+- **Automation, Scripting & DevOps**: Writing robust infrastructure automation, system utilities, and CLI tools.
 
 ## Quick Start
 
@@ -30,44 +30,57 @@ def process_items(
 
 ## Core Concepts
 
-### Type Hints
+#Strict Type Hints & Runtime Validation (Pydantic / Mypy)
+
+Modern Python (3.11/3.12+) features comprehensive type annotations and structural models:
 
 ```python
-from typing import TypeVar, Generic
-from collections.abc import Callable, Iterator
+from typing import Annotated
+from pydantic import BaseModel, EmailStr, Field
 
-def process_items(
-    items: list[str],
-    transform: Callable[[str], str] | None = None,
-) -> list[str]:
-    if transform:
-        return [transform(item) for item in items]
-    return items
+class UserProfile(BaseModel):
+    id: str
+    email: EmailStr
+    age: Annotated[int, Field(ge=18, le=120)]
+    roles: list[str] = ["member"]
 
-# Use TypeVar for generics
-T = TypeVar('T')
-
-def first(items: list[T]) -> T | None:
-    return items[0] if items else None
+# Automatic validation and serialization
+user = UserProfile(id="usr_415", email="alice@example.com", age=28)
+print(user.model_dump_json())
 ```
 
-### Dataclasses & Pydantic
+#Asynchronous Event Loop & Asyncio Task Groups
+
+Concurrent asynchronous I/O with modern exception handling:
 
 ```python
-from dataclasses import dataclass, field
-from pydantic import BaseModel, Field
+import asyncio
+import httpx
 
-# Dataclass for simple data containers
-@dataclass
-class User:
-    name: str
-    email: str
-    tags: list[str] = field(default_factory=list)
+async def fetch_metric(client: httpx.AsyncClient, metric_id: int) -> dict:
+    resp = await client.get(f"https://api.example.com/metrics/{metric_id}")
+    return resp.json()
 
-# Pydantic for validation
-class UserCreate(BaseModel):
-    name: str = Field(..., min_length=1, max_length=100)
-    email: str = Field(..., pattern=r'^[\w\.-]+@[\w\.-]+\.\w+$')
+async def main():
+    async with httpx.AsyncClient() as client:
+        # Python 3.11+ TaskGroup manages structured concurrency cleanly
+        async with asyncio.TaskGroup() as tg:
+            task1 = tg.create_task(fetch_metric(client, 1))
+            task2 = tg.create_task(fetch_metric(client, 2))
+
+    print("Results:", task1.result(), task2.result())
+
+asyncio.run(main())
+```
+
+#Modern Dependency Management with `uv` / `poetry`
+
+Replaces slow legacy pip and virtualenv workflows with lightning-fast Rust-based tooling:
+
+```bash
+# Instant package installation and lockfile management via uv
+uv venv
+uv pip install -r requirements.txt
 ```
 
 ## Common Patterns
@@ -105,21 +118,20 @@ def managed_resource() -> Iterator[Resource]:
         resource.cleanup()
 ```
 
-## Best Practices
+## Best Practices (2026)
 
 **Do**:
 
-- Use type hints for function signatures
-- Use `pyproject.toml` for project configuration
-- Use virtual environments (`venv`, `poetry`)
-- Use generators for large datasets
+- **Adopt `uv` for Package Management**: Use `uv` (10-100x faster than pip) for virtual environments and dependency resolution.
+- **Lint and Format with Ruff**: Replace Flake8, Black, and isort with the blazing-fast Rust-based `ruff` linter/formatter.
+- **Enforce Strict Static Typing with Mypy or Pyright**: Catch type errors and missing attributes in CI before production.
+- **Use Context Managers for Resources**: Always manage files, sockets, and locks using `with` and `async with` statements.
 
 **Don't**:
 
-- Use mutable default arguments (`def f(x=[]`)
-- Use `import *` (pollutes namespace)
-- Catch bare `except:` (catch specific exceptions)
-- Use `assert` for input validation
+- **Don't use mutable default arguments in functions**: Avoid `def append_to(item, target=[])`; use `target: list | None = None`.
+- **Don't catch generic `except Exception:` blindly**: Catch specific exception classes to avoid masking unexpected programming errors.
+- **Don't install global packages directly**: Always isolate project dependencies in dedicated virtual environments (`.venv`).
 
 ## Troubleshooting
 
