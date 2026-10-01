@@ -33,7 +33,7 @@ pytest
 
 ## Core Concepts
 
-#Dependency Injection with Fixtures
+### Dependency Injection with Fixtures
 
 Fixtures provide modular, reusable dependencies with explicit lifecycle scopes:
 
@@ -58,7 +58,7 @@ def db_session(db_engine):
     session.close()
 ```
 
-#Parameterized Tests (`@pytest.mark.parametrize`)
+### Parameterized Tests (`@pytest.mark.parametrize`)
 
 Tests multiple input/output scenarios cleanly without loop boilerplate:
 
@@ -75,7 +75,7 @@ def test_email_validation(email, expected_valid):
     assert validate_email(email) == expected_valid
 ```
 
-#Async Testing with `pytest-asyncio`
+### Async Testing with `pytest-asyncio`
 
 Tests async coroutines seamlessly:
 
@@ -116,20 +116,20 @@ def test_user_creation(db_session):
     assert user.id is not None
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use Plain `assert` Statements**: Pytest provides detailed assertion introspection without requiring special assertion methods.
-- **Use `conftest.py` for Shared Fixtures**: Place global fixtures and configuration hooks in `conftest.py` files.
-- **Run Parallel Tests with `pytest-xdist`**: Accelerate test runs across all CPU cores with `pytest -n auto`.
-- **Mark Tests by Category**: Use custom marks (`@pytest.mark.slow`, `@pytest.mark.integration`) and filter runs with `-m "not slow"`.
+- Use Plain `assert` Statements: Pytest provides detailed assertion introspection without requiring special assertion methods.
+- Use `conftest.py` for Shared Fixtures: Place global fixtures and configuration hooks in `conftest.py` files.
+- Run Parallel Tests with `pytest-xdist`: Accelerate test runs across all CPU cores with `pytest -n auto`.
+- Mark Tests by Category: Use custom marks (`@pytest.mark.slow`, `@pytest.mark.integration`) and filter runs with `-m "not slow"`.
 
 **Don't**:
 
-- **Don't use `assert` with parentheses**: Writing `assert(a == b, "msg")` evaluates a non-empty tuple which is always truthy.
-- **Don't mutate shared session-scoped fixtures**: Keep session fixtures read-only; use function-scoped fixtures for test-isolated mutations.
-- **Don't create deep nested class hierarchies**: Pytest favors simple standalone test functions over unittest-style classes.
+- Use `assert` with parentheses: Writing `assert(a == b, "msg")` evaluates a non-empty tuple which is always truthy.
+- Mutate shared session-scoped fixtures: Keep session fixtures read-only; use function-scoped fixtures for test-isolated mutations.
+- Create deep nested class hierarchies: Pytest favors simple standalone test functions over unittest-style classes.
 
 ## Troubleshooting
 

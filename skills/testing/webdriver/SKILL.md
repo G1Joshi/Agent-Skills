@@ -35,7 +35,7 @@ await browser.deleteSession();
 
 ## Core Concepts
 
-#W3C Standardized Endpoint Endpoints
+### W3C Standardized Endpoint Endpoints
 
 All actions map to standardized REST endpoints defined in the W3C Recommendation:
 
@@ -47,7 +47,7 @@ POST /session/{id}/element/{el}/click # Click element
 DELETE /session/{id}           # Terminate browser session
 ```
 
-#Raw HTTP Session Orchestration
+### Raw HTTP Session Orchestration
 
 Interacting with ChromeDriver directly using curl or raw HTTP:
 
@@ -64,7 +64,7 @@ curl -X POST http://localhost:9515/session/8f3d1e1c/url \
   -d '{"url": "https://example.com"}'
 ```
 
-#WebdriverIO Standalone Client
+### WebdriverIO Standalone Client
 
 Consuming WebDriver directly in TypeScript without full test runner frameworks:
 
@@ -107,20 +107,20 @@ print(driver.title)
 driver.quit()
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Ensure ChromeDriver and Chrome Major Versions Match**: Use automated driver managers or match major version releases strictly.
-- **Always Delete Sessions on Exit**: Call `DELETE /session/{id}` to prevent headless browser processes from leaking memory.
-- **Use W3C Compliant Capabilities**: Define capabilities under `alwaysMatch` and `firstMatch` according to the W3C spec.
-- **Handle StaleElementReferenceException Gracefully**: Re-fetch elements if the underlying DOM re-renders between lookup and action.
+- Ensure ChromeDriver and Chrome Major Versions Match: Use automated driver managers or match major version releases strictly.
+- Always Delete Sessions on Exit: Call `DELETE /session/{id}` to prevent headless browser processes from leaking memory.
+- Use W3C Compliant Capabilities: Define capabilities under `alwaysMatch` and `firstMatch` according to the W3C spec.
+- Handle StaleElementReferenceException Gracefully: Re-fetch elements if the underlying DOM re-renders between lookup and action.
 
 **Don't**:
 
-- **Don't use legacy JSON Wire Protocol**: JSONWP is deprecated; ensure drivers run in strict W3C mode.
-- **Don't hardcode local ports**: Assign dynamic ports when running parallel browser driver binaries on CI runners.
-- **Don't leave browser drivers exposed to public networks**: Bind driver daemons to localhost (`127.0.0.1`).
+- Use legacy JSON Wire Protocol: JSONWP is deprecated; ensure drivers run in strict W3C mode.
+- Hardcode local ports: Assign dynamic ports when running parallel browser driver binaries on CI runners.
+- Leave browser drivers exposed to public networks: Bind driver daemons to localhost (`127.0.0.1`).
 
 ## Troubleshooting
 

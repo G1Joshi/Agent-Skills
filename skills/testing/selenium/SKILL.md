@@ -27,15 +27,15 @@ driver.quit();
 
 ## Core Concepts
 
-#W3C Standardized WebDriver Architecture
+### W3C Standardized WebDriver Architecture
 
 Clients communicate with browser-specific drivers (ChromeDriver, GeckoDriver) using standard W3C HTTP commands:
 
-```
+```text
 [ Test Script (Java/Python/C#) ] ──(W3C WebDriver Protocol)──→ [ Browser Driver (chromedriver) ] ──→ [ Browser ]
 ```
 
-#Explicit Waits with WebDriverWait & ExpectedConditions
+### Explicit Waits with WebDriverWait & ExpectedConditions
 
 Polls the DOM until specific conditions (visibility, clickability) are fulfilled:
 
@@ -68,7 +68,7 @@ public class LoginPageTest {
 }
 ```
 
-#Page Object Model (POM) Design Pattern
+### Page Object Model (POM) Design Pattern
 
 Encapsulates page selectors and interactions into reusable classes:
 
@@ -109,20 +109,20 @@ element = WebDriverWait(driver, 10).until(
 element.click()
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Always Use Explicit Waits**: Never use `Thread.sleep()` or global implicit waits; use `WebDriverWait` with `ExpectedConditions`.
-- **Implement the Page Object Model**: Separate test assertions from UI selector mechanics.
-- **Always Call `driver.quit()` in Teardown**: Prevent orphaned driver and browser processes from consuming runner memory.
-- **Leverage Selenium Manager**: Allow Selenium 4.x to manage browser driver downloads automatically without manual binary management.
+- Always Use Explicit Waits: Never use `Thread.sleep()` or global implicit waits; use `WebDriverWait` with `ExpectedConditions`.
+- Implement the Page Object Model: Separate test assertions from UI selector mechanics.
+- Always Call `driver.quit()` in Teardown: Prevent orphaned driver and browser processes from consuming runner memory.
+- Leverage Selenium Manager: Allow Selenium 4.x to manage browser driver downloads automatically without manual binary management.
 
 **Don't**:
 
-- **Don't mix implicit and explicit waits**: Mixing both causes unpredictable wait durations that multiply timeouts.
-- **Don't use fragile XPath hierarchies**: Avoid absolute paths like `/html/body/div[2]/div[1]/button`; use unique IDs or CSS selectors.
-- **Don't run UI tests for pure API validation**: Use lightweight HTTP libraries for API testing; reserve Selenium for user journeys.
+- Mix implicit and explicit waits: Mixing both causes unpredictable wait durations that multiply timeouts.
+- Use fragile XPath hierarchies: Avoid absolute paths like `/html/body/div[2]/div[1]/button`; use unique IDs or CSS selectors.
+- Run UI tests for pure API validation: Use lightweight HTTP libraries for API testing; reserve Selenium for user journeys.
 
 ## Troubleshooting
 

@@ -30,7 +30,7 @@ test.describe("Navigation", () => {
 
 ## Core Concepts
 
-#Auto-Waiting & Resilient Locators
+### Auto-Waiting & Resilient Locators
 
 Playwright automatically waits for elements to be attached, visible, stable, and receive events before clicking:
 
@@ -52,7 +52,7 @@ test("customer can complete checkout", async ({ page }) => {
 });
 ```
 
-#Trace Viewer for Post-Mortem Debugging
+### Trace Viewer for Post-Mortem Debugging
 
 Records DOM snapshots, console logs, network waterfalls, and action videos during test runs:
 
@@ -64,7 +64,7 @@ npx playwright test --trace on-first-retry
 npx playwright show-trace trace.zip
 ```
 
-#Network Mocking & HAR Replay
+### Network Mocking & HAR Replay
 
 Intercepts requests and fulfills them with mock responses:
 
@@ -117,20 +117,20 @@ export class LoginPage {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Prefer User-Facing Locators**: Use `page.getByRole()`, `page.getByText()`, and `page.getByLabel()` over fragile CSS selectors.
-- **Use Web-First Assertions**: Always use `await expect(locator).toBeVisible()` which automatically retries until passing.
-- **Reuse Storage State for Fast Authentication**: Save auth cookies with `storageState` to log in once rather than in every test.
-- **Run in Parallel Across Browsers**: Leverage Playwright's native worker parallelization across Chromium, WebKit, and Firefox.
+- Prefer User-Facing Locators: Use `page.getByRole()`, `page.getByText()`, and `page.getByLabel()` over fragile CSS selectors.
+- Use Web-First Assertions: Always use `await expect(locator).toBeVisible()` which automatically retries until passing.
+- Reuse Storage State for Fast Authentication: Save auth cookies with `storageState` to log in once rather than in every test.
+- Run in Parallel Across Browsers: Leverage Playwright's native worker parallelization across Chromium, WebKit, and Firefox.
 
 **Don't**:
 
-- **Don't use `page.waitForTimeout(5000)`**: Static delays cause flakiness; wait for locators or network states instead.
-- **Don't rely on XPath selectors**: XPath selectors break easily when DOM hierarchies shift.
-- **Don't share state between tests**: Use independent `BrowserContext` instances to ensure zero test cross-contamination.
+- Use `page.waitForTimeout(5000)`: Static delays cause flakiness; wait for locators or network states instead.
+- Rely on XPath selectors: XPath selectors break easily when DOM hierarchies shift.
+- Share state between tests: Use independent `BrowserContext` instances to ensure zero test cross-contamination.
 
 ## Troubleshooting
 

@@ -38,7 +38,7 @@ test("math", () => {
 
 ## Core Concepts
 
-#Unified Vite Configuration (vite.config.ts)
+### Unified Vite Configuration (vite.config.ts)
 
 Shares identical plugins, alias paths, and CSS pipelines between development and testing:
 
@@ -65,7 +65,7 @@ export default defineConfig({
 });
 ```
 
-#Modern Mocking Utilities (`vi.fn()`, `vi.mock()`)
+### Modern Mocking Utilities (`vi.fn()`, `vi.mock()`)
 
 High-performance module and timer mocking engine:
 
@@ -84,7 +84,7 @@ test("loads analytics data cleanly", async () => {
 });
 ```
 
-#In-Source Testing
+### In-Source Testing
 
 Write tests directly alongside source code (stripped automatically in production builds):
 
@@ -125,20 +125,20 @@ test("triggers notification with formatted message", async () => {
 });
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use `happy-dom` Instead of `jsdom`**: Choose `environment: 'happy-dom'` for 2-3x faster DOM simulation performance.
-- **Leverage V8 Coverage Provider**: Use `coverage.provider: 'v8'` for instant, precise native code coverage reports.
-- **Use `vi.hoisted()` for Dynamic Mock Pre-Execution**: Initialize variables needed inside `vi.mock()` factories cleanly.
-- **Use In-Source Testing for Pure Utility Modules**: Colocate tests inside utility files for rapid feedback during development.
+- Use `happy-dom` Instead of `jsdom`: Choose `environment: 'happy-dom'` for 2-3x faster DOM simulation performance.
+- Leverage V8 Coverage Provider: Use `coverage.provider: 'v8'` for instant, precise native code coverage reports.
+- Use `vi.hoisted()` for Dynamic Mock Pre-Execution: Initialize variables needed inside `vi.mock()` factories cleanly.
+- Use In-Source Testing for Pure Utility Modules: Colocate tests inside utility files for rapid feedback during development.
 
 **Don't**:
 
-- **Don't use separate Babel / ts-jest configurations**: Rely on Vitest's native Vite pipeline; eliminate extra transpilers.
-- **Don't forget `vi.restoreAllMocks()`**: Reset spies between tests to prevent test pollution in watch mode.
-- **Don't mock global fetch manually**: Use `vi.spyOn(globalThis, 'fetch')` or MSW for standardized network mocks.
+- Use separate Babel / ts-jest configurations: Rely on Vitest's native Vite pipeline; eliminate extra transpilers.
+- Forget `vi.restoreAllMocks()`: Reset spies between tests to prevent test pollution in watch mode.
+- Mock global fetch manually: Use `vi.spyOn(globalThis, 'fetch')` or MSW for standardized network mocks.
 
 ## Troubleshooting
 

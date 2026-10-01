@@ -33,7 +33,7 @@ test("adds 1 + 2 to equal 3", () => {
 
 ## Core Concepts
 
-#Module Mocking & Function Spies (`jest.fn()`, `jest.mock()`)
+### Module Mocking & Function Spies (`jest.fn()`, `jest.mock()`)
 
 Replaces dependencies with mock implementations:
 
@@ -54,7 +54,7 @@ test("sends welcome email upon registration", async () => {
 });
 ```
 
-#Fake Timers for Asynchronous Delays
+### Fake Timers for Asynchronous Delays
 
 Fast-forwards debounce timers, intervals, and timeouts instantaneously:
 
@@ -73,7 +73,7 @@ test("debounced search triggers after 300ms", () => {
 });
 ```
 
-#Snapshot Assertions
+### Snapshot Assertions
 
 Detects unintended regressions in complex structures:
 
@@ -110,20 +110,20 @@ test("fetches successfully data from an API", async () => {
 });
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Clear Mocks Between Tests**: Enable `clearMocks: true` in `jest.config.js` to prevent call count contamination across tests.
-- **Use `@swc/jest` for Fast TypeScript Compilation**: Replace slow `ts-jest` with SWC compiler to dramatically accelerate execution.
-- **Use `test.each` for Table-Driven Test Cases**: Consolidate repetitive test scenarios into parameterized tables.
-- **Keep Snapshots Small**: Avoid snapshotting massive DOM trees; snapshot focused component states and data contracts.
+- Clear Mocks Between Tests: Enable `clearMocks: true` in `jest.config.js` to prevent call count contamination across tests.
+- Use `@swc/jest` for Fast TypeScript Compilation: Replace slow `ts-jest` with SWC compiler to dramatically accelerate execution.
+- Use `test.each` for Table-Driven Test Cases: Consolidate repetitive test scenarios into parameterized tables.
+- Keep Snapshots Small: Avoid snapshotting massive DOM trees; snapshot focused component states and data contracts.
 
 **Don't**:
 
-- **Don't blindly update snapshots (`-u`)**: Review snapshot diffs carefully before accepting changes to prevent approving bugs.
-- **Don't mock what you don't own**: Avoid mocking third-party libraries excessively; prefer integration tests with real adapters where possible.
-- **Don't leave hanging asynchronous promises**: Always return promises or `await` async calls to avoid unhandled rejections.
+- Blindly update snapshots (`-u`): Review snapshot diffs carefully before accepting changes to prevent approving bugs.
+- Mock what you don't own: Avoid mocking third-party libraries excessively; prefer integration tests with real adapters where possible.
+- Leave hanging asynchronous promises: Always return promises or `await` async calls to avoid unhandled rejections.
 
 ## Troubleshooting
 

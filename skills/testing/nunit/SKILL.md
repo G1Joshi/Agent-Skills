@@ -44,7 +44,7 @@ public class Tests
 
 ## Core Concepts
 
-#Constraint-Based Assertion Model
+### Constraint-Based Assertion Model
 
 NUnit emphasizes fluent constraint assertions over legacy multiple-assert methods:
 
@@ -67,7 +67,7 @@ public class AccountTests
 }
 ```
 
-#Parameterized Test Cases (`[TestCase]`)
+### Parameterized Test Cases (`[TestCase]`)
 
 Passes inline parameters to test multiple input/output permutations:
 
@@ -82,7 +82,7 @@ public void Add_ReturnsCorrectSum(int a, int b, int expected)
 }
 ```
 
-#Multiple Assertions Block (`Assert.Multiple`)
+### Multiple Assertions Block (`Assert.Multiple`)
 
 Executes all assertions in a block, reporting all failures rather than terminating on the first:
 
@@ -134,20 +134,20 @@ public class CalculatorTests
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Adopt `Assert.Multiple`**: Run all field assertions on complex objects to view full failure contexts simultaneously.
-- **Use `Assert.That` Exclusively**: Modern NUnit deprecates legacy `Assert.AreEqual()` in favor of the constraint model.
-- **Enable Parallel Execution**: Add `[assembly: Parallelizable(ParallelScope.Fixtures)]` to accelerate test execution.
-- **Pair with FluentAssertions**: Combine with `FluentAssertions` library for enhanced assertion readability.
+- Adopt `Assert.Multiple`: Run all field assertions on complex objects to view full failure contexts simultaneously.
+- Use `Assert.That` Exclusively: Modern NUnit deprecates legacy `Assert.AreEqual()` in favor of the constraint model.
+- Enable Parallel Execution: Add `[assembly: Parallelizable(ParallelScope.Fixtures)]` to accelerate test execution.
+- Pair with FluentAssertions: Combine with `FluentAssertions` library for enhanced assertion readability.
 
 **Don't**:
 
-- **Don't use `[SetUp]` for slow integration setup**: Use `[OneTimeSetUp]` for database connections shared across the fixture.
-- **Don't leave static shared state unreset**: Ensure parallelizable test fixtures do not mutate static state.
-- **Don't write huge monolithic test methods**: Keep test methods focused on single business behaviors.
+- Use `[SetUp]` for slow integration setup: Use `[OneTimeSetUp]` for database connections shared across the fixture.
+- Leave static shared state unreset: Ensure parallelizable test fixtures do not mutate static state.
+- Write huge monolithic test methods: Keep test methods focused on single business behaviors.
 
 ## Troubleshooting
 

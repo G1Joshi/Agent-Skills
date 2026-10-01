@@ -30,7 +30,7 @@ expect(beverages).to.have.property("tea").with.lengthOf(3);
 
 ## Core Concepts
 
-#Chainable Language Chains (BDD Style)
+### Chainable Language Chains (BDD Style)
 
 Chai uses natural English chaining words (`to`, `be`, `have`, `and`, `with`, `at`, `of`):
 
@@ -42,7 +42,7 @@ expect(user.roles).to.be.an("array").that.includes("admin");
 expect(user.score).to.be.at.least(0).and.below(100);
 ```
 
-#Deep Equality vs Strict Identity
+### Deep Equality vs Strict Identity
 
 Distinguishes between memory reference equality and structural value equality:
 
@@ -57,7 +57,7 @@ const expected = { id: 1, tags: ["web", "api"] };
 expect(actual).to.deep.equal(expected);
 ```
 
-#Asynchronous Promise Assertions (chai-as-promised)
+### Asynchronous Promise Assertions (chai-as-promised)
 
 Asserts on resolved and rejected promise outcomes cleanly:
 
@@ -95,20 +95,20 @@ it("validates nested user response", () => {
 });
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Prefer `expect` over `should`**: `expect` works cleanly with `null` and `undefined` without extending `Object.prototype`.
-- **Use `deep.equal` for Objects and Arrays**: Prevent false negatives caused by comparing distinct object references.
-- **Provide Custom Assertion Failure Messages**: Pass custom descriptions as the second argument (`expect(val, 'User balance must match ledger').to.equal(100)`).
-- **Always Await `chai-as-promised`**: Forgetting `await` on promise assertions results in unhandled promise rejections.
+- Prefer `expect` over `should`: `expect` works cleanly with `null` and `undefined` without extending `Object.prototype`.
+- Use `deep.equal` for Objects and Arrays: Prevent false negatives caused by comparing distinct object references.
+- Provide Custom Assertion Failure Messages: Pass custom descriptions as the second argument (`expect(val, 'User balance must match ledger').to.equal(100)`).
+- Always Await `chai-as-promised`: Forgetting `await` on promise assertions results in unhandled promise rejections.
 
 **Don't**:
 
-- **Don't write orphan chains**: Writing `expect(val).to.be.true;` in environments without function call getters can lead to silent passes if mistyped.
-- **Don't use `assert` and `expect` interchangeably in the same suite**: Standardize on one assertion style across the team.
-- **Don't forget to install `@types/chai`**: Ensure strict TypeScript typings are active in TS projects.
+- Write orphan chains: Writing `expect(val).to.be.true;` in environments without function call getters can lead to silent passes if mistyped.
+- Use `assert` and `expect` interchangeably in the same suite: Standardize on one assertion style across the team.
+- Forget to install `@types/chai`: Ensure strict TypeScript typings are active in TS projects.
 
 ## Troubleshooting
 

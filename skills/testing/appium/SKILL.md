@@ -34,17 +34,17 @@ await $('android=new UiSelector().text("Submit")').click();
 
 ## Core Concepts
 
-#W3C WebDriver Protocol for Mobile
+### W3C WebDriver Protocol for Mobile
 
 Appium translates standard W3C WebDriver HTTP wire protocol commands into platform-specific native automation drivers (XCUITest for iOS, UIAutomator2 for Android):
 
-```
+```text
 [ Test Script (Node/Python/Java) ] ──(W3C WebDriver)──→ [ Appium Server (Port 4723) ]
                                                               ├──→ [ XCUITest Driver (iOS) ]
                                                               └──→ [ UIAutomator2 Driver (Android) ]
 ```
 
-#Appium 2.0 Desired Capabilities (Options Classes)
+### Appium 2.0 Desired Capabilities (Options Classes)
 
 Modern Appium 2.x replaces generic capability maps with strongly-typed platform options:
 
@@ -66,7 +66,7 @@ const driver = await remote({
 });
 ```
 
-#Mobile Element Locators & Explicit Waits
+### Mobile Element Locators & Explicit Waits
 
 Locating elements safely using accessibility identifiers and explicit condition waits:
 
@@ -98,20 +98,20 @@ def tap_when_ready(driver, accessibility_id: str, timeout: int = 10):
     element.click()
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Always Prefer Accessibility IDs (`~locator`)**: Coordinate with mobile developers to assign `accessibilityIdentifier` (iOS) and `contentDescription` (Android).
-- **Use Appium 2.x Independent Drivers**: Install only needed drivers (`appium driver install uiautomator2`) to keep server installations lightweight.
-- **Implement Explicit Waits Instead of Static Sleep**: Use `.waitForDisplayed()` rather than arbitrary `sleep(5000)` pauses.
-- **Reset State with `noReset` / `fullReset` Intelligently**: Use `noReset: true` to avoid reinstalling the app on every single test case.
+- Always Prefer Accessibility IDs (`~locator`): Coordinate with mobile developers to assign `accessibilityIdentifier` (iOS) and `contentDescription` (Android).
+- Use Appium 2.x Independent Drivers: Install only needed drivers (`appium driver install uiautomator2`) to keep server installations lightweight.
+- Implement Explicit Waits Instead of Static Sleep: Use `.waitForDisplayed()` rather than arbitrary `sleep(5000)` pauses.
+- Reset State with `noReset` / `fullReset` Intelligently: Use `noReset: true` to avoid reinstalling the app on every single test case.
 
 **Don't**:
 
-- **Don't use XPath locators for mobile hierarchies**: XPath traversal on mobile UI trees is extremely slow and brittle across OS updates.
-- **Don't hardcode absolute file paths**: Use environment variables or relative paths for APK and IPA binaries.
-- **Don't ignore Appium Inspector**: Use the official Appium Inspector GUI to verify element accessibility hierarchies and attributes.
+- Use XPath locators for mobile hierarchies: XPath traversal on mobile UI trees is extremely slow and brittle across OS updates.
+- Hardcode absolute file paths: Use environment variables or relative paths for APK and IPA binaries.
+- Ignore Appium Inspector: Use the official Appium Inspector GUI to verify element accessibility hierarchies and attributes.
 
 ## Troubleshooting
 

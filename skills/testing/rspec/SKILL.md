@@ -30,7 +30,7 @@ end
 
 ## Core Concepts
 
-#Hierarchical Contexts & Readable Specifications
+### Hierarchical Contexts & Readable Specifications
 
 Structures tests to match human-readable business expectations:
 
@@ -61,7 +61,7 @@ RSpec.describe Order, type: :model do
 end
 ```
 
-#Verified Mocks (`instance_double`)
+### Verified Mocks (`instance_double`)
 
 Prevents stale mocks by validating that mocked methods actually exist on the target class:
 
@@ -75,7 +75,7 @@ it "calls external payment gateway" do
 end
 ```
 
-#FactoryBot Integration for Test Fixtures
+### FactoryBot Integration for Test Fixtures
 
 Generates flexible model test records without brittle fixtures:
 
@@ -127,20 +127,20 @@ RSpec.describe Order do
 end
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use `instance_double` Instead of `double`**: Catch renamed or deleted methods immediately during test execution.
-- **Use `build_stubbed` in FactoryBot for Unit Tests**: Avoid touching the database when testing pure model logic.
-- **Keep `it` Blocks to a Single Expectation**: Isolate failures clearly; one assertion per specification.
-- **Use `context` Blocks Starting with "when" or "with"**: Clarify environmental preconditions and business states.
+- Use `instance_double` Instead of `double`: Catch renamed or deleted methods immediately during test execution.
+- Use `build_stubbed` in FactoryBot for Unit Tests: Avoid touching the database when testing pure model logic.
+- Keep `it` Blocks to a Single Expectation: Isolate failures clearly; one assertion per specification.
+- Use `context` Blocks Starting with "when" or "with": Clarify environmental preconditions and business states.
 
 **Don't**:
 
-- **Don't overuse `let!` (bang)**: Eager loading on every test slows down test suites; prefer lazy `let` unless eager creation is required.
-- **Don't test framework features**: Test custom business logic; avoid testing standard Rails ActiveRecord functionality directly.
-- **Don't leave mysterious instance variables (`@user`)**: Use explicit `let` bindings for predictable memoization.
+- Overuse `let!` (bang): Eager loading on every test slows down test suites; prefer lazy `let` unless eager creation is required.
+- Test framework features: Test custom business logic; avoid testing standard Rails ActiveRecord functionality directly.
+- Leave mysterious instance variables (`@user`): Use explicit `let` bindings for predictable memoization.
 
 ## Troubleshooting
 

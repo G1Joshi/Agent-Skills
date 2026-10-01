@@ -38,7 +38,7 @@ Run with `k6 run script.js`.
 
 ## Core Concepts
 
-#Go-Powered Virtual Users (VUs) with JS Runtimes
+### Go-Powered Virtual Users (VUs) with JS Runtimes
 
 Tests are written in JavaScript, but executed by a multi-threaded Go engine with zero NodeJS overhead:
 
@@ -69,7 +69,7 @@ export default function () {
 }
 ```
 
-#Custom Metrics (Counters, Gauges, Trends)
+### Custom Metrics (Counters, Gauges, Trends)
 
 Tracks domain-specific operational metrics alongside standard HTTP timings:
 
@@ -96,7 +96,7 @@ export default function () {
 }
 ```
 
-#Tagging & Scenarios
+### Tagging & Scenarios
 
 Isolates different user behaviors (e.g. 80% readers, 20% writers) in a single test run:
 
@@ -145,20 +145,20 @@ export default function () {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Always Define Explicit `thresholds`**: Let CI/CD pipelines fail automatically if latency percentiles or error rates degrade.
-- **Ramp Virtual Users Incrementally**: Avoid instant spikes unless specifically conducting a spike/break test.
-- **Parameterize Test Data**: Feed unique data using `SharedArray` from JSON/CSV files to prevent caching artifacts.
-- **Export Metrics to Prometheus / InfluxDB**: Use `k6 run --out statsd` or Grafana Cloud k6 for real-time visualization.
+- Always Define Explicit `thresholds`: Let CI/CD pipelines fail automatically if latency percentiles or error rates degrade.
+- Ramp Virtual Users Incrementally: Avoid instant spikes unless specifically conducting a spike/break test.
+- Parameterize Test Data: Feed unique data using `SharedArray` from JSON/CSV files to prevent caching artifacts.
+- Export Metrics to Prometheus / InfluxDB: Use `k6 run --out statsd` or Grafana Cloud k6 for real-time visualization.
 
 **Don't**:
 
-- **Don't import heavy NPM packages directly**: Use k6-compatible polyfills; k6 does not run inside standard Node.js.
-- **Don't print logs inside default test functions**: `console.log()` inside virtual user loops degrades test runner performance.
-- **Don't omit think time (`sleep`)**: Zero sleep simulations hammer servers unrealistically and skew load profiles.
+- Import heavy NPM packages directly: Use k6-compatible polyfills; k6 does not run inside standard Node.js.
+- Print logs inside default test functions: `console.log()` inside virtual user loops degrades test runner performance.
+- Omit think time (`sleep`): Zero sleep simulations hammer servers unrealistically and skew load profiles.
 
 ## Troubleshooting
 

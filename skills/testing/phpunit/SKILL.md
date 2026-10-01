@@ -36,7 +36,7 @@ final class StackTest extends TestCase
 
 ## Core Concepts
 
-#PHPUnit Test Case Structure
+### PHPUnit Test Case Structure
 
 Extends `TestCase` and leverages modern PHP 8 attributes:
 
@@ -67,7 +67,7 @@ final class CurrencyConverterTest extends TestCase
 }
 ```
 
-#Native Mock Objects
+### Native Mock Objects
 
 Stubs methods and asserts on invocation parameters:
 
@@ -84,7 +84,7 @@ public function testPaymentServiceSendsNotification(): void
 }
 ```
 
-#Declarative phpunit.xml Configuration
+### Declarative phpunit.xml Configuration
 
 Configures test suites, environment variables, and coverage enforcement:
 
@@ -141,20 +141,20 @@ class ValidatorTest extends TestCase
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Adopt PHP 8 Attributes**: Use `#[Test]` and `#[DataProvider]` instead of legacy docblock annotations (`@test`).
-- **Use Static Data Providers**: Ensure all data provider methods are declared as `public static`.
-- **Run with `--colors=always --testdox`**: Produce clean, human-readable test output in local terminals and CI.
-- **Enforce Strict Types in Tests**: Add `declare(strict_types=1);` at the top of all test files.
+- Adopt PHP 8 Attributes: Use `#[Test]` and `#[DataProvider]` instead of legacy docblock annotations (`@test`).
+- Use Static Data Providers: Ensure all data provider methods are declared as `public static`.
+- Run with `--colors=always --testdox`: Produce clean, human-readable test output in local terminals and CI.
+- Enforce Strict Types in Tests: Add `declare(strict_types=1);` at the top of all test files.
 
 **Don't**:
 
-- **Don't use `@runInSeparateProcess` unless strictly necessary**: Process isolation adds severe performance overhead.
-- **Don't use `assertEquals` on floats**: Use `assertEqualsWithDelta` to avoid floating point precision failures.
-- **Don't catch exceptions manually**: Use `$this->expectException(CustomException::class)` to assert on thrown errors.
+- Use `@runInSeparateProcess` unless strictly necessary: Process isolation adds severe performance overhead.
+- Use `assertEquals` on floats: Use `assertEqualsWithDelta` to avoid floating point precision failures.
+- Catch exceptions manually: Use `$this->expectException(CustomException::class)` to assert on thrown errors.
 
 ## Troubleshooting
 
