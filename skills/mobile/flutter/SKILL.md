@@ -85,7 +85,7 @@ class HomePage extends StatelessWidget {
 
 ## Core Concepts
 
-#Widget Tree, Element Tree & RenderObject Architecture
+### Widget Tree, Element Tree & RenderObject Architecture
 
 Flutter bypasses platform WebViews and OEM widgets, rendering directly via the Impeller graphics engine:
 
@@ -118,7 +118,7 @@ class MetricCard extends StatelessWidget {
 }
 ```
 
-#Predictable State Management with Bloc / Cubit
+### Predictable State Management with Bloc / Cubit
 
 Decouples UI layout from reactive business logic via event-driven streams:
 
@@ -144,7 +144,7 @@ BlocBuilder<CounterCubit, CounterState>(
 )
 ```
 
-#Platform Channels for Native Integration
+### Platform Channels for Native Integration
 
 Bidirectional asynchronous message passing between Dart and platform-native Swift/Kotlin:
 
@@ -167,7 +167,10 @@ class BatteryService {
 
 ### Feature-First Architecture
 
-Organize files by feature rather than by layer.
+**Problem**: Layer-first project organization (`controllers/`, `views/`) becoming unmaintainable as apps scale.
+
+**Solution**:
+Organize files into cohesive domain feature modules:
 
 ```text
 lib/
@@ -189,24 +192,48 @@ lib/
 
 ### Clean Architecture with Repositories
 
-- **Data Layer**: Repositories, API clients (Dio/Http), DTOs.
-- **Domain Layer**: Entities, business logic (pure Dart).
-- **Presentation Layer**: Widgets, Blocs/Cubits.
+**Problem**: Directly coupling UI widget code to HTTP clients or database drivers breaks modularity and makes unit testing difficult.
 
-## Best Practices (2026)
+**Solution**:
+
+```dart
+abstract interface class UserRepository {
+  Future<User> getUser(String id);
+}
+
+class UserRepositoryImpl implements UserRepository {
+  final UserRemoteDataSource remoteDataSource;
+  final UserLocalDataSource localDataSource;
+
+  UserRepositoryImpl({required this.remoteDataSource, required this.localDataSource});
+
+  @override
+  Future<User> getUser(String id) async {
+    try {
+      final userModel = await remoteDataSource.fetchUser(id);
+      await localDataSource.cacheUser(userModel);
+      return userModel.toEntity();
+    } catch (_) {
+      return await localDataSource.getCachedUser(id);
+    }
+  }
+}
+```
+
+## Best Practices
 
 **Do**:
 
-- **Leverage `const` Constructors Everywhere**: Mark immutable widgets with `const` to allow Flutter to skip unnecessary widget rebuilds.
-- **Rely on the Impeller Engine**: Ensure modern Impeller rendering is active on iOS and Android to prevent shader compilation jank.
-- **Split Large Build Methods into Subwidgets**: Extract deep widget hierarchies into dedicated `StatelessWidget` classes for clean rebuild scopes.
-- **Implement Strict Lint Rules**: Enforce `flutter_lints` or `very_good_analysis` in `analysis_options.yaml`.
+- Leverage `const` Constructors Everywhere: Mark immutable widgets with `const` to allow Flutter to skip unnecessary widget rebuilds.
+- Rely on the Impeller Engine: Ensure modern Impeller rendering is active on iOS and Android to prevent shader compilation jank.
+- Split Large Build Methods into Subwidgets: Extract deep widget hierarchies into dedicated `StatelessWidget` classes for clean rebuild scopes.
+- Implement Strict Lint Rules: Enforce `flutter_lints` or `very_good_analysis` in `analysis_options.yaml`.
 
 **Don't**:
 
-- **Don't perform async operations directly inside `build()`**: Never call HTTP requests or database operations in build methods.
-- **Don't overuse `setState` in Root Widgets**: Keep state local; triggering top-level `setState` forces excessive full-tree recomposition.
-- **Don't hardcode fixed pixel sizes for layouts**: Use `LayoutBuilder`, `MediaQuery`, and Flexible/Expanded widgets for responsive scaling.
+- Perform async operations directly inside `build()`: Never call HTTP requests or database operations in build methods.
+- Overuse `setState` in Root Widgets: Keep state local; triggering top-level `setState` forces excessive full-tree recomposition.
+- Hardcode fixed pixel sizes for layouts: Use `LayoutBuilder`, `MediaQuery`, and Flexible/Expanded widgets for responsive scaling.
 
 ## Troubleshooting
 

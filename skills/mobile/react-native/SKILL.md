@@ -16,7 +16,7 @@ React Native allows you to build native mobile apps using React and JavaScript/T
 
 ## Quick Start
 
-Using **Expo** (Recommended for 2024/2025):
+Using **Expo** (Recommended production standard):
 
 ```bash
 npx create-expo-app@latest my-app
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
 
 ## Core Concepts
 
-#Fabric Renderer & TurboModules (New Architecture)
+### Fabric Renderer & TurboModules (New Architecture)
 
 Replaces legacy JSON bridge serialization with direct C++ JSI (JavaScript Interface) calls for instant memory access and synchronous layout passes:
 
@@ -70,7 +70,7 @@ export interface Spec extends TurboModule {
 export default TurboModuleRegistry.getEnforcing<Spec>("CustomMathModule");
 ```
 
-#High-Performance Layout with Flexbox (Yoga)
+### High-Performance Layout with Flexbox (Yoga)
 
 React Native uses Yoga C++ engine to implement CSS Flexbox layout calculations directly into native mobile views:
 
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
 });
 ```
 
-#Concurrent Reanimated Animations
+### Concurrent Reanimated Animations
 
 Executes fluid gestures and physics-based animations directly on the UI thread via worklets:
 
@@ -134,7 +134,8 @@ export const PulsingBadge = () => {
 
 ## Common Patterns
 
-#High-Performance Animations with Reanimated
+### High-Performance Animations with Reanimated
+
 **Problem**: JavaScript thread frame drops cause jittery mobile gesture animations.  
 **Solution**: Run animations on UI thread using `react-native-reanimated`.
 
@@ -177,20 +178,20 @@ export function DraggableBox() {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Enable the New Architecture**: Ensure `newArchEnabled=true` is active in `android/gradle.properties` and CocoaPods.
-- **Use FlashList Instead of FlatList**: Adopt Shopify's `@shopify/flash-list` for recycling cell views without memory spikes or blank cells.
-- **Extract Styles with `StyleSheet.create`**: Prevent creating new style objects on every render pass.
-- **Profile with React DevTools and Flipper/Chrome Inspector**: Measure layout passes and identify unnecessary component re-renders.
+- Enable the New Architecture: Ensure `newArchEnabled=true` is active in `android/gradle.properties` and CocoaPods.
+- Use FlashList Instead of FlatList: Adopt Shopify's `@shopify/flash-list` for recycling cell views without memory spikes or blank cells.
+- Extract Styles with `StyleSheet.create`: Prevent creating new style objects on every render pass.
+- Profile with React DevTools and Flipper/Chrome Inspector: Measure layout passes and identify unnecessary component re-renders.
 
 **Don't**:
 
-- **Don't pass raw anonymous functions to FlatList items**: Memoize render items using `useCallback` or dedicated subcomponents.
-- **Don't perform heavy work on the JavaScript thread**: Offload encryption, image compression, and heavy parsing to background threads or native modules.
-- **Don't ignore Android BackHandler**: Always handle hardware back presses to avoid terminating user flows abruptly.
+- Pass raw anonymous functions to FlatList items: Memoize render items using `useCallback` or dedicated subcomponents.
+- Perform heavy work on the JavaScript thread: Offload encryption, image compression, and heavy parsing to background threads or native modules.
+- Ignore Android BackHandler: Always handle hardware back presses to avoid terminating user flows abruptly.
 
 ## Troubleshooting
 

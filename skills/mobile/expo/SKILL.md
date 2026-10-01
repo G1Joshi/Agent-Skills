@@ -17,7 +17,7 @@ Expo is an open-source framework for apps that run natively on Android, iOS, and
 ## Quick Start
 
 ```bash
-# Create a new app with Expo Router (default in 2025)
+# Create a new app with Expo Router
 npx create-expo-app@latest my-safe-app
 cd my-safe-app
 npx expo start
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
 
 ## Core Concepts
 
-#Continuous Native Generation (Prebuild)
+### Continuous Native Generation (Prebuild)
 
 Expo manages native `ios/` and `android/` directories as generated build artifacts via `app.json` config plugins, eliminating fragile manual native code edits:
 
@@ -94,7 +94,7 @@ Expo manages native `ios/` and `android/` directories as generated build artifac
 npx expo prebuild --clean
 ```
 
-#Expo Router File-Based Navigation
+### Expo Router File-Based Navigation
 
 Screens and nested navigation stacks correspond directly to directory structures in `app/`:
 
@@ -117,7 +117,7 @@ export default function UserProfile() {
 }
 ```
 
-#Secure Storage & Native APIs
+### Secure Storage & Native APIs
 
 Expo provides production-hardened cross-platform APIs designed with TypeScript first:
 
@@ -135,7 +135,8 @@ export async function persistAuthToken(token: string) {
 
 ## Common Patterns
 
-#Dynamic File-Based Routing (Expo Router)
+### Dynamic File-Based Routing (Expo Router)
+
 **Problem**: Managing complex mobile navigation stacks with manual navigator components.  
 **Solution**: Use Expo Router with file-based routing and deep linking out of the box.
 
@@ -156,20 +157,20 @@ export default function UserScreen() {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use Expo Config Plugins**: Customize native project properties via config plugins rather than directly modifying `ios/` or `android/`.
-- **Adopt Expo Router v3+**: Leverage type-safe routes, layout routes (`_layout.tsx`), and automated deep linking.
-- **Use EAS Build for Remote CI/CD**: Build production `.ipa` and `.aab` packages with automated credential and certificate management.
-- **Implement Hermes Engine**: Run the Hermes JavaScript engine (default) for fast startup times and minimal memory footprints.
+- Use Expo Config Plugins: Customize native project properties via config plugins rather than directly modifying `ios/` or `android/`.
+- Adopt Expo Router v3+: Leverage type-safe routes, layout routes (`_layout.tsx`), and automated deep linking.
+- Use EAS Build for Remote CI/CD: Build production `.ipa` and `.aab` packages with automated credential and certificate management.
+- Implement Hermes Engine: Run the Hermes JavaScript engine (default) for fast startup times and minimal memory footprints.
 
 **Don't**:
 
-- **Don't hardcode sensitive secrets in `app.json`**: Store API secrets in EAS Secrets or runtime environment variables.
-- **Don't use legacy `expo publish`**: Migrate to modern EAS Update (`eas update`) with rollout channels.
-- **Don't bypass Apple Privacy Manifests**: Ensure all third-party native libraries declare appropriate data collection reasons.
+- Hardcode sensitive secrets in `app.json`: Store API secrets in EAS Secrets or runtime environment variables.
+- Use legacy `expo publish`: Migrate to modern EAS Update (`eas update`) with rollout channels.
+- Bypass Apple Privacy Manifests: Ensure all third-party native libraries declare appropriate data collection reasons.
 
 ## Troubleshooting
 

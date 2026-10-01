@@ -42,18 +42,18 @@ class Greeting {
 
 ## Core Concepts
 
-#Source Sets Hierarchy (commonMain vs Platform Sets)
+### Source Sets Hierarchy (commonMain vs Platform Sets)
 
 Shared code lives in `commonMain`; platform-specific source sets bridge native OS features:
 
-```
+```text
 shared/src/
   ├── commonMain/kotlin/     # Shared business logic, Ktor, SQLDelight
   ├── androidMain/kotlin/    # Android-specific APIs & Context
   └── iosMain/kotlin/        # iOS Objective-C / Swift interop
 ```
 
-#`expect` / `actual` Platform Declarations
+### `expect` / `actual` Platform Declarations
 
 Defines a common contract that must be implemented by each target platform:
 
@@ -71,7 +71,7 @@ actual class PlatformSecureStorage actual constructor() {
 }
 ```
 
-#Shared Persistence with SQLDelight / Room KMP
+### Shared Persistence with SQLDelight / Room KMP
 
 Compiles SQL queries into type-safe Kotlin data classes shared across platforms:
 
@@ -85,7 +85,8 @@ class DatabaseDriverFactory(private val driver: SqlDriver) {
 
 ## Common Patterns
 
-#Shared Ktor Client Across iOS and Android
+### Shared Ktor Client Across iOS and Android
+
 **Problem**: Duplicating HTTP request logic and deserialization schemas across platforms.  
 **Solution**: Define shared Ktor HttpClient in `commonMain`.
 
@@ -103,20 +104,20 @@ class ApiClient(engine: HttpClientEngine) {
 // iosMain: ApiClient(Darwin.create())
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Export Swift-Friendly Frameworks**: Configure `shared.podspec` or Swift Package export with transitive dependencies enabled.
-- **Use SKIE for Coroutines & Flow Interop**: Generate native Swift `async/await` and `@Observable` wrappers for Kotlin coroutines.
-- **Keep UI Frameworks Decoupled**: Share domain and network logic in `commonMain` while letting iOS teams use native SwiftUI idioms.
-- **Automate Multiplatform CI/CD**: Run Gradle builds on macOS runners to validate both Android and iOS targets in CI pipelines.
+- Export Swift-Friendly Frameworks: Configure `shared.podspec` or Swift Package export with transitive dependencies enabled.
+- Use SKIE for Coroutines & Flow Interop: Generate native Swift `async/await` and `@Observable` wrappers for Kotlin coroutines.
+- Keep UI Frameworks Decoupled: Share domain and network logic in `commonMain` while letting iOS teams use native SwiftUI idioms.
+- Automate Multiplatform CI/CD: Run Gradle builds on macOS runners to validate both Android and iOS targets in CI pipelines.
 
 **Don't**:
 
-- **Don't leak Android `Context` into `commonMain`**: Keep domain logic pure and dependency-injected.
-- **Don't expose raw Kotlin coroutine Job types to Swift**: Wrap shared flows with SKIE or custom cancellation tokens.
-- **Don't ignore iOS memory management (ARC)**: Be mindful of reference cycles when sharing objects across the Kotlin/Native boundary.
+- Leak Android `Context` into `commonMain`: Keep domain logic pure and dependency-injected.
+- Expose raw Kotlin coroutine Job types to Swift: Wrap shared flows with SKIE or custom cancellation tokens.
+- Ignore iOS memory management (ARC): Be mindful of reference cycles when sharing objects across the Kotlin/Native boundary.
 
 ## Troubleshooting
 

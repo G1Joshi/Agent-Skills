@@ -5,7 +5,9 @@ description: Expert Xamarin assistance covering Xamarin.Forms cross-platform UI,
 
 # Xamarin (Legacy)
 
-**⚠️ STATUS: END OF LIFE (May 2024)**
+**⚠️ STATUS: LEGACY (MIGRATION TO .NET MAUI REQUIRED)**
+
+Xamarin has reached official end-of-life status. Legacy Xamarin.Forms and native Xamarin codebases should be migrated to modern .NET MAUI.
 
 Xamarin has officially reached End of Support. It was a cross-platform framework for building Android/iOS apps with .NET and C#. **All active development should move to .NET MAUI.**
 
@@ -29,21 +31,9 @@ upgrade-assistant analyze ./MyXamarinApp.sln
 upgrade-assistant upgrade ./MyXamarinApp.sln --non-interactive
 ```
 
-## Migration to .NET MAUI
-
-The primary "skill" for Xamarin developers in 2025 is **Migration**.
-
-### High-Level Steps:
-
-1.  **Analyze**: Use `.NET Upgrade Assistant`.
-2.  **Project Structure**: Merge separate iOS/Android projects into the new Single Project structure (optional but recommended).
-3.  **Namespace Updates**: `Xamarin.Forms` -> `Microsoft.Maui.Controls`.
-4.  **Dependencies**: Replace Xamarin.Essentials with MAUI Essentials.
-5.  **Renderers**: Convert Custom Renderers to **Handlers** (Mapped architecture).
-
 ## Core Concepts
 
-#XAML Data Binding & MVVM (Model-View-ViewModel)
+### XAML Data Binding & MVVM (Model-View-ViewModel)
 
 Two-way data binding synchronizes native mobile controls with observable ViewModels:
 
@@ -83,7 +73,7 @@ public class ProfileViewModel : INotifyPropertyChanged
 </ContentPage>
 ```
 
-#DependencyService Platform Abstraction
+### DependencyService Platform Abstraction
 
 Resolves platform-specific native implementations from shared code:
 
@@ -101,7 +91,7 @@ public class AndroidStorage : IDeviceStorage
 var path = DependencyService.Get<IDeviceStorage>().GetStorageDirectory();
 ```
 
-#Transition to .NET MAUI Architecture
+### Transition to .NET MAUI Architecture
 
 Modernizes Xamarin codebases by unifying project structures into a single multi-targeted `.csproj`:
 
@@ -115,6 +105,16 @@ Modernizes Xamarin codebases by unifying project structures into a single multi-
   </PropertyGroup>
 </Project>
 ```
+
+### Migration to .NET MAUI Architecture
+
+The primary focus for legacy Xamarin codebases is structured migration to modern .NET MAUI:
+
+1. **Analyze Dependencies**: Run the `.NET Upgrade Assistant` to identify breaking APIs and obsolete NuGet packages.
+2. **Consolidate Project Structure**: Merge separate iOS/Android head projects into a unified Single Project (`.csproj`) layout.
+3. **Update Namespaces**: Migrate legacy `Xamarin.Forms` namespaces to `Microsoft.Maui.Controls`.
+4. **Replace Framework APIs**: Replace legacy `Xamarin.Essentials` with unified `Microsoft.Maui.Devices` APIs.
+5. **Convert Custom Renderers**: Migrate platform renderers to modern decoupled **Handlers** via mapped property mappers.
 
 ## Common Patterns
 
@@ -139,20 +139,20 @@ Update the XML root declarations to .NET MAUI standard schemas:
 </ContentPage>
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Migrate to .NET MAUI**: Transition active projects to .NET 8/9 MAUI; Xamarin reached official end-of-support.
-- **Use CommunityToolkit.Mvvm**: Replace repetitive `INotifyPropertyChanged` boilerplate with source-generator `[ObservableProperty]` and `[RelayCommand]`.
-- **Compile XAML with `[XamlCompilation(XamlCompilationOptions.Compile)]`**: Enable XAMLC to catch XAML binding errors at build time.
-- **Use WeakReferenceMessenger**: Decouple inter-view communications without leaking View references in event handlers.
+- Migrate to .NET MAUI: Transition active projects to .NET 8/9 MAUI; Xamarin reached official end-of-support.
+- Use CommunityToolkit.Mvvm: Replace repetitive `INotifyPropertyChanged` boilerplate with source-generator `[ObservableProperty]` and `[RelayCommand]`.
+- Compile XAML with `[XamlCompilation(XamlCompilationOptions.Compile)]`: Enable XAMLC to catch XAML binding errors at build time.
+- Use WeakReferenceMessenger: Decouple inter-view communications without leaking View references in event handlers.
 
 **Don't**:
 
-- **Don't start greenfield apps on Xamarin**: New .NET mobile applications should start directly on .NET MAUI.
-- **Don't write heavy custom renderers**: Use lightweight Handlers (.NET MAUI style) rather than heavy legacy Xamarin Custom Renderers.
-- **Don't ignore Linker settings**: Test release builds with Linker enabled (`Link SDK assemblies only`) to keep binary sizes compact.
+- Start greenfield apps on Xamarin: New .NET mobile applications should start directly on .NET MAUI.
+- Write heavy custom renderers: Use lightweight Handlers (.NET MAUI style) rather than heavy legacy Xamarin Custom Renderers.
+- Ignore Linker settings: Test release builds with Linker enabled (`Link SDK assemblies only`) to keep binary sizes compact.
 
 ## Troubleshooting
 

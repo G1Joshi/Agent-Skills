@@ -27,7 +27,7 @@ cordova run android
 
 ## Core Concepts
 
-#Declarative config.xml Schema
+### Declarative config.xml Schema
 
 The central manifest orchestrates app metadata, permissions, preferences, and plugin parameters across platforms:
 
@@ -44,7 +44,7 @@ The central manifest orchestrates app metadata, permissions, preferences, and pl
 </widget>
 ```
 
-#deviceready Lifecycle Event
+### deviceready Lifecycle Event
 
 Cordova requires waiting for native bridge initialization before invoking any hardware plugin APIs:
 
@@ -58,7 +58,7 @@ function onDeviceReady() {
 }
 ```
 
-#Native Plugin Hook Architecture
+### Native Plugin Hook Architecture
 
 Hooks execute arbitrary Node.js scripts during the build lifecycle (e.g. copying release Google Services JSON, injecting Gradle properties):
 
@@ -80,9 +80,12 @@ module.exports = function (context) {
 
 ## Common Patterns
 
-### Migration to Capacitor
+### Modernizing Legacy Webviews via Capacitor Migration
 
-Many teams use Capacitor as a drop-in replacement runner for Cordova apps to modernize the buildstack while keeping the frontend code.
+**Problem**: Deprecated Cordova build tooling causing build breaks with modern mobile OS toolchains.
+
+**Solution**:
+Migrate web assets and plugins to Capacitor as a modern drop-in runner:
 
 ```bash
 npm install @capacitor/cli @capacitor/core
@@ -90,20 +93,20 @@ npx cap init
 # Capacitor automatically reads config.xml and supports most Cordova plugins
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Enable AndroidX**: Ensure `AndroidXEnabled` preference is true in `config.xml` to prevent build failures with modern Android SDKs.
-- **Plan Migration to Capacitor**: Treat Cordova as maintenance-only; transition new features to modern tools like Capacitor.
-- **Pin Exact Plugin Versions**: Avoid dynamic plugin versions (`latest`) in `config.xml` to ensure reproducible CI/CD builds.
-- **Check for Plugin Deprecations**: Audit plugins against current iOS WKWebView and Android 14+ target SDK requirements.
+- Enable AndroidX: Ensure `AndroidXEnabled` preference is true in `config.xml` to prevent build failures with modern Android SDKs.
+- Plan Migration to Capacitor: Treat Cordova as maintenance-only; transition new features to modern tools like Capacitor.
+- Pin Exact Plugin Versions: Avoid dynamic plugin versions (`latest`) in `config.xml` to ensure reproducible CI/CD builds.
+- Check for Plugin Deprecations: Audit plugins against current iOS WKWebView and Android 14+ target SDK requirements.
 
 **Don't**:
 
-- **Don't commit `platforms/` or `plugins/`**: Keep them in `.gitignore` and regenerate them from `config.xml` and `package.json`.
-- **Don't use synchronous file I/O**: Heavy synchronous web operations inside Cordova WebViews freeze UI rendering.
-- **Don't rely on obsolete plugins**: Discard abandoned plugins that lack 64-bit binaries or modern privacy manifests.
+- Commit `platforms/` or `plugins/`: Keep them in `.gitignore` and regenerate them from `config.xml` and `package.json`.
+- Use synchronous file I/O: Heavy synchronous web operations inside Cordova WebViews freeze UI rendering.
+- Rely on obsolete plugins: Discard abandoned plugins that lack 64-bit binaries or modern privacy manifests.
 
 ## Troubleshooting
 
