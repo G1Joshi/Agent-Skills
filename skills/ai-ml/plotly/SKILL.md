@@ -5,7 +5,7 @@ description: Expert Plotly visualization assistance covering interactive D3/WebG
 
 # Plotly
 
-Plotly creates **interactive** (zoomable, hoverable) charts in the browser. v6.0 (2025) drops big dependencies (Pandas is optional) and improves performance.
+Plotly generates publication-quality interactive charts, dashboards, and analytical visualizations across Python, R, and JavaScript.
 
 ## When to Use
 
@@ -34,7 +34,7 @@ fig.show()
 
 ## Core Concepts
 
-#High-Level Charting with Plotly Express
+### High-Level Charting with Plotly Express
 
 Generating rich multi-variable interactive charts in one line:
 
@@ -68,7 +68,7 @@ fig.update_traces(
 fig.write_html("interactive_scatter.html", include_plotlyjs="cdn")
 ```
 
-#Financial Candlestick Chart with Range Slider (graph_objects)
+### Financial Candlestick Chart with Range Slider (graph_objects)
 
 Detailed technical analysis with interactive time navigation:
 
@@ -97,7 +97,7 @@ fig.update_layout(
 fig.write_html("candlestick_chart.html")
 ```
 
-#Interactive Subplot Grid with Secondary Y-Axis
+### Interactive Subplot Grid with Secondary Y-Axis
 
 Combining bar charts and line charts across synchronized subplots:
 
@@ -139,15 +139,20 @@ fig.update_layout(
 fig.write_html("dashboard_chart.html")
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** start with `plotly.express` for rapid prototyping; drop down to `plotly.graph_objects` only for complex multi-axis layouts.
-- **Do** use `include_plotlyjs="cdn"` when exporting HTML files to reduce file size from 3MB down to a few kilobytes.
-- **Do** use WebGL-accelerated traces (`go.Scattergl`) when rendering more than 50,000 points to keep the browser responsive.
-- **Do** customize `hovertemplate` to display meaningful business units and currency signs cleanly.
-- **Don't** plot millions of raw points without downsampling; dense overlapping points degrade browser DOM rendering.
-- **Don't** embed full static PNG images when users need zoom, pan, and hover interactivity.
-- **Don't** forget to set responsive container sizing (`fig.update_layout(autosize=True)`).
+**Do**:
+
+- Start with `plotly.express` for rapid prototyping; drop down to `plotly.graph_objects` only for complex multi-axis layouts.
+- Use `include_plotlyjs="cdn"` when exporting HTML files to reduce file size from 3MB down to a few kilobytes.
+- Use WebGL-accelerated traces (`go.Scattergl`) when rendering more than 50,000 points to keep the browser responsive.
+- Customize `hovertemplate` to display meaningful business units and currency signs cleanly.
+
+**Don't**:
+
+- Plot millions of raw points without downsampling; dense overlapping points degrade browser DOM rendering.
+- Embed full static PNG images when users need zoom, pan, and hover interactivity.
+- Forget to set responsive container sizing (`fig.update_layout(autosize=True)`).
 
 ## Troubleshooting
 

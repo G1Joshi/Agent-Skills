@@ -39,7 +39,7 @@ preds = model.predict(X)
 
 ## Core Concepts
 
-#Native Categorical Feature Handling
+### Native Categorical Feature Handling
 
 Training CatBoostClassifier directly on raw categorical string columns:
 
@@ -78,7 +78,7 @@ model = CatBoostClassifier(
 model.fit(train_pool, eval_set=val_pool)
 ```
 
-#Feature Importance & SHAP Values
+### Feature Importance & SHAP Values
 
 Interpreting model decisions with Tree SHAP:
 
@@ -95,7 +95,7 @@ for name, score in zip(X.columns, feature_importance):
     print(f"Feature: {name:10s} Importance: {score:.4f}")
 ```
 
-#Exporting Model to ONNX for High-Speed Serving
+### Exporting Model to ONNX for High-Speed Serving
 
 Serializing trained models for cross-platform C++/Go/Rust inference:
 
@@ -130,15 +130,20 @@ model.fit(train_pool, eval_set=eval_pool, verbose=100)
 print(f"Best iteration: {model.get_best_iteration()}")
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** pass categorical columns directly to `cat_features` rather than manual one-hot encoding.
-- **Do** use `early_stopping_rounds` with a dedicated validation set to prevent overfitting.
-- **Do** train on GPU (`task_type="GPU"`) for datasets exceeding 1 million rows for up to 10x-20x speedup.
-- **Do** monitor evaluation metrics using `plot=True` in Jupyter or export training logs to TensorBoard.
-- **Don't** label encode high-cardinality categoricals manually; CatBoost's target encoding is statistically superior.
-- **Don't** use too large `depth` (> 10) unless explicitly regularized; CatBoost defaults (depth 6) are optimal.
-- **Don't** evaluate final performance on the validation set used for early stopping; evaluate on a held-out test set.
+**Do**:
+
+- Pass categorical columns directly to `cat_features` rather than manual one-hot encoding.
+- Use `early_stopping_rounds` with a dedicated validation set to prevent overfitting.
+- Train on GPU (`task_type="GPU"`) for datasets exceeding 1 million rows for up to 10x-20x speedup.
+- Monitor evaluation metrics using `plot=True` in Jupyter or export training logs to TensorBoard.
+
+**Don't**:
+
+- Label encode high-cardinality categoricals manually; CatBoost's target encoding is statistically superior.
+- Use too large `depth` (> 10) unless explicitly regularized; CatBoost defaults (depth 6) are optimal.
+- Evaluate final performance on the validation set used for early stopping; evaluate on a held-out test set.
 
 ## Troubleshooting
 

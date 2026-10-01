@@ -35,7 +35,7 @@ print(message.content[0].text)
 
 ## Core Concepts
 
-#Tool Use (Function Calling) with Anthropic SDK
+### Tool Use (Function Calling) with Anthropic SDK
 
 Exposing structured tools to Claude for agentic execution:
 
@@ -75,7 +75,7 @@ for content in response.content:
         print(f"Arguments: {content.input}")
 ```
 
-#Prompt Caching for Massive Contexts
+### Prompt Caching for Massive Contexts
 
 Caching system prompts and large documentation blocks:
 
@@ -103,7 +103,7 @@ print(f"Cached tokens read: {response.usage.cache_read_input_tokens}")
 print(f"Cached tokens created: {response.usage.cache_creation_input_tokens}")
 ```
 
-#Streaming Responses with Python Async Client
+### Streaming Responses with Python Async Client
 
 Consuming token streams in real-time:
 
@@ -159,15 +159,20 @@ for block in response.content:
         print(f"Tool called: {block.name}, Args: {block.input}")
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target `claude-3-5-sonnet` for the optimal balance of intelligence, coding proficiency, and speed.
-- **Do** apply `cache_control: {"type": "ephemeral"}` to static prompts exceeding 1,024 tokens to save 90% in costs.
-- **Do** provide clear, explicit descriptions and JSON schemas for all tools to minimize hallucinations.
-- **Do** use system prompts with clear persona guidelines, constraints, and XML tags (`<context>`, `<rules>`).
-- **Don't** concatenate user input into system instructions without sanitization; use XML tags to prevent injection.
-- **Don't** leave temperature unconfigured; use `temperature=0` for structured extraction/coding, `0.7` for creative writing.
-- **Don't** hardcode API keys; retrieve them from environment variables or secret vaults.
+**Do**:
+
+- Target `claude-3-5-sonnet` for the optimal balance of intelligence, coding proficiency, and speed.
+- Apply `cache_control: {"type": "ephemeral"}` to static prompts exceeding 1,024 tokens to save 90% in costs.
+- Provide clear, explicit descriptions and JSON schemas for all tools to minimize hallucinations.
+- Use system prompts with clear persona guidelines, constraints, and XML tags (`<context>`, `<rules>`).
+
+**Don't**:
+
+- Concatenate user input into system instructions without sanitization; use XML tags to prevent injection.
+- Leave temperature unconfigured; use `temperature=0` for structured extraction/coding, `0.7` for creative writing.
+- Hardcode API keys; retrieve them from environment variables or secret vaults.
 
 ## Troubleshooting
 

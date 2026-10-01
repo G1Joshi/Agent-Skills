@@ -5,7 +5,7 @@ description: Expert Dask distributed computing assistance covering Dask DataFram
 
 # Dask
 
-Dask scales Python. It looks like Pandas/NumPy but runs on clusters. 2025 updates focus on **High Performance Shuffle** and GPU integration.
+Dask provides distributed computing in Python, mirroring familiar NumPy, Pandas, and Scikit-learn APIs with dynamic task scheduling, high-performance shuffles, and GPU acceleration.
 
 ## When to Use
 
@@ -29,7 +29,7 @@ print(result)
 
 ## Core Concepts
 
-#Out-of-Core Processing with Dask DataFrame
+### Out-of-Core Processing with Dask DataFrame
 
 Loading partitioned Parquet files and computing aggregations lazily:
 
@@ -57,7 +57,7 @@ result_df = metrics.compute()
 print(result_df)
 ```
 
-#Custom Task Graphs with dask.delayed
+### Custom Task Graphs with dask.delayed
 
 Parallelizing independent function executions:
 
@@ -89,7 +89,7 @@ total_result = final_total.compute()
 print("Grand Total:", total_result)
 ```
 
-#Dask Array for Distributed Linear Algebra
+### Dask Array for Distributed Linear Algebra
 
 Manipulating massive multi-dimensional arrays:
 
@@ -131,15 +131,20 @@ results = client.gather(futures)
 print(results)
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** check the Dask Web Dashboard (typically on port 8787) to monitor memory pressure, task streams, and bottlenecks.
-- **Do** choose chunk sizes between 100MB and 300MB in memory for optimal parallel efficiency.
-- **Do** persist intermediate DataFrames (`df = df.persist()`) when querying the same transformed data repeatedly.
-- **Do** filter columns and rows early using column projections and predicate pushdown.
-- **Don't** call `.compute()` inside loops; build the complete task graph and call `compute()` once.
-- **Don't** use Dask if data fits comfortably in RAM; native Pandas and Polars are significantly faster for in-memory tasks.
-- **Don't** create millions of tiny delayed tasks; excessive task overhead degrades scheduler performance.
+**Do**:
+
+- Check the Dask Web Dashboard (typically on port 8787) to monitor memory pressure, task streams, and bottlenecks.
+- Choose chunk sizes between 100MB and 300MB in memory for optimal parallel efficiency.
+- Persist intermediate DataFrames (`df = df.persist()`) when querying the same transformed data repeatedly.
+- Filter columns and rows early using column projections and predicate pushdown.
+
+**Don't**:
+
+- Call `.compute()` inside loops; build the complete task graph and call `compute()` once.
+- Use Dask if data fits comfortably in RAM; native Pandas and Polars are significantly faster for in-memory tasks.
+- Create millions of tiny delayed tasks; excessive task overhead degrades scheduler performance.
 
 ## Troubleshooting
 

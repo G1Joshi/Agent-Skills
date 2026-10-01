@@ -5,7 +5,7 @@ description: Expert Hugging Face assistance covering Transformers, datasets, pip
 
 # Hugging Face
 
-Hugging Face is the GitHub of AI. It hosts 1M+ models. 2025 sees massive growth in **Multimodal** models and **Robotics** (LeRobot).
+Hugging Face is the central platform and ecosystem for open-source machine learning, hosting models, datasets, Spaces, and foundational libraries like Transformers, Accelerate, and PEFT.
 
 ## When to Use
 
@@ -28,7 +28,7 @@ print(result) # [{'label': 'POSITIVE', 'score': 0.9998}]
 
 ## Core Concepts
 
-#Inference Pipeline with Transformers & PyTorch
+### Inference Pipeline with Transformers & PyTorch
 
 Loading state-of-the-art transformer models with automatic tokenization:
 
@@ -52,7 +52,7 @@ for res in results:
     print(f"Label: {res['label']}, Score: {res['score']:.4f}")
 ```
 
-#4-Bit Model Quantization with BitsAndBytes
+### 4-Bit Model Quantization with BitsAndBytes
 
 Loading large LLMs on consumer hardware using 4-bit NormalFloat (NF4):
 
@@ -81,7 +81,7 @@ outputs = model.generate(**inputs, max_new_tokens=50)
 print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 ```
 
-#Streaming Massive Datasets with Datasets Library
+### Streaming Massive Datasets with Datasets Library
 
 Iterating over terabyte-scale datasets without downloading all files upfront:
 
@@ -124,15 +124,20 @@ model = AutoModelForCausalLM.from_pretrained(
 )
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use `BitsAndBytesConfig` (`nf4`) or AWQ quantization to run open-weight LLMs with low memory consumption.
-- **Do** set `device_map="auto"` when loading large models to distribute layers automatically across available GPUs and RAM.
-- **Do** use `datasets.load_dataset(..., streaming=True)` for datasets that exceed local storage capacity.
-- **Do** pass `torch_dtype=torch.bfloat16` when running inference on modern Ampere/Hopper GPU architectures.
-- **Don't** load entire models onto CPU before moving to GPU; instantiate directly with `device_map`.
-- **Don't** hardcode Hugging Face access tokens in code; authenticate via `huggingface-cli login` or `HF_TOKEN`.
-- **Don't** run unquantized 70B+ parameter models on consumer hardware; use quantized GGUF, EXL2, or 4-bit NF4.
+**Do**:
+
+- Use `BitsAndBytesConfig` (`nf4`) or AWQ quantization to run open-weight LLMs with low memory consumption.
+- Set `device_map="auto"` when loading large models to distribute layers automatically across available GPUs and RAM.
+- Use `datasets.load_dataset(..., streaming=True)` for datasets that exceed local storage capacity.
+- Pass `torch_dtype=torch.bfloat16` when running inference on modern Ampere/Hopper GPU architectures.
+
+**Don't**:
+
+- Load entire models onto CPU before moving to GPU; instantiate directly with `device_map`.
+- Hardcode Hugging Face access tokens in code; authenticate via `huggingface-cli login` or `HF_TOKEN`.
+- Run unquantized 70B+ parameter models on consumer hardware; use quantized GGUF, EXL2, or 4-bit NF4.
 
 ## Troubleshooting
 

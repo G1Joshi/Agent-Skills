@@ -5,7 +5,7 @@ description: Expert DeepSeek AI assistance covering DeepSeek-R1 reasoning models
 
 # DeepSeek
 
-DeepSeek (from China) disrupted the market in late 2024/2025 by releasing **DeepSeek-V3** and **R1** (Reasoning) with performance matching Claude/GPT-4 at 1/10th the cost.
+DeepSeek provides state-of-the-art open foundation models, including DeepSeek-V3 (Mixture-of-Experts) and DeepSeek-R1 for chain-of-thought mathematical reasoning and agentic workflows.
 
 ## When to Use
 
@@ -39,7 +39,7 @@ print("Final Answer:\n", response.choices[0].message.content)
 
 ## Core Concepts
 
-#Consuming DeepSeek API with OpenAI SDK Compatibility
+### Consuming DeepSeek API with OpenAI SDK Compatibility
 
 Querying DeepSeek models with reasoning token handling:
 
@@ -74,7 +74,7 @@ print("\n=== Final Response ===")
 print(final_answer)
 ```
 
-#High-Throughput Self-Hosting with vLLM
+### High-Throughput Self-Hosting with vLLM
 
 Deploying DeepSeek-V3 / R1 on multi-GPU nodes with PagedAttention:
 
@@ -88,7 +88,7 @@ vllm serve deepseek-ai/DeepSeek-R1 \
   --port 8000
 ```
 
-#Streaming Reasoning Tokens
+### Streaming Reasoning Tokens
 
 Streaming live thinking tokens to the client interface:
 
@@ -126,15 +126,20 @@ if thought_process:
 print(f"Output: {final_text}")
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** separate reasoning output (`reasoning_content`) from final output (`content`) when rendering responses to users.
-- **Do** use `temperature=0.6` (recommended default for DeepSeek-R1) to balance logical rigor and exploration.
-- **Do** use FP8 or AWQ 4-bit quantizations when self-hosting on hardware with limited VRAM.
-- **Do** implement retries with exponential backoff on API endpoints during peak network congestion.
-- **Don't** strip `<think>` tags prematurely if debugging algorithmic reasoning failures.
-- **Don't** provide overly verbose system prompts for DeepSeek-R1; it is trained to reason autonomously.
-- **Don't** use `temperature=0` with DeepSeek reasoning models; it may cause repetitive reasoning loops.
+**Do**:
+
+- Separate reasoning output (`reasoning_content`) from final output (`content`) when rendering responses to users.
+- Use `temperature=0.6` (recommended default for DeepSeek-R1) to balance logical rigor and exploration.
+- Use FP8 or AWQ 4-bit quantizations when self-hosting on hardware with limited VRAM.
+- Implement retries with exponential backoff on API endpoints during peak network congestion.
+
+**Don't**:
+
+- Strip `<think>` tags prematurely if debugging algorithmic reasoning failures.
+- Provide overly verbose system prompts for DeepSeek-R1; it is trained to reason autonomously.
+- Use `temperature=0` with DeepSeek reasoning models; it may cause repetitive reasoning loops.
 
 ## Troubleshooting
 

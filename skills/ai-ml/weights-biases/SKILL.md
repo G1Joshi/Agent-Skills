@@ -5,7 +5,7 @@ description: Expert Weights & Biases (W&B) assistance covering experiment tracki
 
 # Weights & Biases (W&B)
 
-W&B is the "Github for ML models". It tracks every run, hyperparameter, and artifact. 2025 brings **W&B Inference** and **Weave**.
+Weights & Biases (W&B) provides MLOps infrastructure for tracking experiments, versioning datasets and models, evaluating LLM applications, and orchestrating distributed training runs.
 
 ## When to Use
 
@@ -34,7 +34,7 @@ wandb.finish()
 
 ## Core Concepts
 
-#Experiment Tracking with wandb.init & wandb.log
+### Experiment Tracking with wandb.init & wandb.log
 
 Logging metrics, hyperparameters, and console output:
 
@@ -76,7 +76,7 @@ for epoch in range(config.epochs):
 wandb.finish()
 ```
 
-#Dataset & Model Checkpoint Versioning with Artifacts
+### Dataset & Model Checkpoint Versioning with Artifacts
 
 Tracking data lineage and model weights:
 
@@ -102,7 +102,7 @@ print(f"Downloaded model to {artifact_dir}")
 run.finish()
 ```
 
-#Automated Hyperparameter Sweeps with wandb.sweep
+### Automated Hyperparameter Sweeps with wandb.sweep
 
 Running Bayesian optimization across parameters:
 
@@ -151,15 +151,20 @@ run.log_artifact(artifact)
 # In training run: link model artifact directly to input dataset lineage
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** always set `config=...` in `wandb.init()` to record all training hyperparameters for full experiment reproducibility.
-- **Do** call `wandb.finish()` at the end of runs to ensure logs, checkpoints, and system metrics finish syncing.
-- **Do** use W&B Artifacts to track datasets and models, establishing end-to-end data lineage and auditability.
-- **Do** group related runs using `group="experiment_group_name"` for cleaner team dashboards.
-- **Don't** call `wandb.log()` in tight microsecond inner loops; log aggregated metrics periodically per step or epoch.
-- **Don't** hardcode your API key; configure via environment variable `WANDB_API_KEY`.
-- **Don't** log sensitive credentials or unmasked PII data to W&B dashboards.
+**Do**:
+
+- Always set `config=...` in `wandb.init()` to record all training hyperparameters for full experiment reproducibility.
+- Call `wandb.finish()` at the end of runs to ensure logs, checkpoints, and system metrics finish syncing.
+- Use W&B Artifacts to track datasets and models, establishing end-to-end data lineage and auditability.
+- Group related runs using `group="experiment_group_name"` for cleaner team dashboards.
+
+**Don't**:
+
+- Call `wandb.log()` in tight microsecond inner loops; log aggregated metrics periodically per step or epoch.
+- Hardcode your API key; configure via environment variable `WANDB_API_KEY`.
+- Log sensitive credentials or unmasked PII data to W&B dashboards.
 
 ## Troubleshooting
 

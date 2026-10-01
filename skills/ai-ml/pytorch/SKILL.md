@@ -5,7 +5,7 @@ description: Expert PyTorch deep learning assistance covering dynamic tensors, a
 
 # PyTorch
 
-PyTorch is the dominant framework for research and production AI. v2.5 (2025) solidifies **`torch.compile`** and introduces **FlexAttention**.
+PyTorch is the foundational deep learning framework for research and production, featuring dynamic computational graphs, `torch.compile` graph optimization, and distributed GPU training.
 
 ## When to Use
 
@@ -41,7 +41,7 @@ optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)
 
 ## Core Concepts
 
-#Modern Neural Network Module with torch.compile
+### Modern Neural Network Module with torch.compile
 
 Defining architectures and compiling with TorchDynamo:
 
@@ -76,7 +76,7 @@ else:
     compiled_model = model
 ```
 
-#Automatic Mixed Precision (AMP) Training Loop
+### Automatic Mixed Precision (AMP) Training Loop
 
 Accelerating training and halving VRAM usage with bfloat16:
 
@@ -105,7 +105,7 @@ optimizer.step()
 print(f"Batch Loss: {loss.item():.4f}")
 ```
 
-#Saving & Loading Safe Weights with Safetensors
+### Saving & Loading Safe Weights with Safetensors
 
 Exporting model weights without arbitrary Python pickle execution:
 
@@ -145,15 +145,20 @@ for epoch in range(10):
         optimizer.step()
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target PyTorch 2.4+ and apply `torch.compile(model)` to production models for instant speedups.
-- **Do** use `optimizer.zero_grad(set_to_none=True)` instead of `zero_grad()` to reduce memory bandwidth overhead.
-- **Do** train with Automatic Mixed Precision (`torch.amp.autocast(..., dtype=torch.bfloat16)`) on modern GPUs.
-- **Do** save models using `safetensors` instead of Python `pickle` (`torch.save`) to prevent arbitrary code execution vulnerabilities.
-- **Don't** move tensors between CPU and GPU inside training loops; prefetch batches on the target device.
-- **Don't** track computational graphs during inference; wrap evaluation in `with torch.inference_mode():`.
-- **Don't** use Python lists for tensor aggregations; accumulate loss with scalar float values (`total_loss += loss.item()`).
+**Do**:
+
+- Target PyTorch 2.4+ and apply `torch.compile(model)` to production models for instant speedups.
+- Use `optimizer.zero_grad(set_to_none=True)` instead of `zero_grad()` to reduce memory bandwidth overhead.
+- Train with Automatic Mixed Precision (`torch.amp.autocast(..., dtype=torch.bfloat16)`) on modern GPUs.
+- Save models using `safetensors` instead of Python `pickle` (`torch.save`) to prevent arbitrary code execution vulnerabilities.
+
+**Don't**:
+
+- Move tensors between CPU and GPU inside training loops; prefetch batches on the target device.
+- Track computational graphs during inference; wrap evaluation in `with torch.inference_mode():`.
+- Use Python lists for tensor aggregations; accumulate loss with scalar float values (`total_loss += loss.item()`).
 
 ## Troubleshooting
 

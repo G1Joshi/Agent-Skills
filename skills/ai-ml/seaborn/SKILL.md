@@ -32,7 +32,7 @@ plt.show()
 
 ## Core Concepts
 
-#Modern Seaborn Objects Interface (sns.objects)
+### Modern Seaborn Objects Interface (sns.objects)
 
 Grammar of graphics data visualization:
 
@@ -62,7 +62,7 @@ fig = plt.figure(figsize=(9, 5))
 plot.on(fig).save("seaborn_objects_plot.png")
 ```
 
-#Statistical Distributions & Faceted Grids
+### Statistical Distributions & Faceted Grids
 
 Visualizing density and distributions across categories:
 
@@ -92,7 +92,7 @@ g.savefig("tips_kde_faceted.png", bbox_inches="tight")
 plt.close()
 ```
 
-#Categorical Box and Violin Comparisons
+### Categorical Box and Violin Comparisons
 
 Comparing distributions across discrete classes:
 
@@ -137,15 +137,20 @@ plt.title("Feature Correlation Matrix")
 plt.show()
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** adopt the new `seaborn.objects` (`so.Plot`) API for modern, composable grammar-of-graphics visualizations.
-- **Do** apply `sns.set_theme()` at application startup to configure consistent typography and aesthetic palettes.
-- **Do** pass tidy long-form DataFrames to Seaborn functions (`data=df, x='col1', y='col2', hue='category'`).
-- **Do** always close Matplotlib figures (`plt.close(fig)`) when generating charts in backend web pipelines.
-- **Don't** use pie charts for categorical proportions; use horizontal bar charts (`sns.barplot`).
-- **Don't** overload charts with more than 4-5 categories in `hue`; use faceted subplots (`col='category'`) instead.
-- **Don't** mix stateful `plt.title()` with object-oriented `ax.set_title()`.
+**Do**:
+
+- Adopt the new `seaborn.objects` (`so.Plot`) API for modern, composable grammar-of-graphics visualizations.
+- Apply `sns.set_theme()` at application startup to configure consistent typography and aesthetic palettes.
+- Pass tidy long-form DataFrames to Seaborn functions (`data=df, x='col1', y='col2', hue='category'`).
+- Always close Matplotlib figures (`plt.close(fig)`) when generating charts in backend web pipelines.
+
+**Don't**:
+
+- Use pie charts for categorical proportions; use horizontal bar charts (`sns.barplot`).
+- Overload charts with more than 4-5 categories in `hue`; use faceted subplots (`col='category'`) instead.
+- Mix stateful `plt.title()` with object-oriented `ax.set_title()`.
 
 ## Troubleshooting
 

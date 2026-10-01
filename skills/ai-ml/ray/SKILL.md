@@ -5,7 +5,7 @@ description: Expert Ray distributed computing assistance covering Ray Core (acto
 
 # Ray
 
-Ray is the compute layer for AI. It powers ChatGPT training and massive scale workloads. v3.0 (2025) improves **efficiency** and adds an **MCP Server** for agents.
+Ray is an open-source unified compute framework that makes it easy to scale AI and Python workloads across distributed clusters with Ray Train, Ray Data, and Ray Serve.
 
 ## When to Use
 
@@ -34,7 +34,7 @@ print("Computed squares:", results)
 
 ## Core Concepts
 
-#Distributed Tasks & Stateful Actors
+### Distributed Tasks & Stateful Actors
 
 Scaling functions and classes across cluster workers:
 
@@ -71,7 +71,7 @@ inc_futures = [counter_actor.increment.remote() for _ in range(5)]
 print("Final actor count:", ray.get(inc_futures[-1]))
 ```
 
-#Production Model Serving with Ray Serve
+### Production Model Serving with Ray Serve
 
 Deploying scalable REST endpoints with dynamic request batching:
 
@@ -94,7 +94,7 @@ app = SentimentClassifier.bind()
 # serve.run(app)
 ```
 
-#Distributed Hyperparameter Tuning with Ray Tune
+### Distributed Hyperparameter Tuning with Ray Tune
 
 Running parallel hyperparameter trials:
 
@@ -144,15 +144,20 @@ server_actor = ModelServer.remote()
 prediction = ray.get(server_actor.predict.remote(sample_data))
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** check the Ray Dashboard (port 8265) to monitor node CPU/GPU utilization, actor placement, and object store memory.
-- **Do** pass large read-only datasets via the Ray plasma object store (`ray.put(data)`) to prevent repetitive serializations.
-- **Do** specify resource requirements explicitly in decorators (`@ray.remote(num_cpus=2, num_gpus=1)`).
-- **Do** use Ray Serve for production multi-model microservices with built-in auto-batching.
-- **Don't** call `ray.get()` inside remote tasks; pass ObjectRefs directly to other remote tasks to preserve pipelining.
-- **Don't** create millions of micro-tasks; batch fine-grained tasks together to minimize scheduler overhead.
-- **Don't** pass large stateful objects (like database connections or open files) inside remote arguments.
+**Do**:
+
+- Check the Ray Dashboard (port 8265) to monitor node CPU/GPU utilization, actor placement, and object store memory.
+- Pass large read-only datasets via the Ray plasma object store (`ray.put(data)`) to prevent repetitive serializations.
+- Specify resource requirements explicitly in decorators (`@ray.remote(num_cpus=2, num_gpus=1)`).
+- Use Ray Serve for production multi-model microservices with built-in auto-batching.
+
+**Don't**:
+
+- Call `ray.get()` inside remote tasks; pass ObjectRefs directly to other remote tasks to preserve pipelining.
+- Create millions of micro-tasks; batch fine-grained tasks together to minimize scheduler overhead.
+- Pass large stateful objects (like database connections or open files) inside remote arguments.
 
 ## Troubleshooting
 

@@ -34,7 +34,7 @@ print(f"Generated Image: {image_url}")
 
 ## Core Concepts
 
-#Generating Images with OpenAI Python SDK
+### Generating Images with OpenAI Python SDK
 
 Calling the DALL-E 3 API with quality and size parameters:
 
@@ -60,7 +60,7 @@ print(f"Generated Image URL: {image_url}")
 print(f"DALL-E 3 Revised Prompt: {revised_prompt}")
 ```
 
-#In-Memory Image Handling with Base64 Format
+### In-Memory Image Handling with Base64 Format
 
 Receiving image bytes directly without expiring temporary URLs:
 
@@ -87,7 +87,7 @@ with open("owl_logo.png", "wb") as f:
 print("Saved logo to owl_logo.png")
 ```
 
-#Image Editing & Inpainting with DALL-E 2
+### Image Editing & Inpainting with DALL-E 2
 
 Replacing masked regions in existing PNG images:
 
@@ -130,15 +130,20 @@ revised = response.data[0].revised_prompt
 print(f"Model rewritten prompt: {revised}")
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** inspect and log `revised_prompt` returned by DALL-E 3 to understand how OpenAI expanded the user query.
-- **Do** use `response_format="b64_json"` and immediately upload generated images to S3/Cloudflare R2; temporary URLs expire in 1 hour.
-- **Do** select `style="natural"` for realistic photography and `style="vivid"` for striking digital art or marketing banners.
-- **Do** sanitize and moderate user input prompts with OpenAI Moderation API before submitting to DALL-E.
-- **Don't** assume standard seed reproducibility; DALL-E 3 does not support fixed deterministic seeds.
-- **Don't** request more than `n=1` with DALL-E 3 (DALL-E 3 API only accepts `n=1` per call).
-- **Don't** include prohibited content (celebrities, copyrighted logos) causing immediate safety policy rejections.
+**Do**:
+
+- Inspect and log `revised_prompt` returned by DALL-E 3 to understand how OpenAI expanded the user query.
+- Use `response_format="b64_json"` and immediately upload generated images to S3/Cloudflare R2; temporary URLs expire in 1 hour.
+- Select `style="natural"` for realistic photography and `style="vivid"` for striking digital art or marketing banners.
+- Sanitize and moderate user input prompts with OpenAI Moderation API before submitting to DALL-E.
+
+**Don't**:
+
+- Assume standard seed reproducibility; DALL-E 3 does not support fixed deterministic seeds.
+- Request more than `n=1` with DALL-E 3 (DALL-E 3 API only accepts `n=1` per call).
+- Include prohibited content (celebrities, copyrighted logos) causing immediate safety policy rejections.
 
 ## Troubleshooting
 

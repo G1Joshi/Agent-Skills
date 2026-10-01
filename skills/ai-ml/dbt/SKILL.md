@@ -38,7 +38,7 @@ left join payments using (order_id)
 
 ## Core Concepts
 
-#Declarative SQL Modeling with ref() & source()
+### Declarative SQL Modeling with ref() & source()
 
 Building transformation models with dependency resolution:
 
@@ -73,7 +73,7 @@ from orders o
 inner join customers c on o.customer_id = c.customer_id
 ```
 
-#Schema Testing & Documentation in YAML
+### Schema Testing & Documentation in YAML
 
 Enforcing column constraints and documentation:
 
@@ -105,7 +105,7 @@ models:
           - not_null
 ```
 
-#Jinja Macros for DRY Reusable Logic
+### Jinja Macros for DRY Reusable Logic
 
 Creating custom reusable SQL utilities:
 
@@ -145,15 +145,20 @@ select * from {{ source('raw', 'events') }}
 {% endif %}
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** organize projects into standard layers: `staging` (1-to-1 with raw sources), `intermediate`, and `marts`.
-- **Do** always use `{{ ref('model_name') }}` and `{{ source('source_name', 'table_name') }}` to maintain DAG lineage.
-- **Do** implement incremental models (`materialized='incremental'`) for multi-million row fact tables.
-- **Do** run `dbt test` in CI pipelines on every pull request to catch data schema regressions.
-- **Don't** write raw database table references (e.g. `analytics.raw.users`); always use `source()` or `ref()`.
-- **Don't** perform business logic inside staging models; staging should only clean, cast, and rename columns.
-- **Don't** hardcode environments (dev vs prod); use `target.name` conditionals in profiles.yml.
+**Do**:
+
+- Organize projects into standard layers: `staging` (1-to-1 with raw sources), `intermediate`, and `marts`.
+- Always use `{{ ref('model_name') }}` and `{{ source('source_name', 'table_name') }}` to maintain DAG lineage.
+- Implement incremental models (`materialized='incremental'`) for multi-million row fact tables.
+- Run `dbt test` in CI pipelines on every pull request to catch data schema regressions.
+
+**Don't**:
+
+- Write raw database table references (e.g. `analytics.raw.users`); always use `source()` or `ref()`.
+- Perform business logic inside staging models; staging should only clean, cast, and rename columns.
+- Hardcode environments (dev vs prod); use `target.name` conditionals in profiles.yml.
 
 ## Troubleshooting
 

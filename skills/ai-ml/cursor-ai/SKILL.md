@@ -5,7 +5,7 @@ description: Expert Cursor AI code editor assistance covering .cursorrules, Comp
 
 # Cursor AI
 
-Cursor is a fork of VS Code with AI baked into the core. **Cursor Composer** (2025) acts as an autonomous engineer that can write/edit multiple files simultaneously.
+Cursor is an AI-native code editor built on VS Code, featuring multi-file code editing via Cursor Composer, predictive codebase indexing, and contextual code generation.
 
 ## When to Use
 
@@ -29,7 +29,7 @@ Create `.cursorrules` in your project root to provide persistent agent instructi
 
 ## Core Concepts
 
-#Configuring .cursorrules for Automated Agent Guidelines
+### Configuring .cursorrules for Automated Agent Guidelines
 
 Guiding AI behavior with standardized project rules:
 
@@ -48,7 +48,7 @@ Always adhere strictly to these conventions:
 - When generating code, omit explanatory conversational filler; output code and brief rationale.
 ```
 
-#Targeted Context Tagging with @ Directives
+### Targeted Context Tagging with @ Directives
 
 Injecting precise context into AI prompt buffers:
 
@@ -59,7 +59,7 @@ Inspect @middleware.ts and @src/auth/session.ts to implement a new rate-limited 
 Ensure compliance with @docs/security-guidelines.md.
 ```
 
-#Multi-File Composer Refactoring Workflows
+### Multi-File Composer Refactoring Workflows
 
 Prompting across architectural boundaries:
 
@@ -74,7 +74,8 @@ Refactor our legacy User REST endpoints to modern Server Actions:
 
 ## Common Patterns
 
-#Repository Rules for AI (.cursorrules)
+### Repository Rules for AI (.cursorrules)
+
 **Problem**: AI generates code with inconsistent formatting, outdated libraries, or non-idiomatic abstractions.  
 **Solution**: Define deterministic coding instructions in root `.cursorrules`.
 
@@ -90,19 +91,35 @@ You are an expert TypeScript engineer working on a Next.js 15 App Router codebas
 - Never write placeholder comments (// TODO); provide complete implementations.
 ```
 
-#Multi-File Composer Context (@Folders)
-**Problem**: Refactoring cross-cutting concerns (e.g. updating an auth token interface across 5 files).  
-**Solution**: Scope Cursor Composer with `@src/services/auth` and `@src/types` to synchronize type definitions, API callers, and test mocks in one unified multi-file diff.
+### Multi-File Composer Context (@Folders)
 
-## Best Practices (2026)
+**Problem**: Refactoring cross-cutting concerns (e.g. updating an auth token interface across multiple files) causes hallucinated APIs when agents lack full directory context.
 
-- **Do** create a `.cursorrules` file in the project root to permanently align model completions with team conventions.
-- **Do** use `@file`, `@docs`, and `@symbol` instead of `@codebase` for targeted tasks to reduce prompt token noise and cost.
-- **Do** review AI-generated diffs carefully before accepting multi-file Composer changes.
-- **Do** configure `.cursorignore` to prevent indexing of generated files, `.env` secrets, and build output directories.
-- **Don't** prompt the AI with raw database passwords, production API keys, or private customer data.
-- **Don't** blindly accept massive multi-file refactors without running automated test suites (`npm test`).
-- **Don't** write ambiguous prompts; specify desired libraries, error handling strategies, and boundary constraints.
+**Solution**:
+
+```text
+// Composer Prompt with scoped directory references
+@src/types/auth.ts @src/services/auth/ @tests/auth/
+Refactor AuthToken to include `tenantId: string`:
+1. Update AuthToken interface and JWT payload decoder in @src/types/auth.ts
+2. Update session middleware in @src/services/auth/session.ts to extract tenantId
+3. Update mockAuthToken fixtures in @tests/auth/auth.test.ts
+```
+
+## Best Practices
+
+**Do**:
+
+- Create a `.cursorrules` file in the project root to permanently align model completions with team conventions.
+- Use `@file`, `@docs`, and `@symbol` instead of `@codebase` for targeted tasks to reduce prompt token noise and cost.
+- Review AI-generated diffs carefully before accepting multi-file Composer changes.
+- Configure `.cursorignore` to prevent indexing of generated files, `.env` secrets, and build output directories.
+
+**Don't**:
+
+- Prompt the AI with raw database passwords, production API keys, or private customer data.
+- Blindly accept massive multi-file refactors without running automated test suites (`npm test`).
+- Write ambiguous prompts; specify desired libraries, error handling strategies, and boundary constraints.
 
 ## Troubleshooting
 

@@ -5,7 +5,7 @@ description: Expert Apache Airflow assistance covering DAG authoring, TaskFlow A
 
 # Airflow
 
-Apache Airflow is the standard for data engineering pipelines. v3.0 (2025) introduces **Event-driven Triggers** and a modern React UI.
+Apache Airflow is the industry standard for programmatic data pipeline orchestration, featuring dynamic DAG generation, event-driven triggers, and robust task scheduling.
 
 ## When to Use
 
@@ -48,7 +48,7 @@ etl_pipeline()
 
 ## Core Concepts
 
-#TaskFlow API & Functional DAG Authoring
+### TaskFlow API & Functional DAG Authoring
 
 Pythonic DAG definition with automatic XCom data passing:
 
@@ -97,7 +97,7 @@ def customer_metrics_dag():
 customer_pipeline = customer_metrics_dag()
 ```
 
-#Dynamic Task Mapping with expand()
+### Dynamic Task Mapping with expand()
 
 Fanning out tasks concurrently based on upstream output:
 
@@ -129,7 +129,7 @@ def dynamic_fanout_dag():
 fanout_dag = dynamic_fanout_dag()
 ```
 
-#Deferrable Operators for Efficient Resource Utilization
+### Deferrable Operators for Efficient Resource Utilization
 
 Freeing worker slots while awaiting remote cluster jobs:
 
@@ -173,15 +173,20 @@ files = get_files()
 process_file.expand(filename=files)
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** write new DAGs using the TaskFlow API (`@task`, `@dag`) instead of legacy PythonOperator boilerplate.
-- **Do** set `catchup=False` on DAGs unless historically backfilling missing time intervals intentionally.
-- **Do** use Deferrable Operators and Sensors to prevent worker slot exhaustion during long external waits.
-- **Do** test DAGs for parse errors and syntax issues in CI using `pytest` and `dag.test()`.
-- **Don't** perform heavy compute or database queries in top-level DAG script code; execute them only inside tasks.
-- **Don't** store large binary payloads or massive DataFrames in XCom; store metadata/S3 pointers instead.
-- **Don't** hardcode credentials in DAG files; use Airflow Connections and Secrets Backends (HashiCorp Vault, AWS Secrets Manager).
+**Do**:
+
+- Write new DAGs using the TaskFlow API (`@task`, `@dag`) instead of legacy PythonOperator boilerplate.
+- Set `catchup=False` on DAGs unless historically backfilling missing time intervals intentionally.
+- Use Deferrable Operators and Sensors to prevent worker slot exhaustion during long external waits.
+- Test DAGs for parse errors and syntax issues in CI using `pytest` and `dag.test()`.
+
+**Don't**:
+
+- Perform heavy compute or database queries in top-level DAG script code; execute them only inside tasks.
+- Store large binary payloads or massive DataFrames in XCom; store metadata/S3 pointers instead.
+- Hardcode credentials in DAG files; use Airflow Connections and Secrets Backends (HashiCorp Vault, AWS Secrets Manager).
 
 ## Troubleshooting
 

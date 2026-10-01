@@ -5,7 +5,7 @@ description: Expert Google Gemini API assistance covering Gemini 1.5 Pro / Flash
 
 # Gemini
 
-Gemini is Google's native multimodal model. Uniquely, it accepts **video** and huge context (2M+ tokens) natively. 2025 sees Gemini 2.0/3.0.
+Gemini is Google's native multimodal foundation model family, featuring native audio, image, and video comprehension alongside million-token context windows and fast tool-calling.
 
 ## When to Use
 
@@ -31,7 +31,7 @@ print(response.text)
 
 ## Core Concepts
 
-#Structured Output with Pydantic & Google GenAI SDK
+### Structured Output with Pydantic & Google GenAI SDK
 
 Enforcing type-safe JSON schema responses:
 
@@ -64,7 +64,7 @@ extracted: InvoiceExtraction = InvoiceExtraction.model_validate_json(response.te
 print(f"Extracted Invoice: {extracted.invoice_number}, Total: ${extracted.total_amount}")
 ```
 
-#Native Video & Audio Multimodal Analysis
+### Native Video & Audio Multimodal Analysis
 
 Processing video files directly using the File API:
 
@@ -88,7 +88,7 @@ response = client.models.generate_content(
 print(response.text)
 ```
 
-#Context Caching for Massive Contexts
+### Context Caching for Massive Contexts
 
 Reducing cost on recurring queries against massive datasets:
 
@@ -141,15 +141,20 @@ response = client.models.generate_content(
 print(response.text)
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target the modern Google GenAI SDK (`google-genai`) instead of legacy deprecated libraries.
-- **Do** use `gemini-1.5-flash` for high-volume, low-latency tasks and `gemini-1.5-pro` for deep reasoning.
-- **Do** enforce structured outputs with `response_schema` and Pydantic models for reliable API integrations.
-- **Do** leverage Context Caching for prompts exceeding 32k tokens that are reused across multiple calls.
-- **Don't** upload raw video/audio base64 payloads inline; use the `client.files.upload()` API.
-- **Don't** leave sensitive credentials exposed in client-side code; proxy requests through a secure backend.
-- **Don't** use high temperature settings (> 0.4) when strict schema compliance or factual retrieval is required.
+**Do**:
+
+- Target the modern Google GenAI SDK (`google-genai`) instead of legacy deprecated libraries.
+- Use `gemini-1.5-flash` for high-volume, low-latency tasks and `gemini-1.5-pro` for deep reasoning.
+- Enforce structured outputs with `response_schema` and Pydantic models for reliable API integrations.
+- Leverage Context Caching for prompts exceeding 32k tokens that are reused across multiple calls.
+
+**Don't**:
+
+- Upload raw video/audio base64 payloads inline; use the `client.files.upload()` API.
+- Leave sensitive credentials exposed in client-side code; proxy requests through a secure backend.
+- Use high temperature settings (> 0.4) when strict schema compliance or factual retrieval is required.
 
 ## Troubleshooting
 

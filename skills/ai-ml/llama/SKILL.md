@@ -5,7 +5,7 @@ description: Expert Meta Llama (Llama 3 / 3.2 / 3.3) assistance covering fine-tu
 
 # Llama
 
-Meta Llama is the king of Open Weights models. Llama 4 (2025) pushes 405B+ parameters, rivaling closed models like GPT-5.
+Meta Llama is the foundation standard for open-weight language models, providing dense and Mixture-of-Experts architectures optimized for fine-tuning, quantization, and local deployment.
 
 ## When to Use
 
@@ -26,7 +26,7 @@ vLLM serve meta-llama/Llama-3.2-3B-Instruct \
 
 ## Core Concepts
 
-#Local GGUF Inference with llama-cpp-python
+### Local GGUF Inference with llama-cpp-python
 
 Fast, low-latency CPU/GPU inference with zero external network calls:
 
@@ -54,7 +54,7 @@ response = llm.create_chat_completion(
 print(response["choices"][0]["message"]["content"])
 ```
 
-#Serving Llama via vLLM with OpenAI API Compatibility
+### Serving Llama via vLLM with OpenAI API Compatibility
 
 Deploying Llama 3.1 as an enterprise production endpoint:
 
@@ -66,7 +66,7 @@ vllm serve meta-llama/Llama-3.1-8B-Instruct \
   --port 8000
 ```
 
-#Parameter-Efficient Fine-Tuning with LoRA & PEFT
+### Parameter-Efficient Fine-Tuning with LoRA & PEFT
 
 Adapting Llama to domain specific instructions:
 
@@ -111,22 +111,27 @@ prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_
 # Formats into: <|begin_of_text|><|start_header_id|>system<|end_header_id|>...
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use GGUF 4-bit (`Q4_K_M`) or 5-bit (`Q5_K_M`) quantization for optimal balance of speed and perplexity.
-- **Do** offload all layers (`n_gpu_layers=-1`) to GPU memory whenever VRAM capacity allows.
-- **Do** use Meta Llama 3 prompt template formatting (`<|start_header_id|>...<|end_header_id|>`) for accurate instruction following.
-- **Do** pin model versions and test against specific release tags (e.g. `Llama-3.1-8B-Instruct`).
-- **Don't** run unquantized 16-bit models on consumer GPUs if memory capacity causes swap thrashing.
-- **Don't** forget to configure appropriate context lengths (`n_ctx`); exceeding default context degrades performance.
-- **Don't** use chat models without supplying system prompts specifying constraints and formatting rules.
+**Do**:
+
+- Use GGUF 4-bit (`Q4_K_M`) or 5-bit (`Q5_K_M`) quantization for optimal balance of speed and perplexity.
+- Offload all layers (`n_gpu_layers=-1`) to GPU memory whenever VRAM capacity allows.
+- Use Meta Llama 3 prompt template formatting (`<|start_header_id|>...<|end_header_id|>`) for accurate instruction following.
+- Pin model versions and test against specific release tags (e.g. `Llama-3.1-8B-Instruct`).
+
+**Don't**:
+
+- Run unquantized 16-bit models on consumer GPUs if memory capacity causes swap thrashing.
+- Forget to configure appropriate context lengths (`n_ctx`); exceeding default context degrades performance.
+- Use chat models without supplying system prompts specifying constraints and formatting rules.
 
 ## Troubleshooting
 
 | Error                                        | Cause                                                    | Solution                                                                 |
 | :------------------------------------------- | :------------------------------------------------------- | :----------------------------------------------------------------------- |
 | `403 Client Error: Cannot access repository` | Missing access approval for Llama model on Hugging Face. | Request model access on Meta/HuggingFace and provide Hugging Face token. |
-| `Model generating endless repetition tokens` | Missing stop tokens in inference generation config.      | Set stop tokens: `["<                                                    | eot_id | >", "< | end_of_text | >"]`. |
+| `Model generating endless repetition tokens` | Missing stop tokens in inference generation config.      | Configure explicit stop tokens: `<\|eot_id\|>` and `<\|end_of_text\|>`.  |
 | `CUDA out of memory during vLLM serve`       | KV cache memory allocation exceeds available VRAM.       | Lower `--gpu-memory-utilization` or reduce `--max-model-len`.            |
 
 ## References

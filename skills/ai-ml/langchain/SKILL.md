@@ -5,7 +5,7 @@ description: Expert LangChain and LangGraph assistance covering LCEL pipe syntax
 
 # LangChain
 
-LangChain is the standard framework for chaining LLM components. In 2025, the focus shifted to **LangGraph** for building stateful, cyclic agents.
+LangChain is a composable framework for building applications with LLMs, featuring LangGraph for constructing robust, stateful, cyclic multi-agent architectures.
 
 ## When to Use
 
@@ -33,7 +33,7 @@ print(result)
 
 ## Core Concepts
 
-#LangChain Expression Language (LCEL) & Streaming
+### LangChain Expression Language (LCEL) & Streaming
 
 Declarative pipe-based chain execution with type inference and streaming:
 
@@ -59,7 +59,7 @@ for chunk in chain.stream({"topic_a": "Kubernetes", "topic_b": "Docker Swarm"}):
     print(chunk, end="", flush=True)
 ```
 
-#Retrieval-Augmented Generation (RAG) Pipeline
+### Retrieval-Augmented Generation (RAG) Pipeline
 
 Querying vector stores and passing relevant context to LLMs:
 
@@ -92,7 +92,7 @@ response = rag_chain.invoke("What does LangChain v0.3 introduce?")
 print(response)
 ```
 
-#Agentic Workflows with Tool Calling
+### Agentic Workflows with Tool Calling
 
 Binding custom Python functions as agent tools:
 
@@ -142,15 +142,20 @@ workflow.add_edge("agent", END)
 app = workflow.compile()
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target LangChain v0.3+ and construct pipelines using LCEL (`chain = prompt | model | parser`).
-- **Do** use LangGraph for multi-turn, stateful, cyclical agent architectures rather than legacy AgentExecutor.
-- **Do** configure LangSmith (`LANGCHAIN_TRACING_V2=true`) to monitor latency, cost, and tool calls in development and production.
-- **Do** bind tools explicitly with Pydantic type annotations and docstrings for reliable tool call generation.
-- **Don't** use deprecated v0.1 import paths (`langchain.chains` or `langchain.agents`); import from `langchain_core` and `langgraph`.
-- **Don't** construct prompts using manual string formatting; use `ChatPromptTemplate` to properly handle roles and escapes.
-- **Don't** pass unvalidated user input directly to vectorstore retriever filters.
+**Do**:
+
+- Target LangChain v0.3+ and construct pipelines using LCEL (`chain = prompt | model | parser`).
+- Use LangGraph for multi-turn, stateful, cyclical agent architectures rather than legacy AgentExecutor.
+- Configure LangSmith (`LANGCHAIN_TRACING_V2=true`) to monitor latency, cost, and tool calls in development and production.
+- Bind tools explicitly with Pydantic type annotations and docstrings for reliable tool call generation.
+
+**Don't**:
+
+- Use deprecated v0.1 import paths (`langchain.chains` or `langchain.agents`); import from `langchain_core` and `langgraph`.
+- Construct prompts using manual string formatting; use `ChatPromptTemplate` to properly handle roles and escapes.
+- Pass unvalidated user input directly to vectorstore retriever filters.
 
 ## Troubleshooting
 

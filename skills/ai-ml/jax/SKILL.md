@@ -5,7 +5,7 @@ description: Expert JAX assistance covering Autograd, XLA compilation (`jit`), v
 
 # JAX
 
-JAX is "NumPy on steroids". It combines Autograd (automatic differentiation) with XLA (compilation). 2025 sees **Flax NNX** (PyTorch-style OOP) becoming standard.
+JAX combines composable function transformations with automatic differentiation (Autograd) and Accelerated Linear Algebra (XLA) compilation for high-throughput machine learning research.
 
 ## When to Use
 
@@ -39,7 +39,7 @@ print("Gradients:", grads)
 
 ## Core Concepts
 
-#Composable Function Transformations: jit, grad & vmap
+### Composable Function Transformations: jit, grad & vmap
 
 Combining just-in-time compilation, automatic differentiation, and automated batching:
 
@@ -72,7 +72,7 @@ grad_val = fast_grad_fn(w, x, y)
 print("Computed Gradient:", grad_val)
 ```
 
-#Explicit PRNG Key Management
+### Explicit PRNG Key Management
 
 State-free pseudorandom number generation:
 
@@ -91,7 +91,7 @@ data_uniform = jax.random.uniform(subkey2, shape=(4, 4))
 print("Normal sample mean:", jnp.mean(data_normal))
 ```
 
-#Stateful Model with Equinox & Pure Functions
+### Stateful Model with Equinox & Pure Functions
 
 Expressive, object-oriented neural networks built on pure JAX functions:
 
@@ -141,15 +141,20 @@ weights = jnp.ones(10)
 predictions = predict_batch(weights, batch_x) # Output shape: (100,)
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** write purely functional code: zero side effects, no in-place array mutations (`x.at[idx].set(val)` instead of `x[idx] = val`).
-- **Do** wrap performance-critical functions with `@jax.jit` to trigger XLA compilation.
-- **Do** split PRNG keys explicitly (`jax.random.split(key)`) every time random numbers are generated.
-- **Do** use modern high-level libraries like Equinox or Flax Linen rather than writing raw parameter dictionaries.
-- **Don't** use standard Python conditionals (`if x > 0:`) inside JIT functions on dynamic tracers; use `jax.lax.cond`.
-- **Don't** reuse PRNG keys; reusing keys generates statistically correlated random numbers.
-- **Don't** mutate global variables inside functions transformed with `jit`, `grad`, or `vmap`.
+**Do**:
+
+- Write purely functional code: zero side effects, no in-place array mutations (`x.at[idx].set(val)` instead of `x[idx] = val`).
+- Wrap performance-critical functions with `@jax.jit` to trigger XLA compilation.
+- Split PRNG keys explicitly (`jax.random.split(key)`) every time random numbers are generated.
+- Use modern high-level libraries like Equinox or Flax Linen rather than writing raw parameter dictionaries.
+
+**Don't**:
+
+- Use standard Python conditionals (`if x > 0:`) inside JIT functions on dynamic tracers; use `jax.lax.cond`.
+- Reuse PRNG keys; reusing keys generates statistically correlated random numbers.
+- Mutate global variables inside functions transformed with `jit`, `grad`, or `vmap`.
 
 ## Troubleshooting
 

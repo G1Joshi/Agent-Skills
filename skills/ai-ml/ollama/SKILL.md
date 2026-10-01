@@ -5,7 +5,7 @@ description: Expert Ollama assistance covering local LLM execution, Modelfile cu
 
 # Ollama
 
-Ollama makes running LLMs locally as easy as `docker run`. 2025 updates include **Windows/AMD** support, **Multimodal** input, and Tool Calling.
+Ollama bundles model weights, configurations, and runtime dependencies into a streamlined CLI and local server for running open-source LLMs locally with native tool-calling.
 
 ## When to Use
 
@@ -34,7 +34,7 @@ print(response['message']['content'])
 
 ## Core Concepts
 
-#Local Inference with the Python Ollama SDK
+### Local Inference with the Python Ollama SDK
 
 Querying local models with streaming and structured JSON output:
 
@@ -57,7 +57,7 @@ response = ollama.chat(
 print(response['message']['content'])
 ```
 
-#Structured Output with Pydantic & JSON Schema
+### Structured Output with Pydantic & JSON Schema
 
 Enforcing typed JSON responses from local models:
 
@@ -84,7 +84,7 @@ print("Threat Level:", analysis.threat_level)
 print("Mitigation:", analysis.mitigation)
 ```
 
-#Custom Modelfile Authoring
+### Custom Modelfile Authoring
 
 Creating tailored local model artifacts:
 
@@ -131,15 +131,20 @@ You are a senior DevOps engineer. Always provide answers as copy-pasteable bash 
 
 Build model: `ollama create devops-assistant -f ./Modelfile`
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** set `OLLAMA_NUM_PARALLEL` and `OLLAMA_MAX_LOADED_MODELS` to handle concurrent local requests efficiently.
-- **Do** use `format=Schema.model_json_schema()` for reliable structured outputs without regex parsing.
-- **Do** offload models to Apple Silicon Metal or NVIDIA CUDA automatically with proper driver setups.
-- **Do** utilize `ollama pull` and model tags to test quantized variants (`:q4_K_M`, `:q8_0`).
-- **Don't** expose Ollama port (11434) to the public internet without an authenticating reverse proxy (Nginx, Caddy).
-- **Don't** assume default context is unlimited; explicitly set `num_ctx: 16384` or higher in options if needed.
-- **Don't** run heavy 70B models on systems with less than 64GB unified memory/RAM.
+**Do**:
+
+- Set `OLLAMA_NUM_PARALLEL` and `OLLAMA_MAX_LOADED_MODELS` to handle concurrent local requests efficiently.
+- Use `format=Schema.model_json_schema()` for reliable structured outputs without regex parsing.
+- Offload models to Apple Silicon Metal or NVIDIA CUDA automatically with proper driver setups.
+- Utilize `ollama pull` and model tags to test quantized variants (`:q4_K_M`, `:q8_0`).
+
+**Don't**:
+
+- Expose Ollama port (11434) to the public internet without an authenticating reverse proxy (Nginx, Caddy).
+- Assume default context is unlimited; explicitly set `num_ctx: 16384` or higher in options if needed.
+- Run heavy 70B models on systems with less than 64GB unified memory/RAM.
 
 ## Troubleshooting
 

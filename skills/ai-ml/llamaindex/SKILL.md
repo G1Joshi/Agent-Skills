@@ -5,7 +5,7 @@ description: Expert LlamaIndex assistance covering RAG (Retrieval-Augmented Gene
 
 # LlamaIndex
 
-LlamaIndex (formerly GPT Index) connects LLMs to your data. 2025 introduces **Workflows**, an event-driven way to build complex RAG pipelines.
+LlamaIndex is a data framework connecting custom data sources to large language models, featuring event-driven Workflows, hybrid retrieval strategies, and production RAG pipelines.
 
 ## When to Use
 
@@ -31,7 +31,7 @@ print(str(response))
 
 ## Core Concepts
 
-#Ingesting Documents & Building VectorStoreIndex
+### Ingesting Documents & Building VectorStoreIndex
 
 Building vector index and querying with conversational engine:
 
@@ -62,7 +62,7 @@ for node in response.source_nodes:
     print(f"- [Score: {node.score:.3f}] {node.node.get_text()[:120]}...")
 ```
 
-#Hybrid Search with BM25 & Dense Reranking
+### Hybrid Search with BM25 & Dense Reranking
 
 Combining keyword and semantic matching:
 
@@ -92,7 +92,7 @@ query_engine = index.as_query_engine(
 )
 ```
 
-#Multi-Document Router Agent
+### Multi-Document Router Agent
 
 Intelligently selecting the right index based on query semantics:
 
@@ -143,15 +143,20 @@ query_engine = index.as_query_engine(
 response = query_engine.query("What is error code E-1049?")
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target LlamaIndex v0.10+ / v0.11+ using `Settings.llm` and `Settings.embed_model` global singletons.
-- **Do** use `SentenceSplitter` with explicit `chunk_size` and `chunk_overlap` tailored to your document structure.
-- **Do** apply a cross-encoder reranker (`SentenceTransformerRerank`) to improve precision of retrieved context.
-- **Do** inspect `response.source_nodes` to audit and debug retrieval relevance.
-- **Don't** ingest raw documents without chunking; huge chunks dilute embedding vector specificity.
-- **Don't** use standard vector search alone when precise keyword lookups (SKUs, IDs) are required; use hybrid search.
-- **Don't** create separate storage contexts repeatedly without persisting them to disk or a vector DB.
+**Do**:
+
+- Target LlamaIndex v0.10+ / v0.11+ using `Settings.llm` and `Settings.embed_model` global singletons.
+- Use `SentenceSplitter` with explicit `chunk_size` and `chunk_overlap` tailored to your document structure.
+- Apply a cross-encoder reranker (`SentenceTransformerRerank`) to improve precision of retrieved context.
+- Inspect `response.source_nodes` to audit and debug retrieval relevance.
+
+**Don't**:
+
+- Ingest raw documents without chunking; huge chunks dilute embedding vector specificity.
+- Use standard vector search alone when precise keyword lookups (SKUs, IDs) are required; use hybrid search.
+- Create separate storage contexts repeatedly without persisting them to disk or a vector DB.
 
 ## Troubleshooting
 

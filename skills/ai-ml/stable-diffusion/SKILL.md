@@ -5,7 +5,7 @@ description: Expert Stable Diffusion assistance covering SDXL, SD 1.5, Diffusers
 
 # Stable Diffusion
 
-Stable Diffusion (by Stability AI) is the open standard for image generation. SD 3.5 (2025) improves prompt adherence and typography.
+Stable Diffusion is an open latent text-to-image diffusion architecture offering versatile fine-tuning (LoRA, ControlNet), local inference, and precise prompt typography adherence.
 
 ## When to Use
 
@@ -34,7 +34,7 @@ image.save("output.png")
 
 ## Core Concepts
 
-#Generating Images with SDXL & Hugging Face Diffusers
+### Generating Images with SDXL & Hugging Face Diffusers
 
 High-resolution generative image pipeline with Euler Ancestral scheduler:
 
@@ -71,7 +71,7 @@ image = pipeline(
 image.save("crystal_chip.png")
 ```
 
-#ControlNet Conditioning for Spatial Control
+### ControlNet Conditioning for Spatial Control
 
 Guiding image geometry with Canny edge maps:
 
@@ -108,7 +108,7 @@ result = pipe(
 result.save("brutalist_villa.png")
 ```
 
-#Loading & Stacking LoRA Style Weights
+### Loading & Stacking LoRA Style Weights
 
 Applying domain-specific fine-tuned LoRA weights:
 
@@ -136,15 +136,20 @@ pipe.enable_vae_slicing()
 # Reduces peak VRAM footprint down to under 6GB
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** always use `torch.float16` or `torch.bfloat16` with `variant="fp16"` to slash VRAM requirements in half.
-- **Do** enable `pipeline.enable_xformers_memory_efficient_attention()` or PyTorch 2.0 SDPA to reduce memory usage during inference.
-- **Do** load model weights exclusively in `.safetensors` format rather than legacy PyTorch `.bin` / `.ckpt` files.
-- **Do** use `enable_vae_tiling()` when generating or upscaling images beyond 1024x1024 to prevent out-of-memory errors.
-- **Don't** use standard 512x512 resolution with SDXL; SDXL is trained natively for 1024x1024 aspect ratios.
-- **Don't** exceed `guidance_scale=8.5` with SDXL/Flux; excessive CFG values create color saturation artifacts.
-- **Don't** run inference without setting deterministic seeds (`torch.Generator(device).manual_seed(42)`) when reproducibility is required.
+**Do**:
+
+- Always use `torch.float16` or `torch.bfloat16` with `variant="fp16"` to slash VRAM requirements in half.
+- Enable `pipeline.enable_xformers_memory_efficient_attention()` or PyTorch 2.0 SDPA to reduce memory usage during inference.
+- Load model weights exclusively in `.safetensors` format rather than legacy PyTorch `.bin` / `.ckpt` files.
+- Use `enable_vae_tiling()` when generating or upscaling images beyond 1024x1024 to prevent out-of-memory errors.
+
+**Don't**:
+
+- Use standard 512x512 resolution with SDXL; SDXL is trained natively for 1024x1024 aspect ratios.
+- Exceed `guidance_scale=8.5` with SDXL/Flux; excessive CFG values create color saturation artifacts.
+- Run inference without setting deterministic seeds (`torch.Generator(device).manual_seed(42)`) when reproducibility is required.
 
 ## Troubleshooting
 

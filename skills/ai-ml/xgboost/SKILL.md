@@ -5,7 +5,7 @@ description: Expert XGBoost assistance covering extreme gradient boosting, tree 
 
 # XGBoost
 
-XGBoost is the winningest algorithm in Kaggle history for tabular data. v2.1 (2025) brings native **Blackwell** GPU support and Polars integration.
+XGBoost is an optimized distributed gradient boosting library designed for high efficiency, speed, and predictive accuracy on tabular datasets.
 
 ## When to Use
 
@@ -40,7 +40,7 @@ print(f"XGBoost Test Accuracy: {accuracy:.4f}")
 
 ## Core Concepts
 
-#High-Performance XGBClassifier with Early Stopping
+### High-Performance XGBClassifier with Early Stopping
 
 Training XGBoost using Scikit-Learn API with GPU acceleration:
 
@@ -81,7 +81,7 @@ preds = clf.predict_proba(X_val)[:, 1]
 print(f"Validation AUC: {roc_auc_score(y_val, preds):.4f}")
 ```
 
-#Enforcing Monotonic Constraints
+### Enforcing Monotonic Constraints
 
 Ensuring predictions strictly increase or decrease with specific features:
 
@@ -97,7 +97,7 @@ constrained_clf = xgb.XGBClassifier(
 constrained_clf.fit(X_train, y_train)
 ```
 
-#Saving Model in Universal JSON Format
+### Saving Model in Universal JSON Format
 
 Exporting trained model for portable cross-platform serving:
 
@@ -140,15 +140,20 @@ bst = xgb.train(
 )
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target XGBoost 2.x with `tree_method="hist"` and `device="cuda"` for extreme training speedups.
-- **Do** save models in the native `.json` format (`model.save_model("model.json")`) rather than binary pickle files.
-- **Do** set `early_stopping_rounds` in constructor parameters to prevent overfitting on validation data.
-- **Do** utilize `monotone_constraints` when business or regulatory logic demands monotonic behavior.
-- **Don't** use deprecated `gpu_hist` tree method; in modern XGBoost use `tree_method="hist"` with `device="cuda"`.
-- **Don't** perform manual one-hot encoding on high-cardinality categoricals; use `enable_categorical=True`.
-- **Don't** tune hyperparameters without early stopping active; it wastes compute on overfitted trees.
+**Do**:
+
+- Target XGBoost 2.x with `tree_method="hist"` and `device="cuda"` for extreme training speedups.
+- Save models in the native `.json` format (`model.save_model("model.json")`) rather than binary pickle files.
+- Set `early_stopping_rounds` in constructor parameters to prevent overfitting on validation data.
+- Utilize `monotone_constraints` when business or regulatory logic demands monotonic behavior.
+
+**Don't**:
+
+- Use deprecated `gpu_hist` tree method; in modern XGBoost use `tree_method="hist"` with `device="cuda"`.
+- Perform manual one-hot encoding on high-cardinality categoricals; use `enable_categorical=True`.
+- Tune hyperparameters without early stopping active; it wastes compute on overfitted trees.
 
 ## Troubleshooting
 

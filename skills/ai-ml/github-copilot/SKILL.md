@@ -5,7 +5,7 @@ description: Expert GitHub Copilot assistance covering inline completions, Copil
 
 # GitHub Copilot
 
-GitHub Copilot is the enterprise standard. 2025 features **Copilot Workspace** (Idea-to-PR workflow) and **Copilot Edits** (multi-file awareness).
+GitHub Copilot is an enterprise AI pair programming assistant, providing inline completions, multi-file code editing via Copilot Edits, pull request reviews, and CLI integration.
 
 ## When to Use
 
@@ -29,7 +29,7 @@ Configure custom repository instructions in `.github/copilot-instructions.md`:
 
 ## Core Concepts
 
-#Project-Wide Custom Instructions (.github/copilot-instructions.md)
+### Project-Wide Custom Instructions (.github/copilot-instructions.md)
 
 Configuring persistent AI developer guidelines:
 
@@ -52,7 +52,7 @@ Coding Conventions
 5. All new business functions must include an accompanying unit test file.
 ```
 
-#Slash Commands & Context Modifiers in Copilot Chat
+### Slash Commands & Context Modifiers in Copilot Chat
 
 Directing the AI assistant with precision:
 
@@ -67,7 +67,7 @@ Directing the AI assistant with precision:
 @terminal /fix Resolve this TypeScript compilation error with discriminated unions
 ```
 
-#Inline Prompt Engineering for Precise Code Generation
+### Inline Prompt Engineering for Precise Code Generation
 
 Guiding inline suggestions with intentional comment prompts:
 
@@ -83,7 +83,8 @@ export function parseJWTHeader(authHeader?: string): TokenPayload {
 
 ## Common Patterns
 
-#Custom Copilot Instructions (.github/copilot-instructions.md)
+### Custom Copilot Instructions (.github/copilot-instructions.md)
+
 **Problem**: Generic completions ignore repository style guides, testing patterns, and library versions.  
 **Solution**: Create project-level guidelines recognized by Copilot in VS Code and JetBrains.
 
@@ -98,7 +99,8 @@ export function parseJWTHeader(authHeader?: string): TokenPayload {
 - Concurrency: Prefer `Promise.allSettled()` over `Promise.all()` for batch operations.
 ```
 
-#Prompt-Driven Unit Test Generation (/tests)
+### Prompt-Driven Unit Test Generation (/tests)
+
 **Problem**: Writing repetitive unit test boilerplate for edge cases and validation schemas.  
 **Solution**: Highlight target function in editor and invoke `/tests` with constraints.
 
@@ -112,15 +114,20 @@ export function calculateDiscount(price: number, coupon?: string): number {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** maintain a `.github/copilot-instructions.md` in repository root to align Copilot with team conventions.
-- **Do** use `@workspace` to scope prompts to whole repository architecture and dependency patterns.
-- **Do** provide clear docstrings, parameter types, and test names to guide high-quality completions.
-- **Do** verify and write unit tests for all Copilot-generated logic before committing.
-- **Don't** accept multi-line completions without verifying security implications (e.g. SQL injection, sanitization).
-- **Don't** prompt Copilot with confidential tokens, production certificates, or customer PII.
-- **Don't** rely on Copilot for sensitive cryptographic algorithm implementation without formal review.
+**Do**:
+
+- Maintain a `.github/copilot-instructions.md` in repository root to align Copilot with team conventions.
+- Use `@workspace` to scope prompts to whole repository architecture and dependency patterns.
+- Provide clear docstrings, parameter types, and test names to guide high-quality completions.
+- Verify and write unit tests for all Copilot-generated logic before committing.
+
+**Don't**:
+
+- Accept multi-line completions without verifying security implications (e.g. SQL injection, sanitization).
+- Prompt Copilot with confidential tokens, production certificates, or customer PII.
+- Rely on Copilot for sensitive cryptographic algorithm implementation without formal review.
 
 ## Troubleshooting
 

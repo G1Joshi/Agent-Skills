@@ -5,7 +5,7 @@ description: Expert MLflow assistance covering experiment tracking, autologging,
 
 # MLflow
 
-MLflow is the standard for tracking experiments. v3.0 (2025) pivots to **GenAI**, adding LLM Tracing, Prompt Management, and "LLM-as-a-Judge".
+MLflow is an open-source platform for managing the end-to-end machine learning lifecycle, including experiment tracking, model registry, artifact storage, and LLM tracing evaluation.
 
 ## When to Use
 
@@ -39,7 +39,7 @@ with mlflow.start_run():
 
 ## Core Concepts
 
-#Experiment Tracking & Autologging
+### Experiment Tracking & Autologging
 
 Logging parameters, evaluation metrics, and model weights automatically:
 
@@ -72,7 +72,7 @@ with mlflow.start_run(run_name="rf_n100_d5") as run:
     print(f"Logged run: {run.info.run_id} with Accuracy: {score:.4f}")
 ```
 
-#Model Registry & Production Staging
+### Model Registry & Production Staging
 
 Registering and promoting versioned models:
 
@@ -97,7 +97,7 @@ champion_model = mlflow.pyfunc.load_model("models:/CustomerChurnPredictor@champi
 predictions = champion_model.predict(X_test)
 ```
 
-#LLM Evaluation with mlflow.evaluate
+### LLM Evaluation with mlflow.evaluate
 
 Benchmarking RAG outputs against ground truth datasets:
 
@@ -147,15 +147,20 @@ mlflow.autolog()
 model.fit(X_train, y_train)
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target MLflow 2.15+ utilizing model aliases (`@champion`, `@challenger`) rather than legacy stage transitions.
-- **Do** log model signatures (`mlflow.models.infer_signature`) to ensure input/output schema validation at deployment time.
-- **Do** use `mlflow.start_run()` inside Python context managers to ensure runs are reliably closed on errors.
-- **Do** back up the remote backend store (PostgreSQL) and artifact repository (S3/GCS) regularly.
-- **Don't** store large training datasets directly as artifacts; log dataset hashes and S3 URIs via `mlflow.data`.
-- **Don't** use local filesystem tracking URIs in production or collaborative team environments.
-- **Don't** hardcode tracking URIs; configure via environment variable `MLFLOW_TRACKING_URI`.
+**Do**:
+
+- Target MLflow 2.15+ utilizing model aliases (`@champion`, `@challenger`) rather than legacy stage transitions.
+- Log model signatures (`mlflow.models.infer_signature`) to ensure input/output schema validation at deployment time.
+- Use `mlflow.start_run()` inside Python context managers to ensure runs are reliably closed on errors.
+- Back up the remote backend store (PostgreSQL) and artifact repository (S3/GCS) regularly.
+
+**Don't**:
+
+- Store large training datasets directly as artifacts; log dataset hashes and S3 URIs via `mlflow.data`.
+- Use local filesystem tracking URIs in production or collaborative team environments.
+- Hardcode tracking URIs; configure via environment variable `MLFLOW_TRACKING_URI`.
 
 ## Troubleshooting
 

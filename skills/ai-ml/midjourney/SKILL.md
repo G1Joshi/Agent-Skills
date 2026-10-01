@@ -5,7 +5,7 @@ description: Expert Midjourney generative AI assistance covering prompt engineer
 
 # Midjourney
 
-Midjourney is a closed-source image generator known for its **artistic quality** and distinct "Midjourney Look". v7 (2025) adds 3D modeling and higher photorealism.
+Midjourney is an advanced generative image platform recognized for artistic composition, fine detail, photorealism, and parameter-driven prompt manipulation.
 
 ## When to Use
 
@@ -22,7 +22,7 @@ Midjourney is a closed-source image generator known for its **artistic quality**
 
 ## Core Concepts
 
-#Core Command Parameters (v6 & v6.1)
+### Core Command Parameters (v6 & v6.1)
 
 Directing aspect ratio, stylization, and rendering engines:
 
@@ -38,7 +38,7 @@ Parameter breakdown:
 - `--stylize 250` (`--s`): Controls strength of artistic flair (range 0 to 1000).
 - `--chaos 15` (`--c`): Adds variation to initial grid generations (range 0 to 100).
 
-#Style References (--sref) & Character Consistency (--cref)
+### Style References (--sref) & Character Consistency (--cref)
 
 Transferring aesthetic signatures across scenes:
 
@@ -50,7 +50,7 @@ Transferring aesthetic signatures across scenes:
 /imagine prompt: the detective sitting at a rainy cafe table reviewing case files --cref https://example.com/detective_face.jpg --cw 90
 ```
 
-#Multi-Prompting with Explicit Weights (::)
+### Multi-Prompting with Explicit Weights (::)
 
 Preventing concept bleed and tuning semantic emphasis:
 
@@ -77,15 +77,20 @@ Use `--cref` (character reference) and `--sref` (style reference) parameters:
 /imagine prompt: cozy cafe interior with warm morning light --sref https://url-to-style-reference.png --sw 100 --v 6.1
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use `--style raw` when aiming for accurate photorealism and literal prompt adherence.
-- **Do** specify lighting, camera lenses, and film stock (e.g. `35mm lens, f/1.8, golden hour illumination`) for realism.
-- **Do** leverage `--sref` (Style Reference) with `--sw` (weight) to maintain brand aesthetic across a series of images.
-- **Do** use `--no` for negative conditions rather than writing phrases like "without people" in the main prompt.
-- **Don't** use buzzwords like "photorealistic", "hyperrealistic", or "4K"; describe physical lighting and textures instead.
-- **Don't** use long, rambling paragraphs; concise, comma-separated descriptive descriptors yield better results.
-- **Don't** exceed `--stylize 750` unless abstract, highly stylized, or artistic interpretation is desired.
+**Do**:
+
+- Use `--style raw` when aiming for accurate photorealism and literal prompt adherence.
+- Specify lighting, camera lenses, and film stock (e.g. `35mm lens, f/1.8, golden hour illumination`) for realism.
+- Leverage `--sref` (Style Reference) with `--sw` (weight) to maintain brand aesthetic across a series of images.
+- Use `--no` for negative conditions rather than writing phrases like "without people" in the main prompt.
+
+**Don't**:
+
+- Use buzzwords like "photorealistic", "hyperrealistic", or "4K"; describe physical lighting and textures instead.
+- Use long, rambling paragraphs; concise, comma-separated descriptive descriptors yield better results.
+- Exceed `--stylize 750` unless abstract, highly stylized, or artistic interpretation is desired.
 
 ## Troubleshooting
 
