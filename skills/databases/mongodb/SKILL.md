@@ -29,7 +29,7 @@ await silence.save();
 
 ## Core Concepts
 
-#BSON Documents & Schema Flexibility
+### BSON Documents & Schema Flexibility
 
 Data is stored as binary JSON (BSON), supporting native dates, 64-bit integers, decimals, and geospatial points:
 
@@ -51,7 +51,7 @@ Data is stored as binary JSON (BSON), supporting native dates, 64-bit integers, 
 }
 ```
 
-#Powerful Multi-Stage Aggregation Framework
+### Powerful Multi-Stage Aggregation Framework
 
 Transforms and aggregates documents through sequential pipeline stages:
 
@@ -73,11 +73,11 @@ db.orders.aggregate([
 ]);
 ```
 
-#Replica Sets & Automated Failover
+### Replica Sets & Automated Failover
 
 Ensures high availability through 3-node primary-secondary elections:
 
-```
+```text
 [ Primary (Read/Write) ] ──Oplog Replication (Async)──→ [ Secondary (Read Replicas) ]
                                                               │
                                                               ▼
@@ -120,20 +120,20 @@ db.orders.aggregate([
 ]);
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Design for Data Access Patterns**: Embed data that is read together frequently; reference data when unbounded growth is expected.
-- **Follow the ESR Rule for Indexes**: Order compound indexes by **Equality** first, **Sort** second, and **Range** last.
-- **Enable JSON Schema Validation**: Enforce required fields and types at the collection level via `$jsonSchema`.
-- **Use Bulk Operations**: Batch multiple write operations using `bulkWrite()` to minimize network roundtrips.
+- Design for Data Access Patterns: Embed data that is read together frequently; reference data when unbounded growth is expected.
+- Follow the ESR Rule for Indexes: Order compound indexes by **Equality** first, **Sort** second, and **Range** last.
+- Enable JSON Schema Validation: Enforce required fields and types at the collection level via `$jsonSchema`.
+- Use Bulk Operations: Batch multiple write operations using `bulkWrite()` to minimize network roundtrips.
 
 **Don't**:
 
-- **Don't create unbounded arrays inside documents**: Unbounded arrays degrade performance and can hit the 16MB document size limit.
-- **Don't use `$lookup` excessively**: MongoDB is not a relational database; heavy multi-collection joins destroy throughput.
-- **Don't perform unindexed queries**: Run `.explain("executionStats")` to verify queries utilize `IXSCAN` rather than `COLLSCAN`.
+- Create unbounded arrays inside documents: Unbounded arrays degrade performance and can hit the 16MB document size limit.
+- Use `$lookup` excessively: MongoDB is not a relational database; heavy multi-collection joins destroy throughput.
+- Perform unindexed queries: Run `.explain("executionStats")` to verify queries utilize `IXSCAN` rather than `COLLSCAN`.
 
 ## Troubleshooting
 

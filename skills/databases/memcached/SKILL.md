@@ -30,18 +30,18 @@ END
 
 ## Core Concepts
 
-#Multi-Threaded Event Loop & Slab Allocation
+### Multi-Threaded Event Loop & Slab Allocation
 
 Memcached allocates memory in fixed slabs to prevent operating system memory fragmentation:
 
-```
+```text
 Memory Pool (Slab Allocator)
   ├── Slab Class 1 (Chunk Size: 96 Bytes)  -> Stores small keys & tokens
   ├── Slab Class 2 (Chunk Size: 120 Bytes) -> Stores session snippets
   └── Slab Class N (Chunk Size: 1MB)       -> Maximum item size
 ```
 
-#Consistent Hashing Client-Side Routing
+### Consistent Hashing Client-Side Routing
 
 Clusters scale horizontally by having client drivers calculate server destinations using consistent hashing algorithms (Ketama):
 
@@ -64,7 +64,7 @@ memcached.set("user:415:profile", JSON.stringify(userData), 3600, (err) => {
 });
 ```
 
-#Atomic Binary Protocol Operations (CAS, INCR)
+### Atomic Binary Protocol Operations (CAS, INCR)
 
 Guarantees thread-safe counters and optimistic concurrency control via Check-and-Set (CAS):
 
@@ -106,20 +106,20 @@ async function getUserProfile(userId) {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use Ketama Consistent Hashing**: Ensure clients hash keys across cluster nodes so adding/removing nodes evicts minimal keys.
-- **Set Appropriate Item Expirations**: Always assign a TTL; prevent stale cache items from lingering indefinitely.
-- **Size Slabs to Match Item Distribution**: Monitor `stats slabs` and tune `-f` (chunk growth factor) to minimize internal slab waste.
-- **Enable SASL Authentication**: Secure Memcached instances with SASL authentication and private subnet firewall rules.
+- Use Ketama Consistent Hashing: Ensure clients hash keys across cluster nodes so adding/removing nodes evicts minimal keys.
+- Set Appropriate Item Expirations: Always assign a TTL; prevent stale cache items from lingering indefinitely.
+- Size Slabs to Match Item Distribution: Monitor `stats slabs` and tune `-f` (chunk growth factor) to minimize internal slab waste.
+- Enable SASL Authentication: Secure Memcached instances with SASL authentication and private subnet firewall rules.
 
 **Don't**:
 
-- **Don't store items larger than 1MB**: Memcached defaults to a 1MB maximum item size; split large objects or compress them.
-- **Don't treat Memcached as a persistent database**: Memcached is strictly in-memory; all data is lost upon server restart.
-- **Don't expose port 11211 to the public internet**: Open ports risk catastrophic UDP reflection DDoS amplification attacks.
+- Store items larger than 1MB: Memcached defaults to a 1MB maximum item size; split large objects or compress them.
+- Treat Memcached as a persistent database: Memcached is strictly in-memory; all data is lost upon server restart.
+- Expose port 11211 to the public internet: Open ports risk catastrophic UDP reflection DDoS amplification attacks.
 
 ## Troubleshooting
 

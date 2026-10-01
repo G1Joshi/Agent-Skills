@@ -27,18 +27,18 @@ FROM raw_data;
 
 ## Core Concepts
 
-#Multi-Cluster Shared Data Architecture
+### Multi-Cluster Shared Data Architecture
 
 Decouples centralized cloud storage from independent, autoscaling virtual compute warehouses:
 
-```
+```text
 [ Central Cloud Storage (AWS S3 / Azure Blob / GCS) ]
          ├── [ Virtual Warehouse: ETL (Size: X-Large) ]
          ├── [ Virtual Warehouse: BI Reports (Size: Medium, Autoscale) ]
          └── [ Virtual Warehouse: Data Science (Size: Large) ]
 ```
 
-#Time Travel & Zero-Copy Cloning
+### Time Travel & Zero-Copy Cloning
 
 Restores historical data and creates instant instant clones without data duplication:
 
@@ -52,7 +52,7 @@ WHERE status = 'FAILED';
 CREATE OR REPLACE DATABASE dev_clone_2026 CLONE production;
 ```
 
-#Native Semi-Structured VARIANT Querying
+### Native Semi-Structured VARIANT Querying
 
 Ingests and queries nested JSON, Avro, and Parquet data directly:
 
@@ -83,20 +83,20 @@ CREATE OR REPLACE TABLE orders_restored CLONE prod_db.public.orders
   AT (OFFSET => -60*120);
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Enable Auto-Suspend and Auto-Resume**: Set warehouses to auto-suspend after 60 seconds of inactivity (`AUTO_SUSPEND = 60`) to stop billing.
-- **Cluster by Primary Query Dimensions**: Apply cluster keys (`CLUSTER BY (event_date, customer_id)`) on multi-terabyte tables to optimize micro-partition pruning.
-- **Leverage Transient Tables for Staging**: Use `CREATE TRANSIENT TABLE` for intermediate ETL steps to eliminate Time Travel storage costs.
-- **Use Dynamic Data Masking**: Protect sensitive PII columns using role-based masking policies.
+- Enable Auto-Suspend and Auto-Resume: Set warehouses to auto-suspend after 60 seconds of inactivity (`AUTO_SUSPEND = 60`) to stop billing.
+- Cluster by Primary Query Dimensions: Apply cluster keys (`CLUSTER BY (event_date, customer_id)`) on multi-terabyte tables to optimize micro-partition pruning.
+- Leverage Transient Tables for Staging: Use `CREATE TRANSIENT TABLE` for intermediate ETL steps to eliminate Time Travel storage costs.
+- Use Dynamic Data Masking: Protect sensitive PII columns using role-based masking policies.
 
 **Don't**:
 
-- **Don't leave oversized virtual warehouses running 24/7**: Size warehouses appropriately; scale down when batch jobs complete.
-- **Don't use Snowflake for single-row transactional OLTP**: High latency per single insert makes Snowflake unsuitable for low-latency operational backends.
-- **Don't ignore micro-partition pruning**: Always filter queries by date or clustered keys to avoid full table scans.
+- Leave oversized virtual warehouses running 24/7: Size warehouses appropriately; scale down when batch jobs complete.
+- Use Snowflake for single-row transactional OLTP: High latency per single insert makes Snowflake unsuitable for low-latency operational backends.
+- Ignore micro-partition pruning: Always filter queries by date or clustered keys to avoid full table scans.
 
 ## Troubleshooting
 

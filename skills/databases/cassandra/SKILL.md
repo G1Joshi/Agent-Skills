@@ -28,17 +28,17 @@ INSERT INTO users (user_id, name) VALUES (uuid(), 'Alice');
 
 ## Core Concepts
 
-#Masterless Ring Architecture & Consistent Hashing
+### Masterless Ring Architecture & Consistent Hashing
 
 Every node in the cluster is identical; partition tokens dictate which nodes own primary and replica data:
 
-```
+```text
 [ Node 1 (Token: 0) ] ────→ [ Node 2 (Token: 33) ] ────→ [ Node 3 (Token: 66) ]
           ▲                                                           │
           └───────────────────────────────────────────────────────────┘
 ```
 
-#Partition Keys vs Clustering Columns (CQL)
+### Partition Keys vs Clustering Columns (CQL)
 
 The partition key determines physical node placement; clustering columns determine on-disk sorting within the partition:
 
@@ -57,7 +57,7 @@ CREATE TABLE telemetry_data.sensor_readings (
 ) WITH CLUSTERING ORDER BY (recorded_at DESC);
 ```
 
-#Tunable Consistency Levels (CAP Theorem)
+### Tunable Consistency Levels (CAP Theorem)
 
 Balance latency against strict consistency on a per-query basis:
 
@@ -94,20 +94,20 @@ CREATE TABLE ecommerce.orders_by_user (
 ) WITH CLUSTERING ORDER BY (order_time DESC);
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Design Tables Around Queries (Query-First Modeling)**: Create dedicated denormalized tables for each specific query requirement.
-- **Keep Partition Sizes Under 100MB**: Ensure partition rows do not grow indefinitely; incorporate time buckets (date, month) into composite partition keys.
-- **Use `LOCAL_QUORUM` for Multi-DC Clusters**: Guarantee strong consistency locally without incurring cross-ocean WAN latency.
-- **Run Regular Repair Jobs with Reaper**: Run incremental repairs to reconcile tombstones and out-of-sync replicas.
+- Design Tables Around Queries (Query-First Modeling): Create dedicated denormalized tables for each specific query requirement.
+- Keep Partition Sizes Under 100MB: Ensure partition rows do not grow indefinitely; incorporate time buckets (date, month) into composite partition keys.
+- Use `LOCAL_QUORUM` for Multi-DC Clusters: Guarantee strong consistency locally without incurring cross-ocean WAN latency.
+- Run Regular Repair Jobs with Reaper: Run incremental repairs to reconcile tombstones and out-of-sync replicas.
 
 **Don't**:
 
-- **Don't use `ALLOW FILTERING` in production queries**: Scanning across multiple node partitions destroys Cassandra's sub-millisecond guarantees.
-- **Don't perform bulk deletions**: Deletions create tombstone markers that degrade read performance and cause JVM garbage collection pauses.
-- **Don't use Cassandra as an analytical SQL database**: Avoid joins, aggregation queries, and ad-hoc multi-table scans.
+- Use `ALLOW FILTERING` in production queries: Scanning across multiple node partitions destroys Cassandra's sub-millisecond guarantees.
+- Perform bulk deletions: Deletions create tombstone markers that degrade read performance and cause JVM garbage collection pauses.
+- Use Cassandra as an analytical SQL database: Avoid joins, aggregation queries, and ad-hoc multi-table scans.
 
 ## Troubleshooting
 

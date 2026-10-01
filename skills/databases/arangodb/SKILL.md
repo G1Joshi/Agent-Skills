@@ -26,7 +26,7 @@ FOR u IN users
 
 ## Core Concepts
 
-#Multi-Model Document & Edge Collections
+### Multi-Model Document & Edge Collections
 
 Documents store unstructured JSON entities; Edge collections define directed connections between documents using `_from` and `_to` attributes:
 
@@ -38,7 +38,7 @@ Documents store unstructured JSON entities; Edge collections define directed con
 { "_from": "users/alice", "_to": "users/bob", "relationship": "mentor", "since": 2024 }
 ```
 
-#ArangoDB Query Language (AQL) Graph Traversal
+### ArangoDB Query Language (AQL) Graph Traversal
 
 Traverses interconnected relationship graphs up to N hops:
 
@@ -53,7 +53,7 @@ FOR v, e, p IN 1..3 OUTBOUND 'users/alice' GRAPH 'socialGraph'
   }
 ```
 
-#Distributed Cluster Sharding (OneShard & SmartGraphs)
+### Distributed Cluster Sharding (OneShard & SmartGraphs)
 
 Ensures interconnected graph vertices and edges are colocated on identical physical DB servers to eliminate network hop penalties:
 
@@ -85,20 +85,20 @@ FOR v, e, p IN 1..3 OUTBOUND 'users/alice' GRAPH 'social_graph'
   }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Leverage SmartGraphs for Multi-Tenant Clusters**: Colocate graph subtrees on single cluster nodes using `smartGraphAttribute` to eliminate network hop latencies.
-- **Use ArangoSearch Views**: Replace separate external Elasticsearch clusters by indexing collections directly with ArangoSearch.
-- **Filter Early in Graph Traversals**: Use `PRUNE` and inline `FILTER` conditions to stop traversals down dead-end relationship paths.
-- **Bind Parameters in AQL**: Always pass variables as `@param` to prevent AQL injection and maximize query compilation cache reuse.
+- Leverage SmartGraphs for Multi-Tenant Clusters: Colocate graph subtrees on single cluster nodes using `smartGraphAttribute` to eliminate network hop latencies.
+- Use ArangoSearch Views: Replace separate external Elasticsearch clusters by indexing collections directly with ArangoSearch.
+- Filter Early in Graph Traversals: Use `PRUNE` and inline `FILTER` conditions to stop traversals down dead-end relationship paths.
+- Bind Parameters in AQL: Always pass variables as `@param` to prevent AQL injection and maximize query compilation cache reuse.
 
 **Don't**:
 
-- **Don't perform unbounded graph traversals**: Never run `1..99` traversals without a `PRUNE` condition or depth limits.
-- **Don't use Edge collections without indexes**: ArangoDB automatically indexes `_from` and `_to`; avoid overriding them with inefficient manual indexes.
-- **Don't mix cross-tenant data without SmartGraph keys**: Sharding graphs randomly across nodes causes severe distributed RPC overhead.
+- Perform unbounded graph traversals: Never run `1..99` traversals without a `PRUNE` condition or depth limits.
+- Use Edge collections without indexes: ArangoDB automatically indexes `_from` and `_to`; avoid overriding them with inefficient manual indexes.
+- Mix cross-tenant data without SmartGraph keys: Sharding graphs randomly across nodes causes severe distributed RPC overhead.
 
 ## Troubleshooting
 

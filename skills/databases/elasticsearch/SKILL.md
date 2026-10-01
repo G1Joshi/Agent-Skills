@@ -30,18 +30,18 @@ GET /products/_search
 
 ## Core Concepts
 
-#Inverted Index & Tokenization Pipeline
+### Inverted Index & Tokenization Pipeline
 
 Analyzers split text into tokens, normalize casing, apply stemming, and build inverted term-to-document indexes:
 
-```
+```text
 "The quick brown fox" ──Analyzer──→ ['quick', 'brown', 'fox']
 Inverted Index:
   'brown' -> [Doc 1, Doc 4]
   'fox'   -> [Doc 1, Doc 2]
 ```
 
-#Query DSL (Bool, Match, Multi-Match)
+### Query DSL (Bool, Match, Multi-Match)
 
 Constructs rich boolean relevancy queries:
 
@@ -65,11 +65,11 @@ POST /products/_search
 }
 ```
 
-#Index Lifecycle Management (ILM) & Hot-Warm-Cold Tiers
+### Index Lifecycle Management (ILM) & Hot-Warm-Cold Tiers
 
 Automates moving aging indices across storage tiers to reduce infrastructure costs:
 
-```
+```text
 [ Hot Tier (Fast NVMe SSDs) ] ──30 Days──→ [ Warm Tier (Standard SSD) ] ──90 Days──→ [ Cold Tier / S3 Snapshot ]
 ```
 
@@ -101,20 +101,20 @@ POST /products/_search
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use `keyword` Type for Exact Matching**: Use `keyword` fields for filtering, sorting, and aggregations; use `text` for full-text search.
-- **Place Filters Inside the `filter` Context**: Filter clauses do not calculate BM25 relevancy scores and are cached automatically.
-- **Implement Index Lifecycle Management (ILM)**: Rollover indices based on size (50GB) and age rather than arbitrary calendar dates.
-- **Tune `refresh_interval` During Bulk Ingestion**: Increase `refresh_interval` to `30s` or `-1` when streaming bulk data to boost throughput.
+- Use `keyword` Type for Exact Matching: Use `keyword` fields for filtering, sorting, and aggregations; use `text` for full-text search.
+- Place Filters Inside the `filter` Context: Filter clauses do not calculate BM25 relevancy scores and are cached automatically.
+- Implement Index Lifecycle Management (ILM): Rollover indices based on size (50GB) and age rather than arbitrary calendar dates.
+- Tune `refresh_interval` During Bulk Ingestion: Increase `refresh_interval` to `30s` or `-1` when streaming bulk data to boost throughput.
 
 **Don't**:
 
-- **Don't create too many small shards**: Keep shard sizes between 20GB and 50GB; excessive small shards exhaust cluster heap memory.
-- **Don't use `wildcard` queries with leading asterisks (`*keyword`)**: Leading wildcards force full inverted index scans.
-- **Don't use Elasticsearch as a primary system-of-record database**: Replicate data from primary relational databases (PostgreSQL/MySQL).
+- Create too many small shards: Keep shard sizes between 20GB and 50GB; excessive small shards exhaust cluster heap memory.
+- Use `wildcard` queries with leading asterisks (`*keyword`): Leading wildcards force full inverted index scans.
+- Use Elasticsearch as a primary system-of-record database: Replicate data from primary relational databases (PostgreSQL/MySQL).
 
 ## Troubleshooting
 

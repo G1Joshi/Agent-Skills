@@ -30,7 +30,7 @@ FROM Sales_CTE;
 
 ## Core Concepts
 
-#System-Versioned Temporal Tables
+### System-Versioned Temporal Tables
 
 Automatically captures complete historical audit trails for every row mutation:
 
@@ -51,18 +51,18 @@ FOR SYSTEM_TIME AS OF '2026-01-15 12:00:00'
 WHERE EmployeeID = 101;
 ```
 
-#Always On Availability Groups
+### Always On Availability Groups
 
 Synchronous and asynchronous multi-database replication across high-availability failover nodes:
 
-```
+```text
 [ Primary Replica (Read/Write) ] ──Synchronous Commit──→ [ Secondary Replica (Readable) ]
                                           │
                                           ▼
                                [ Disaster Recovery Replica (Async) ]
 ```
 
-#Query Store & Plan Forcing
+### Query Store & Plan Forcing
 
 Captures query performance history, runtime statistics, and forces stable execution plans:
 
@@ -94,20 +94,20 @@ FROM Sales.Orders
 WHERE CustomerId = 1205 AND OrderStatus = 'Shipped';
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Enable Query Store on All Production Databases**: Track execution plan regressions and runtime latency metrics automatically.
-- **Use Parameterized Queries**: Prevent parameter sniffing regressions and eliminate SQL injection vulnerabilities.
-- **Index Foreign Keys**: Manually index foreign key columns to prevent table locks during cascades and deletions.
-- **Use Read-Intent Routing**: Direct reporting queries to readable secondary replicas (`ApplicationIntent=ReadOnly`).
+- Enable Query Store on All Production Databases: Track execution plan regressions and runtime latency metrics automatically.
+- Use Parameterized Queries: Prevent parameter sniffing regressions and eliminate SQL injection vulnerabilities.
+- Index Foreign Keys: Manually index foreign key columns to prevent table locks during cascades and deletions.
+- Use Read-Intent Routing: Direct reporting queries to readable secondary replicas (`ApplicationIntent=ReadOnly`).
 
 **Don't**:
 
-- **Don't use `NOLOCK` indiscriminately**: `WITH (NOLOCK)` causes dirty reads, phantom records, and duplicate row scans.
-- **Don't use generic `VARCHAR(MAX)` everywhere**: Oversized LOB types bypass memory optimization and degrade performance.
-- **Don't perform row-by-row cursor processing**: Replace procedural cursors with set-based SQL queries.
+- Use `NOLOCK` indiscriminately: `WITH (NOLOCK)` causes dirty reads, phantom records, and duplicate row scans.
+- Use generic `VARCHAR(MAX)` everywhere: Oversized LOB types bypass memory optimization and degrade performance.
+- Perform row-by-row cursor processing: Replace procedural cursors with set-based SQL queries.
 
 ## Troubleshooting
 

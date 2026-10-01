@@ -27,7 +27,7 @@ LIMIT 10;
 
 ## Core Concepts
 
-#Capacitor Columnar Storage & Dremel Query Engine
+### Capacitor Columnar Storage & Dremel Query Engine
 
 Data is stored in proprietary Capacitor columnar format with dynamic tree-based Dremel execution slots:
 
@@ -49,7 +49,7 @@ OPTIONS(
 );
 ```
 
-#Semi-Structured Native JSON Querying
+### Semi-Structured Native JSON Querying
 
 Queries nested JSON attributes efficiently without schema migrations:
 
@@ -63,7 +63,7 @@ WHERE DATE(event_timestamp) = CURRENT_DATE()
   AND JSON_VALUE(metadata.action) = 'checkout';
 ```
 
-#BigQuery ML Model Training
+### BigQuery ML Model Training
 
 Trains and evaluates predictive models entirely inside SQL:
 
@@ -101,20 +101,20 @@ OPTIONS (
 );
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Always Enforce `require_partition_filter=true`**: Prevent runaway query billing by requiring users to specify date partitions in `WHERE` clauses.
-- **Cluster by High-Cardinality Filter Columns**: Order tables by user ID, customer ID, or category to minimize scanned bytes.
-- **Use BigQuery Storage Write API**: Stream real-time data using the gRPC-based Storage Write API for reduced cost and guaranteed atomicity.
-- **Inspect `Bytes Billed` in Query Validator**: Check dry-run scanned byte estimates before executing heavy exploratory queries.
+- Always Enforce `require_partition_filter=true`: Prevent runaway query billing by requiring users to specify date partitions in `WHERE` clauses.
+- Cluster by High-Cardinality Filter Columns: Order tables by user ID, customer ID, or category to minimize scanned bytes.
+- Use BigQuery Storage Write API: Stream real-time data using the gRPC-based Storage Write API for reduced cost and guaranteed atomicity.
+- Inspect `Bytes Billed` in Query Validator: Check dry-run scanned byte estimates before executing heavy exploratory queries.
 
 **Don't**:
 
-- **Don't use `SELECT *`**: BigQuery charges per byte scanned; querying all columns drains query budgets.
-- **Don't use `ORDER BY` in subqueries**: Global sorting requires single-node processing; sort only in the final outer query with `LIMIT`.
-- **Don't export large query results to single CSVs**: Use partitioned wildcards (`EXPORT DATA OPTIONS(...)`) for multi-part exports.
+- Use `SELECT *`: BigQuery charges per byte scanned; querying all columns drains query budgets.
+- Use `ORDER BY` in subqueries: Global sorting requires single-node processing; sort only in the final outer query with `LIMIT`.
+- Export large query results to single CSVs: Use partitioned wildcards (`EXPORT DATA OPTIONS(...)`) for multi-part exports.
 
 ## Troubleshooting
 

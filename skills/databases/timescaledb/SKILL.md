@@ -30,7 +30,7 @@ ORDER BY bucket DESC;
 
 ## Core Concepts
 
-#Hypertables & Automated Time Chunking
+### Hypertables & Automated Time Chunking
 
 A hypertable exposes a unified SQL table interface while partitioning data into time-based chunks automatically in the background:
 
@@ -48,7 +48,7 @@ CREATE TABLE stock_ticks (
 SELECT create_hypertable('stock_ticks', 'time', chunk_time_interval => INTERVAL '1 day');
 ```
 
-#Continuous Aggregates (Real-Time Rollups)
+### Continuous Aggregates (Real-Time Rollups)
 
 Maintains incrementally updated aggregate views that combine historical materializations with raw live incoming data:
 
@@ -67,7 +67,7 @@ FROM stock_ticks
 GROUP BY bucket, symbol;
 ```
 
-#Columnar Chunk Compression Policy
+### Columnar Chunk Compression Policy
 
 Automatically compresses chunks older than a specified duration into columnar format:
 
@@ -110,20 +110,20 @@ SELECT add_continuous_aggregate_policy('metrics_hourly',
   schedule_interval => INTERVAL '30 minutes');
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Size Chunk Intervals to Fit in Memory**: Set `chunk_time_interval` so that the active chunk fits comfortably within the RAM buffer cache.
-- **Segment Compression by Entity ID**: Use `compress_segmentby = 'symbol'` to enable rapid column-vector scans on specific entities.
-- **Use Continuous Aggregates for Dashboards**: Query continuous aggregate views rather than scanning millions of raw rows in dashboards.
-- **Define Automated Retention Policies**: Execute `add_retention_policy('stock_ticks', INTERVAL '90 days')` to purge old data automatically.
+- Size Chunk Intervals to Fit in Memory: Set `chunk_time_interval` so that the active chunk fits comfortably within the RAM buffer cache.
+- Segment Compression by Entity ID: Use `compress_segmentby = 'symbol'` to enable rapid column-vector scans on specific entities.
+- Use Continuous Aggregates for Dashboards: Query continuous aggregate views rather than scanning millions of raw rows in dashboards.
+- Define Automated Retention Policies: Execute `add_retention_policy('stock_ticks', INTERVAL '90 days')` to purge old data automatically.
 
 **Don't**:
 
-- **Don't use unindexed secondary columns for filtering**: Always index auxiliary columns (`symbol`, `device_id`) used in query filters.
-- **Don't mutate historical data in compressed chunks frequently**: Updating compressed chunks requires decompressing them, causing I/O spikes.
-- **Don't run TimescaleDB without monitoring chunk count**: Having tens of thousands of tiny chunks degrades query planning performance.
+- Use unindexed secondary columns for filtering: Always index auxiliary columns (`symbol`, `device_id`) used in query filters.
+- Mutate historical data in compressed chunks frequently: Updating compressed chunks requires decompressing them, causing I/O spikes.
+- Run TimescaleDB without monitoring chunk count: Having tens of thousands of tiny chunks degrades query planning performance.
 
 ## Troubleshooting
 

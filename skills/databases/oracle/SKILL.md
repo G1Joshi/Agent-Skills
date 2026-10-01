@@ -29,18 +29,18 @@ END;
 
 ## Core Concepts
 
-#Multitenant Architecture (CDB and PDBs)
+### Multitenant Architecture (CDB and PDBs)
 
 One Container Database (CDB) manages system memory and background processes; Pluggable Databases (PDBs) run independently:
 
-```
+```text
 [ Container Database (CDB$ROOT) ]
         ├── [ Pluggable DB: PDB_FINANCE ]
         ├── [ Pluggable DB: PDB_HR ]
         └── [ Pluggable DB: PDB_COMMERCE ]
 ```
 
-#PL/SQL Stored Packages & Transaction Management
+### PL/SQL Stored Packages & Transaction Management
 
 Encapsulates procedural business logic with compiled database performance:
 
@@ -64,7 +64,7 @@ END FinancialOps;
 /
 ```
 
-#Automatic Workload Repository (AWR) & ASH
+### Automatic Workload Repository (AWR) & ASH
 
 Comprehensive database performance monitoring and execution profiling:
 
@@ -101,20 +101,20 @@ END;
 /
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use Bind Variables Everywhere**: Bind variables (`:val`) prevent hard parsing, reduce latch contention, and stop SQL injection.
-- **Analyze AWR Reports Regularly**: Inspect the "Top 5 Timed Events" in AWR to identify I/O bottlenecks and locking contention.
-- **Implement Partitioning for Massive Tables**: Partition multi-terabyte tables by range or hash to enable partition pruning.
-- **Use Automatic Memory Management (AMM)**: Allow Oracle to balance PGA (work areas) and SGA (buffer cache/shared pool) dynamically.
+- Use Bind Variables Everywhere: Bind variables (`:val`) prevent hard parsing, reduce latch contention, and stop SQL injection.
+- Analyze AWR Reports Regularly: Inspect the "Top 5 Timed Events" in AWR to identify I/O bottlenecks and locking contention.
+- Implement Partitioning for Massive Tables: Partition multi-terabyte tables by range or hash to enable partition pruning.
+- Use Automatic Memory Management (AMM): Allow Oracle to balance PGA (work areas) and SGA (buffer cache/shared pool) dynamically.
 
 **Don't**:
 
-- **Don't hardcode literals in production queries**: Literal strings force Oracle to recompile and pollute the Shared Pool with distinct execution plans.
-- **Don't commit inside iterative row loops**: Committing row-by-row causes `ORA-01555 Snapshot Too Old` errors and redo log thrashing.
-- **Don't ignore index monitoring**: Drop unused indexes to reclaim storage and reduce write lock overhead.
+- Hardcode literals in production queries: Literal strings force Oracle to recompile and pollute the Shared Pool with distinct execution plans.
+- Commit inside iterative row loops: Committing row-by-row causes `ORA-01555 Snapshot Too Old` errors and redo log thrashing.
+- Ignore index monitoring: Drop unused indexes to reclaim storage and reduce write lock overhead.
 
 ## Troubleshooting
 

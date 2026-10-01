@@ -28,7 +28,7 @@ ORDER BY Hour
 
 ## Core Concepts
 
-#MergeTree Engine Family
+### MergeTree Engine Family
 
 The foundational storage engine for ClickHouse; writes data in immutable sorted parts and merges them asynchronously in the background:
 
@@ -48,7 +48,7 @@ ORDER BY (site_id, event_time, user_id)
 SETTINGS index_granularity = 8192;
 ```
 
-#Materialized Views with AggregatingMergeTree
+### Materialized Views with AggregatingMergeTree
 
 Precomputes rolling aggregations at insertion time with zero background batch job overhead:
 
@@ -74,7 +74,7 @@ FROM analytics.page_views
 GROUP BY hour, site_id;
 ```
 
-#Vectorized SIMD Query Execution
+### Vectorized SIMD Query Execution
 
 ClickHouse processes data in vectorized arrays of column primitives, utilizing hardware CPU SIMD instructions to aggregate millions of values per cycle:
 
@@ -116,20 +116,20 @@ FROM telemetry.sensor_metrics FINAL
 WHERE sensor_id = 101;
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Insert in Large Batches**: Stream data in batches of 10,000 to 100,000 rows (or at 1-second intervals) to prevent creating excessive small parts.
-- **Use `LowCardinality(String)`**: Compress string columns with fewer than 10,000 unique values into indexed integer dictionaries.
-- **Order by Most-Filtered Columns First**: Arrange primary sort keys from lowest cardinality to highest cardinality (`site_id`, `event_time`, `user_id`).
-- **Use `ReplacingMergeTree` for Deduplication**: Deduplicate rows based on version numbers during background merges.
+- Insert in Large Batches: Stream data in batches of 10,000 to 100,000 rows (or at 1-second intervals) to prevent creating excessive small parts.
+- Use `LowCardinality(String)`: Compress string columns with fewer than 10,000 unique values into indexed integer dictionaries.
+- Order by Most-Filtered Columns First: Arrange primary sort keys from lowest cardinality to highest cardinality (`site_id`, `event_time`, `user_id`).
+- Use `ReplacingMergeTree` for Deduplication: Deduplicate rows based on version numbers during background merges.
 
 **Don't**:
 
-- **Don't perform single-row `INSERT` statements**: Inserting single rows overwhelms the MergeTree engine and exhausts filesystem inodes.
-- **Don't use ClickHouse for transactional OLTP**: ClickHouse does not support ACID row locking, single-record updates, or foreign key cascades.
-- **Don't create too many partitions**: Keep partition counts under 1,000 per table; partition by month (`toYYYYMM`) rather than day.
+- Perform single-row `INSERT` statements: Inserting single rows overwhelms the MergeTree engine and exhausts filesystem inodes.
+- Use ClickHouse for transactional OLTP: ClickHouse does not support ACID row locking, single-record updates, or foreign key cascades.
+- Create too many partitions: Keep partition counts under 1,000 per table; partition by month (`toYYYYMM`) rather than day.
 
 ## Troubleshooting
 

@@ -24,7 +24,7 @@ curl -X PUT http://admin:password@127.0.0.1:5984/my_database/doc1 \
 
 ## Core Concepts
 
-#Pure HTTP/RESTful Interface
+### Pure HTTP/RESTful Interface
 
 Every database operation maps directly to standard HTTP methods:
 
@@ -39,7 +39,7 @@ curl -X POST http://admin:password@127.0.0.1:5984/mydb \
 curl -X GET http://admin:password@127.0.0.1:5984/mydb/8f3d1e1c...
 ```
 
-#Multiversion Concurrency Control (MVCC) & Revisions (`_rev`)
+### Multiversion Concurrency Control (MVCC) & Revisions (`_rev`)
 
 Updating documents requires passing the active revision tag to prevent accidental overwrites:
 
@@ -50,7 +50,7 @@ curl -X PUT http://admin:password@127.0.0.1:5984/mydb/8f3d1e1c... \
   -d '{"_rev": "1-a1b2c3d4...", "title": "Updated Title", "status": "draft"}'
 ```
 
-#Bi-Directional Master-Master Replication
+### Bi-Directional Master-Master Replication
 
 Syncs databases seamlessly between independent nodes:
 
@@ -81,20 +81,20 @@ REV=$(curl -s "http://127.0.0.1:5984/mydb/doc1" | jq -r '._rev')
 curl -X PUT "http://127.0.0.1:5984/mydb/doc1"   -H "Content-Type: application/json"   -d "{"_rev": "$REV", "title": "Updated Document", "status": "resolved"}"
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Pair with PouchDB in Browsers**: Use PouchDB locally in client IndexedDB; sync automatically with CouchDB on network recovery.
-- **Run Regular Database Compaction**: Execute `POST /mydb/_compact` to clean up old MVCC revision trees and reclaim disk space.
-- **Design Conflict Resolution Explicitly**: Handle deterministic conflict resolution in application code when concurrent offline edits occur.
-- **Create Mango Indexes**: Define JSON indexes (`_index`) to optimize ad-hoc JSON querying via `_find`.
+- Pair with PouchDB in Browsers: Use PouchDB locally in client IndexedDB; sync automatically with CouchDB on network recovery.
+- Run Regular Database Compaction: Execute `POST /mydb/_compact` to clean up old MVCC revision trees and reclaim disk space.
+- Design Conflict Resolution Explicitly: Handle deterministic conflict resolution in application code when concurrent offline edits occur.
+- Create Mango Indexes: Define JSON indexes (`_index`) to optimize ad-hoc JSON querying via `_find`.
 
 **Don't**:
 
-- **Don't rely on CouchDB for high-throughput OLTP transactions**: CouchDB is built for offline sync and eventual consistency, not rapid transactions.
-- **Don't ignore the `_rev` parameter**: Forgetting to handle 409 Conflict responses causes user updates to drop.
-- **Don't expose raw CouchDB admin ports to public networks**: Protect port 5984 behind Nginx or Cloudflare reverse proxies.
+- Rely on CouchDB for high-throughput OLTP transactions: CouchDB is built for offline sync and eventual consistency, not rapid transactions.
+- Ignore the `_rev` parameter: Forgetting to handle 409 Conflict responses causes user updates to drop.
+- Expose raw CouchDB admin ports to public networks: Protect port 5984 behind Nginx or Cloudflare reverse proxies.
 
 ## Troubleshooting
 

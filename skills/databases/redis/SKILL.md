@@ -29,7 +29,7 @@ HSET user:100 name "Jeevan" role "admin"
 
 ## Core Concepts
 
-#Advanced In-Memory Data Structures
+### Advanced In-Memory Data Structures
 
 Redis goes far beyond simple string caching, offering rich native data primitives:
 
@@ -42,7 +42,7 @@ Redis goes far beyond simple string caching, offering rich native data primitive
 | **Sorted Set (ZSET)** | Leaderboards, sliding rate limits  | `ZADD leaderboard 4500 "user101"`             |
 | **Stream**            | Event sourcing, append-only logs   | `XADD mystream * sensor "temp" val 24.5`      |
 
-#Atomic Distributed Locks (`SET NX PX`)
+### Atomic Distributed Locks (`SET NX PX`)
 
 Acquires safe mutual exclusion locks across distributed nodes:
 
@@ -73,7 +73,7 @@ async function releaseLock(lockKey: string, token: string): Promise<boolean> {
 }
 ```
 
-#Sliding Window Rate Limiter with Sorted Sets (ZSET)
+### Sliding Window Rate Limiter with Sorted Sets (ZSET)
 
 Calculates rolling request rates accurately:
 
@@ -132,20 +132,20 @@ else
 end
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Always Set an Eviction Policy**: Configure `maxmemory-policy volatile-lru` or `allkeys-lru` to prevent out-of-memory crashes.
-- **Use Pipelines for Multi-Key Operations**: Batch commands with `redis.pipeline()` to eliminate network roundtrip latency.
-- **Execute Complex Logic with Atomic Lua Scripts**: Use Lua scripts or Redis Functions to guarantee atomic multi-step operations.
-- **Namespace Keys Systematically**: Follow standardized key naming conventions (`app:environment:entity:id`).
+- Always Set an Eviction Policy: Configure `maxmemory-policy volatile-lru` or `allkeys-lru` to prevent out-of-memory crashes.
+- Use Pipelines for Multi-Key Operations: Batch commands with `redis.pipeline()` to eliminate network roundtrip latency.
+- Execute Complex Logic with Atomic Lua Scripts: Use Lua scripts or Redis Functions to guarantee atomic multi-step operations.
+- Namespace Keys Systematically: Follow standardized key naming conventions (`app:environment:entity:id`).
 
 **Don't**:
 
-- **Don't run the `KEYS *` command in production**: `KEYS` blocks the single-threaded event loop; use `SCAN` instead.
-- **Don't store massive multi-megabyte values**: Redis is single-threaded; serializing huge objects delays all concurrent requests.
-- **Don't use Redis without persistence configurations**: Ensure RDB snapshots or AOF (`appendonly yes`) are active if data loss is unacceptable.
+- Run the `KEYS *` command in production: `KEYS` blocks the single-threaded event loop; use `SCAN` instead.
+- Store massive multi-megabyte values: Redis is single-threaded; serializing huge objects delays all concurrent requests.
+- Use Redis without persistence configurations: Ensure RDB snapshots or AOF (`appendonly yes`) are active if data loss is unacceptable.
 
 ## Troubleshooting
 
