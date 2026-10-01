@@ -42,7 +42,7 @@ app.post(
 
 ## Core Concepts
 
-#Pluggable Strategy Architecture
+### Pluggable Strategy Architecture
 
 Passport delegates credential verification to specialized Strategy plugins (`passport-local`, `passport-jwt`, `passport-google-oauth20`):
 
@@ -72,7 +72,7 @@ passport.use(
 );
 ```
 
-#Session Serialization & Deserialization
+### Session Serialization & Deserialization
 
 Coordinates storing minimal user identifiers in session cookies and hydrating full user entities on subsequent requests:
 
@@ -93,7 +93,7 @@ passport.deserializeUser(async (id: string, done) => {
 });
 ```
 
-#Stateless JWT Strategy for APIs
+### Stateless JWT Strategy for APIs
 
 Validates bearer tokens without maintaining server-side session state:
 
@@ -144,20 +144,20 @@ passport.use(
 );
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Store Only the User ID in `serializeUser`**: Keep session store payloads tiny; fetch updated permissions on deserialization.
-- **Use Stateless JWT Strategy for REST APIs**: Avoid heavy cookie-based session stores when servicing stateless mobile and frontend clients.
-- **Handle Async Errors Gracefully**: Always wrap database lookups in try/catch blocks and pass exceptions to `done(err)`.
-- **Combine with Express Session Stores (Redis)**: Use `connect-redis` to share session state horizontally across Node.js replicas.
+- Store Only the User ID in `serializeUser`: Keep session store payloads tiny; fetch updated permissions on deserialization.
+- Use Stateless JWT Strategy for REST APIs: Avoid heavy cookie-based session stores when servicing stateless mobile and frontend clients.
+- Handle Async Errors Gracefully: Always wrap database lookups in try/catch blocks and pass exceptions to `done(err)`.
+- Combine with Express Session Stores (Redis): Use `connect-redis` to share session state horizontally across Node.js replicas.
 
 **Don't**:
 
-- **Don't store full user objects in sessions**: Outdated permissions or changed passwords won't take effect until sessions expire.
-- **Don't use `passport.authenticate('local')` without rate limiting**: Protect authentication endpoints with `express-rate-limit` against brute-force attacks.
-- **Don't forget to call `done()`**: Failing to invoke `done()` leaves HTTP requests hanging until client connection timeouts.
+- Store full user objects in sessions: Outdated permissions or changed passwords won't take effect until sessions expire.
+- Use `passport.authenticate('local')` without rate limiting: Protect authentication endpoints with `express-rate-limit` against brute-force attacks.
+- Forget to call `done()`: Failing to invoke `done()` leaves HTTP requests hanging until client connection timeouts.
 
 ## Troubleshooting
 

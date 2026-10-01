@@ -34,18 +34,18 @@ GET /authorize?
 
 ## Core Concepts
 
-#The OIDC Layer on OAuth 2.0
+### The OIDC Layer on OAuth 2.0
 
 OIDC adds an identity layer on top of OAuth 2.0 by introducing the cryptographic ID Token and UserInfo endpoint:
 
-```
+```text
 [ OAuth 2.0 (Authorization) ] ──+ OpenID Scope ──→ [ OpenID Connect (Authentication) ]
                                                      ├── ID Token (JWT with user claims)
                                                      ├── Discovery Endpoint (/.well-known/openid-configuration)
                                                      └── UserInfo Endpoint (/userinfo)
 ```
 
-#The OIDC Discovery Document (`/.well-known/openid-configuration`)
+### The OIDC Discovery Document (`/.well-known/openid-configuration`)
 
 Allows clients to discover authorization, token, JWKS, and userinfo endpoints dynamically:
 
@@ -60,7 +60,7 @@ Allows clients to discover authorization, token, JWKS, and userinfo endpoints dy
 }
 ```
 
-#The ID Token & Core Standard Claims
+### The ID Token & Core Standard Claims
 
 A signed JWT containing identity assertion claims:
 
@@ -79,7 +79,8 @@ A signed JWT containing identity assertion claims:
 
 ## Common Patterns
 
-#Authorization Code Flow with PKCE
+### Authorization Code Flow with PKCE
+
 **Problem**: Public clients (SPAs, Mobile Apps) cannot securely store client secrets.  
 **Solution**: Generate dynamic code verifier and code challenge (Proof Key for Code Exchange).
 
@@ -104,20 +105,20 @@ const authUrl =
   `&code_challenge=${challenge}&code_challenge_method=S256&scope=openid profile email`;
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Always Verify the Nonce Claim**: Include a cryptographic `nonce` parameter in the authorization request and verify it matches in the ID token.
-- **Verify `at_hash` When Present**: Ensure the access token hash matches `at_hash` in the ID token to prevent access token injection.
-- **Consume Identity Attributes from ID Token Claims**: Avoid unnecessary network roundtrips to `/userinfo` when claims exist in the ID token.
-- **Support Dynamic Discovery**: Point OIDC client libraries to the issuer URL to load endpoints automatically via `/.well-known/openid-configuration`.
+- Always Verify the Nonce Claim: Include a cryptographic `nonce` parameter in the authorization request and verify it matches in the ID token.
+- Verify `at_hash` When Present: Ensure the access token hash matches `at_hash` in the ID token to prevent access token injection.
+- Consume Identity Attributes from ID Token Claims: Avoid unnecessary network roundtrips to `/userinfo` when claims exist in the ID token.
+- Support Dynamic Discovery: Point OIDC client libraries to the issuer URL to load endpoints automatically via `/.well-known/openid-configuration`.
 
 **Don't**:
 
-- **Don't use ID tokens as API Access Tokens**: ID tokens assert identity to the client app; APIs must receive Access Tokens.
-- **Don't store ID tokens without signature verification**: Validate the signature against the provider's JWKS before trusting claims.
-- **Don't neglect the `sub` claim**: The Subject (`sub`) claim is the only stable, immutable user identifier; emails can change.
+- Use ID tokens as API Access Tokens: ID tokens assert identity to the client app; APIs must receive Access Tokens.
+- Store ID tokens without signature verification: Validate the signature against the provider's JWKS before trusting claims.
+- Neglect the `sub` claim: The Subject (`sub`) claim is the only stable, immutable user identifier; emails can change.
 
 ## Troubleshooting
 

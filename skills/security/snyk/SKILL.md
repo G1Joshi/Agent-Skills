@@ -32,7 +32,7 @@ snyk monitor
 
 ## Core Concepts
 
-#Snyk CLI Dependency Auditing
+### Snyk CLI Dependency Auditing
 
 Scans project manifest files against Snyk's proprietary vulnerability intelligence database:
 
@@ -44,7 +44,7 @@ snyk test --severity-threshold=high
 snyk fix
 ```
 
-#Container Image Vulnerability Analysis
+### Container Image Vulnerability Analysis
 
 Analyzes base images and package managers, suggesting secure base image alternatives:
 
@@ -53,7 +53,7 @@ Analyzes base images and package managers, suggesting secure base image alternat
 snyk container test my-org/api:latest --file=Dockerfile
 ```
 
-#GitHub Actions CI/CD Integration
+### GitHub Actions CI/CD Integration
 
 Blocks pull requests containing critical vulnerabilities:
 
@@ -84,20 +84,20 @@ snyk test --severity-threshold=high
 snyk container test myapp:latest --severity-threshold=critical --fail-on=upgradable
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Integrate Snyk in Pre-Commit and IDEs**: Catch vulnerabilities while authoring code using the Snyk VS Code / JetBrains extensions.
-- **Enforce Severity Thresholds in CI**: Fail pull requests only on `high` or `critical` vulnerabilities to prevent pipeline gridlock.
-- **Scan Container Base Images Regularly**: Leverage minimal base images like Alpine or Chainguard to minimize attack surfaces.
-- **Scan Infrastructure as Code**: Run `snyk iac test` on Terraform and Kubernetes configs to prevent open security groups.
+- Integrate Snyk in Pre-Commit and IDEs: Catch vulnerabilities while authoring code using the Snyk VS Code / JetBrains extensions.
+- Enforce Severity Thresholds in CI: Fail pull requests only on `high` or `critical` vulnerabilities to prevent pipeline gridlock.
+- Scan Container Base Images Regularly: Leverage minimal base images like Alpine or Chainguard to minimize attack surfaces.
+- Scan Infrastructure as Code: Run `snyk iac test` on Terraform and Kubernetes configs to prevent open security groups.
 
 **Don't**:
 
-- **Don't ignore transitive dependencies**: Vulnerabilities frequently live in nested child dependencies; use Snyk's automated PR fixes.
-- **Don't blindly ignore vulnerabilities with `.snyk` files**: Require security team approval before adding temporary expiration ignores.
-- **Don't leave Snyk tokens unrotated**: Rotate CI API tokens periodically in your Snyk organization settings.
+- Ignore transitive dependencies: Vulnerabilities frequently live in nested child dependencies; use Snyk's automated PR fixes.
+- Blindly ignore vulnerabilities with `.snyk` files: Require security team approval before adding temporary expiration ignores.
+- Leave Snyk tokens unrotated: Rotate CI API tokens periodically in your Snyk organization settings.
 
 ## Troubleshooting
 

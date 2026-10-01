@@ -22,17 +22,17 @@ docker run -p 8080:8080 -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=admin
 
 ## Core Concepts
 
-#Realm Architecture & Multi-Tenancy
+### Realm Architecture & Multi-Tenancy
 
 Realms isolate groups of users, credentials, roles, and client applications completely:
 
-```
+```text
 [ Master Realm (Administer Keycloak) ]
        ├── [ Realm: EnterpriseA ] ── (Users, Roles, Clients, LDAP Provider)
        └── [ Realm: EnterpriseB ] ── (Users, Roles, Clients, Google Provider)
 ```
 
-#OIDC Client Registration (Public vs Confidential)
+### OIDC Client Registration (Public vs Confidential)
 
 - **Confidential Clients**: Backend servers that maintain a `client_secret` securely.
 - **Public Clients**: SPAs and mobile apps that authenticate via PKCE without secrets:
@@ -48,7 +48,7 @@ Realms isolate groups of users, credentials, roles, and client applications comp
 }
 ```
 
-#Docker Deployment with Production Database
+### Docker Deployment with Production Database
 
 Running Keycloak in production mode connected to PostgreSQL:
 
@@ -87,20 +87,20 @@ curl -X POST "http://keycloak:8080/realms/enterprise/protocol/openid-connect/tok
   -d "client_secret=YOUR_CLIENT_SECRET"
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Run Keycloak with `start --optimized`**: Build container images with `kc.sh build` ahead of time to minimize container boot time in Kubernetes.
-- **Never Use the `master` Realm for Application Users**: Create custom dedicated realms for applications; reserve `master` strictly for Keycloak admin.
-- **Enable PKCE on All Public Clients**: Enforce S256 code challenge method on all single-page and mobile applications.
-- **Use Distributed Cache Replication (Infinispan)**: Configure Infinispan clustering when deploying multi-replica Keycloak pods to synchronize sessions.
+- Run Keycloak with `start --optimized`: Build container images with `kc.sh build` ahead of time to minimize container boot time in Kubernetes.
+- Never Use the `master` Realm for Application Users: Create custom dedicated realms for applications; reserve `master` strictly for Keycloak admin.
+- Enable PKCE on All Public Clients: Enforce S256 code challenge method on all single-page and mobile applications.
+- Use Distributed Cache Replication (Infinispan): Configure Infinispan clustering when deploying multi-replica Keycloak pods to synchronize sessions.
 
 **Don't**:
 
-- **Don't expose Keycloak administration console to the public internet**: Protect `/admin` endpoints behind private VPNs or IP whitelists.
-- **Don't use embedded H2 database in production**: Always use external, managed PostgreSQL or MySQL with automated backups.
-- **Don't neglect database migration planning during upgrades**: Major Keycloak version updates require coordinated database schema migrations.
+- Expose Keycloak administration console to the public internet: Protect `/admin` endpoints behind private VPNs or IP whitelists.
+- Use embedded H2 database in production: Always use external, managed PostgreSQL or MySQL with automated backups.
+- Neglect database migration planning during upgrades: Major Keycloak version updates require coordinated database schema migrations.
 
 ## Troubleshooting
 

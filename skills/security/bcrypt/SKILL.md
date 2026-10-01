@@ -35,11 +35,11 @@ if (match) {
 
 ## Core Concepts
 
-#The Modular Crypt Format ($2b$ Cost $ Salt + Hash)
+### The Modular Crypt Format ($2b$ Cost $ Salt + Hash)
 
 Bcrypt outputs a standardized 60-character string encoding the algorithm revision, work factor, 128-bit salt, and 184-bit hash:
 
-```
+```text
 $2b$12$e8Y5W5t2KqfO.oXWf1NfTeu4GZ7hJ2xM.wKzV8L8T7p6Q9r8S1t2u
  ── ── ────────────────────── ──────────────────────────────
  │  │             │                         │
@@ -49,7 +49,7 @@ $2b$12$e8Y5W5t2KqfO.oXWf1NfTeu4GZ7hJ2xM.wKzV8L8T7p6Q9r8S1t2u
  └───────────────────────────────────────────── Algorithm Identifier (2b)
 ```
 
-#Salting & Adaptive Work Factor
+### Salting & Adaptive Work Factor
 
 Salting prevents rainbow table attacks; the cost factor dictates exponential computation time:
 
@@ -65,7 +65,7 @@ export async function hashPassword(plainText: string): Promise<string> {
 }
 ```
 
-#Constant-Time Password Verification
+### Constant-Time Password Verification
 
 Prevents side-channel timing attacks by performing comparisons in constant time:
 
@@ -102,20 +102,20 @@ export async function verifyPassword(plainPassword, hashedPassword) {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use a Work Factor of at least 12**: Benchmark hashing time on production servers aiming for 250ms per hash.
-- **Re-Hash Passwords on Login**: Check if legacy hashes have lower cost factors (`bcrypt.getRounds(hash) < 12`) and upgrade them dynamically upon successful login.
-- **Handle the 72-Byte Truncation Limit**: Pre-hash passwords with SHA-256 before bcrypt if users are permitted to submit arbitrarily long passphrases.
-- **Offload Hashing from Event Loops**: Always use asynchronous `bcrypt.hash()` rather than blocking `bcrypt.hashSync()`.
+- Use a Work Factor of at least 12: Benchmark hashing time on production servers aiming for 250ms per hash.
+- Re-Hash Passwords on Login: Check if legacy hashes have lower cost factors (`bcrypt.getRounds(hash) < 12`) and upgrade them dynamically upon successful login.
+- Handle the 72-Byte Truncation Limit: Pre-hash passwords with SHA-256 before bcrypt if users are permitted to submit arbitrarily long passphrases.
+- Offload Hashing from Event Loops: Always use asynchronous `bcrypt.hash()` rather than blocking `bcrypt.hashSync()`.
 
 **Don't**:
 
-- **Don't use MD5, SHA-1, or plain SHA-256 for passwords**: Fast general-purpose hashing functions allow billions of guesses per second on consumer GPUs.
-- **Don't generate salts manually without cryptographically secure random sources**: Use `bcrypt.genSalt()` which taps `/dev/urandom`.
-- **Don't log or print plaintext passwords**: Sanitize incoming request bodies in logging middleware before persisting access logs.
+- Use MD5, SHA-1, or plain SHA-256 for passwords: Fast general-purpose hashing functions allow billions of guesses per second on consumer GPUs.
+- Generate salts manually without cryptographically secure random sources: Use `bcrypt.genSalt()` which taps `/dev/urandom`.
+- Log or print plaintext passwords: Sanitize incoming request bodies in logging middleware before persisting access logs.
 
 ## Troubleshooting
 

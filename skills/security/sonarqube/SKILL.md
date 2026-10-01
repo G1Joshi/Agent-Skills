@@ -31,15 +31,15 @@ sonar.login=...
 
 ## Core Concepts
 
-#The "Clean as You Code" Methodology
+### The "Clean as You Code" Methodology
 
 Focuses quality gate enforcement on "New Code" (modified in the PR) rather than legacy debt:
 
-```
+```text
 [ Developer Branch ] ──Pull Request──→ [ CI Scanner ] ──Analyze New Code──→ [ Quality Gate PASS / FAIL ]
 ```
 
-#sonar-project.properties Configuration
+### sonar-project.properties Configuration
 
 Defines source paths, exclusions, test execution reports, and lcov coverage targets:
 
@@ -54,7 +54,7 @@ sonar.javascript.lcov.reportPaths=coverage/lcov.info
 sonar.qualitygate.wait=true
 ```
 
-#SonarScanner CLI Execution
+### SonarScanner CLI Execution
 
 Runs static analysis and uploads results to SonarQube Server or SonarCloud:
 
@@ -82,20 +82,20 @@ mvn clean verify sonar:sonar \
   -Dsonar.qualitygate.wait=true
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Enforce the Quality Gate on Pull Requests**: Block merges if code coverage on new code is under 80% or if new security vulnerabilities are found.
-- **Upload Real Code Coverage Reports**: Ensure unit test runs output valid LCOV or JaCoCo XML reports consumed by SonarQube.
-- **Review Security Hotspots Interactively**: Investigate flagged security hotspots to confirm safe usage of cryptography and deserialization.
-- **Use SonarLint in IDEs**: Run instant local analysis in VS Code/JetBrains to fix code smells before committing.
+- Enforce the Quality Gate on Pull Requests: Block merges if code coverage on new code is under 80% or if new security vulnerabilities are found.
+- Upload Real Code Coverage Reports: Ensure unit test runs output valid LCOV or JaCoCo XML reports consumed by SonarQube.
+- Review Security Hotspots Interactively: Investigate flagged security hotspots to confirm safe usage of cryptography and deserialization.
+- Use SonarLint in IDEs: Run instant local analysis in VS Code/JetBrains to fix code smells before committing.
 
 **Don't**:
 
-- **Don't attempt to fix all legacy technical debt at once**: Adopt the Clean as You Code strategy; fix debt incrementally as files are modified.
-- **Don't disable rules to bypass failing Quality Gates**: Address underlying architectural smells rather than weakening inspection rules.
-- **Don't run SonarScanner on untested code**: Run tests and generate coverage reports before executing the Sonar scanner step.
+- Attempt to fix all legacy technical debt at once: Adopt the Clean as You Code strategy; fix debt incrementally as files are modified.
+- Disable rules to bypass failing Quality Gates: Address underlying architectural smells rather than weakening inspection rules.
+- Run SonarScanner on untested code: Run tests and generate coverage reports before executing the Sonar scanner step.
 
 ## Troubleshooting
 

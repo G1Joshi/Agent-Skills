@@ -29,18 +29,18 @@ vault kv get secret/hello
 
 ## Core Concepts
 
-#Secret Engines & Path-Based Access
+### Secret Engines & Path-Based Access
 
 Vault organizes capabilities under hierarchical mount paths:
 
-```
+```text
 secret/data/my-app/config     -> Key-Value (KV v2) persistent secrets
 database/creds/readonly-user  -> Dynamic on-demand temporary database roles
 transit/encrypt/customer-pii  -> Encryption-as-a-Service without key export
 pki/issue/internal-domain     -> Dynamic TLS certificate generation
 ```
 
-#Dynamic Database Credential Generation
+### Dynamic Database Credential Generation
 
 Vault connects to PostgreSQL/MySQL and creates unique users on the fly with automatic lease expiration:
 
@@ -55,7 +55,7 @@ vault read database/creds/readonly-role
 # password: A1b2C3d4E5f6G7h8
 ```
 
-#Application Authentication via Kubernetes Auth
+### Application Authentication via Kubernetes Auth
 
 Applications running in Kubernetes authenticate using their native ServiceAccount tokens:
 
@@ -97,20 +97,20 @@ vault read database/creds/readonly-app
 vault kv get -format=json secret/data/payments/stripe | jq '.data.data.api_key'
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use Dynamic Database Credentials**: Never share static database passwords across services; let Vault issue short-lived credentials.
-- **Authenticate via Cloud / Platform Identity**: Use Kubernetes Auth, AWS IAM Auth, or Azure Managed Identity instead of static root tokens.
-- **Enable Transit Secret Engine for Sensitive PII**: Offload encryption and key rotation to Vault; keep private keys out of application memory.
-- **Automate Lease Renewal**: Ensure background tasks renew long-running leases or re-authenticate prior to token expiration.
+- Use Dynamic Database Credentials: Never share static database passwords across services; let Vault issue short-lived credentials.
+- Authenticate via Cloud / Platform Identity: Use Kubernetes Auth, AWS IAM Auth, or Azure Managed Identity instead of static root tokens.
+- Enable Transit Secret Engine for Sensitive PII: Offload encryption and key rotation to Vault; keep private keys out of application memory.
+- Automate Lease Renewal: Ensure background tasks renew long-running leases or re-authenticate prior to token expiration.
 
 **Don't**:
 
-- **Don't store the Vault Root Token**: Revoke the root token immediately after initial setup and cluster unsealing.
-- **Don't disable TLS on the Vault API**: Never communicate with Vault over unencrypted HTTP.
-- **Don't grant broad wildcard policies**: Follow least privilege; grant read access only to specific secret paths needed by each microservice.
+- Store the Vault Root Token: Revoke the root token immediately after initial setup and cluster unsealing.
+- Disable TLS on the Vault API: Never communicate with Vault over unencrypted HTTP.
+- Grant broad wildcard policies: Follow least privilege; grant read access only to specific secret paths needed by each microservice.
 
 ## Troubleshooting
 

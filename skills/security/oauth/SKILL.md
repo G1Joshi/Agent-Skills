@@ -44,7 +44,7 @@ const tokenResponse = await fetch("https://auth.example.com/token", {
 
 ## Core Concepts
 
-#The 4 OAuth 2.0 / 2.1 Grant Types
+### The 4 OAuth 2.0 / 2.1 Grant Types
 
 | Grant Type                       | Client Type                                      | Use Case                                        |
 | :------------------------------- | :----------------------------------------------- | :---------------------------------------------- |
@@ -53,11 +53,11 @@ const tokenResponse = await fetch("https://auth.example.com/token", {
 | **Refresh Token**                | Confidential & Public                            | Renewing expired access tokens without re-login |
 | **Device Authorization**         | Input-constrained (Smart TV, CLI)                | Authenticating via secondary browser screen     |
 
-#Proof Key for Code Exchange (PKCE) Protocol Flow
+### Proof Key for Code Exchange (PKCE) Protocol Flow
 
 Protects authorization codes from interception on public clients:
 
-```
+```text
 [ Client ] ──1. Generate Verifier & Challenge (SHA256)──→ Local
 [ Client ] ──2. GET /authorize?code_challenge=xyz───────→ [ Auth Server ]
 [ Client ] ←─3. Receive Authorization Code─────────────── [ Auth Server ]
@@ -65,7 +65,7 @@ Protects authorization codes from interception on public clients:
 [ Client ] ←─5. Receive Access Token & Refresh Token───── [ Auth Server ]
 ```
 
-#Scopes & Consent Management
+### Scopes & Consent Management
 
 Defines granular operational permissions approved by the resource owner:
 
@@ -102,20 +102,20 @@ const authUrl =
   `code_challenge=${challenge}&code_challenge_method=S256`;
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Enforce OAuth 2.1 Recommendations**: Deprecate legacy Implicit Grant and Resource Owner Password Credentials (ROPC) completely.
-- **Mandate PKCE for All Authorization Code Flows**: Require PKCE for confidential clients as well as public clients.
-- **Implement Refresh Token Rotation**: Invalidate previous refresh tokens upon each exchange to detect token reuse and theft immediately.
-- **Validate Redirect URIs Strictly**: Use exact string matching against registered redirect URIs; never use wildcard regular expressions.
+- Enforce OAuth 2.1 Recommendations: Deprecate legacy Implicit Grant and Resource Owner Password Credentials (ROPC) completely.
+- Mandate PKCE for All Authorization Code Flows: Require PKCE for confidential clients as well as public clients.
+- Implement Refresh Token Rotation: Invalidate previous refresh tokens upon each exchange to detect token reuse and theft immediately.
+- Validate Redirect URIs Strictly: Use exact string matching against registered redirect URIs; never use wildcard regular expressions.
 
 **Don't**:
 
-- **Don't use OAuth 2.0 for Authentication without OpenID Connect**: OAuth provides authorization (access tokens); OIDC adds authentication (ID tokens).
-- **Don't pass access tokens in URL query strings**: Query parameters leak into browser histories, server access logs, and referrer headers.
-- **Don't grant broad wildcard scopes**: Enforce least privilege by issuing fine-grained scopes tailored to the application's actual needs.
+- Use OAuth 2.0 for Authentication without OpenID Connect: OAuth provides authorization (access tokens); OIDC adds authentication (ID tokens).
+- Pass access tokens in URL query strings: Query parameters leak into browser histories, server access logs, and referrer headers.
+- Grant broad wildcard scopes: Enforce least privilege by issuing fine-grained scopes tailored to the application's actual needs.
 
 ## Troubleshooting
 

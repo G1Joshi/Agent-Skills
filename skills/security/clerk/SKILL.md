@@ -42,7 +42,7 @@ export default async function Page() {
 
 ## Core Concepts
 
-#Drop-in Component Architecture (<SignIn />, <UserButton />)
+### Drop-in Component Architecture (<SignIn />, <UserButton />)
 
 Provides prebuilt, accessible, themed UI components that handle complete auth lifecycles:
 
@@ -82,7 +82,7 @@ export default function RootLayout({
 }
 ```
 
-#Edge Middleware Session Protection
+### Edge Middleware Session Protection
 
 Protects routes and extracts authenticated user claims at the edge before rendering:
 
@@ -106,7 +106,7 @@ export const config = {
 };
 ```
 
-#Multi-Tenant Organizations & Role Checks
+### Multi-Tenant Organizations & Role Checks
 
 Manages multi-organization contexts with granular RBAC permissions:
 
@@ -149,20 +149,20 @@ export const config = {
 };
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Verify Webhook Signatures with Svix**: Always verify incoming Clerk user lifecycle webhooks using `svix` before updating local databases.
-- **Use Server-Side `auth()` in App Router**: Extract `userId` and `orgId` via `auth()` in Server Components to eliminate client-side waterfall fetches.
-- **Theme Components with Tailored CSS**: Match application design systems using Clerk's `appearance` prop and Tailwind utility variables.
-- **Enable Passkeys by Default**: Encourage users to register biometric passkeys to eliminate credential phishing risks.
+- Verify Webhook Signatures with Svix: Always verify incoming Clerk user lifecycle webhooks using `svix` before updating local databases.
+- Use Server-Side `auth()` in App Router: Extract `userId` and `orgId` via `auth()` in Server Components to eliminate client-side waterfall fetches.
+- Theme Components with Tailored CSS: Match application design systems using Clerk's `appearance` prop and Tailwind utility variables.
+- Enable Passkeys by Default: Encourage users to register biometric passkeys to eliminate credential phishing risks.
 
 **Don't**:
 
-- **Don't expose `CLERK_SECRET_KEY` in frontend code**: Keep secret keys strictly in server environment variables.
-- **Don't store database IDs in client state**: Treat Clerk's JWT session claims as the single source of truth for the active request.
-- **Don't bypass route protection**: Always enforce server-side protection in route handlers and middleware; do not rely on UI hiding alone.
+- Expose `CLERK_SECRET_KEY` in frontend code: Keep secret keys strictly in server environment variables.
+- Store database IDs in client state: Treat Clerk's JWT session claims as the single source of truth for the active request.
+- Bypass route protection: Always enforce server-side protection in route handlers and middleware; do not rely on UI hiding alone.
 
 ## Troubleshooting
 

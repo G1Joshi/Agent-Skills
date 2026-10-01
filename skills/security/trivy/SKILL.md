@@ -29,7 +29,7 @@ trivy repo https://github.com/knqyf263/trivy
 
 ## Core Concepts
 
-#Multi-Target Scanning Architecture
+### Multi-Target Scanning Architecture
 
 Trivy scans container images, filesystems, Git repositories, AWS accounts, and Kubernetes clusters using a unified engine:
 
@@ -44,7 +44,7 @@ trivy fs --scanners vuln,secret,misconfig .
 trivy k8s --report summary cluster
 ```
 
-#Software Bill of Materials (SBOM) Export
+### Software Bill of Materials (SBOM) Export
 
 Generates standardized inventory of all components and licenses in container images:
 
@@ -53,7 +53,7 @@ Generates standardized inventory of all components and licenses in container ima
 trivy image --format cyclonedx --output sbom.json my-org/api:latest
 ```
 
-#GitHub Actions CI Security Gate
+### GitHub Actions CI Security Gate
 
 Blocks container builds containing unpatched critical CVEs:
 
@@ -87,20 +87,20 @@ trivy image \
   myapp:latest
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use Distroless / Chainguard Minimal Images**: Reduce container vulnerabilities by 90%+ by stripping out package managers and shells.
-- **Integrate Trivy in Container Build Pipelines**: Run Trivy immediately after `docker build` before pushing images to container registries.
-- **Generate SBOMs for Releases**: Attach SPDX or CycloneDX SBOMs to GitHub releases for supply chain transparency.
-- **Leverage `.trivyignore` Conservatively**: Document justifiable reasons and expiration dates when ignoring specific CVEs.
+- Use Distroless / Chainguard Minimal Images: Reduce container vulnerabilities by 90%+ by stripping out package managers and shells.
+- Integrate Trivy in Container Build Pipelines: Run Trivy immediately after `docker build` before pushing images to container registries.
+- Generate SBOMs for Releases: Attach SPDX or CycloneDX SBOMs to GitHub releases for supply chain transparency.
+- Leverage `.trivyignore` Conservatively: Document justifiable reasons and expiration dates when ignoring specific CVEs.
 
 **Don't**:
 
-- **Don't scan without updating vulnerability DBs**: Ensure Trivy has access to download the latest vulnerability database cache before scanning.
-- **Don't ignore hardcoded secret alerts**: Treat leaked API keys flagged by Trivy secret scanning as compromised immediately.
-- **Don't allow unmitigated Critical CVEs into production**: Patch base images or update libraries when active exploits exist.
+- Scan without updating vulnerability DBs: Ensure Trivy has access to download the latest vulnerability database cache before scanning.
+- Ignore hardcoded secret alerts: Treat leaked API keys flagged by Trivy secret scanning as compromised immediately.
+- Allow unmitigated Critical CVEs into production: Patch base images or update libraries when active exploits exist.
 
 ## Troubleshooting
 

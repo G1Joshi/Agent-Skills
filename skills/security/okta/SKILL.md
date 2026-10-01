@@ -42,18 +42,18 @@ function App() {
 
 ## Core Concepts
 
-#Okta Application Models & Sign-On Policies
+### Okta Application Models & Sign-On Policies
 
 Applications in Okta represent integration targets with distinct security policies:
 
-```
+```text
 [ User Directory (Okta Universal Directory) ]
         ├── [ App: AWS IAM Federation (SAML 2.0) ]
         ├── [ App: Internal Engineering Portal (OIDC + PKCE) ]
         └── [ App: Salesforce (SAML + SCIM Provisioning) ]
 ```
 
-#Okta JWT Token Verification via Okta JWT Verifier
+### Okta JWT Token Verification via Okta JWT Verifier
 
 Validates tokens issued by Okta Authorization Servers:
 
@@ -75,7 +75,7 @@ export async function verifyOktaToken(authHeader: string) {
 }
 ```
 
-#SCIM 2.0 Automated User Provisioning
+### SCIM 2.0 Automated User Provisioning
 
 Synchronizes user creation, updates, and deprovisioning from Okta to downstream apps automatically:
 
@@ -122,20 +122,20 @@ export async function verifyOktaScope(token: string, requiredScope: string) {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use Custom Authorization Servers for Customer APIs**: Keep workforce and customer authentication configurations strictly segregated.
-- **Implement SCIM Deprovisioning**: Ensure deactivated employees in Okta are immediately revoked across all downstream SaaS platforms.
-- **Enforce FIDO2 / WebAuthn Factors**: Prioritize phishing-resistant Fast IDentity Online (FIDO2) authenticators over SMS OTP.
-- **Cache Public Keys (JWKS) Gracefully**: Use built-in verifier caching to avoid hitting Okta rate limits on token validation.
+- Use Custom Authorization Servers for Customer APIs: Keep workforce and customer authentication configurations strictly segregated.
+- Implement SCIM Deprovisioning: Ensure deactivated employees in Okta are immediately revoked across all downstream SaaS platforms.
+- Enforce FIDO2 / WebAuthn Factors: Prioritize phishing-resistant Fast IDentity Online (FIDO2) authenticators over SMS OTP.
+- Cache Public Keys (JWKS) Gracefully: Use built-in verifier caching to avoid hitting Okta rate limits on token validation.
 
 **Don't**:
 
-- **Don't hardcode API tokens with Super Admin permissions**: Create granular service accounts with least-privilege administrative roles.
-- **Don't allow unencrypted HTTP endpoints in Okta App redirect URIs**: Enforce HTTPS on all registered redirect destinations.
-- **Don't disable rate limit alerts**: Monitor Okta System Log webhooks for security alerts and rate limit warnings.
+- Hardcode API tokens with Super Admin permissions: Create granular service accounts with least-privilege administrative roles.
+- Allow unencrypted HTTP endpoints in Okta App redirect URIs: Enforce HTTPS on all registered redirect destinations.
+- Disable rate limit alerts: Monitor Okta System Log webhooks for security alerts and rate limit warnings.
 
 ## Troubleshooting
 
