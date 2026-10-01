@@ -5,7 +5,7 @@ description: Expert Warp terminal assistance covering AI command search, block-b
 
 # Warp
 
-Warp is a modern, Rust-based terminal that works like a text editor. In 2025, it positions itself as an **Agentic Development Environment** for the CLI.
+Warp is a modern, GPU-accelerated terminal built in Rust, featuring block-based navigation, IDE-style text editing, and automated command workflows.
 
 ## When to Use
 
@@ -105,22 +105,33 @@ arguments:
 
 ### Block Sharing & Collaboration
 
-**Problem**: Share exact error output and failed command context with teammates without messy screenshotting.  
-**Solution**: Click block menu (`...`) > **Create Secret Link** or **Copy Block Link** to share executable, syntax-highlighted blocks directly.
+**Problem**: Sharing terminal command output and stack traces with team members without formatting loss or screenshotting.
 
-## Best Practices (2026)
+**Solution**:
 
-- **Do** parameterize repeated deployment and debugging commands as Warp Workflows (`.warp/workflows/`).
-- **Do** use **Block Sharing** (right-click block -> Share) to generate secure links to command outputs during incidents.
-- **Do** organize team operational runbooks inside **Warp Drive** for centralized onboarding.
-- **Do** inspect and review generated shell commands from Warp AI before pressing enter on production environments.
-- **Don't** share terminal output blocks containing unredacted API tokens, customer PII, or credentials.
-- **Don't** hardcode static credentials or cluster names into shared team workflows; use variables (`{{argument}}`).
-- **Don't** disable native shell integrations; Warp relies on them for command status tracking and block boundaries.
+```bash
+# Share individual command block and execution output directly:
+warp share --block-id last-command --access restricted --team engineering
+```
+
+## Best Practices
+
+**Do**:
+
+- Parameterize repeated deployment and debugging commands as Warp Workflows (`.warp/workflows/`).
+- Use **Block Sharing** (right-click block -> Share) to generate secure links to command outputs during incidents.
+- Organize team operational runbooks inside **Warp Drive** for centralized onboarding.
+- Inspect and review generated shell commands from Warp AI before pressing enter on production environments.
+
+**Don't**:
+
+- Share terminal output blocks containing unredacted API tokens, customer PII, or credentials.
+- Hardcode static credentials or cluster names into shared team workflows; use variables (`{{argument}}`).
+- Disable native shell integrations; Warp relies on them for command status tracking and block boundaries.
 
 ## Troubleshooting
 
-| Error / Symptom                                       | Cause                                                    | Solution                                                                   |
+| Error                                                 | Cause                                                    | Solution                                                                   |
 | ----------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------- |
 | Shell integration not loading custom `.zshrc` aliases | Warp subshell initialization sequence overriding aliases | Place custom aliases in `~/.zshrc` after the Warp shell integration block. |
 | AI Assistant suggests outdated CLI commands           | Missing local context or outdated CLI version            | Provide specific target version in prompt or update CLI binary on host.    |

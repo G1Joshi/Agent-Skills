@@ -102,7 +102,8 @@ tig blame src/auth/jwt_validator.go
 
 ## Common Patterns
 
-#Custom Tig Keybindings (~/.tigrc)
+### Custom Tig Keybindings (~/.tigrc)
+
 **Problem**: Quick terminal staging, rebasing, and branch checkout.  
 **Solution**: Define custom hotkeys in `~/.tigrc`.
 
@@ -118,19 +119,24 @@ bind status C !git commit -v
 bind generic P !git push origin HEAD
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** configure `main-view` in `~/.tigrc` with `commit-title:graph=yes,refs=yes` to display clear branch hierarchies.
-- **Do** use `tig blame` to quickly discover which PR or commit introduced a breaking line of code.
-- **Do** utilize `tig status` to review and stage individual line hunks (`1`) for granular, clean git commits.
-- **Do** remap default navigation keys to `j`/`k` in `.tigrc` if accustomed to Vim keybindings.
-- **Don't** leave unresolved merge conflicts open in Tig; use Tig to view the conflict status and resolve in your editor.
-- **Don't** run heavy full-history Tig views on multi-gigabyte repositories without specifying branch or path limits.
-- **Don't** forget to press `q` to ascend up the view hierarchy without killing the session.
+**Do**:
+
+- Configure `main-view` in `~/.tigrc` with `commit-title:graph=yes,refs=yes` to display clear branch hierarchies.
+- Use `tig blame` to quickly discover which PR or commit introduced a breaking line of code.
+- Utilize `tig status` to review and stage individual line hunks (`1`) for granular, clean git commits.
+- Remap default navigation keys to `j`/`k` in `.tigrc` if accustomed to Vim keybindings.
+
+**Don't**:
+
+- Leave unresolved merge conflicts open in Tig; use Tig to view the conflict status and resolve in your editor.
+- Run heavy full-history Tig views on multi-gigabyte repositories without specifying branch or path limits.
+- Forget to press `q` to ascend up the view hierarchy without killing the session.
 
 ## Troubleshooting
 
-| Error / Symptom                        | Cause                                                           | Solution                                                                      |
+| Error                                  | Cause                                                           | Solution                                                                      |
 | -------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------- |
 | Colors hard to read in terminal        | Terminal theme contrast clash with default Tig palette          | Configure custom colors in `~/.tigrc` (e.g. `color diff-stat green default`). |
 | Tig opens in wrong git repository root | Current working directory is inside a submodule or outside repo | Check `git rev-parse --show-toplevel` before invoking `tig`.                  |

@@ -5,7 +5,7 @@ description: Expert Git version control assistance covering branching, interacti
 
 # Git
 
-Git is the foundation of modern software. In 2025, features like **Sparse Checkout** and **Scalar** (for monorepos) are becoming mainstream.
+Git is the foundation of modern distributed version control, featuring robust branching models, interactive history rewriting, Sparse Checkout, and Scalar support for monorepos.
 
 ## When to Use
 
@@ -148,22 +148,22 @@ git bisect run npm test -- --runInBand
 git bisect reset
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use `git switch` and `git restore`**: Avoid overloaded `git checkout` to prevent accidental branch switches or file overwrites.
-- **Push with `--force-with-lease`**: Protect against overwriting colleagues' commits on remote branches.
-- **Enable Background Maintenance**: Run `git maintenance start` to optimize packfiles, commit graphs, and fetch performance.
-- **Sign Commits with SSH / GPG**: Guarantee authenticity of commit authorship in production pipelines.
-- **Write Conventional Commits**: Use standardized prefixes (`feat:`, `fix:`, `chore:`, `refactor:`) to automate semantic versioning and changelogs.
+- Use `git switch` and `git restore`: Avoid overloaded `git checkout` to prevent accidental branch switches or file overwrites.
+- Push with `--force-with-lease`: Protect against overwriting colleagues' commits on remote branches.
+- Enable Background Maintenance: Run `git maintenance start` to optimize packfiles, commit graphs, and fetch performance.
+- Sign Commits with SSH / GPG: Guarantee authenticity of commit authorship in production pipelines.
+- Write Conventional Commits: Use standardized prefixes (`feat:`, `fix:`, `chore:`, `refactor:`) to automate semantic versioning and changelogs.
 
 **Don't**:
 
-- **Don't force push to protected branches**: Never rewrite history on `main`, `master`, or shared release branches.
-- **Don't commit secrets or credentials**: Use `.gitignore` and git-secrets/trufflehog; once committed, credentials persist in packfile blobs even if deleted later.
-- **Don't use huge binary files directly**: Store large model weights or media in Git LFS (Large File Storage) or S3.
-- **Don't merge dirty working trees**: Stash or commit changes before pulling or rebasing to avoid accidental file conflicts.
+- Force push to protected branches: Never rewrite history on `main`, `master`, or shared release branches.
+- Commit secrets or credentials: Use `.gitignore` and git-secrets/trufflehog; once committed, credentials persist in packfile blobs even if deleted later.
+- Use huge binary files directly: Store large model weights or media in Git LFS (Large File Storage) or S3.
+- Merge dirty working trees: Stash or commit changes before pulling or rebasing to avoid accidental file conflicts.
 
 ## Troubleshooting
 

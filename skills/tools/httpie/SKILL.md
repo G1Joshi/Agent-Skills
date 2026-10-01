@@ -5,7 +5,7 @@ description: Expert HTTPie assistance covering CLI and GUI HTTP client usage, JS
 
 # HTTPie
 
-HTTPie started as a CLI (`http get example.com`) and now includes a beautiful **Desktop** app (2025). It is famous for its **human-friendly** syntax.
+HTTPie provides an intuitive CLI and desktop client for testing, debugging, and interacting with HTTP APIs, featuring human-readable syntax and formatted JSON output.
 
 ## When to Use
 
@@ -28,7 +28,7 @@ http POST api.example.com/users \
 
 ## Core Concepts
 
-#Intuitive JSON Request & Header Syntax
+### Intuitive JSON Request & Header Syntax
 
 Sending structured JSON payloads without escaping quotes:
 
@@ -48,7 +48,7 @@ http GET https://api.example.com/v1/orders \
   sort==desc
 ```
 
-#Persistent Sessions for Authenticated Workflows
+### Persistent Sessions for Authenticated Workflows
 
 Saving authentication tokens and session cookies:
 
@@ -62,7 +62,7 @@ http --session=staging POST https://api.example.com/auth/login \
 http --session=staging GET https://api.example.com/dashboard/kpi
 ```
 
-#Form Submissions & File Uploads
+### Form Submissions & File Uploads
 
 Uploading files with multi-part encoding:
 
@@ -90,15 +90,20 @@ http --session=admin-session POST api.example.com/login username=admin password=
 http --session=admin-session GET api.example.com/dashboard/stats
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use `:=` for non-string JSON values (numbers, booleans, arrays) and `=` for string values.
-- **Do** use `--session` to avoid repeating authentication headers across sequential CLI requests.
-- **Do** use `--print=HhBb` to control which headers and body elements are printed to terminal output.
-- **Do** pipe output to `jq` using `--json` flag when combining with shell scripts.
-- **Don't** include plain text passwords in shell history; supply via environment variables or prompt.
-- **Don't** forget `==` when specifying URL query parameters (single `=` defines request body properties).
-- **Don't** use HTTPie in resource-constrained container images if minimal `/bin/sh` with curl suffices.
+**Do**:
+
+- Use `:=` for non-string JSON values (numbers, booleans, arrays) and `=` for string values.
+- Use `--session` to avoid repeating authentication headers across sequential CLI requests.
+- Use `--print=HhBb` to control which headers and body elements are printed to terminal output.
+- Pipe output to `jq` using `--json` flag when combining with shell scripts.
+
+**Don't**:
+
+- Include plain text passwords in shell history; supply via environment variables or prompt.
+- Forget `==` when specifying URL query parameters (single `=` defines request body properties).
+- Use HTTPie in resource-constrained container images if minimal `/bin/sh` with curl suffices.
 
 ## Troubleshooting
 

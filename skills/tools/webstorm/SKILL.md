@@ -16,14 +16,14 @@ WebStorm is the JetBrains IDE for Web. While VS Code is free, WebStorm allows be
 
 ## Quick Start
 
-#1. Launch Project via Terminal
+### 1. Launch Project via Terminal
 
 ```bash
 # Open frontend project in WebStorm
 webstorm .
 ```
 
-#2. Run Debug Session
+### 2. Run Debug Session
 
 ```bash
 # Start Vite / Next.js with Node inspect enabled
@@ -98,7 +98,8 @@ Debugging Node.js server and Chrome frontend simultaneously:
 
 ## Common Patterns
 
-#Strict TypeScript Workspace Configuration
+### Strict TypeScript Workspace Configuration
+
 **Problem**: Ensure WebStorm uses project-specific TypeScript version rather than IDE fallback.  
 **Solution**: Configure `tsconfig.json` path mapping recognized by WebStorm.
 
@@ -115,7 +116,8 @@ Debugging Node.js server and Chrome frontend simultaneously:
 }
 ```
 
-#Vitest / Jest Run Configuration
+### Vitest / Jest Run Configuration
+
 **Problem**: Standardize test runner execution with breakpoint debugging across team.  
 **Solution**: Create committed run configuration file.
 
@@ -131,19 +133,24 @@ Debugging Node.js server and Chrome frontend simultaneously:
 </component>
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** configure ESLint and Prettier under **Languages & Frameworks -> JavaScript -> Code Quality Tools** with "Run on save".
-- **Do** use WebStorm's **Extract Component / Method** (`Ctrl+Alt+M` / `Cmd+Option+M`) for safe structural refactoring.
-- **Do** utilize `.http` files stored in the repository for shareable, executable API integration tests.
-- **Do** exclude heavy build output directories (`.next`, `dist`, `coverage`) by right clicking -> **Mark Directory as -> Excluded**.
-- **Don't** commit `.idea/workspace.xml` or user-specific shelf patches into Git.
-- **Don't** run duplicate linters simultaneously; coordinate Prettier and ESLint configurations cleanly.
-- **Don't** ignore yellow inspection warnings in JavaScript/TypeScript code; resolve them using `Alt + Enter`.
+**Do**:
+
+- Configure ESLint and Prettier under **Languages & Frameworks -> JavaScript -> Code Quality Tools** with "Run on save".
+- Use WebStorm's **Extract Component / Method** (`Ctrl+Alt+M` / `Cmd+Option+M`) for safe structural refactoring.
+- Utilize `.http` files stored in the repository for shareable, executable API integration tests.
+- Exclude heavy build output directories (`.next`, `dist`, `coverage`) by right clicking -> **Mark Directory as -> Excluded**.
+
+**Don't**:
+
+- Commit `.idea/workspace.xml` or user-specific shelf patches into Git.
+- Run duplicate linters simultaneously; coordinate Prettier and ESLint configurations cleanly.
+- Ignore yellow inspection warnings in JavaScript/TypeScript code; resolve them using `Alt + Enter`.
 
 ## Troubleshooting
 
-| Error / Symptom                                   | Cause                                                              | Solution                                                                                                                   |
+| Error                                             | Cause                                                              | Solution                                                                                                                   |
 | ------------------------------------------------- | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
 | WebStorm displays errors that `tsc` does not show | IDE using different TypeScript version than project `package.json` | Configure WebStorm to use project TypeScript under `Settings > Languages & Frameworks > TypeScript`.                       |
 | IDE slow or indexing continuously                 | Large cache or build directories being indexed                     | Right-click `dist`, `.next`, `coverage` folders > **Mark Directory as > Excluded**.                                        |

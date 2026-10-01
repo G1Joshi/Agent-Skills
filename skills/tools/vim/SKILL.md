@@ -114,14 +114,20 @@ Automating repetitive tabular data transformations:
 
 ### Macro Recording and Bulk Execution
 
-**Problem**: Perform repetitive multi-step edits across multiple lines.  
-**Solution**: Record keystrokes into register `q`.
+**Problem**: Performing repetitive multi-step editing sequences across hundreds of lines manually.
 
-1. Place cursor at target start position.
-2. Press `qq` to start recording to register `q`.
-3. Perform editing sequence (e.g. `I" <Esc> A",<Esc> j ^`).
-4. Press `q` to stop recording.
-5. Replay with `@q`, or run across 50 lines: `50@q`.
+**Solution**:
+
+```vim
+" Record macro to register q:
+" qq -> enter normal/insert commands -> q to stop
+
+" Replay macro on current line:
+@q
+
+" Replay macro across lines 1 to 50:
+:1,50normal @q
+```
 
 ### Plugin Management with vim-plug
 
@@ -138,19 +144,24 @@ call plug#end()
 
 Run `:PlugInstall` inside Vim to install.
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** master modal navigation (`h`, `j`, `k`, `l`, `w`, `b`, `e`) and avoid reaching for arrow keys.
-- **Do** leverage Text Objects (`ciw`, `da(`, `yi{`) to edit structured code blocks with minimal keystrokes.
-- **Do** use the dot command (`.`) to repeat recent text transformations across similar lines.
-- **Do** enable `set hidden` so buffers can stay open in the background without forcing immediate saves.
-- **Don't** install hundreds of heavy legacy VimScript plugins; transition to Neovim Lua if a rich IDE experience is required.
-- **Don't** leave swap files (`.swp`) lingering; configure `set noswapfile` or set a dedicated swap directory.
-- **Don't** use synchronous external calls in `~/.vimrc` that cause noticeable startup delay on remote machines.
+**Do**:
+
+- Master modal navigation (`h`, `j`, `k`, `l`, `w`, `b`, `e`) and avoid reaching for arrow keys.
+- Leverage Text Objects (`ciw`, `da(`, `yi{`) to edit structured code blocks with minimal keystrokes.
+- Use the dot command (`.`) to repeat recent text transformations across similar lines.
+- Enable `set hidden` so buffers can stay open in the background without forcing immediate saves.
+
+**Don't**:
+
+- Install hundreds of heavy legacy VimScript plugins; transition to Neovim Lua if a rich IDE experience is required.
+- Leave swap files (`.swp`) lingering; configure `set noswapfile` or set a dedicated swap directory.
+- Use synchronous external calls in `~/.vimrc` that cause noticeable startup delay on remote machines.
 
 ## Troubleshooting
 
-| Error / Symptom                                        | Cause                                     | Solution                                                                           |
+| Error                                                  | Cause                                     | Solution                                                                           |
 | ------------------------------------------------------ | ----------------------------------------- | ---------------------------------------------------------------------------------- |
 | System clipboard copy fails (`"+y` does nothing)       | Vim compiled without `+clipboard` support | Install `vim-gtk3` (Ubuntu) or `macvim` / `neovim` with clipboard support enabled. |
 | Arrow keys insert `A`, `B`, `C`, `D` characters        | Running in strict Vi compatible mode      | Add `set nocompatible` at top of `~/.vimrc`.                                       |

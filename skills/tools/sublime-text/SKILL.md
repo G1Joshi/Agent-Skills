@@ -5,7 +5,7 @@ description: Expert Sublime Text assistance covering Package Control, LSP integr
 
 # Sublime Text 4
 
-Sublime Text is legendary for its speed and "Goto Anything" (`Cmd+P`) interface. Even in 2025, it remains the fastest GUI editor for opening massive files.
+Sublime Text is a lightweight, ultra-responsive text editor known for its instant startup speed, multi-caret editing, and extensible Package Control ecosystem.
 
 ## When to Use
 
@@ -134,19 +134,24 @@ Automating test running and error matching directly from the editor:
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** install **Package Control** and the **LSP** package (`LSP`, `LSP-pyright`, `LSP-typescript`) for IDE-grade completions.
-- **Do** enable `hardware_acceleration: "opengl"` for ultra-fluid 120Hz/144Hz scrolling on supported displays.
-- **Do** use `Ctrl+Shift+L` (`Cmd+Shift+L`) to convert multiple lines into independent cursor selections.
-- **Do** configure project files (`.sublime-project`) with explicit `folder_exclude_patterns` for `node_modules` and `.git`.
-- **Don't** leave file indexing enabled on massive multi-gigabyte build output directories.
-- **Don't** install unmaintained legacy Sublime Text 2/3 plugins that block the UI thread.
-- **Don't** store sensitive API keys in plaintext user snippets or build configurations.
+**Do**:
+
+- Install **Package Control** and the **LSP** package (`LSP`, `LSP-pyright`, `LSP-typescript`) for IDE-grade completions.
+- Enable `hardware_acceleration: "opengl"` for ultra-fluid 120Hz/144Hz scrolling on supported displays.
+- Use `Ctrl+Shift+L` (`Cmd+Shift+L`) to convert multiple lines into independent cursor selections.
+- Configure project files (`.sublime-project`) with explicit `folder_exclude_patterns` for `node_modules` and `.git`.
+
+**Don't**:
+
+- Leave file indexing enabled on massive multi-gigabyte build output directories.
+- Install unmaintained legacy Sublime Text 2/3 plugins that block the UI thread.
+- Store sensitive API keys in plaintext user snippets or build configurations.
 
 ## Troubleshooting
 
-| Error / Symptom                                                     | Cause                                                                | Solution                                                                                                            |
+| Error                                                               | Cause                                                                | Solution                                                                                                            |
 | ------------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | `Package Control: There are no packages available for installation` | SSL cert validation failure or network proxy interference            | Check `Preferences > Package Settings > Package Control > Settings` and add custom `http_proxy` or refresh channel. |
 | High CPU usage by `plugin_host`                                     | Heavy file indexing on large dependency directories (`node_modules`) | Add `node_modules` to `binary_file_patterns` or `folder_exclude_patterns` in User Preferences.                      |

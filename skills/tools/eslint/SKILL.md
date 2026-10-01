@@ -5,7 +5,7 @@ description: Expert ESLint assistance covering Flat Config (eslint.config.js), t
 
 # ESLint
 
-ESLint is the standard linter for JS/TS. v9 (2024/2025) moved to **Flat Config** (`eslint.config.js`), a major breaking change that simplifies configuration.
+ESLint is the industry-standard static analysis tool for identifying and fixing problems in JavaScript and TypeScript codebases, configured via modern Flat Config (`eslint.config.js`).
 
 ## When to Use
 
@@ -38,7 +38,7 @@ export default tseslint.config(
 
 ## Core Concepts
 
-#Modern Flat Config Architecture (eslint.config.js)
+### Modern Flat Config Architecture (eslint.config.js)
 
 Configuring ESLint v9+ with TypeScript and React:
 
@@ -88,7 +88,7 @@ export default tseslint.config(
 );
 ```
 
-#Authoring a Custom Lint Rule
+### Authoring a Custom Lint Rule
 
 Creating a custom organizational lint rule:
 
@@ -120,7 +120,7 @@ export default {
 };
 ```
 
-#Executing ESLint via CLI
+### Executing ESLint via CLI
 
 Running analysis and automated fixes:
 
@@ -163,15 +163,20 @@ export default [
 ];
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** migrate to ESLint Flat Config (`eslint.config.js` / `eslint.config.mjs`); legacy `.eslintrc.*` is deprecated in ESLint v9+.
-- **Do** enable `recommendedTypeChecked` from `typescript-eslint` for deep semantic type validation.
-- **Do** use `--cache` in CI and local scripts to only lint modified files.
-- **Do** ignore files via the top-level `{ ignores: [...] }` object in `eslint.config.js`.
-- **Don't** use ESLint for code formatting (indentation, semicolons); delegate formatting to Biome or Prettier.
-- **Don't** disable rules globally with inline comments (`/* eslint-disable */`); disable specifically with rationale.
-- **Don't** enable type-aware rules without supplying `parserOptions.project`; it causes parser errors.
+**Do**:
+
+- Migrate to ESLint Flat Config (`eslint.config.js` / `eslint.config.mjs`); legacy `.eslintrc.*` is deprecated in ESLint v9+.
+- Enable `recommendedTypeChecked` from `typescript-eslint` for deep semantic type validation.
+- Use `--cache` in CI and local scripts to only lint modified files.
+- Ignore files via the top-level `{ ignores: [...] }` object in `eslint.config.js`.
+
+**Don't**:
+
+- Use ESLint for code formatting (indentation, semicolons); delegate formatting to Biome or Prettier.
+- Disable rules globally with inline comments (`/* eslint-disable */`); disable specifically with rationale.
+- Enable type-aware rules without supplying `parserOptions.project`; it causes parser errors.
 
 ## Troubleshooting
 

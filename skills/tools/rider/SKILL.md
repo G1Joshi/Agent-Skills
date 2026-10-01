@@ -5,7 +5,7 @@ description: Expert JetBrains Rider assistance covering .NET/C# cross-platform d
 
 # Rider
 
-Rider is JetBrains' .NET IDE. It is faster than Visual Studio 2022 in many cases and runs on Mac/Linux. It works great for **Unity** and **Unreal Engine**.
+JetBrains Rider is a fast, cross-platform .NET IDE providing rich refactoring, dotTrace profiling, and first-class support for ASP.NET Core, Unity, and Unreal Engine.
 
 ## When to Use
 
@@ -121,7 +121,8 @@ public class CreateUserEndpoint : Endpoint<CreateUserRequest, CreateUserResponse
 
 ## Common Patterns
 
-#Launch Settings Profile (.run/launchSettings.json)
+### Launch Settings Profile (.run/launchSettings.json)
+
 **Problem**: Standardize ASP.NET Core environment variables across developers.  
 **Solution**: Configure launch profiles in `launchSettings.json`.
 
@@ -141,19 +142,24 @@ public class CreateUserEndpoint : Endpoint<CreateUserRequest, CreateUserResponse
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** enable Nullable Reference Types (`<Nullable>enable</Nullable>`) across all project files.
-- **Do** utilize Rider's integrated **dotMemory** and **dotTrace** for profiling GC allocations and high-CPU methods.
-- **Do** use `Ctrl + Shift + R` (Refactor This) for safe signature modifications, interface extraction, and inline methods.
-- **Do** enable Solution-Wide Analysis to catch compilation and architectural rule violations before committing.
-- **Don't** check in `.idea/` workspace files or personal launch settings into Git.
-- **Don't** ignore ReSharper yellow and red inspection warnings; resolve them continuously.
-- **Don't** run synchronous blocking calls (`.Result`, `.Wait()`) on asynchronous Task operations; use `await`.
+**Do**:
+
+- Enable Nullable Reference Types (`<Nullable>enable</Nullable>`) across all project files.
+- Utilize Rider's integrated **dotMemory** and **dotTrace** for profiling GC allocations and high-CPU methods.
+- Use `Ctrl + Shift + R` (Refactor This) for safe signature modifications, interface extraction, and inline methods.
+- Enable Solution-Wide Analysis to catch compilation and architectural rule violations before committing.
+
+**Don't**:
+
+- Check in `.idea/` workspace files or personal launch settings into Git.
+- Ignore ReSharper yellow and red inspection warnings; resolve them continuously.
+- Run synchronous blocking calls (`.Result`, `.Wait()`) on asynchronous Task operations; use `await`.
 
 ## Troubleshooting
 
-| Error / Symptom                                    | Cause                                                                              | Solution                                                                                                  |
+| Error                                              | Cause                                                                              | Solution                                                                                                  |
 | -------------------------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | Rider cannot find target .NET SDK                  | Multiple SDKs or wrong architecture installed (e.g. ARM64 vs x64 on Apple Silicon) | Set custom SDK path in **Settings > Build, Execution, Deployment > Toolset and Build**.                   |
 | Unity breakpoints not hitting                      | Rider plugin in Unity outdated or debugger attached to wrong process               | Check Unity Package Manager for `com.unity.ide.rider`; ensure editor is attached to Unity Editor process. |

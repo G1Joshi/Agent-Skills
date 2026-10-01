@@ -5,7 +5,7 @@ description: Expert Visual Studio Code assistance covering settings.json, launch
 
 # Visual Studio Code
 
-VS Code is the industry standard editor. In 2025, it has evolved into an **AI-First** editor with a native AI Companion and generic **Agent Mode**.
+Visual Studio Code is a versatile, lightweight code editor offering rich language ecosystems, built-in debugging, source control integration, and Dev Container support.
 
 ## When to Use
 
@@ -152,19 +152,24 @@ Prompting developers to install essential project plugins:
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** commit `.vscode/settings.json`, `.vscode/launch.json`, and `.vscode/extensions.json` to version control for team alignment.
-- **Do** configure **Dev Containers** (`.devcontainer/devcontainer.json`) for instant, reproducible containerized onboarding.
-- **Do** use `editor.formatOnSave: true` with a defined `editor.defaultFormatter` to maintain clean git diffs.
-- **Do** define task workflows in `.vscode/tasks.json` to run tests and linters via unified keybindings (`Cmd+Shift+B`).
-- **Don't** install hundreds of unnecessary extensions; disable extensions globally and enable them per workspace.
-- **Don't** commit `.vscode/settings.json` with machine-specific hardcoded local file paths.
-- **Don't** ignore VS Code security prompts when opening untrusted repositories in Workspace Trust mode.
+**Do**:
+
+- Commit `.vscode/settings.json`, `.vscode/launch.json`, and `.vscode/extensions.json` to version control for team alignment.
+- Configure **Dev Containers** (`.devcontainer/devcontainer.json`) for instant, reproducible containerized onboarding.
+- Use `editor.formatOnSave: true` with a defined `editor.defaultFormatter` to maintain clean git diffs.
+- Define task workflows in `.vscode/tasks.json` to run tests and linters via unified keybindings (`Cmd+Shift+B`).
+
+**Don't**:
+
+- Install hundreds of unnecessary extensions; disable extensions globally and enable them per workspace.
+- Commit `.vscode/settings.json` with machine-specific hardcoded local file paths.
+- Ignore VS Code security prompts when opening untrusted repositories in Workspace Trust mode.
 
 ## Troubleshooting
 
-| Error / Symptom                         | Cause                                                               | Solution                                                                         |
+| Error                                   | Cause                                                               | Solution                                                                         |
 | --------------------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | Format on save not executing            | Multiple formatters installed without default specified             | Set `"editor.defaultFormatter"` explicitly in `settings.json`.                   |
 | Remote - SSH disconnects frequently     | Keepalive packets timing out over unstable connection               | Add `"ServerAliveInterval 60"` to `~/.ssh/config` for target host.               |

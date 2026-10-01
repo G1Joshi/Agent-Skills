@@ -5,7 +5,7 @@ description: Expert iTerm2 terminal assistance covering split panes, profiles, t
 
 # iTerm2
 
-iTerm2 is the power-user terminal for Mac. v3.5/3.6 (2025) adds **AI Integration** (OpenAI key) and a built-in **Web Browser** panel.
+iTerm2 is an advanced terminal emulator for macOS, providing split panes, tmux integration, robust search, trigger automation, and customizable profiles.
 
 ## When to Use
 
@@ -30,7 +30,7 @@ Useful Shortcuts:
 
 ## Core Concepts
 
-#Shell Integration Installation & Benefits
+### Shell Integration Installation & Benefits
 
 Enabling semantic prompt navigation and status codes:
 
@@ -48,7 +48,7 @@ Features enabled:
 - Colored circle indicator showing command success (blue) or exit failure (red).
 - `iterm2_set_user_var`: Inject custom variables into badge or status bar.
 
-#tmux Integration via Control Mode (-CC)
+### tmux Integration via Control Mode (-CC)
 
 Running remote persistent sessions as native local tabs:
 
@@ -59,7 +59,7 @@ ssh user@server.infra.internal -t "tmux -CC attach || tmux -CC new"
 
 iTerm2 renders tmux windows as native tabs and panes with local mouse scrolling and clipboard integration.
 
-#Setting Dynamic Badges and Status Bars
+### Setting Dynamic Badges and Status Bars
 
 Displaying active AWS profile or Git branch in the terminal background:
 
@@ -87,15 +87,20 @@ Attach tmux in native iTerm2 control mode:
 tmux -CC attach -t dev-session
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** install and enable iTerm2 Shell Integration to jump between commands and capture exit statuses.
-- **Do** use `tmux -CC` when working over SSH to retain persistent sessions with native macOS UI shortcuts.
-- **Do** map Caps Lock to Control or Escape in macOS settings for ergonomic terminal navigation.
-- **Do** export iTerm2 profile settings to a shared JSON file or dotfiles repository.
-- **Don't** store plain passwords in iTerm2 password manager without system keychain encryption.
-- **Don't** leave scrollback buffer unlimited on low-memory machines; set buffer to 10,000-50,000 lines.
-- **Don't** use slow rendering drivers; enable GPU acceleration in **Preferences -> Advanced -> GPU Rendering**.
+**Do**:
+
+- Install and enable iTerm2 Shell Integration to jump between commands and capture exit statuses.
+- Use `tmux -CC` when working over SSH to retain persistent sessions with native macOS UI shortcuts.
+- Map Caps Lock to Control or Escape in macOS settings for ergonomic terminal navigation.
+- Export iTerm2 profile settings to a shared JSON file or dotfiles repository.
+
+**Don't**:
+
+- Store plain passwords in iTerm2 password manager without system keychain encryption.
+- Leave scrollback buffer unlimited on low-memory machines; set buffer to 10,000-50,000 lines.
+- Use slow rendering drivers; enable GPU acceleration in **Preferences -> Advanced -> GPU Rendering**.
 
 ## Troubleshooting
 

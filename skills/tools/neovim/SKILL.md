@@ -5,7 +5,7 @@ description: Expert Neovim assistance covering Lua configuration, native LSP cli
 
 # Neovim
 
-Neovim is the future of Vim. v0.11 (2025) brings built-in completion, enhanced LSP, and mature Tree-sitter integration.
+Neovim is an extensible, Lua-configurable terminal text editor focusing on high performance, built-in Language Server Protocol (LSP) client, and Tree-sitter syntax parsing.
 
 ## When to Use
 
@@ -192,19 +192,24 @@ vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "Live Grep" })
 vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Find Buffers" })
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** pin plugin dependencies to git release tags or lockfiles (`lazy-lock.json`) to prevent breaking updates.
-- **Do** leverage Tree-sitter for syntax highlighting, indentation, and incremental AST code selection.
-- **Do** set `updatetime = 250` for responsive diagnostic floats and git gutter refreshes.
-- **Do** use `vim.keymap.set` with explicit `desc` attributes to support `which-key.nvim` keymap discovery.
-- **Don't** install monolithic legacy VimScript plugins when native Lua alternatives exist.
-- **Don't** execute synchronous `io.popen` calls in `init.lua` that stall editor startup time.
-- **Don't** commit `lazy-lock.json` merge conflicts without running `:Lazy restore`.
+**Do**:
+
+- Pin plugin dependencies to git release tags or lockfiles (`lazy-lock.json`) to prevent breaking updates.
+- Leverage Tree-sitter for syntax highlighting, indentation, and incremental AST code selection.
+- Set `updatetime = 250` for responsive diagnostic floats and git gutter refreshes.
+- Use `vim.keymap.set` with explicit `desc` attributes to support `which-key.nvim` keymap discovery.
+
+**Don't**:
+
+- Install monolithic legacy VimScript plugins when native Lua alternatives exist.
+- Execute synchronous `io.popen` calls in `init.lua` that stall editor startup time.
+- Commit `lazy-lock.json` merge conflicts without running `:Lazy restore`.
 
 ## Troubleshooting
 
-| Error / Symptom                               | Cause                                                              | Solution                                                                                                               |
+| Error                                         | Cause                                                              | Solution                                                                                                               |
 | --------------------------------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
 | `module 'lazy' not found`                     | Plugin manager clone failed or RTP path incorrect                  | Run `git clone --filter=blob:none https://github.com/folke/lazy.nvim.git ~/.local/share/nvim/lazy/lazy.nvim` manually. |
 | Treesitter parser compilation failure         | Missing C compiler (`cc`, `clang`, or `gcc`)                       | Install build essentials: `brew install gcc` (macOS) or `apt install build-essential` (Linux).                         |

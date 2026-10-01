@@ -27,7 +27,7 @@ Insomnia is the lightweight alternative to Postman. v9.0+ focuses on **Local-Fir
 
 ## Core Concepts
 
-#Environment Variables & Chained Request Responses
+### Environment Variables & Chained Request Responses
 
 Extracting bearer token from authentication response:
 
@@ -42,7 +42,7 @@ Extracting bearer token from authentication response:
 
 Subsequent requests reference `{{ base_url }}/v1/users` with header `Authorization: Bearer {{ auth_token }}`.
 
-#Inso CLI Test Execution in CI Pipelines
+### Inso CLI Test Execution in CI Pipelines
 
 Running automated API test collections headlessly:
 
@@ -54,7 +54,7 @@ inso lint spec "Company API Spec"
 inso run test "User Lifecycle Test Suite" --env "Staging" --ci
 ```
 
-#gRPC Service Invocation
+### gRPC Service Invocation
 
 Calling gRPC methods with server reflection:
 
@@ -65,7 +65,8 @@ Calling gRPC methods with server reflection:
 
 ## Common Patterns
 
-#Automated CI Collection Testing with Inso CLI
+### Automated CI Collection Testing with Inso CLI
+
 **Problem**: Run Insomnia API tests automatically inside CI/CD pipelines.  
 **Solution**: Execute tests via `inso` CLI.
 
@@ -77,15 +78,20 @@ npm install -g insomnia-inso
 inso run test "User API Test Suite" --env "Staging" --ci
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** sync Insomnia collections to Git repositories for version control and peer review of API changes.
-- **Do** use Inso CLI in CI/CD pipelines to validate OpenAPI specifications and run regression tests.
-- **Do** organize environments hierarchically (Base Environment -> Staging, Production sub-environments).
-- **Do** use response chaining (`{% response ... %}`) to eliminate manual copy-pasting of auth tokens.
-- **Don't** store plaintext production credentials in public Git-synced collections.
-- **Don't** skip OpenAPI linting; maintain clean, valid specs that generate accurate SDKs.
-- **Don't** duplicate request URLs across endpoints; reference `{{ base_url }}` consistently.
+**Do**:
+
+- Sync Insomnia collections to Git repositories for version control and peer review of API changes.
+- Use Inso CLI in CI/CD pipelines to validate OpenAPI specifications and run regression tests.
+- Organize environments hierarchically (Base Environment -> Staging, Production sub-environments).
+- Use response chaining (`{% response ... %}`) to eliminate manual copy-pasting of auth tokens.
+
+**Don't**:
+
+- Store plaintext production credentials in public Git-synced collections.
+- Skip OpenAPI linting; maintain clean, valid specs that generate accurate SDKs.
+- Duplicate request URLs across endpoints; reference `{{ base_url }}` consistently.
 
 ## Troubleshooting
 

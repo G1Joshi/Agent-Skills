@@ -5,7 +5,7 @@ description: Expert Atlassian Jira assistance covering agile boards (Scrum/Kanba
 
 # Jira Software
 
-Jira is the industry standard for enterprise agile planning. 2025 includes **Atlassian Intelligence** to auto-fill fields and predict sprint completion.
+Jira is an enterprise agile project management tool providing scrum and kanban boards, customizable issue workflows, roadmaps, and automation rules for engineering teams.
 
 ## When to Use
 
@@ -25,7 +25,7 @@ curl -X GET "https://mycompany.atlassian.net/rest/api/3/search?jql=project=PROJ+
 
 ## Core Concepts
 
-#Querying and Filtering with Advanced JQL
+### Querying and Filtering with Advanced JQL
 
 Precise issue queries for engineering metrics:
 
@@ -40,7 +40,7 @@ project = "CORE" AND status = "Done" AND updated >= -7d AND resolution = Unresol
 fixVersion = "2026.1.0" AND assignee is EMPTY AND statusCategory != Done
 ```
 
-#Jira REST API v3 Integration with Python
+### Jira REST API v3 Integration with Python
 
 Creating and transitioning issues programmatically:
 
@@ -79,7 +79,7 @@ response = requests.post(url, json=payload, headers=headers, auth=auth)
 print("Created Ticket Key:", response.json().get("key"))
 ```
 
-#Transitioning Issue Status Programmatically
+### Transitioning Issue Status Programmatically
 
 Moving an issue along workflow states:
 
@@ -110,15 +110,20 @@ project = "PAYMENTS" AND issuetype in (Bug, Incident)
   ORDER BY priority DESC, created ASC
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target the Jira Cloud REST API v3 using Atlassian Document Format (ADF) for rich text descriptions.
-- **Do** reference Jira ticket keys (`CORE-1029`) in branch names and commit messages for automatic activity linking.
-- **Do** save complex JQL queries as shared filters and create custom team dashboard gadgets.
-- **Do** use Jira Automation rules to auto-transition issues when pull requests are opened or merged.
-- **Don't** leave issues in ambiguous states; close or transition issues promptly to maintain sprint velocity accuracy.
-- **Don't** expose Jira API tokens in public repositories; use encrypted environment variables.
-- **Don't** create dozens of custom fields that slow down Jira instance indexing and search performance.
+**Do**:
+
+- Target the Jira Cloud REST API v3 using Atlassian Document Format (ADF) for rich text descriptions.
+- Reference Jira ticket keys (`CORE-1029`) in branch names and commit messages for automatic activity linking.
+- Save complex JQL queries as shared filters and create custom team dashboard gadgets.
+- Use Jira Automation rules to auto-transition issues when pull requests are opened or merged.
+
+**Don't**:
+
+- Leave issues in ambiguous states; close or transition issues promptly to maintain sprint velocity accuracy.
+- Expose Jira API tokens in public repositories; use encrypted environment variables.
+- Create dozens of custom fields that slow down Jira instance indexing and search performance.
 
 ## Troubleshooting
 

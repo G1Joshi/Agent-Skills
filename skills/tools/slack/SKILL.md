@@ -5,7 +5,7 @@ description: Expert Slack platform assistance covering Bolt SDK (JavaScript/Pyth
 
 # Slack
 
-Slack is the OS of work. 2025 turns it into an **Agentic OS** where AI agents can read messages, summarize threads, and trigger workflow actions autonomously.
+The Slack Platform allows engineering teams to build custom workflows, Bolt SDK automations, interactive Block Kit interfaces, and webhook alerts for team collaboration.
 
 ## When to Use
 
@@ -210,19 +210,24 @@ curl -X POST -H 'Content-type: application/json' \
   "$SLACK_WEBHOOK_URL"
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use **Socket Mode** for internal enterprise bots to eliminate the need for exposing public webhook ingress URLs.
-- **Do** acknowledge events and commands within 3 seconds (`await ack()`) to prevent Slack API timeouts.
-- **Do** construct structured messages using **Block Kit Builder** rather than legacy plaintext formatting.
-- **Do** store bot tokens (`xoxb-`) and signing secrets in encrypted secret managers (AWS SSM, Vault).
-- **Don't** broadcast unaggregated alerts to `@channel` or `@here` for non-critical, informational events.
-- **Don't** log sensitive customer data or authorization credentials in Slack message channels.
-- **Don't** run long synchronous background jobs inside the initial command handler; delegate to background workers.
+**Do**:
+
+- Use **Socket Mode** for internal enterprise bots to eliminate the need for exposing public webhook ingress URLs.
+- Acknowledge events and commands within 3 seconds (`await ack()`) to prevent Slack API timeouts.
+- Construct structured messages using **Block Kit Builder** rather than legacy plaintext formatting.
+- Store bot tokens (`xoxb-`) and signing secrets in encrypted secret managers (AWS SSM, Vault).
+
+**Don't**:
+
+- Broadcast unaggregated alerts to `@channel` or `@here` for non-critical, informational events.
+- Log sensitive customer data or authorization credentials in Slack message channels.
+- Run long synchronous background jobs inside the initial command handler; delegate to background workers.
 
 ## Troubleshooting
 
-| Error / Symptom                                         | Cause                                               | Solution                                                                                             |
+| Error                                                   | Cause                                               | Solution                                                                                             |
 | ------------------------------------------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | `dispatch_failed` when running slash command            | App took longer than 3,000ms to acknowledge request | Call `await ack()` immediately before executing asynchronous long-running tasks.                     |
 | `invalid_auth`                                          | Invalid bot token or scopes missing                 | Verify bot token starts with `xoxb-` and requested scopes (`chat:write`, `commands`) are authorized. |

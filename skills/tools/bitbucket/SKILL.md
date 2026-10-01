@@ -33,7 +33,7 @@ pipelines:
 
 ## Core Concepts
 
-#Declarative CI/CD Pipeline (bitbucket-pipelines.yml)
+### Declarative CI/CD Pipeline (bitbucket-pipelines.yml)
 
 Automating test, build, and deployment pipelines:
 
@@ -72,7 +72,7 @@ pipelines:
             - echo "Deploying version $BITBUCKET_COMMIT to production..."
 ```
 
-#Bitbucket REST API v2 Operations with Curl
+### Bitbucket REST API v2 Operations with Curl
 
 Querying pull requests and triggering builds programmatically:
 
@@ -84,7 +84,7 @@ curl -s -X GET \
   "https://api.bitbucket.org/2.0/repositories/my-workspace/my-repo/pullrequests?state=OPEN" | jq .
 ```
 
-#Jira Smart Commits Integration
+### Jira Smart Commits Integration
 
 Transitioning Jira issues and logging time via Git commit messages:
 
@@ -124,15 +124,20 @@ pipelines:
             - ./deploy-prod.sh
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** configure Merge Checks to require successful pipeline builds and minimum reviewer approvals on protected branches.
-- **Do** use Repository Variables (masked and secured) for cloud API credentials and deployment tokens.
-- **Do** use `deployment: production` steps to track deployment history and rollback status in Jira.
-- **Do** leverage Bitbucket Pipeline caches (`caches: - node`, `- docker`) to accelerate build execution.
-- **Don't** allow force-pushing (`git push --force`) to `main` or release branches.
-- **Don't** store plaintext passwords or tokens in `bitbucket-pipelines.yml`.
-- **Don't** run long deployment steps without explicit `trigger: manual` on production environments.
+**Do**:
+
+- Configure Merge Checks to require successful pipeline builds and minimum reviewer approvals on protected branches.
+- Use Repository Variables (masked and secured) for cloud API credentials and deployment tokens.
+- Use `deployment: production` steps to track deployment history and rollback status in Jira.
+- Leverage Bitbucket Pipeline caches (`caches: - node`, `- docker`) to accelerate build execution.
+
+**Don't**:
+
+- Allow force-pushing (`git push --force`) to `main` or release branches.
+- Store plaintext passwords or tokens in `bitbucket-pipelines.yml`.
+- Run long deployment steps without explicit `trigger: manual` on production environments.
 
 ## Troubleshooting
 

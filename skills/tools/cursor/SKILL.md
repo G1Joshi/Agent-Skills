@@ -5,7 +5,7 @@ description: Expert Cursor IDE assistance covering AI pair programming, codebase
 
 # Cursor
 
-Cursor is a fork of VS Code customized for AI. It pioneered **Tab-to-Complete** (Copilot++) and **Composer** (Multi-file edits). In 2025, it is the leading "AI Native" editor.
+Cursor is an AI-native code editor built on VS Code, featuring multi-file code editing via Cursor Composer, predictive codebase indexing, and contextual code generation.
 
 ## When to Use
 
@@ -29,7 +29,7 @@ Configure repository rules in `.cursorrules`:
 
 ## Core Concepts
 
-#Configuring .cursorrules for Automated Agent Guidelines
+### Configuring .cursorrules for Automated Agent Guidelines
 
 Defining persistent project rules for code generation:
 
@@ -48,7 +48,7 @@ Always adhere strictly to these conventions:
 - When generating code, omit explanatory conversational filler; output code and brief rationale.
 ```
 
-#Targeted Context Tagging with @ Directives
+### Targeted Context Tagging with @ Directives
 
 Injecting precise context into AI prompt buffers:
 
@@ -59,7 +59,7 @@ Inspect @middleware.ts and @src/auth/session.ts to implement a new rate-limited 
 Ensure compliance with @docs/security-guidelines.md.
 ```
 
-#Multi-File Composer Refactoring Workflows
+### Multi-File Composer Refactoring Workflows
 
 Prompting across architectural boundaries:
 
@@ -74,7 +74,8 @@ Refactor our legacy User REST endpoints to modern Server Actions:
 
 ## Common Patterns
 
-#Global and Project .cursorrules Configuration
+### Global and Project .cursorrules Configuration
+
 **Problem**: Cursor generates responses with generic boilerplate that violates repository architectural rules.  
 **Solution**: Define comprehensive repository rules in root `.cursorrules`.
 
@@ -87,15 +88,20 @@ Refactor our legacy User REST endpoints to modern Server Actions:
 - Wrap all external network calls with timeout boundaries.
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** create a `.cursorrules` file in the project root to permanently align model completions with team conventions.
-- **Do** use `@file`, `@docs`, and `@symbol` instead of `@codebase` for targeted tasks to reduce prompt token noise and cost.
-- **Do** review AI-generated diffs carefully before accepting multi-file Composer changes.
-- **Do** configure `.cursorignore` to prevent indexing of generated files, `.env` secrets, and build output directories.
-- **Don't** prompt the AI with raw database passwords, production API keys, or private customer data.
-- **Don't** blindly accept massive multi-file refactors without running automated test suites (`npm test`).
-- **Don't** write ambiguous prompts; specify desired libraries, error handling strategies, and boundary constraints.
+**Do**:
+
+- Create a `.cursorrules` file in the project root to permanently align model completions with team conventions.
+- Use `@file`, `@docs`, and `@symbol` instead of `@codebase` for targeted tasks to reduce prompt token noise and cost.
+- Review AI-generated diffs carefully before accepting multi-file Composer changes.
+- Configure `.cursorignore` to prevent indexing of generated files, `.env` secrets, and build output directories.
+
+**Don't**:
+
+- Prompt the AI with raw database passwords, production API keys, or private customer data.
+- Blindly accept massive multi-file refactors without running automated test suites (`npm test`).
+- Write ambiguous prompts; specify desired libraries, error handling strategies, and boundary constraints.
 
 ## Troubleshooting
 

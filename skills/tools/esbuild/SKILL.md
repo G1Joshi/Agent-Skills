@@ -29,7 +29,7 @@ npx esbuild src/index.ts \
 
 ## Core Concepts
 
-#Programmatic Build API with esbuild.build()
+### Programmatic Build API with esbuild.build()
 
 Configuring a production bundle script in Node.js:
 
@@ -64,7 +64,7 @@ await esbuild.build({
 console.log("Build completed successfully.");
 ```
 
-#Authoring a Custom esbuild Plugin
+### Authoring a Custom esbuild Plugin
 
 Intercepting imports and resolving virtual modules:
 
@@ -90,7 +90,7 @@ const envPlugin = {
 };
 ```
 
-#High-Speed CLI Minification
+### High-Speed CLI Minification
 
 Minifying assets from command line:
 
@@ -128,15 +128,20 @@ const { host, port } = await ctx.serve({ servedir: "public" });
 console.log(`Server listening on http://${host}:${port}`);
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target `platform: 'neutral'` or `format: 'esm'` for modern library bundling.
-- **Do** enable `treeShaking: true` to eliminate dead code from external dependencies.
-- **Do** use `esbuild.context()` when building local development servers with instant hot rebuilding.
-- **Do** use `define` to statically replace environment variables at build time.
-- **Don't** rely on esbuild for TypeScript type checking; always run `tsc --noEmit` alongside esbuild in CI.
-- **Don't** use esbuild for legacy ES5 transpilation; esbuild focuses on modern ES2015+ targets.
-- **Don't** author complex AST code transformation plugins in esbuild; esbuild intentionally does not expose an AST.
+**Do**:
+
+- Target `platform: 'neutral'` or `format: 'esm'` for modern library bundling.
+- Enable `treeShaking: true` to eliminate dead code from external dependencies.
+- Use `esbuild.context()` when building local development servers with instant hot rebuilding.
+- Use `define` to statically replace environment variables at build time.
+
+**Don't**:
+
+- Rely on esbuild for TypeScript type checking; always run `tsc --noEmit` alongside esbuild in CI.
+- Use esbuild for legacy ES5 transpilation; esbuild focuses on modern ES2015+ targets.
+- Author complex AST code transformation plugins in esbuild; esbuild intentionally does not expose an AST.
 
 ## Troubleshooting
 

@@ -158,22 +158,27 @@ mkcd() {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** compile `~/.zcompdump` into a byte-compiled file (`compdump.zwc`) to accelerate shell startup time.
-- **Do** set `setopt SHARE_HISTORY` to synchronize command history across all active terminal tabs.
-- **Do** use **Starship** or a lean native prompt rather than bloated legacy prompt themes.
-- **Do** profile startup latency using `zmodload zsh/zprof` at top and bottom of `~/.zshrc`.
-- **Don't** use heavy, bloated framework configurations (monolithic Oh-My-Zsh configurations) with dozens of unneeded plugins.
-- **Don't** store plaintext cloud credentials, API tokens, or secrets in `~/.zshrc`; use private `.env` files or secret vaults.
-- **Don't** run slow external commands (`nvm`, `brew doctor`) synchronously on every interactive shell launch.
+**Do**:
+
+- Compile `~/.zcompdump` into a byte-compiled file (`compdump.zwc`) to accelerate shell startup time.
+- Set `setopt SHARE_HISTORY` to synchronize command history across all active terminal tabs.
+- Use **Starship** or a lean native prompt rather than bloated legacy prompt themes.
+- Profile startup latency using `zmodload zsh/zprof` at top and bottom of `~/.zshrc`.
+
+**Don't**:
+
+- Use heavy, bloated framework configurations (monolithic Oh-My-Zsh configurations) with dozens of unneeded plugins.
+- Store plaintext cloud credentials, API tokens, or secrets in `~/.zshrc`; use private `.env` files or secret vaults.
+- Run slow external commands (`nvm`, `brew doctor`) synchronously on every interactive shell launch.
 
 ## Troubleshooting
 
-| Error / Symptom                                      | Cause                                                                           | Solution                                                                                                  |
+| Error                                                | Cause                                                                           | Solution                                                                                                  |
 | ---------------------------------------------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | `zsh: command not found: ...` after editing `.zshrc` | Syntax error in `.zshrc` or `$PATH` assignment overwritten instead of prepended | Prepend paths properly: `export PATH="$HOME/bin:$PATH"` and run `source ~/.zshrc`.                        |
-| `zsh compinit: insecure directories, run compaudit`  | Insecure file permissions on `/usr/local/share/zsh`                             | Run `compaudit                                                                                            | xargs chmod g-w,o-w` to fix directory permissions. |
+| `zsh compinit: insecure directories, run compaudit`  | Insecure file permissions on `/usr/local/share/zsh`                             | Run `compaudit \| xargs chmod g-w,o-w` to fix directory permissions.                                      |
 | Zsh starts very slowly (> 500ms)                     | Synchronous `nvm` or heavy plugin initialization                                | Use lazy loading for `nvm` or profile with `zmodload zsh/zprof` at top of `.zshrc` and `zprof` at bottom. |
 
 ## References

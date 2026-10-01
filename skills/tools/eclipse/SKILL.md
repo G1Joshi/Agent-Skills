@@ -26,7 +26,7 @@ Eclipse was the dominant Java IDE for a decade. While IntelliJ has taken the lea
 
 ## Core Concepts
 
-#Maven Project Configuration (.classpath and pom.xml)
+### Maven Project Configuration (.classpath and pom.xml)
 
 Standard Java 21 enterprise project structure:
 
@@ -45,7 +45,7 @@ Standard Java 21 enterprise project structure:
 </project>
 ```
 
-#Eclipse Memory Optimization (eclipse.ini)
+### Eclipse Memory Optimization (eclipse.ini)
 
 Configuring JVM parameters for large codebases:
 
@@ -64,7 +64,7 @@ plugins/org.eclipse.equinox.launcher_1.6.800.v20240513-1750.jar
 -Dfile.encoding=UTF-8
 ```
 
-#Headless Eclipse JDT.LS Language Server Integration
+### Headless Eclipse JDT.LS Language Server Integration
 
 Connecting modern editors to Eclipse Java engine:
 
@@ -83,7 +83,8 @@ java \
 
 ## Common Patterns
 
-#Maven Build Lifecycle Configuration (.project)
+### Maven Build Lifecycle Configuration (.project)
+
 **Problem**: Synchronize Eclipse project dependencies with external Maven builds.  
 **Solution**: Ensure M2E Maven buildCommand is present in `.project`.
 
@@ -103,15 +104,20 @@ java \
 </projectDescription>
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** tune `eclipse.ini` to allocate sufficient heap memory (`-Xmx4096m`) and use G1GC garbage collection.
-- **Do** import projects as Maven or Gradle projects rather than raw generic Eclipse projects.
-- **Do** configure Eclipse Code Formatter profiles (`formatter.xml`) in version control to enforce team consistency.
-- **Do** clean and rebuild projects (`Project -> Clean...`) if internal incremental compiler caches get out of sync.
-- **Don't** commit Eclipse workspace metadata folders (`.metadata/`) to version control.
-- **Don't** use 32-bit JDKs; always run Eclipse on a modern 64-bit JDK (Temurin, Corretto, Zulu 21+).
-- **Don't** install unverified third-party plugins that degrade IDE startup and editor performance.
+**Do**:
+
+- Tune `eclipse.ini` to allocate sufficient heap memory (`-Xmx4096m`) and use G1GC garbage collection.
+- Import projects as Maven or Gradle projects rather than raw generic Eclipse projects.
+- Configure Eclipse Code Formatter profiles (`formatter.xml`) in version control to enforce team consistency.
+- Clean and rebuild projects (`Project -> Clean...`) if internal incremental compiler caches get out of sync.
+
+**Don't**:
+
+- Commit Eclipse workspace metadata folders (`.metadata/`) to version control.
+- Use 32-bit JDKs; always run Eclipse on a modern 64-bit JDK (Temurin, Corretto, Zulu 21+).
+- Install unverified third-party plugins that degrade IDE startup and editor performance.
 
 ## Troubleshooting
 

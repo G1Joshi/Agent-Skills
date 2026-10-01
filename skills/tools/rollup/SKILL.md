@@ -168,19 +168,24 @@ export default {
 };
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** externalize runtime peer dependencies (`react`, `lodash`) to avoid bundling duplicate copies into consumer packages.
-- **Do** set `"sideEffects": false` in `package.json` to enable consumer bundlers to aggressively tree-shake unused code.
-- **Do** emit TypeScript declaration files (`.d.ts`) alongside bundles using `@rollup/plugin-typescript`.
-- **Do** use `.mjs` extension for Rollup configuration files to ensure native ESM loading in modern Node.js.
-- **Don't** use Rollup for complex SPAs when modern bundlers like Vite or Turbopack provide superior dev server workflows.
-- **Don't** disable source maps for production library builds; consumers need them for stack trace debugging.
-- **Don't** bundle large Node.js built-ins (`fs`, `path`) into browser library targets without polyfill wrappers.
+**Do**:
+
+- Externalize runtime peer dependencies (`react`, `lodash`) to avoid bundling duplicate copies into consumer packages.
+- Set `"sideEffects": false` in `package.json` to enable consumer bundlers to aggressively tree-shake unused code.
+- Emit TypeScript declaration files (`.d.ts`) alongside bundles using `@rollup/plugin-typescript`.
+- Use `.mjs` extension for Rollup configuration files to ensure native ESM loading in modern Node.js.
+
+**Don't**:
+
+- Use Rollup for complex SPAs when modern bundlers like Vite or Turbopack provide superior dev server workflows.
+- Disable source maps for production library builds; consumers need them for stack trace debugging.
+- Bundle large Node.js built-ins (`fs`, `path`) into browser library targets without polyfill wrappers.
 
 ## Troubleshooting
 
-| Error / Symptom                                                 | Cause                                                  | Solution                                                                                    |
+| Error                                                           | Cause                                                  | Solution                                                                                    |
 | --------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
 | `Unresolved dependencies: '...' treated as external`            | Package import not found by Rollup resolver            | Add `@rollup/plugin-node-resolve` to the `plugins` array.                                   |
 | `Cannot find module ... or its corresponding type declarations` | TypeScript plugin tsconfig path mismatch               | Configure `typescript({ tsconfig: "./tsconfig.json", declaration: true, outDir: "dist" })`. |

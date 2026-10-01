@@ -106,12 +106,19 @@ Configuring Composer scripts and real-time inspections:
 
 ### Path Mapping for Dockerized Projects
 
-**Problem**: Breakpoints inside Docker containers are not hit because local and container filesystem paths differ.  
-**Solution**: Define path mappings in **PHP > Servers**.
+**Problem**: Breakpoints inside Docker containers are not hit because local and container filesystem paths differ.
 
-- Host: `localhost` (Port: `8080`)
-- Check **Use path mappings**
-- Map project root `/Users/username/Code/my-project` to `/var/www/html`.
+**Solution**:
+
+```ini
+# .idea/php.xml (Docker Xdebug Path Mapping)
+[Server]
+Host=localhost
+Port=8080
+UsePathMappings=true
+LocalPath=/Users/username/Code/my-project
+RemotePath=/var/www/html
+```
 
 ### Static Analysis (PHPStan / Psalm) Integration
 
@@ -132,19 +139,24 @@ parameters:
     checkMissingIterableValueType: false
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** configure **PHPStan** or **Psalm** as a real-time inspection engine under **Settings -> Languages & Frameworks -> PHP -> Quality Tools**.
-- **Do** generate `.phpstorm.meta.php` and `_ide_helper.php` using Laravel IDE Helper for full autocompletion of magic facades.
-- **Do** use Docker Compose PHP Interpreters for consistent PHP runtime versions across engineering teams.
-- **Do** configure path mappings accurately when debugging code executing inside Docker or remote VMs.
-- **Don't** commit the user-specific workspace files inside `.idea/` (add `.idea/workspace.xml` and `.idea/shelf/` to `.gitignore`).
-- **Don't** leave Xdebug enabled in production PHP environments; it carries significant performance overhead.
-- **Don't** ignore PhpStorm inspections; utilize `Alt + Enter` for instant automated quick-fixes.
+**Do**:
+
+- Configure **PHPStan** or **Psalm** as a real-time inspection engine under **Settings -> Languages & Frameworks -> PHP -> Quality Tools**.
+- Generate `.phpstorm.meta.php` and `_ide_helper.php` using Laravel IDE Helper for full autocompletion of magic facades.
+- Use Docker Compose PHP Interpreters for consistent PHP runtime versions across engineering teams.
+- Configure path mappings accurately when debugging code executing inside Docker or remote VMs.
+
+**Don't**:
+
+- Commit the user-specific workspace files inside `.idea/` (add `.idea/workspace.xml` and `.idea/shelf/` to `.gitignore`).
+- Leave Xdebug enabled in production PHP environments; it carries significant performance overhead.
+- Ignore PhpStorm inspections; utilize `Alt + Enter` for instant automated quick-fixes.
 
 ## Troubleshooting
 
-| Error / Symptom                           | Cause                                                                   | Solution                                                                                                     |
+| Error                                     | Cause                                                                   | Solution                                                                                                     |
 | ----------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | Xdebug breakpoint ignored / not triggered | `xdebug.client_host` wrong or firewall blocking port 9003               | Use `host.docker.internal` on Docker for Mac/Windows, verify IDE listener is enabled (green telephone icon). |
 | High memory usage or slow indexing        | Indexing large directories like `storage/`, `var/`, or generated caches | Right-click directory > **Mark Directory as > Excluded**.                                                    |

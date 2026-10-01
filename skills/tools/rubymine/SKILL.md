@@ -16,14 +16,14 @@ RubyMine provides specialized tooling for **Ruby** and **Rails**. It excels at n
 
 ## Quick Start
 
-#1. Launch via Terminal
+### 1. Launch via Terminal
 
 ```bash
 # Open Rails project in RubyMine
 rubymine .
 ```
 
-#2. Configure Bundler & Run Tests
+### 2. Configure Bundler & Run Tests
 
 ```bash
 # Install bundle dependencies and verify SDK
@@ -113,7 +113,8 @@ end
 
 ## Common Patterns
 
-#Docker Compose Remote Debugging
+### Docker Compose Remote Debugging
+
 **Problem**: Run Rails server inside Docker Compose while hitting breakpoints in RubyMine.  
 **Solution**: Configure remote Ruby SDK via Docker Compose.
 
@@ -131,7 +132,8 @@ services:
       - RUBY_DEBUG_PORT=1234
 ```
 
-#Database Console Active Record Integration
+### Database Console Active Record Integration
+
 **Problem**: Inspect database records and verify schema migrations directly.  
 **Solution**: Execute SQL scratchpad queries against development database.
 
@@ -140,19 +142,24 @@ services:
 SELECT id, email, created_at FROM users WHERE active = true ORDER BY created_at DESC LIMIT 10;
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** configure **RuboCop** under **Settings -> Tools -> RuboCop** with "Run on the fly" for instant linting feedback.
-- **Do** use **Go to Model/Controller/View** (`Ctrl+Alt+Home` or `Cmd+Option+Up`) to jump across Rails MVC boundaries.
-- **Do** leverage **Database View** to run interactive SQL migrations and inspect schema indices.
-- **Do** use `debug` gem with Visual Debugger for seamless step debugging in modern Ruby 3.x.
-- **Don't** commit `.idea/` workspace files or personal deployment settings to git.
-- **Don't** leave Spring application preloader running when gems or C-extensions are updated; run `bin/spring stop`.
-- **Don't** run test suites without Spring or parallel test execution configured on large repositories.
+**Do**:
+
+- Configure **RuboCop** under **Settings -> Tools -> RuboCop** with "Run on the fly" for instant linting feedback.
+- Use **Go to Model/Controller/View** (`Ctrl+Alt+Home` or `Cmd+Option+Up`) to jump across Rails MVC boundaries.
+- Leverage **Database View** to run interactive SQL migrations and inspect schema indices.
+- Use `debug` gem with Visual Debugger for seamless step debugging in modern Ruby 3.x.
+
+**Don't**:
+
+- Commit `.idea/` workspace files or personal deployment settings to git.
+- Leave Spring application preloader running when gems or C-extensions are updated; run `bin/spring stop`.
+- Run test suites without Spring or parallel test execution configured on large repositories.
 
 ## Troubleshooting
 
-| Error / Symptom                                                           | Cause                                                                  | Solution                                                                         |
+| Error                                                                     | Cause                                                                  | Solution                                                                         |
 | ------------------------------------------------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | `Gem not found` in RubyMine despite bundle install succeeding in terminal | RubyMine pointing to different Ruby version than shell `.ruby-version` | Check SDK setting in RubyMine matches `ruby -v` in project root directory.       |
 | Slow indexing or freeze during Rails load                                 | Indexing `log/`, `tmp/`, or asset compilation directories              | Right-click `log/` and `tmp/` folders > **Mark Directory as > Excluded**.        |

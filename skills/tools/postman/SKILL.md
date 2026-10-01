@@ -5,7 +5,7 @@ description: Expert Postman assistance covering API collection design, pre-reque
 
 # Postman
 
-Postman is the complete API lifecycle platform. 2025 features **AI Agent Builder** (orchestrating multi-step workflows) and **Postbot** (AI driven testing).
+Postman is an API platform for building and using APIs, providing automated collection testing, mock servers, environment management, and Newman CLI integration for CI/CD.
 
 ## When to Use
 
@@ -139,19 +139,24 @@ if (pm.response.code !== 201) {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** parameterize environment URLs, tenant IDs, and credentials using `{{base_url}}` variables.
-- **Do** store sensitive credentials in Environment variables with type **Secret** to mask values from UI and exports.
-- **Do** run collections via Newman in CI/CD workflows to prevent regressions before deployment.
-- **Do** organize collections by domain resource with clear folder-level authorization inheritance.
-- **Don't** hardcode raw JWT tokens or passwords directly in request headers or body payloads.
-- **Don't** commit environment files containing active production API keys to public repositories.
-- **Don't** duplicate authentication headers manually; configure Auth at the Collection level.
+**Do**:
+
+- Parameterize environment URLs, tenant IDs, and credentials using `{{base_url}}` variables.
+- Store sensitive credentials in Environment variables with type **Secret** to mask values from UI and exports.
+- Run collections via Newman in CI/CD workflows to prevent regressions before deployment.
+- Organize collections by domain resource with clear folder-level authorization inheritance.
+
+**Don't**:
+
+- Hardcode raw JWT tokens or passwords directly in request headers or body payloads.
+- Commit environment files containing active production API keys to public repositories.
+- Duplicate authentication headers manually; configure Auth at the Collection level.
 
 ## Troubleshooting
 
-| Error / Symptom                                           | Cause                                                              | Solution                                                                                                         |
+| Error                                                     | Cause                                                              | Solution                                                                                                         |
 | --------------------------------------------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
 | `SSL Error: Self-signed certificate in certificate chain` | Target endpoint uses local dev or untrusted SSL certificate        | Turn off **SSL certificate verification** in Postman Settings > General, or pass `--insecure` to Newman.         |
 | Variable not substituting (`{{API_URL}}` remains literal) | Active environment not selected in dropdown or variable misspelled | Ensure environment dropdown in top-right is selected and scope matches (`environment` vs `collectionVariables`). |

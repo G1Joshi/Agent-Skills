@@ -5,7 +5,7 @@ description: Expert Lens (Kubernetes IDE) assistance covering cluster visualizat
 
 # Lens Desktop
 
-Lens is a graphical IDE for Kubernetes. 2025 adds **Lens Prism** (Agent Mode) to reason about cluster issues.
+Lens is an intuitive Kubernetes desktop IDE that simplifies cluster monitoring, pod troubleshooting, log inspection, and multi-cluster navigation.
 
 ## When to Use
 
@@ -89,7 +89,8 @@ spec:
 
 ## Common Patterns
 
-#Multi-Cluster Kubeconfig Management
+### Multi-Cluster Kubeconfig Management
+
 **Problem**: Managing distinct credentials for dozens of Kubernetes clusters.  
 **Solution**: Merge multiple cluster configs into a unified directory watched by Lens.
 
@@ -100,15 +101,20 @@ kubectl config view --flatten > ~/.kube/all-clusters.yaml
 # Add ~/.kube/all-clusters.yaml to Lens Catalog
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** configure Prometheus metrics provider in cluster settings to enable CPU, Memory, and Network graphs.
-- **Do** use Lens Workspaces to categorize clusters by environment (Production, Staging, Ephemeral Dev).
-- **Do** audit RBAC permissions before granting team members cluster access; Lens inherits underlying kubeconfig privileges.
-- **Do** utilize the built-in Terminal with cluster context pre-set to run `kubectl` commands rapidly.
-- **Don't** leave production cluster connections active without MFA-backed IAM authenticator tokens.
-- **Don't** edit production ConfigMaps or Deployments live in Lens UI without checking changes into Git (GitOps).
-- **Don't** install unverified community extensions that require broad local file access.
+**Do**:
+
+- Configure Prometheus metrics provider in cluster settings to enable CPU, Memory, and Network graphs.
+- Use Lens Workspaces to categorize clusters by environment (Production, Staging, Ephemeral Dev).
+- Audit RBAC permissions before granting team members cluster access; Lens inherits underlying kubeconfig privileges.
+- Utilize the built-in Terminal with cluster context pre-set to run `kubectl` commands rapidly.
+
+**Don't**:
+
+- Leave production cluster connections active without MFA-backed IAM authenticator tokens.
+- Edit production ConfigMaps or Deployments live in Lens UI without checking changes into Git (GitOps).
+- Install unverified community extensions that require broad local file access.
 
 ## Troubleshooting
 

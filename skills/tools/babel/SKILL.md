@@ -36,7 +36,7 @@ Babel is the transpiler that made ES6+ possible. While slower than SWC/esbuild, 
 
 ## Core Concepts
 
-#Modern Project Configuration (babel.config.json)
+### Modern Project Configuration (babel.config.json)
 
 Transpiling modern TypeScript and React for targeted browsers:
 
@@ -64,7 +64,7 @@ Transpiling modern TypeScript and React for targeted browsers:
 }
 ```
 
-#Authoring a Custom Babel AST Transformation Plugin
+### Authoring a Custom Babel AST Transformation Plugin
 
 Writing an AST visitor that removes `console.log` statements in production:
 
@@ -89,7 +89,7 @@ export default function ({ types: t }) {
 }
 ```
 
-#Executing Babel via CLI
+### Executing Babel via CLI
 
 Transpiling directories from command line:
 
@@ -121,15 +121,20 @@ module.exports = function ({ types: t }) {
 };
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use `useBuiltIns: "usage"` with `core-js` to import only the exact polyfills referenced in your source code.
-- **Do** prefer `babel.config.json` over legacy `.babelrc` for consistent monorepo root-level configuration.
-- **Do** evaluate whether modern native build tools (SWC, esbuild, Biome) can replace Babel for 10x-50x faster builds.
-- **Do** use `@babel/plugin-transform-runtime` to prevent duplicate helper functions across modules.
-- **Don't** transpile `node_modules` with Babel unless a third-party package ships untranspiled modern ES features.
-- **Don't** set `modules: "commonjs"` if your bundler (Vite, Rollup, Webpack) supports native ES modules.
-- **Don't** use Babel for type checking; use `tsc --noEmit` alongside Babel.
+**Do**:
+
+- Use `useBuiltIns: "usage"` with `core-js` to import only the exact polyfills referenced in your source code.
+- Prefer `babel.config.json` over legacy `.babelrc` for consistent monorepo root-level configuration.
+- Evaluate whether modern native build tools (SWC, esbuild, Biome) can replace Babel for 10x-50x faster builds.
+- Use `@babel/plugin-transform-runtime` to prevent duplicate helper functions across modules.
+
+**Don't**:
+
+- Transpile `node_modules` with Babel unless a third-party package ships untranspiled modern ES features.
+- Set `modules: "commonjs"` if your bundler (Vite, Rollup, Webpack) supports native ES modules.
+- Use Babel for type checking; use `tsc --noEmit` alongside Babel.
 
 ## Troubleshooting
 
