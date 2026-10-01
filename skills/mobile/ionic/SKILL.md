@@ -76,7 +76,7 @@ export default Home;
 
 ## Core Concepts
 
-#Platform-Adaptive UI (Material vs Cupertino)
+### Platform-Adaptive UI (Material vs Cupertino)
 
 Ionic components automatically detect host operating systems and adjust styling, typography, ripple effects, and icon placements:
 
@@ -108,7 +108,7 @@ export const DashboardScreen: React.FC = () => (
 );
 ```
 
-#Mobile Navigation with IonRouterOutlet
+### Mobile Navigation with IonRouterOutlet
 
 Maintains separate page navigation stacks for iOS and Android, caching previous pages in the DOM to preserve scroll positions:
 
@@ -128,7 +128,7 @@ export const AppRouter: React.FC = () => (
 );
 ```
 
-#Ionic Lifecycle Events
+### Ionic Lifecycle Events
 
 Ionic provides component lifecycle hooks that trigger when views enter and leave the active navigation stack (complementing React/Vue lifecycles):
 
@@ -152,7 +152,8 @@ const AnalyticsView: React.FC = () => {
 
 ## Common Patterns
 
-#Native Biometric Authentication with Capacitor
+### Native Biometric Authentication with Capacitor
+
 **Problem**: Secure mobile app access using FaceID / TouchID on iOS and Android.  
 **Solution**: Integrate `@capacitor-community/biometric-auth`.
 
@@ -171,20 +172,20 @@ async function authenticateUser(): Promise<boolean> {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Pair with Modern Capacitor**: Always use Capacitor (not Cordova) for native device access and plugin capabilities.
-- **Use Ionic CSS Variables**: Customize themes globally using CSS custom properties (`--ion-color-primary`, `--ion-background-color`).
-- **Implement Virtual Scrolling**: Use `@ionic/react` virtual scroller or TanStack Virtual for long item feeds to prevent DOM bloat.
-- **Respect Native Back Navigation**: Handle hardware Android back buttons and iOS swipe-to-go-back gestures gracefully.
+- Pair with Modern Capacitor: Always use Capacitor (not Cordova) for native device access and plugin capabilities.
+- Use Ionic CSS Variables: Customize themes globally using CSS custom properties (`--ion-color-primary`, `--ion-background-color`).
+- Implement Virtual Scrolling: Use `@ionic/react` virtual scroller or TanStack Virtual for long item feeds to prevent DOM bloat.
+- Respect Native Back Navigation: Handle hardware Android back buttons and iOS swipe-to-go-back gestures gracefully.
 
 **Don't**:
 
-- **Don't place heavy animations in WebViews**: Use CSS transforms and hardware-accelerated transitions; avoid expensive DOM mutations.
-- **Don't ignore notch safe areas**: Ensure header and footer toolbars leverage Ionic's built-in safe area insets.
-- **Don't mix non-Ionic modal systems**: Use `IonModal` to ensure focus management and native hardware dismiss events work predictably.
+- Place heavy animations in WebViews: Use CSS transforms and hardware-accelerated transitions; avoid expensive DOM mutations.
+- Ignore notch safe areas: Ensure header and footer toolbars leverage Ionic's built-in safe area insets.
+- Mix non-Ionic modal systems: Use `IonModal` to ensure focus management and native hardware dismiss events work predictably.
 
 ## Troubleshooting
 

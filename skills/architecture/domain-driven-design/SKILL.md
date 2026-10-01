@@ -44,15 +44,15 @@ public class Order {
 
 ## Core Concepts
 
-#Strategic DDD: Bounded Contexts & Context Mapping
+### Strategic DDD: Bounded Contexts & Context Mapping
 
 Divides a large organization into autonomous boundaries with distinct terminology and models:
 
-```
+```text
 [ Sales Context ] ──(Customer = Buyer)──→ [ Context Map ] ──(Customer = Borrower)──→ [ Underwriting Context ]
 ```
 
-#Value Objects vs Entities
+### Value Objects vs Entities
 
 Entities possess a persistent identity that endures across mutations; Value Objects are immutable and defined entirely by their attributes:
 
@@ -78,7 +78,7 @@ export class Money {
 }
 ```
 
-#Aggregate Roots & Transaction Boundaries
+### Aggregate Roots & Transaction Boundaries
 
 The Aggregate Root is the sole gateway through which external callers can interact with inner entities:
 
@@ -111,7 +111,8 @@ export class Invoice {
 
 ## Common Patterns
 
-#Aggregate Root with Encapsulated Business Invariants
+### Aggregate Root with Encapsulated Business Invariants
+
 **Problem**: Direct mutation of entity state bypasses business rules and produces inconsistent data.  
 **Solution**: Protect invariants inside Aggregate Roots and emit Domain Events.
 
@@ -149,20 +150,20 @@ export class BankAccount {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Co-Design with Domain Experts**: Conduct Event Storming workshops to map domain workflows before writing code.
-- **Enforce Invariants Inside the Aggregate**: Ensure invalid state can never exist within an entity or aggregate root.
-- **Reference Other Aggregates by ID Only**: Never hold direct object references to other aggregate roots; use their unique IDs.
-- **Make Value Objects Immutable**: Guarantee side-effect free equality checks and safe passing across concurrent threads.
+- Co-Design with Domain Experts: Conduct Event Storming workshops to map domain workflows before writing code.
+- Enforce Invariants Inside the Aggregate: Ensure invalid state can never exist within an entity or aggregate root.
+- Reference Other Aggregates by ID Only: Never hold direct object references to other aggregate roots; use their unique IDs.
+- Make Value Objects Immutable: Guarantee side-effect free equality checks and safe passing across concurrent threads.
 
 **Don't**:
 
-- **Don't create massive aggregates**: Keep aggregates small; large aggregates cause database lock contention and performance bottlenecks.
-- **Don't let technical database concerns leak into Domain logic**: Design domain models for business behavior, not database normalization.
-- **Don't use DDD for generic CRUD contexts**: Reserve DDD tactical patterns for the Core Domain where competitive advantage lies.
+- Create massive aggregates: Keep aggregates small; large aggregates cause database lock contention and performance bottlenecks.
+- Let technical database concerns leak into Domain logic: Design domain models for business behavior, not database normalization.
+- Use DDD for generic CRUD contexts: Reserve DDD tactical patterns for the Core Domain where competitive advantage lies.
 
 ## Troubleshooting
 

@@ -5,7 +5,7 @@ description: Expert Astro framework assistance covering content collections, Isl
 
 # Astro
 
-Astro is a web framework popularized for "Islands Architecture". It ships **zero JavaScript** to the client by default, hydrating only the interactive parts. Astro 5 (2025) introduces Server Islands.
+Astro is a content-driven web framework pioneering Islands Architecture, shipping zero client-side JavaScript by default and hydrating interactive components on demand.
 
 ## When to Use
 
@@ -36,7 +36,7 @@ const data = await fetch('https://api.myjson.com').then(r => r.json());
 
 ## Core Concepts
 
-#Component Islands & Client Directives
+### Component Islands & Client Directives
 
 Hydrating JavaScript only where interactive functionality is required:
 
@@ -70,7 +70,7 @@ const pageTitle = "Astro 5 E-Commerce";
 </html>
 ```
 
-#Content Collections with Type-Safe Schemas
+### Content Collections with Type-Safe Schemas
 
 Validating Markdown and MDX content with Zod schemas:
 
@@ -94,7 +94,7 @@ export const collections = {
 };
 ```
 
-#Server Endpoints & Dynamic API Routes
+### Server Endpoints & Dynamic API Routes
 
 Exposing REST endpoints for dynamic data fetching:
 
@@ -146,15 +146,20 @@ import SearchBar from '../components/SearchBar.jsx'; // React component
 </Layout>
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use Astro Server Islands (`server:defer`) to defer slow, dynamic parts of static pages for instant TTFB.
-- **Do** leverage Content Collections for all Markdown and MDX files to ensure compile-time schema validation.
-- **Do** use `<Image />` component from `astro:assets` to automate WebP conversion and responsive `srcset`.
-- **Do** keep interactive islands isolated and small (`client:idle` or `client:visible`).
-- **Don't** use `client:load` on components below the fold; hydrate only when necessary.
-- **Don't** import client UI framework libraries into `.astro` frontmatter unless rendering them as islands.
-- **Don't** use client-side navigation (`ViewTransitions`) without auditing third-party script re-execution.
+**Do**:
+
+- Use Astro Server Islands (`server:defer`) to defer slow, dynamic parts of static pages for instant TTFB.
+- Leverage Content Collections for all Markdown and MDX files to ensure compile-time schema validation.
+- Use `<Image />` component from `astro:assets` to automate WebP conversion and responsive `srcset`.
+- Keep interactive islands isolated and small (`client:idle` or `client:visible`).
+
+**Don't**:
+
+- Use `client:load` on components below the fold; hydrate only when necessary.
+- Import client UI framework libraries into `.astro` frontmatter unless rendering them as islands.
+- Use client-side navigation (`ViewTransitions`) without auditing third-party script re-execution.
 
 ## Troubleshooting
 

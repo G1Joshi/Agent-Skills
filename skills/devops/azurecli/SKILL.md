@@ -5,7 +5,7 @@ description: Expert Azure CLI (az) assistance covering command automation, JMESP
 
 # Azure CLI (`az`)
 
-The Azure CLI is the standard tool for managing Azure resources. 2025 brings deeper integration with **Bicep** (Azure's IaC language) and AI assistance.
+The Azure CLI provides cross-platform command-line management for Azure infrastructure, featuring tight integration with Bicep templates and automated cloud provisioning.
 
 ## When to Use
 
@@ -29,7 +29,7 @@ az aks create --resource-group myResourceGroup --name myAKSCluster --node-count 
 
 ## Core Concepts
 
-#Resource Group Creation & Infrastructure Deployment
+### Resource Group Creation & Infrastructure Deployment
 
 Deploying resources with Bicep / ARM templates:
 
@@ -48,7 +48,7 @@ az deployment group create \
   --parameters environment=prod adminEmail=sysadmin@example.com
 ```
 
-#Querying and Filtering with JMESPath (--query)
+### Querying and Filtering with JMESPath (--query)
 
 Extracting resource properties without installing jq:
 
@@ -67,7 +67,7 @@ APP_GATEWAY_IP=$(az network public-ip show \
   --output tsv)
 ```
 
-#AKS Credential Injection & ACR Authentication
+### AKS Credential Injection & ACR Authentication
 
 Connecting to container services seamlessly:
 
@@ -102,15 +102,20 @@ OUTBOUND_IPS=$(az webapp show \
 echo "Allowlist IPs: $OUTBOUND_IPS"
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** authenticate GitHub Actions and pipelines using Workload Identity Federation (OIDC) rather than client secrets.
-- **Do** use `--output tsv` with `--query` when capturing single strings into shell variables without quotes.
-- **Do** test and validate deployments before execution with `az deployment group what-if`.
-- **Do** use `az bicep` directly through the CLI for clean, modular infrastructure-as-code.
-- **Don't** use interactive `az login` in automated headless scripts; use Service Principals or Managed Identities.
-- **Don't** output sensitive keys in plain text; pipe outputs to secure files or masking variables.
-- **Don't** run long operations synchronously without considering `--no-wait` and `az resource wait`.
+**Do**:
+
+- Authenticate GitHub Actions and pipelines using Workload Identity Federation (OIDC) rather than client secrets.
+- Use `--output tsv` with `--query` when capturing single strings into shell variables without quotes.
+- Test and validate deployments before execution with `az deployment group what-if`.
+- Use `az bicep` directly through the CLI for clean, modular infrastructure-as-code.
+
+**Don't**:
+
+- Use interactive `az login` in automated headless scripts; use Service Principals or Managed Identities.
+- Output sensitive keys in plain text; pipe outputs to secure files or masking variables.
+- Run long operations synchronously without considering `--no-wait` and `az resource wait`.
 
 ## Troubleshooting
 

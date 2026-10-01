@@ -5,7 +5,7 @@ description: Expert Laravel assistance covering Eloquent ORM, Blade templating, 
 
 # Laravel
 
-Laravel is a web application framework with expressive, elegant syntax. Laravel 11 (2025) introduces a streamlined skeleton and native WebSocket server (Reverb).
+Laravel is an expressive PHP web application framework providing an elegant developer experience with Eloquent ORM, robust queues, events, and native real-time broadcasting.
 
 ## When to Use
 
@@ -29,7 +29,7 @@ $users = User::where('active', 1)->get();
 
 ## Core Concepts
 
-#Eloquent ORM with Relationships & Scopes
+### Eloquent ORM with Relationships & Scopes
 
 Expressive database models with type hinting:
 
@@ -57,7 +57,7 @@ class Customer extends Model
 }
 ```
 
-#Form Requests & Validated Controllers
+### Form Requests & Validated Controllers
 
 Strict input validation separated from controller logic:
 
@@ -104,7 +104,7 @@ class OrderController extends Controller
 }
 ```
 
-#Asynchronous Queue Workers & Jobs
+### Asynchronous Queue Workers & Jobs
 
 Offloading heavy processing to Redis or SQS workers:
 
@@ -163,15 +163,20 @@ class OrderController extends Controller
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target Laravel 11/12 with streamlined application structure and minimal configuration files.
-- **Do** use Form Requests for input validation instead of validating inline inside controllers.
-- **Do** utilize Eloquent eager loading (`with(['customer', 'items'])`) to prevent N+1 queries.
-- **Do** run queue workers under supervisor with Redis for reliable background job execution.
-- **Don't** execute raw database queries in Blade views or controllers; use Eloquent or repository classes.
-- **Don't** run migrations directly in production without a verified backup and dry run.
-- **Don't** commit the `.env` file to source control.
+**Do**:
+
+- Target Laravel 11/12 with streamlined application structure and minimal configuration files.
+- Use Form Requests for input validation instead of validating inline inside controllers.
+- Utilize Eloquent eager loading (`with(['customer', 'items'])`) to prevent N+1 queries.
+- Run queue workers under supervisor with Redis for reliable background job execution.
+
+**Don't**:
+
+- Execute raw database queries in Blade views or controllers; use Eloquent or repository classes.
+- Run migrations directly in production without a verified backup and dry run.
+- Commit the `.env` file to source control.
 
 ## Troubleshooting
 

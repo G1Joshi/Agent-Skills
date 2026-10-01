@@ -5,7 +5,7 @@ description: Expert Angular assistance covering Signals, Standalone Components, 
 
 # Angular
 
-Angular is a platform for building mobile and desktop web applications. Angular 19 (2025) has completely reinvented itself with Signals, Standalone Components, and optional Zone.js.
+Angular is an enterprise application framework featuring fine-grained reactivity via Signals, Standalone Components, built-in routing, and form validation.
 
 ## When to Use
 
@@ -40,7 +40,7 @@ export class CounterComponent {
 
 ## Core Concepts
 
-#Angular Signals & Fine-Grained Reactivity
+### Angular Signals & Fine-Grained Reactivity
 
 State management using reactive primitives without Zone.js change detection overhead:
 
@@ -80,7 +80,7 @@ export class CartSummaryComponent {
 }
 ```
 
-#Dependency Injection & Typed HTTP Client
+### Dependency Injection & Typed HTTP Client
 
 Consuming APIs with injected services and modern interceptors:
 
@@ -110,7 +110,7 @@ export class UserService {
 }
 ```
 
-#Typed Reactive Forms with Custom Async Validators
+### Typed Reactive Forms with Custom Async Validators
 
 Robust form state handling with full type safety:
 
@@ -181,15 +181,20 @@ export class CounterComponent {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** build with standalone components (`standalone: true`), eliminating legacy `NgModule` boilerplate.
-- **Do** use modern Angular Signals (`signal()`, `computed()`, `input()`, `output()`) for declarative state.
-- **Do** configure `provideHttpClient(withFetch())` to enable high-performance browser fetch API.
-- **Do** enforce `ChangeDetectionStrategy.OnPush` across all components to prevent redundant render cycles.
-- **Don't** rely on Zone.js for new applications; migrate toward Zoneless change detection for lower bundle sizes.
-- **Don't** mutate signal values directly; always use `.update()` or `.set()`.
-- **Don't** forget to unsubscribe from RxJS observables or use `takeUntilDestroyed()` in component constructors.
+**Do**:
+
+- Build with standalone components (`standalone: true`), eliminating legacy `NgModule` boilerplate.
+- Use modern Angular Signals (`signal()`, `computed()`, `input()`, `output()`) for declarative state.
+- Configure `provideHttpClient(withFetch())` to enable high-performance browser fetch API.
+- Enforce `ChangeDetectionStrategy.OnPush` across all components to prevent redundant render cycles.
+
+**Don't**:
+
+- Rely on Zone.js for new applications; migrate toward Zoneless change detection for lower bundle sizes.
+- Mutate signal values directly; always use `.update()` or `.set()`.
+- Forget to unsubscribe from RxJS observables or use `takeUntilDestroyed()` in component constructors.
 
 ## Troubleshooting
 

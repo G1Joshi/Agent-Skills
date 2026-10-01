@@ -44,7 +44,7 @@ socket.addEventListener("message", (event) => {
 
 ## Core Concepts
 
-#HTTP Upgrade Handshake Protocol
+### HTTP Upgrade Handshake Protocol
 
 WebSocket connections begin as standard HTTP GET requests and upgrade to raw TCP full-duplex sockets:
 
@@ -62,7 +62,7 @@ Connection: Upgrade
 Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=
 ```
 
-#Server-Side Socket Management & Rooms
+### Server-Side Socket Management & Rooms
 
 Managing client socket pools and broadcasting to scoped rooms:
 
@@ -92,7 +92,7 @@ wss.on("connection", (ws, req) => {
 });
 ```
 
-#Heartbeat (Ping/Pong) Keepalive
+### Heartbeat (Ping/Pong) Keepalive
 
 Detects dead connections caused by client drops or silent network disconnects:
 
@@ -116,7 +116,8 @@ wss.on("connection", (ws: any) => {
 
 ## Common Patterns
 
-#Horizontal Scaling with Redis Pub/Sub
+### Horizontal Scaling with Redis Pub/Sub
+
 **Problem**: Clients connected to different WebSocket server instances cannot exchange messages.  
 **Solution**: Distribute broadcast events across server nodes via Redis Pub/Sub.
 
@@ -142,20 +143,20 @@ wss.on("connection", (ws) => {
 });
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Scale Across Nodes with Redis Pub/Sub**: Use Redis, NATS, or Kafka to distribute broadcasts across multi-server WebSocket clusters.
-- **Implement Heartbeats (Ping/Pong)**: Detect half-open TCP connections by sending periodic pings every 30 seconds.
-- **Authenticate During the HTTP Handshake**: Validate JWT tokens or session cookies in the initial upgrade request before accepting the connection.
-- **Apply Backpressure & Message Throttling**: Limit maximum payload sizes (`maxPayload: 1024 * 1024`) and rate limit rapid client messages.
+- Scale Across Nodes with Redis Pub/Sub: Use Redis, NATS, or Kafka to distribute broadcasts across multi-server WebSocket clusters.
+- Implement Heartbeats (Ping/Pong): Detect half-open TCP connections by sending periodic pings every 30 seconds.
+- Authenticate During the HTTP Handshake: Validate JWT tokens or session cookies in the initial upgrade request before accepting the connection.
+- Apply Backpressure & Message Throttling: Limit maximum payload sizes (`maxPayload: 1024 * 1024`) and rate limit rapid client messages.
 
 **Don't**:
 
-- **Don't use WebSockets for simple unidirectional pushes**: Use Server-Sent Events (SSE) if clients only receive data and never send upstream.
-- **Don't store state on individual server memory alone**: Distribute room memberships and sessions using Redis to allow horizontal scaling.
-- **Don't transmit uncompressed binary data carelessly**: Use compact binary formats like Protobuf or MessagePack for high-frequency coordinate data.
+- Use WebSockets for simple unidirectional pushes: Use Server-Sent Events (SSE) if clients only receive data and never send upstream.
+- Store state on individual server memory alone: Distribute room memberships and sessions using Redis to allow horizontal scaling.
+- Transmit uncompressed binary data carelessly: Use compact binary formats like Protobuf or MessagePack for high-frequency coordinate data.
 
 ## Troubleshooting
 

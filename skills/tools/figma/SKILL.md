@@ -5,7 +5,7 @@ description: Expert Figma design tool assistance covering auto-layout, design to
 
 # Figma
 
-Figma is the interface design tool. 2025 brings **Generative UI** (Text to Design) and **Dev Mode** enhancements for accurate CSS/SwiftUI generation.
+Figma is a collaborative cloud-based interface design tool featuring vector networks, design tokens, component variant libraries, and dedicated Dev Mode inspect tooling.
 
 ## When to Use
 
@@ -24,7 +24,7 @@ curl -H "X-Figma-Token: $FIGMA_ACCESS_TOKEN" \
 
 ## Core Concepts
 
-#Fetching Design Tokens via Figma REST API
+### Fetching Design Tokens via Figma REST API
 
 Extracting variables and color styles using Node.js:
 
@@ -59,7 +59,7 @@ async function exportDesignTokens() {
 exportDesignTokens();
 ```
 
-#Developing a Figma Plugin (manifest.json & code.ts)
+### Developing a Figma Plugin (manifest.json & code.ts)
 
 Creating an automation plugin to inspect layers:
 
@@ -99,7 +99,7 @@ figma.ui.onmessage = (msg) => {
 };
 ```
 
-#Dev Mode Code Generation
+### Dev Mode Code Generation
 
 Mapping Figma variables directly to Tailwind CSS:
 
@@ -140,15 +140,20 @@ async function exportTokens(fileKey, token) {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** build components using Figma Auto Layout (`Shift + A`) to accurately reflect CSS flexbox and responsive behaviors.
-- **Do** define global color, spacing, and typography variables in Figma Variables to automate design token exports.
-- **Do** use Figma Dev Mode to inspect exact CSS, Jetpack Compose, and SwiftUI code generation snippets.
-- **Do** name frames and layers with semantic identifiers (e.g. `Button/Primary/Hover`) rather than default `Frame 42`.
-- **Don't** detach component instances; use component variants and properties (`boolean`, `instance swap`, `text`).
-- **Don't** hardcode raw hex values in design mockups; bind colors to design tokens.
-- **Don't** commit Figma personal access tokens to public GitHub repositories.
+**Do**:
+
+- Build components using Figma Auto Layout (`Shift + A`) to accurately reflect CSS flexbox and responsive behaviors.
+- Define global color, spacing, and typography variables in Figma Variables to automate design token exports.
+- Use Figma Dev Mode to inspect exact CSS, Jetpack Compose, and SwiftUI code generation snippets.
+- Name frames and layers with semantic identifiers (e.g. `Button/Primary/Hover`) rather than default `Frame 42`.
+
+**Don't**:
+
+- Detach component instances; use component variants and properties (`boolean`, `instance swap`, `text`).
+- Hardcode raw hex values in design mockups; bind colors to design tokens.
+- Commit Figma personal access tokens to public GitHub repositories.
 
 ## Troubleshooting
 

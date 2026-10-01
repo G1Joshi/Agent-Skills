@@ -5,7 +5,7 @@ description: Expert HashiCorp Nomad assistance covering job specifications (HCL)
 
 # Nomad
 
-HashiCorp Nomad is a flexible scheduler that orchestrates just about anything: containers, binaries, or VMs. Nomad 1.8+ (2025) focuses on **Workload Identity** (JWT) for secure, secret-less authentication.
+HashiCorp Nomad is a lightweight, flexible workload orchestrator capable of managing containerized, non-containerized, and virtualized applications across bare metal and multi-cloud environments.
 
 ## When to Use
 
@@ -39,7 +39,7 @@ job "example" {
 
 ## Core Concepts
 
-#Production Job Specification (job.nomad)
+### Production Job Specification (job.nomad)
 
 Deploying a containerized service with Consul and Vault:
 
@@ -104,7 +104,7 @@ job "api-service" {
 }
 ```
 
-#Batch Job Scheduling for Cron and Analytics
+### Batch Job Scheduling for Cron and Analytics
 
 Running one-off or scheduled batch computation:
 
@@ -130,7 +130,7 @@ job "nightly-cleanup" {
 }
 ```
 
-#Nomad CLI Operations
+### Nomad CLI Operations
 
 Planning and deploying jobs from terminal:
 
@@ -195,15 +195,20 @@ job "api-service" {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** always run `nomad job plan` to inspect allocation changes and dry-run outputs before updating jobs.
-- **Do** set `auto_revert = true` in update blocks to trigger automated rollbacks when health checks fail.
-- **Do** leverage Nomad's native Vault and Consul integrations for secret rendering and service discovery.
-- **Do** deploy an odd number of server nodes (3 or 5) for Raft consensus across availability zones.
-- **Don't** allocate unbounded resources; always specify explicit `cpu` and `memory` limits in task definitions.
-- **Don't** store plaintext passwords in job files; use the `template` block with Vault secrets.
-- **Don't** run Nomad servers without TLS and mutual authentication enabled.
+**Do**:
+
+- Always run `nomad job plan` to inspect allocation changes and dry-run outputs before updating jobs.
+- Set `auto_revert = true` in update blocks to trigger automated rollbacks when health checks fail.
+- Leverage Nomad's native Vault and Consul integrations for secret rendering and service discovery.
+- Deploy an odd number of server nodes (3 or 5) for Raft consensus across availability zones.
+
+**Don't**:
+
+- Allocate unbounded resources; always specify explicit `cpu` and `memory` limits in task definitions.
+- Store plaintext passwords in job files; use the `template` block with Vault secrets.
+- Run Nomad servers without TLS and mutual authentication enabled.
 
 ## Troubleshooting
 

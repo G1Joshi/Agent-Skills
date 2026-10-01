@@ -38,7 +38,7 @@ export default function Profile() {
 
 ## Core Concepts
 
-#Auth0 Universal Login & OIDC Handshake
+### Auth0 Universal Login & OIDC Handshake
 
 Clients redirect to centralized Auth0 login pages, preventing direct credential exposure to frontend applications:
 
@@ -57,7 +57,7 @@ export const GET = handleAuth({
 });
 ```
 
-#Auth0 Actions (Extensibility Pipeline)
+### Auth0 Actions (Extensibility Pipeline)
 
 Node.js event handlers executed during the authentication pipeline to enrich claims, enforce MFA, or check blocklists:
 
@@ -81,7 +81,7 @@ exports.onExecutePostLogin = async (event, api) => {
 };
 ```
 
-#Machine-to-Machine JWT Verification in Backend APIs
+### Machine-to-Machine JWT Verification in Backend APIs
 
 Validates JWT access tokens against the Auth0 JWKS endpoint:
 
@@ -129,20 +129,20 @@ app.get("/api/private", checkJwt, (req, res) => {
 });
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Always Verify the `audience` and `issuer` Claims**: Never validate token signatures without verifying that the audience matches your specific API identifier.
-- **Use Auth0 Actions instead of Legacy Rules/Hooks**: Actions provide modern TypeScript runtimes, secret management, and version history.
-- **Rotate Signing Secrets Regularly**: Use RS256 asymmetric keys with automated JWKS rotation rather than static HS256 shared secrets.
-- **Enable Anomaly Detection**: Turn on brute-force protection, credential stuffing guards, and breached password detection in the Auth0 console.
+- Always Verify the `audience` and `issuer` Claims: Never validate token signatures without verifying that the audience matches your specific API identifier.
+- Use Auth0 Actions instead of Legacy Rules/Hooks: Actions provide modern TypeScript runtimes, secret management, and version history.
+- Rotate Signing Secrets Regularly: Use RS256 asymmetric keys with automated JWKS rotation rather than static HS256 shared secrets.
+- Enable Anomaly Detection: Turn on brute-force protection, credential stuffing guards, and breached password detection in the Auth0 console.
 
 **Don't**:
 
-- **Don't store sensitive user data in client-side localStorage**: Store tokens in secure HttpOnly cookies or use the Auth0 refresh token rotation flow.
-- **Don't hardcode client secrets in frontend or mobile apps**: Use the Authorization Code Flow with PKCE for single-page and mobile apps.
-- **Don't use Auth0 Management API tokens in client code**: Keep Management API tokens strictly within secure backend servers.
+- Store sensitive user data in client-side localStorage: Store tokens in secure HttpOnly cookies or use the Auth0 refresh token rotation flow.
+- Hardcode client secrets in frontend or mobile apps: Use the Authorization Code Flow with PKCE for single-page and mobile apps.
+- Use Auth0 Management API tokens in client code: Keep Management API tokens strictly within secure backend servers.
 
 ## Troubleshooting
 

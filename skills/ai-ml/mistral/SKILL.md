@@ -31,7 +31,7 @@ print(response.choices[0].message.content)
 
 ## Core Concepts
 
-#Chat Completion with Mistral Python Client
+### Chat Completion with Mistral Python Client
 
 Calling Mistral Large with structured configuration:
 
@@ -54,7 +54,7 @@ response = client.chat.complete(
 print(response.choices[0].message.content)
 ```
 
-#Tool Use & Function Calling
+### Tool Use & Function Calling
 
 Binding tools to Mistral for multi-turn agent execution:
 
@@ -96,7 +96,7 @@ if message.tool_calls:
         print(f"Arguments: {tool_call.function.arguments}")
 ```
 
-#Fill-in-the-Middle (FIM) with Codestral
+### Fill-in-the-Middle (FIM) with Codestral
 
 Completing code between prefix and suffix markers:
 
@@ -142,15 +142,20 @@ response = client.fim.complete(
 print(response.choices[0].message.content)
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target `codestral-latest` for coding tasks and Fill-in-the-Middle (FIM) in-editor completions.
-- **Do** use `response_format={"type": "json_object"}` when machine-readable JSON is strictly required.
-- **Do** set `temperature=0.1` for code generation and factual extraction tasks.
-- **Do** leverage Mixtral Mixture-of-Experts (MoE) architectures for high throughput with reduced active parameter counts.
-- **Don't** provide unstructured tool descriptions; define strict JSON schemas with clear parameter types.
-- **Don't** hardcode `MISTRAL_API_KEY` in scripts; load from environment variables.
-- **Don't** use large general models when specialized compact models like `ministral-8b` or `mistral-nemo` suffice.
+**Do**:
+
+- Target `codestral-latest` for coding tasks and Fill-in-the-Middle (FIM) in-editor completions.
+- Use `response_format={"type": "json_object"}` when machine-readable JSON is strictly required.
+- Set `temperature=0.1` for code generation and factual extraction tasks.
+- Leverage Mixtral Mixture-of-Experts (MoE) architectures for high throughput with reduced active parameter counts.
+
+**Don't**:
+
+- Provide unstructured tool descriptions; define strict JSON schemas with clear parameter types.
+- Hardcode `MISTRAL_API_KEY` in scripts; load from environment variables.
+- Use large general models when specialized compact models like `ministral-8b` or `mistral-nemo` suffice.
 
 ## Troubleshooting
 

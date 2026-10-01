@@ -28,7 +28,7 @@ IntelliJ IDEA is the premier IDE for Java and Kotlin. v2025.1 introduces **Java 
 
 ## Core Concepts
 
-#Run / Debug Configuration with VM Options
+### Run / Debug Configuration with VM Options
 
 Configuring production-grade local execution:
 
@@ -47,7 +47,7 @@ Configuring production-grade local execution:
 </component>
 ```
 
-#Inspecting Memory & Thread Dumps with IntelliJ Profiler
+### Inspecting Memory & Thread Dumps with IntelliJ Profiler
 
 Diagnosing memory leaks and deadlocks:
 
@@ -56,7 +56,7 @@ Diagnosing memory leaks and deadlocks:
 - Click **Capture Memory Snapshot** (`.hprof`) to find instances retaining large byte arrays.
 - Inspect **Threads** view to detect thread synchronization bottlenecks.
 
-#Structural Search & Replace (SSR)
+### Structural Search & Replace (SSR)
 
 Finding and modifying patterns across entire codebases:
 
@@ -71,7 +71,8 @@ catch ($ExceptionType$ $e$) {
 
 ## Common Patterns
 
-#JVM Memory Profiling and Heap Dump Analysis
+### JVM Memory Profiling and Heap Dump Analysis
+
 **Problem**: Diagnose memory leaks and high GC overhead in Spring Boot applications.  
 **Solution**: Launch app with JVM profiling arguments.
 
@@ -83,15 +84,20 @@ catch ($ExceptionType$ $e$) {
 -Xms2g -Xmx4g
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** share standardized team run configurations by checking **Store as project file** (`.run/*.run.xml`).
-- **Do** use IntelliJ's built-in Git client with visual 3-way merge conflict resolution.
-- **Do** allocate sufficient memory to the IDE in `Help -> Change Memory Settings` (typically 3GB-4GB).
-- **Do** use IntelliJ inspections and run **Analyze Code -> Inspect Code...** before merging PRs.
-- **Don't** commit the entire `.idea/` folder; maintain a proper `.gitignore` excluding `workspace.xml` and user caches.
-- **Don't** disable annotation processing when using Lombok or MapStruct; enable in **Settings -> Annotation Processors**.
-- **Don't** ignore yellow inspection warnings in Java/Kotlin code; address warnings to keep code maintainable.
+**Do**:
+
+- Share standardized team run configurations by checking **Store as project file** (`.run/*.run.xml`).
+- Use IntelliJ's built-in Git client with visual 3-way merge conflict resolution.
+- Allocate sufficient memory to the IDE in `Help -> Change Memory Settings` (typically 3GB-4GB).
+- Use IntelliJ inspections and run **Analyze Code -> Inspect Code...** before merging PRs.
+
+**Don't**:
+
+- Commit the entire `.idea/` folder; maintain a proper `.gitignore` excluding `workspace.xml` and user caches.
+- Disable annotation processing when using Lombok or MapStruct; enable in **Settings -> Annotation Processors**.
+- Ignore yellow inspection warnings in Java/Kotlin code; address warnings to keep code maintainable.
 
 ## Troubleshooting
 

@@ -214,19 +214,24 @@ module.exports = {
 };
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** enable `cache: { type: "filesystem" }` in Webpack 5 to dramatically reduce CI/CD build times.
-- **Do** use `swc-loader` or `esbuild-loader` in place of `babel-loader` for up to 10x faster transpilation.
-- **Do** use `[contenthash:8]` in production output filenames for optimal long-term browser HTTP caching.
-- **Do** externalize and isolate shared dependencies with `singleton: true` in Module Federation.
-- **Don't** build large production SPAs without configuring `splitChunks` to separate vendor and application code.
-- **Don't** include expensive development plugins (e.g. detailed source map generators) in production configurations.
-- **Don't** commit `dist/` or `.cache/` build output directories to version control.
+**Do**:
+
+- Enable `cache: { type: "filesystem" }` in Webpack 5 to dramatically reduce CI/CD build times.
+- Use `swc-loader` or `esbuild-loader` in place of `babel-loader` for up to 10x faster transpilation.
+- Use `[contenthash:8]` in production output filenames for optimal long-term browser HTTP caching.
+- Externalize and isolate shared dependencies with `singleton: true` in Module Federation.
+
+**Don't**:
+
+- Build large production SPAs without configuring `splitChunks` to separate vendor and application code.
+- Include expensive development plugins (e.g. detailed source map generators) in production configurations.
+- Commit `dist/` or `.cache/` build output directories to version control.
 
 ## Troubleshooting
 
-| Error / Symptom                                 | Cause                                                          | Solution                                                                                                 |
+| Error                                           | Cause                                                          | Solution                                                                                                 |
 | ----------------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `Module not found: Error: Can't resolve '...'`  | File extension missing from `resolve.extensions` array         | Add `resolve: { extensions: ['.ts', '.tsx', '.js', '.json'] }` to `webpack.config.js`.                   |
 | Out of memory (`JavaScript heap out of memory`) | Heavy source maps or source analysis on large dependency graph | Switch `devtool` to `eval-cheap-module-source-map` for development; exclude `node_modules` from loaders. |

@@ -5,7 +5,7 @@ description: Expert AWS CLI assistance covering command-line options, profiles, 
 
 # AWS CLI
 
-The AWS CLI allows you to control AWS services from the command line. In 2025, usage is centered around **AWS IAM Identity Center** (formerly SSO) for secure, short-lived credentials.
+The AWS Command Line Interface (CLI) enables programmatic management of AWS resources, with first-class support for AWS IAM Identity Center and credential automation.
 
 ## When to Use
 
@@ -21,7 +21,7 @@ The AWS CLI allows you to control AWS services from the command line. In 2025, u
 curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
 sudo installer -pkg AWSCLIV2.pkg -target /
 
-# Configure with SSO (Recommended 2025)
+# Configure with AWS IAM Identity Center (SSO)
 aws configure sso
 # SSO session name: my-session
 # SSO start URL: https://my-org.awsapps.com/start
@@ -36,7 +36,7 @@ aws sso login --profile my-profile
 
 ## Core Concepts
 
-#JMESPath Filtering & Formatting
+### JMESPath Filtering & Formatting
 
 Querying specific fields without installing jq:
 
@@ -54,7 +54,7 @@ INSTANCE_ID=$(aws ec2 describe-instances \
   --output text)
 ```
 
-#High-Throughput S3 Synchronization
+### High-Throughput S3 Synchronization
 
 Syncing build artifacts with cache headers:
 
@@ -72,7 +72,7 @@ aws s3 sync dist/ s3://production-static-assets-2026/ \
   --cache-control "no-cache, no-store, must-revalidate"
 ```
 
-#AssumeRole with AWS STS
+### AssumeRole with AWS STS
 
 Assuming cross-account deployment roles securely:
 
@@ -105,15 +105,20 @@ aws ec2 describe-instances \
   --output table
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target AWS CLI v2 (`aws --version`) which includes native SSO and Pager integration.
-- **Do** use `--query` (JMESPath) for client-side filtering and `--filters` for server-side filtering.
-- **Do** configure AWS IAM Identity Center (`aws configure sso`) instead of long-lived access keys.
-- **Do** disable paging in automated shell scripts by setting `export AWS_PAGER=""`.
-- **Don't** commit `~/.aws/credentials` or access keys to Git repositories.
-- **Don't** use `aws s3 cp` in loops for multi-file transfers; use `aws s3 sync` for automated diffing.
-- **Don't** parse AWS CLI JSON output with brittle `grep` or `awk`; use `--output text` with `--query` or `jq`.
+**Do**:
+
+- Target AWS CLI v2 (`aws --version`) which includes native SSO and Pager integration.
+- Use `--query` (JMESPath) for client-side filtering and `--filters` for server-side filtering.
+- Configure AWS IAM Identity Center (`aws configure sso`) instead of long-lived access keys.
+- Disable paging in automated shell scripts by setting `export AWS_PAGER=""`.
+
+**Don't**:
+
+- Commit `~/.aws/credentials` or access keys to Git repositories.
+- Use `aws s3 cp` in loops for multi-file transfers; use `aws s3 sync` for automated diffing.
+- Parse AWS CLI JSON output with brittle `grep` or `awk`; use `--output text` with `--query` or `jq`.
 
 ## Troubleshooting
 

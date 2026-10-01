@@ -31,17 +31,17 @@ class CalculatorTest {
 
 ## Core Concepts
 
-#JUnit 5 Architecture (Platform + Jupiter + Vintage)
+### JUnit 5 Architecture (Platform + Jupiter + Vintage)
 
 JUnit 5 separates the test execution engine from the developer API:
 
-```
+```text
 [ JUnit Platform (Launcher, IDE & Maven/Gradle Execution) ]
         ├── [ JUnit Jupiter (Modern API, Annotations, Extensions) ]
         └── [ JUnit Vintage (Backward compatibility with JUnit 3/4) ]
 ```
 
-#Parameterized Tests (`@ParameterizedTest`)
+### Parameterized Tests (`@ParameterizedTest`)
 
 Executes a test method repeatedly with differing input sets:
 
@@ -63,7 +63,7 @@ class StringUtilityTest {
 }
 ```
 
-#Lifecycle Callbacks & Nested Test Contexts
+### Lifecycle Callbacks & Nested Test Contexts
 
 Organizes tests hierarchically with `@Nested` and handles setup/teardown cleanly:
 
@@ -110,20 +110,20 @@ class MathUtilsTest {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Standardize on JUnit Jupiter (JUnit 5)**: Remove the legacy `junit-vintage-engine` dependency from modern projects.
-- **Use AssertJ for Fluent Assertions**: Pair JUnit with `assertThat(result).isNotNull().hasSize(3)` for clear assertion failures.
-- **Leverage `@TempDir` for File Tests**: Inject temporary directories automatically cleaned up after test completion.
-- **Use Display Names**: Provide descriptive `@DisplayName("Should reject expired payment tokens")` annotations.
+- Standardize on JUnit Jupiter (JUnit 5): Remove the legacy `junit-vintage-engine` dependency from modern projects.
+- Use AssertJ for Fluent Assertions: Pair JUnit with `assertThat(result).isNotNull().hasSize(3)` for clear assertion failures.
+- Leverage `@TempDir` for File Tests: Inject temporary directories automatically cleaned up after test completion.
+- Use Display Names: Provide descriptive `@DisplayName("Should reject expired payment tokens")` annotations.
 
 **Don't**:
 
-- **Don't import JUnit 4 annotations**: Avoid importing `org.junit.Test`; always use `org.junit.jupiter.api.Test`.
-- **Don't make test classes or methods `public` in JUnit 5**: Jupiter classes and methods can and should be package-private.
-- **Don't ignore test execution order**: Tests should be completely independent; avoid relying on execution sequences.
+- Import JUnit 4 annotations: Avoid importing `org.junit.Test`; always use `org.junit.jupiter.api.Test`.
+- Make test classes or methods `public` in JUnit 5: Jupiter classes and methods can and should be package-private.
+- Ignore test execution order: Tests should be completely independent; avoid relying on execution sequences.
 
 ## Troubleshooting
 

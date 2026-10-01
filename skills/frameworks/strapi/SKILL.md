@@ -5,7 +5,7 @@ description: Expert Strapi headless CMS assistance covering content types, plugi
 
 # Strapi
 
-Strapi v5 (2025) introduces a **Document Service API**, Draft & Publish 2.0, and a content history feature. It is the leading self-hosted Headless CMS.
+Strapi is an open-source, customizable headless CMS providing a powerful Document Service API, role-based access control, and customizable REST/GraphQL endpoints.
 
 ## When to Use
 
@@ -40,7 +40,7 @@ module.exports = createCoreController("api::article.article", ({ strapi }) => ({
 
 ## Core Concepts
 
-#Content-Type Schema Definition
+### Content-Type Schema Definition
 
 Declaring entities, attributes, and relationships via JSON schema:
 
@@ -80,7 +80,7 @@ Declaring entities, attributes, and relationships via JSON schema:
 }
 ```
 
-#Custom Controllers & Lifecycle Hooks
+### Custom Controllers & Lifecycle Hooks
 
 Extending core business logic with automated side-effects:
 
@@ -104,7 +104,7 @@ export default {
 };
 ```
 
-#Custom Service & Query API
+### Custom Service & Query API
 
 Querying database using the Strapi Document Service:
 
@@ -150,15 +150,20 @@ module.exports = {
 };
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target Strapi v5 with the modern Document Service API and enhanced content versioning.
-- **Do** configure API tokens with minimum necessary permissions for frontend consumer applications.
-- **Do** use `populate` parameters selectively to prevent over-fetching relational data.
-- **Do** store uploaded media in external object storage (AWS S3, Cloudinary) rather than the local filesystem.
-- **Don't** expose admin panel routes (`/admin`) publicly without VPN or strict IP whitelisting in production.
-- **Don't** edit generated content-type schema files manually while the Strapi development server is running.
-- **Don't** query private fields (like user password hashes) in public controller responses.
+**Do**:
+
+- Target Strapi v5 with the modern Document Service API and enhanced content versioning.
+- Configure API tokens with minimum necessary permissions for frontend consumer applications.
+- Use `populate` parameters selectively to prevent over-fetching relational data.
+- Store uploaded media in external object storage (AWS S3, Cloudinary) rather than the local filesystem.
+
+**Don't**:
+
+- Expose admin panel routes (`/admin`) publicly without VPN or strict IP whitelisting in production.
+- Edit generated content-type schema files manually while the Strapi development server is running.
+- Query private fields (like user password hashes) in public controller responses.
 
 ## Troubleshooting
 

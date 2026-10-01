@@ -5,7 +5,7 @@ description: Expert V language (vlang) assistance covering fast compilation, mem
 
 # V (Vlang)
 
-V (2024 updates) focuses on **compilation speed** (1 million LOC/s) and safety (Autofree). It aims to be a modern C replacement with Go-like simplicity.
+V is a simple, fast, and compiled language designed for building maintainable software with ultra-fast compilation speeds, memory safety, and minimal dependencies.
 
 ## When to Use
 
@@ -32,7 +32,7 @@ fn main() {
 
 ## Core Concepts
 
-#Memory Management & Immutability by Default
+### Memory Management & Immutability by Default
 
 V uses compile-time autofree memory management without garbage collection pauses:
 
@@ -61,7 +61,7 @@ fn main() {
 }
 ```
 
-#Result & Option Types for Error Propagation
+### Result & Option Types for Error Propagation
 
 Handling missing values and errors explicitly without exceptions:
 
@@ -96,7 +96,7 @@ fn main() {
 }
 ```
 
-#Concurrency with Coroutines & Channels
+### Concurrency with Coroutines & Channels
 
 Lightweight thread spawning with built-in CSP channels:
 
@@ -152,15 +152,20 @@ fn main() {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** run `v fmt -w .` to enforce standard formatting across the entire codebase.
-- **Do** use `v -prod` when building release binaries to enable aggressive compiler optimizations and stripping.
-- **Do** handle all errors using `or { ... }` blocks rather than panicking on unhandled results.
-- **Do** write unit tests directly alongside code with `fn test_*()` functions and execute them with `v test .`.
-- **Don't** use global mutable variables; pass context structs and state objects explicitly.
-- **Don't** disable autofree in production unless explicitly using an arena allocator for game loop allocations.
-- **Don't** ignore compiler warnings; treat warnings as errors during CI builds.
+**Do**:
+
+- Run `v fmt -w .` to enforce standard formatting across the entire codebase.
+- Use `v -prod` when building release binaries to enable aggressive compiler optimizations and stripping.
+- Handle all errors using `or { ... }` blocks rather than panicking on unhandled results.
+- Write unit tests directly alongside code with `fn test_*()` functions and execute them with `v test .`.
+
+**Don't**:
+
+- Use global mutable variables; pass context structs and state objects explicitly.
+- Disable autofree in production unless explicitly using an arena allocator for game loop allocations.
+- Ignore compiler warnings; treat warnings as errors during CI builds.
 
 ## Troubleshooting
 

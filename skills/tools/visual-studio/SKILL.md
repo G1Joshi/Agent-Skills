@@ -5,7 +5,7 @@ description: Expert Visual Studio IDE assistance covering C++, .NET/C#, MSBuild 
 
 # Visual Studio
 
-Visual Studio (not VS Code) is the heavyweight IDE for .NET (C#, F#) and C++ development. VS 2022 (64-bit) manages massive solutions.
+Visual Studio is a comprehensive 64-bit IDE for .NET and C++ software development, providing enterprise-grade diagnostics, multi-threaded debugging, and MSBuild solution architectures.
 
 ## When to Use
 
@@ -81,7 +81,8 @@ vstest.console.exe tests\UnitTests\bin\Release\net8.0\UnitTests.dll --Parallel -
 
 ## Common Patterns
 
-#EditorConfig Formatting Rules (.editorconfig)
+### EditorConfig Formatting Rules (.editorconfig)
+
 **Problem**: Inconsistent brace styles, indentation, and imports across Visual Studio team members.  
 **Solution**: Commit root `.editorconfig` recognized by Visual Studio MSBuild engine.
 
@@ -96,19 +97,24 @@ csharp_new_line_before_open_brace = all
 csharp_preferred_modifier_order = public,private,protected,internal,static,readonly,async:suggestion
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** check `.vsconfig` into the root of the repository to ensure all team members install identical SDKs and toolchains.
-- **Do** enable **Code Analysis on Build** and treat compiler warnings as errors (`<TreatWarningsAsErrors>true</TreatWarningsAsErrors>`).
-- **Do** configure **Central Package Management (CPM)** via `Directory.Packages.props` for unified NuGet versions.
-- **Do** use **Live Share** for collaborative real-time pair programming and debugging.
-- **Don't** commit `.vs/` hidden folders or user-specific `.suo` and `.user` files into Git.
-- **Don't** build solutions with unbounded log output; use `/verbosity:minimal` in CI to prevent runner timeouts.
-- **Don't** leave debugging diagnostic tools running in long manual benchmark tests.
+**Do**:
+
+- Check `.vsconfig` into the root of the repository to ensure all team members install identical SDKs and toolchains.
+- Enable **Code Analysis on Build** and treat compiler warnings as errors (`<TreatWarningsAsErrors>true</TreatWarningsAsErrors>`).
+- Configure **Central Package Management (CPM)** via `Directory.Packages.props` for unified NuGet versions.
+- Use **Live Share** for collaborative real-time pair programming and debugging.
+
+**Don't**:
+
+- Commit `.vs/` hidden folders or user-specific `.suo` and `.user` files into Git.
+- Build solutions with unbounded log output; use `/verbosity:minimal` in CI to prevent runner timeouts.
+- Leave debugging diagnostic tools running in long manual benchmark tests.
 
 ## Troubleshooting
 
-| Error / Symptom                                                          | Cause                                                                           | Solution                                                                                                     |
+| Error                                                                    | Cause                                                                           | Solution                                                                                                     |
 | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `The breakpoint will not currently be hit. No symbols have been loaded.` | PDB symbol files missing or mismatched between build output and debug directory | Enable **Debug > Windows > Modules**, right-click module, and load PDB symbols; verify build output matches. |
 | MSBuild error: `The target "Build" does not exist in the project`        | Target SDK or workload not installed                                            | Launch Visual Studio Installer and ensure appropriate workload (e.g. .NET Desktop, Desktop C++) is checked.  |

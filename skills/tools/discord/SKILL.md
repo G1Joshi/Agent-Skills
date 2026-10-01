@@ -5,7 +5,7 @@ description: Expert Discord API and bot development assistance covering Discord.
 
 # Discord
 
-Discord is where developer communities live. 2025 updates to the **Social SDK** allow building rich "Activities" (Embedded Apps) inside Discord.
+The Discord Developer Platform enables building interactive bots, webhook automations, slash commands, and embedded Activities inside Discord communities.
 
 ## When to Use
 
@@ -37,7 +37,7 @@ client.login(process.env.DISCORD_TOKEN);
 
 ## Core Concepts
 
-#Sending Automated Alerts via Incoming Webhook
+### Sending Automated Alerts via Incoming Webhook
 
 Posting formatted embed messages from CI/CD pipelines using curl:
 
@@ -62,7 +62,7 @@ curl -X POST \
   }' "$DISCORD_WEBHOOK_URL"
 ```
 
-#Discord Bot with Slash Commands (discord.py)
+### Discord Bot with Slash Commands (discord.py)
 
 Building an interactive moderation or query bot:
 
@@ -87,7 +87,7 @@ async def on_ready():
 # client.run(os.environ["DISCORD_BOT_TOKEN"])
 ```
 
-#Interactive Buttons & Select Menus (discord.js)
+### Interactive Buttons & Select Menus (discord.js)
 
 Handling UI component interactions:
 
@@ -152,15 +152,20 @@ async function sendDeployAlert(webhookUrl, deployInfo) {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** store Discord bot tokens and webhook URLs in secure environment variables, never in code.
-- **Do** use modern Application Slash Commands (`/command`) rather than legacy message prefix commands (`!command`).
-- **Do** set `ephemeral=True` for sensitive bot responses so they are visible only to the invoking user.
-- **Do** specify only the exact Gateway Intents required by the bot to minimize memory and bandwidth.
-- **Don't** expose webhook URLs publicly; anyone with the URL can post arbitrary messages to the channel.
-- **Don't** block the async event loop in bots; offload heavy computations or I/O with threads or queues.
-- **Don't** spam channels with noisy alert webhooks; aggregate and summarize notifications.
+**Do**:
+
+- Store Discord bot tokens and webhook URLs in secure environment variables, never in code.
+- Use modern Application Slash Commands (`/command`) rather than legacy message prefix commands (`!command`).
+- Set `ephemeral=True` for sensitive bot responses so they are visible only to the invoking user.
+- Specify only the exact Gateway Intents required by the bot to minimize memory and bandwidth.
+
+**Don't**:
+
+- Expose webhook URLs publicly; anyone with the URL can post arbitrary messages to the channel.
+- Block the async event loop in bots; offload heavy computations or I/O with threads or queues.
+- Spam channels with noisy alert webhooks; aggregate and summarize notifications.
 
 ## Troubleshooting
 

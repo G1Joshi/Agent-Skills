@@ -5,7 +5,7 @@ description: Expert Traefik edge router assistance covering dynamic configuratio
 
 # Traefik
 
-Traefik is a modern reverse proxy that auto-discovers services. v3.0 (2025) supports **Wasm Plugins** and the **Kubernetes Gateway API**.
+Traefik is a modern HTTP reverse proxy and load balancer designed for microservices, featuring automatic service discovery, dynamic configuration, and Kubernetes Gateway API support.
 
 ## When to Use
 
@@ -26,7 +26,7 @@ labels:
 
 ## Core Concepts
 
-#Docker Compose Automatic Service Discovery
+### Docker Compose Automatic Service Discovery
 
 Exposing containers to Traefik via container labels:
 
@@ -66,7 +66,7 @@ volumes:
   acme_data:
 ```
 
-#Kubernetes IngressRoute Custom Resource (CRD)
+### Kubernetes IngressRoute Custom Resource (CRD)
 
 Modern Kubernetes routing with Traefik CRDs:
 
@@ -91,7 +91,7 @@ spec:
     certResolver: myresolver
 ```
 
-#Static Configuration (traefik.yml)
+### Static Configuration (traefik.yml)
 
 Core startup parameters:
 
@@ -138,15 +138,20 @@ services:
       - "traefik.http.services.api.loadbalancer.server.port=8080"
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target Traefik v3+ with native support for HTTP/3, OpenTelemetry, and modern Kubernetes Gateway API.
-- **Do** set `--providers.docker.exposedbydefault=false` to prevent accidental public exposure of unlabelled containers.
-- **Do** persist the ACME storage file (`/letsencrypt/acme.json`) on durable volumes with `0600` file permissions.
-- **Do** configure automated HTTP-to-HTTPS redirections at the entrypoint level.
-- **Don't** expose the Traefik dashboard publicly without authenticating middlewares (e.g. BasicAuth or OAuth2).
-- **Don't** grant read-write access to the Docker socket; mount `/var/run/docker.sock:ro` in read-only mode.
-- **Don't** run Traefik in production without rate-limiting and connection-timeout middlewares.
+**Do**:
+
+- Target Traefik v3+ with native support for HTTP/3, OpenTelemetry, and modern Kubernetes Gateway API.
+- Set `--providers.docker.exposedbydefault=false` to prevent accidental public exposure of unlabelled containers.
+- Persist the ACME storage file (`/letsencrypt/acme.json`) on durable volumes with `0600` file permissions.
+- Configure automated HTTP-to-HTTPS redirections at the entrypoint level.
+
+**Don't**:
+
+- Expose the Traefik dashboard publicly without authenticating middlewares (e.g. BasicAuth or OAuth2).
+- Grant read-write access to the Docker socket; mount `/var/run/docker.sock:ro` in read-only mode.
+- Run Traefik in production without rate-limiting and connection-timeout middlewares.
 
 ## Troubleshooting
 

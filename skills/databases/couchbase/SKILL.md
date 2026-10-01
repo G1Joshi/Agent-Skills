@@ -27,18 +27,18 @@ GROUP BY u.name;
 
 ## Core Concepts
 
-#Memory-First VBucket Architecture
+### Memory-First VBucket Architecture
 
 Documents are mapped across 1024 virtual buckets (vBuckets), cached directly in RAM before being asynchronously written to disk:
 
-```
+```text
 [ Application Client ] ──Sub-Millisecond Read/Write──→ [ Managed Memory Cache (RAM) ]
                                                                  │ (Async Flush)
                                                                  ▼
                                                         [ Append-Only Disk Storage ]
 ```
 
-#SQL++ (N1QL) Declarative JSON Queries
+### SQL++ (N1QL) Declarative JSON Queries
 
 Executes full SQL expressions over schemaless JSON structures:
 
@@ -55,11 +55,11 @@ ORDER BY totalAmount DESC
 LIMIT 20;
 ```
 
-#Scopes and Collections Multi-Tenancy
+### Scopes and Collections Multi-Tenancy
 
 Organizes documents into logical namespaces mimicking relational databases:
 
-```
+```text
 [ Bucket: enterprise ]
   ├── [ Scope: billing ]
   │   ├── [ Collection: invoices ]
@@ -87,20 +87,20 @@ WHERE customerId = "cust_987" AND orderStatus = "completed"
 ORDER BY orderDate DESC;
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use Sub-Document API for Partial Mutations**: Mutate specific JSON array items or attributes without fetching/resaving the entire document.
-- **Create Global Secondary Indexes (GSI) Covering Queries**: Index the exact fields in `WHERE` and `SELECT` to enable index-only scans.
-- **Leverage Key-Value Operations for Hot Lookups**: Use `get()` and `upsert()` key-value APIs for sub-millisecond reads rather than N1QL queries.
-- **Size Bucket RAM Quotas Carefully**: Allocate sufficient RAM to ensure high active working set cache-hit ratios.
+- Use Sub-Document API for Partial Mutations: Mutate specific JSON array items or attributes without fetching/resaving the entire document.
+- Create Global Secondary Indexes (GSI) Covering Queries: Index the exact fields in `WHERE` and `SELECT` to enable index-only scans.
+- Leverage Key-Value Operations for Hot Lookups: Use `get()` and `upsert()` key-value APIs for sub-millisecond reads rather than N1QL queries.
+- Size Bucket RAM Quotas Carefully: Allocate sufficient RAM to ensure high active working set cache-hit ratios.
 
 **Don't**:
 
-- **Don't use Primary Indexes in Production**: Avoid `CREATE PRIMARY INDEX`; primary scans scan all documents in the collection.
-- **Don't store massive binary blobs in documents**: Keep documents under 1MB; store images and media in object storage.
-- **Don't ignore Cross-Datacenter Replication (XDCR) lag**: Monitor XDCR replication queues when synchronizing across multi-region clusters.
+- Use Primary Indexes in Production: Avoid `CREATE PRIMARY INDEX`; primary scans scan all documents in the collection.
+- Store massive binary blobs in documents: Keep documents under 1MB; store images and media in object storage.
+- Ignore Cross-Datacenter Replication (XDCR) lag: Monitor XDCR replication queues when synchronizing across multi-region clusters.
 
 ## Troubleshooting
 

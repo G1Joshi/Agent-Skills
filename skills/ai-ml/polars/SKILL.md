@@ -5,7 +5,7 @@ description: Expert Polars data manipulation assistance covering blazing-fast Ru
 
 # Polars
 
-Polars is the fast successor to Pandas. Written in Rust, query-optimized, and parallelized. v1.0 (2024) signaled production readiness.
+Polars is an ultra-fast DataFrame library written in Rust, leveraging Apache Arrow columnar format, lazy evaluation, and multi-threaded parallel query execution.
 
 ## When to Use
 
@@ -38,7 +38,7 @@ print(result)
 
 ## Core Concepts
 
-#Lazy Execution & Query Optimization
+### Lazy Execution & Query Optimization
 
 Building optimized query graphs that execute only when requested:
 
@@ -71,7 +71,7 @@ result_df = lazy_query.collect()
 print(result_df)
 ```
 
-#Expressive Column Expressions (pl.col)
+### Expressive Column Expressions (pl.col)
 
 Composing clean, vector operations inside expressions:
 
@@ -93,7 +93,7 @@ enhanced_df = df.with_columns([
 print(enhanced_df)
 ```
 
-#Streaming Mode for Terabyte-Scale Datasets
+### Streaming Mode for Terabyte-Scale Datasets
 
 Processing larger-than-RAM files in memory-managed batches:
 
@@ -130,15 +130,20 @@ result = df.with_columns(
 )
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** favor `pl.scan_parquet()` / `pl.scan_csv()` and LazyFrames over eager `pl.read_*()` for large workloads.
-- **Do** use `collect(streaming=True)` for datasets that approach or exceed system RAM limits.
-- **Do** compose transformations inside a single `.with_columns()` or `.select()` call to enable automatic parallelization.
-- **Do** use Polars native expressions (`pl.col(...)`) instead of Python lambdas or `.map_elements()`.
-- **Don't** use `.map_elements()` or `.apply()` unless strictly necessary; Python callbacks break Rust parallel execution.
-- **Don't** convert Polars DataFrames to Pandas unless required by a legacy library; use PyArrow for zero-copy transfers.
-- **Don't** call `.collect()` repeatedly inside loops; accumulate the query graph and evaluate once.
+**Do**:
+
+- Favor `pl.scan_parquet()` / `pl.scan_csv()` and LazyFrames over eager `pl.read_*()` for large workloads.
+- Use `collect(streaming=True)` for datasets that approach or exceed system RAM limits.
+- Compose transformations inside a single `.with_columns()` or `.select()` call to enable automatic parallelization.
+- Use Polars native expressions (`pl.col(...)`) instead of Python lambdas or `.map_elements()`.
+
+**Don't**:
+
+- Use `.map_elements()` or `.apply()` unless strictly necessary; Python callbacks break Rust parallel execution.
+- Convert Polars DataFrames to Pandas unless required by a legacy library; use PyArrow for zero-copy transfers.
+- Call `.collect()` repeatedly inside loops; accumulate the query graph and evaluate once.
 
 ## Troubleshooting
 

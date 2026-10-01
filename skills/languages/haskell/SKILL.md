@@ -27,7 +27,7 @@ factorial n = n * factorial (n - 1)
 
 ## Core Concepts
 
-#Non-Strict Lazy Evaluation
+### Non-Strict Lazy Evaluation
 
 Expressions are not evaluated until their results are explicitly demanded by consumer functions:
 
@@ -41,7 +41,7 @@ main :: IO ()
 main = print (take 10 fibs) -- [0,1,1,2,3,5,8,13,21,34]
 ```
 
-#Monads & Explicit I/O Separation
+### Monads & Explicit I/O Separation
 
 Isolates pure code from side effects (disk, network, state) using Monads:
 
@@ -62,7 +62,7 @@ main = do
     Left err    -> putStrLn ("Error: " ++ err)
 ```
 
-#Advanced Typeclasses & Higher-Kinded Types
+### Advanced Typeclasses & Higher-Kinded Types
 
 Defines generic behaviors across data types (Functor, Applicative, Monad):
 
@@ -100,20 +100,20 @@ createUser uid e = do
     return (User validId validE)
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use GHC Modern Language Extensions**: Standardize on `GHC2021` or `GHC2024` with `OverloadedStrings` and `RecordWildCards`.
-- **Use Strict Data Types in Production**: Use `Data.Text` instead of `String` (`[Char]`); use strict fields (`!`) in record data types.
-- **Structure Applications with Polysemy or MTL**: Manage effects cleanly using Monad Transformers (`ReaderT`, `ExceptT`) or effect systems.
-- **Enforce Warnings with `-Wall`**: Compile with `-Wall -Werror` to treat unhandled pattern cases as fatal build errors.
+- Use GHC Modern Language Extensions: Standardize on `GHC2021` or `GHC2024` with `OverloadedStrings` and `RecordWildCards`.
+- Use Strict Data Types in Production: Use `Data.Text` instead of `String` (`[Char]`); use strict fields (`!`) in record data types.
+- Structure Applications with Polysemy or MTL: Manage effects cleanly using Monad Transformers (`ReaderT`, `ExceptT`) or effect systems.
+- Enforce Warnings with `-Wall`: Compile with `-Wall -Werror` to treat unhandled pattern cases as fatal build errors.
 
 **Don't**:
 
-- **Don't use `head` or `fromJust`**: Partial functions crash at runtime on empty lists; use pattern matching or safe alternatives (`headMay`).
-- **Don't use `String` for high-throughput text processing**: The default `String` is a linked list of characters; use `Text` or `ByteString`.
-- **Don't cause space leaks with lazy accumulation**: Use strict fold (`foldl'`) instead of lazy fold (`foldl`) to prevent building massive thunk trees.
+- Use `head` or `fromJust`: Partial functions crash at runtime on empty lists; use pattern matching or safe alternatives (`headMay`).
+- Use `String` for high-throughput text processing: The default `String` is a linked list of characters; use `Text` or `ByteString`.
+- Cause space leaks with lazy accumulation: Use strict fold (`foldl'`) instead of lazy fold (`foldl`) to prevent building massive thunk trees.
 
 ## Troubleshooting
 

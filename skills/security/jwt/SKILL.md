@@ -43,11 +43,11 @@ HMACSHA256(
 
 ## Core Concepts
 
-#JWT Structure (Header.Payload.Signature)
+### JWT Structure (Header.Payload.Signature)
 
 A compact, URL-safe base64url-encoded string consisting of three cryptographic segments:
 
-```
+```text
 eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiZXhwIjoxNzI3NDIwNDAwfQ.XwG...
 ───────────────────────────────────── ────────────────────────────────────────────────────────────────────────── ───────
                 │                                                         │                                         │
@@ -55,7 +55,7 @@ eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4
    (Algorithm & Token Type)                                       (Registered & Custom Claims)              (Cryptographic Proof)
 ```
 
-#Asymmetric RS256 Signing (Private Key Signs, Public Key Verifies)
+### Asymmetric RS256 Signing (Private Key Signs, Public Key Verifies)
 
 Authentication servers sign tokens with a private key; downstream microservices verify with the public key:
 
@@ -86,7 +86,7 @@ const claims = jwt.verify(token, publicKey, {
 });
 ```
 
-#JSON Web Key Sets (JWKS) Automated Key Rotation
+### JSON Web Key Sets (JWKS) Automated Key Rotation
 
 Resource servers dynamically fetch verified public keys without hardcoding static files:
 
@@ -138,20 +138,20 @@ export function verifyToken(token) {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Keep Access Token Expiration Brief (5-15 Minutes)**: Pair short-lived access tokens with secure refresh token rotation to minimize leakage windows.
-- **Always Validate `iss`, `aud`, and `exp` Claims**: Never verify signature alone; ensure the token is targeted for your API and not expired.
-- **Use Asymmetric RS256 or EdDSA Algorithms**: Never use symmetric HS256 for multi-service architectures where sharing secrets is a liability.
-- **Explicitly Whitelist Expected Algorithms**: Enforce `algorithms: ['RS256']` in verification options to prevent algorithm confusion attacks (`none` or HS256).
+- Keep Access Token Expiration Brief (5-15 Minutes): Pair short-lived access tokens with secure refresh token rotation to minimize leakage windows.
+- Always Validate `iss`, `aud`, and `exp` Claims: Never verify signature alone; ensure the token is targeted for your API and not expired.
+- Use Asymmetric RS256 or EdDSA Algorithms: Never use symmetric HS256 for multi-service architectures where sharing secrets is a liability.
+- Explicitly Whitelist Expected Algorithms: Enforce `algorithms: ['RS256']` in verification options to prevent algorithm confusion attacks (`none` or HS256).
 
 **Don't**:
 
-- **Don't put sensitive PII or secrets in the payload**: JWT payloads are merely base64 encoded and can be read by anyone with access to the token.
-- **Don't store JWTs in browser localStorage**: Store auth tokens in HttpOnly, Secure, SameSite cookies to protect against XSS token theft.
-- **Don't create unbounded token sizes**: Keep claims minimal; large tokens bloat every HTTP header and degrade network latency.
+- Put sensitive PII or secrets in the payload: JWT payloads are merely base64 encoded and can be read by anyone with access to the token.
+- Store JWTs in browser localStorage: Store auth tokens in HttpOnly, Secure, SameSite cookies to protect against XSS token theft.
+- Create unbounded token sizes: Keep claims minimal; large tokens bloat every HTTP header and degrade network latency.
 
 ## Troubleshooting
 

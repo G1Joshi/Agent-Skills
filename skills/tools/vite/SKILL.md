@@ -5,7 +5,7 @@ description: Expert Vite assistance covering modern frontend tooling, ESM develo
 
 # Vite
 
-Vite is the standard build tool for modern web development. v6.0 (2025) introduces the **Environment API** for runtimes like Bun/Deno and native **Sass** support.
+Vite is the modern frontend build tool providing an ultra-fast ESM development server, rich plugin ecosystem, and flexible Environment API for cross-runtime SSR.
 
 ## When to Use
 
@@ -168,19 +168,24 @@ export default defineConfig({
 });
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use `@vitejs/plugin-react-swc` instead of Babel for maximum transpilation and HMR performance.
-- **Do** configure `manualChunks` in `rollupOptions` to split large vendor dependencies (React, UI libraries) into cached chunks.
-- **Do** pair Vite with **Vitest** to share the exact same configuration, plugins, and module resolution rules.
-- **Do** enforce `strictPort: true` in CI environments to prevent silent port fallback collisions.
-- **Don't** use Webpack-specific syntax (`require.context`, `module.hot`); use standard `import.meta.glob`.
-- **Don't** leave source maps enabled in public production builds without uploading them to private error trackers (Sentry).
-- **Don't** commit `dist/` or `.vite/` cache directories to Git.
+**Do**:
+
+- Use `@vitejs/plugin-react-swc` instead of Babel for maximum transpilation and HMR performance.
+- Configure `manualChunks` in `rollupOptions` to split large vendor dependencies (React, UI libraries) into cached chunks.
+- Pair Vite with **Vitest** to share the exact same configuration, plugins, and module resolution rules.
+- Enforce `strictPort: true` in CI environments to prevent silent port fallback collisions.
+
+**Don't**:
+
+- Use Webpack-specific syntax (`require.context`, `module.hot`); use standard `import.meta.glob`.
+- Leave source maps enabled in public production builds without uploading them to private error trackers (Sentry).
+- Commit `dist/` or `.vite/` cache directories to Git.
 
 ## Troubleshooting
 
-| Error / Symptom                                                | Cause                                                                          | Solution                                                                                  |
+| Error                                                          | Cause                                                                          | Solution                                                                                  |
 | -------------------------------------------------------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
 | `[vite] Internal server error: Failed to resolve import "..."` | Missing path alias or file extension                                           | Add alias in `resolve.alias` inside `vite.config.ts` and verify file exists.              |
 | HMR stops updating in browser without full reload              | Circular dependencies or component missing explicit React default/named export | Break circular dependency chain; ensure React components have capitalized function names. |

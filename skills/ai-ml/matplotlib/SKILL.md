@@ -40,7 +40,7 @@ plt.show()
 
 ## Core Concepts
 
-#Object-Oriented Subplots & Modern Styling
+### Object-Oriented Subplots & Modern Styling
 
 Building clean, publication-ready multi-axis figures:
 
@@ -80,7 +80,7 @@ fig.savefig("metrics_figure.png", dpi=300, bbox_inches='tight')
 plt.close(fig)
 ```
 
-#Secondary Twin Axis (twinx)
+### Secondary Twin Axis (twinx)
 
 Plotting two metrics with different scales on the same chart:
 
@@ -108,7 +108,7 @@ plt.savefig("revenue_churn.png", bbox_inches='tight')
 plt.close(fig)
 ```
 
-#Heatmaps & Custom Colormaps
+### Heatmaps & Custom Colormaps
 
 Visualizing correlation matrices or loss surfaces:
 
@@ -148,15 +148,20 @@ ax2.set_xlabel("Sample")
 plt.tight_layout()
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use the Object-Oriented interface (`fig, ax = plt.subplots()`) instead of stateful `plt.plot()` calls.
-- **Do** set `matplotlib.use('Agg')` when running inside serverless functions, Docker, or CI without a desktop display.
-- **Do** always call `plt.close(fig)` after saving to disk to prevent memory leaks from accumulated figures.
-- **Do** save figures with `bbox_inches='tight'` to prevent labels and titles from being clipped at margins.
-- **Don't** use rainbow/jet colormaps; use perceptively uniform colormaps (`viridis`, `plasma`, `coolwarm`).
-- **Don't** rely on default DPI (100); export publication graphics with at least `dpi=300`.
-- **Don't** leave gridlines enabled on both axes when using `twinx()`; disable one to prevent clutter.
+**Do**:
+
+- Use the Object-Oriented interface (`fig, ax = plt.subplots()`) instead of stateful `plt.plot()` calls.
+- Set `matplotlib.use('Agg')` when running inside serverless functions, Docker, or CI without a desktop display.
+- Always call `plt.close(fig)` after saving to disk to prevent memory leaks from accumulated figures.
+- Save figures with `bbox_inches='tight'` to prevent labels and titles from being clipped at margins.
+
+**Don't**:
+
+- Use rainbow/jet colormaps; use perceptively uniform colormaps (`viridis`, `plasma`, `coolwarm`).
+- Rely on default DPI (100); export publication graphics with at least `dpi=300`.
+- Leave gridlines enabled on both axes when using `twinx()`; disable one to prevent clutter.
 
 ## Troubleshooting
 

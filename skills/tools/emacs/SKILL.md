@@ -5,7 +5,7 @@ description: Expert GNU Emacs assistance covering init.el, Elisp, Org-mode, Magi
 
 # GNU Emacs
 
-Emacs is an operating system masquerading as an editor. v29+ (2025) features built-in **Eglot** (LSP), **Tree-sitter**, and **Native Compilation** for speed.
+GNU Emacs is an extensible, customizable text editor and computing environment featuring built-in LSP integration (Eglot), Tree-sitter syntax parsing, and native compilation.
 
 ## When to Use
 
@@ -32,7 +32,7 @@ Emacs is an operating system masquerading as an editor. v29+ (2025) features bui
 
 ## Core Concepts
 
-#Modern Emacs Configuration with use-package & Eglot
+### Modern Emacs Configuration with use-package & Eglot
 
 Configuring modern package management and built-in LSP:
 
@@ -69,7 +69,7 @@ Configuring modern package management and built-in LSP:
   (global-corfu-mode 1))
 ```
 
-#Org Mode Literate Programming
+### Org Mode Literate Programming
 
 Executing embedded code blocks within documents:
 
@@ -84,7 +84,7 @@ print(f"Average: {sum(data)/len(data):.2f}")
 : Average: 49.40
 ```
 
-#Magit: Git Porcelain for Emacs
+### Magit: Git Porcelain for Emacs
 
 Keyboard-driven Git operations (`M-x magit-status`):
 
@@ -111,15 +111,20 @@ Use built-in lightweight `eglot`:
          (typescript-ts-mode . eglot-ensure)))
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target Emacs 29/30+ with native compilation (`--with-native-compilation`) and built-in Tree-sitter modes.
-- **Do** use `use-package` with `:defer t` to keep Emacs startup time under 0.5 seconds.
-- **Do** prefer built-in `eglot` over heavy external LSP packages for low memory overhead.
-- **Do** use Magit for Git management; it is widely considered the best Git interface in the industry.
-- **Don't** add package installation logic without `:ensure t` or guard checks in `use-package`.
-- **Don't** leave garbage collection thresholds set too low; bump `gc-cons-threshold` during startup.
-- **Don't** block the Emacs main thread with synchronous network requests; use async processes.
+**Do**:
+
+- Target Emacs 29/30+ with native compilation (`--with-native-compilation`) and built-in Tree-sitter modes.
+- Use `use-package` with `:defer t` to keep Emacs startup time under 0.5 seconds.
+- Prefer built-in `eglot` over heavy external LSP packages for low memory overhead.
+- Use Magit for Git management; it is widely considered the best Git interface in the industry.
+
+**Don't**:
+
+- Add package installation logic without `:ensure t` or guard checks in `use-package`.
+- Leave garbage collection thresholds set too low; bump `gc-cons-threshold` during startup.
+- Block the Emacs main thread with synchronous network requests; use async processes.
 
 ## Troubleshooting
 

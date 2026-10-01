@@ -39,18 +39,18 @@ services:
 
 ## Core Concepts
 
-#Database-Per-Service Isolation
+### Database-Per-Service Isolation
 
 Each microservice owns its private database. No service can directly query another service's database tables:
 
-```
+```text
 [ Orders Service ] ──→ ( Orders DB )
         │ (Async Events / gRPC)
         ▼
 [ Customers Service ] ──→ ( Customers DB )
 ```
 
-#Distributed Tracing (W3C Trace Context)
+### Distributed Tracing (W3C Trace Context)
 
 Correlates requests across multiple network hops using standardized trace IDs:
 
@@ -61,7 +61,7 @@ headers: {
 }
 ```
 
-#Circuit Breakers & Graceful Degradation
+### Circuit Breakers & Graceful Degradation
 
 Fails fast when downstream services become unresponsive, preventing cascading thread exhaustion:
 
@@ -80,7 +80,8 @@ const recommendations = await breaker.fire(userId);
 
 ## Common Patterns
 
-#Circuit Breaker Pattern
+### Circuit Breaker Pattern
+
 **Problem**: Cascading failures when a downstream dependency experiences degraded response times.  
 **Solution**: Wrap external calls in a circuit breaker to fail fast and shed load.
 
@@ -101,20 +102,20 @@ breaker.fallback(() => ({ status: "QUEUED_FOR_RETRY", cached: true }));
 const result = await breaker.fire(paymentData);
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Enforce Database-per-Service**: Never share a database instance between microservices; communicate via APIs or events.
-- **Implement Comprehensive Observability**: Instrument all services with OpenTelemetry traces, Prometheus metrics, and structured JSON logs.
-- **Use Contract Testing (Pact)**: Validate API compatibility between consumer and provider services in CI/CD without running end-to-end clusters.
-- **Adopt Service Meshes for Mesh Security**: Leverage Envoy / Istio for automated mTLS encryption and traffic steering.
+- Enforce Database-per-Service: Never share a database instance between microservices; communicate via APIs or events.
+- Implement Comprehensive Observability: Instrument all services with OpenTelemetry traces, Prometheus metrics, and structured JSON logs.
+- Use Contract Testing (Pact): Validate API compatibility between consumer and provider services in CI/CD without running end-to-end clusters.
+- Adopt Service Meshes for Mesh Security: Leverage Envoy / Istio for automated mTLS encryption and traffic steering.
 
 **Don't**:
 
-- **Don't start with microservices on day one**: Start with a well-structured Modular Monolith until organizational scale warrants extraction.
-- **Don't build distributed monoliths**: Avoid deep synchronous HTTP chains (Service A calls B, which calls C, which calls D).
-- **Don't ignore distributed transactions**: Use Saga patterns or eventual consistency rather than two-phase commits.
+- Start with microservices on day one: Start with a well-structured Modular Monolith until organizational scale warrants extraction.
+- Build distributed monoliths: Avoid deep synchronous HTTP chains (Service A calls B, which calls C, which calls D).
+- Ignore distributed transactions: Use Saga patterns or eventual consistency rather than two-phase commits.
 
 ## Troubleshooting
 

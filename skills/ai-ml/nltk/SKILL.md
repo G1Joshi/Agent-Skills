@@ -34,7 +34,7 @@ print("Filtered tokens:", filtered)
 
 ## Core Concepts
 
-#Tokenization, Stopwords & WordNet Lemmatization
+### Tokenization, Stopwords & WordNet Lemmatization
 
 Standard text normalization pipeline:
 
@@ -68,7 +68,7 @@ sample = "The distributed microservices were running exceptionally fast and scal
 print("Cleaned Tokens:", preprocess_text(sample))
 ```
 
-#VADER Sentiment Analysis for Fast Heuristic Scoring
+### VADER Sentiment Analysis for Fast Heuristic Scoring
 
 Rule-based sentiment intensity scoring:
 
@@ -91,7 +91,7 @@ for review in reviews:
     print(f"Sentiment: {sentiment:8s} (Score: {compound:+.2f}) | {review[:50]}...")
 ```
 
-#Part-of-Speech (POS) Tagging & Named Entity Chunking
+### Part-of-Speech (POS) Tagging & Named Entity Chunking
 
 Extracting grammatical structures from text:
 
@@ -134,15 +134,20 @@ print(lemmatizer.lemmatize("running", wordnet.VERB)) # Output: run
 print(lemmatizer.lemmatize("better", wordnet.ADJ))   # Output: good
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** prefer lemmatization over stemming (`PorterStemmer`) for human-readable root words.
-- **Do** download specific corpora explicitly in setup scripts (`nltk.download('punkt_tab')`) to prevent runtime failures in Docker.
-- **Do** leverage VADER for social media text where punctuation and capitalization convey sentiment.
-- **Do** migrate to spaCy or Hugging Face transformers when semantic understanding or modern deep learning is required.
-- **Don't** call `nltk.download()` repeatedly on every request inside web handlers; download once at build/container time.
-- **Don't** use NLTK for high-throughput production tokenization; use Hugging Face tokenizers or spaCy.
-- **Don't** use WordNet lemmatizer without specifying POS tags if fine-grained verb/noun distinction is needed.
+**Do**:
+
+- Prefer lemmatization over stemming (`PorterStemmer`) for human-readable root words.
+- Download specific corpora explicitly in setup scripts (`nltk.download('punkt_tab')`) to prevent runtime failures in Docker.
+- Leverage VADER for social media text where punctuation and capitalization convey sentiment.
+- Migrate to spaCy or Hugging Face transformers when semantic understanding or modern deep learning is required.
+
+**Don't**:
+
+- Call `nltk.download()` repeatedly on every request inside web handlers; download once at build/container time.
+- Use NLTK for high-throughput production tokenization; use Hugging Face tokenizers or spaCy.
+- Use WordNet lemmatizer without specifying POS tags if fine-grained verb/noun distinction is needed.
 
 ## Troubleshooting
 

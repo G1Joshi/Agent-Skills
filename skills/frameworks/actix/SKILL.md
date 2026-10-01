@@ -43,7 +43,7 @@ async fn main() -> std::io::Result<()> {
 
 ## Core Concepts
 
-#Application State & Scoped Handlers
+### Application State & Scoped Handlers
 
 Thread-safe shared mutable and immutable state injected via extractors:
 
@@ -83,7 +83,7 @@ async fn main() -> std::io::Result<()> {
 }
 ```
 
-#Custom Middleware Pipeline
+### Custom Middleware Pipeline
 
 Intercepting requests and responses with Actix transform middleware:
 
@@ -135,7 +135,7 @@ where
 }
 ```
 
-#Type-Safe Request Extraction & Validation
+### Type-Safe Request Extraction & Validation
 
 Validating incoming JSON payloads using extractor guards:
 
@@ -194,15 +194,20 @@ async fn count(data: web::Data<AppState>) -> impl Responder {
 // In main: App::new().app_data(web::Data::new(AppState { counter: Mutex::new(0) }))
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** wrap heavy CPU-bound or blocking operations in `web::block()` to prevent starving the Actix event loop.
-- **Do** share state using `web::Data<T>` (which uses internal `Arc`) rather than cloning heavy heap resources per worker thread.
-- **Do** enable compression middleware (`actix_web::middleware::Compress`) and default structured JSON logging (`tracing-actix-web`).
-- **Do** define route scopes (`web::scope("/api/v1")`) to group route hierarchies and auth middlewares.
-- **Don't** use synchronous `std::fs` or `std::net` inside handlers; use Tokio async equivalents.
-- **Don't** use `unwrap()` inside async handler bodies; return `Result<HttpResponse, actix_web::Error>`.
-- **Don't** store thread-local storage if handlers need to yield across `.await` points.
+**Do**:
+
+- Wrap heavy CPU-bound or blocking operations in `web::block()` to prevent starving the Actix event loop.
+- Share state using `web::Data<T>` (which uses internal `Arc`) rather than cloning heavy heap resources per worker thread.
+- Enable compression middleware (`actix_web::middleware::Compress`) and default structured JSON logging (`tracing-actix-web`).
+- Define route scopes (`web::scope("/api/v1")`) to group route hierarchies and auth middlewares.
+
+**Don't**:
+
+- Use synchronous `std::fs` or `std::net` inside handlers; use Tokio async equivalents.
+- Use `unwrap()` inside async handler bodies; return `Result<HttpResponse, actix_web::Error>`.
+- Store thread-local storage if handlers need to yield across `.await` points.
 
 ## Troubleshooting
 

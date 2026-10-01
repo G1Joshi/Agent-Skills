@@ -5,7 +5,7 @@ description: Expert Fish shell assistance covering completions, functions, synta
 
 # Fish (Friendly Interactive Shell)
 
-Fish v4.0 (2025) is rewritten in **Rust**. It is famous for "It just works" – 90% of what you need (autosuggestions, coloring) is enabled by default.
+Fish (Friendly Interactive Shell) is a smart, user-friendly command-line shell featuring autosuggestions, syntax highlighting, and clean scriptable syntax out of the box.
 
 ## When to Use
 
@@ -28,7 +28,7 @@ funcsave mkcd
 
 ## Core Concepts
 
-#Modern Shell Configuration (config.fish)
+### Modern Shell Configuration (config.fish)
 
 Configuring environment, completions, and aliases:
 
@@ -59,7 +59,7 @@ if status is-interactive
 end
 ```
 
-#Clean Fish Scripting Syntax
+### Clean Fish Scripting Syntax
 
 Writing readable, modular functions and loops:
 
@@ -86,7 +86,7 @@ function deploy_service --description "Build and deploy service container"
 end
 ```
 
-#Universal Variables (set -U)
+### Universal Variables (set -U)
 
 Setting variables across all current and future shell sessions instantly:
 
@@ -110,15 +110,20 @@ set -U EDITOR nvim
 set -U fish_user_paths /opt/homebrew/bin $HOME/.cargo/bin $fish_user_paths
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use `fish_add_path` to add directories to `$PATH` idempotently without duplicates.
-- **Do** use abbreviations (`abbr -a`) rather than aliases; abbreviations expand in place, maintaining transparent history.
-- **Do** wrap interactive configurations inside `if status is-interactive ... end` to keep non-interactive script startup instant.
-- **Do** store standalone functions in `~/.config/fish/functions/<name>.fish` for automatic lazy loading.
-- **Don't** write system administration shell scripts in Fish if POSIX `/bin/sh` or `/bin/bash` portability is required.
-- **Don't** use legacy bash syntax (e.g. `export FOO=bar` or `$(command)`); use `set -gx FOO bar` and `(command)`.
-- **Don't** overload `config.fish` with heavy external subshell calls; benchmark startup with `fish --profile`.
+**Do**:
+
+- Use `fish_add_path` to add directories to `$PATH` idempotently without duplicates.
+- Use abbreviations (`abbr -a`) rather than aliases; abbreviations expand in place, maintaining transparent history.
+- Wrap interactive configurations inside `if status is-interactive ... end` to keep non-interactive script startup instant.
+- Store standalone functions in `~/.config/fish/functions/<name>.fish` for automatic lazy loading.
+
+**Don't**:
+
+- Write system administration shell scripts in Fish if POSIX `/bin/sh` or `/bin/bash` portability is required.
+- Use legacy bash syntax (e.g. `export FOO=bar` or `$(command)`); use `set -gx FOO bar` and `(command)`.
+- Overload `config.fish` with heavy external subshell calls; benchmark startup with `fish --profile`.
 
 ## Troubleshooting
 

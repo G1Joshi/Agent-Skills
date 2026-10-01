@@ -29,7 +29,7 @@ print("Full Transcription:\n", result["text"])
 
 ## Core Concepts
 
-#High-Speed Audio Transcription with Faster-Whisper
+### High-Speed Audio Transcription with Faster-Whisper
 
 Using CTranslate2 acceleration for production-grade transcription:
 
@@ -62,7 +62,7 @@ for segment in segments:
 print(f"Transcription completed in {time.time() - start_time:.2f} seconds.")
 ```
 
-#Generating Word-Level Timestamps for Subtitles
+### Generating Word-Level Timestamps for Subtitles
 
 Extracting exact timestamps for every individual spoken word:
 
@@ -77,7 +77,7 @@ for segment in segments:
         print(f"Word: {word.word:12s} ({word.start:.2f}s - {word.end:.2f}s, prob: {word.probability:.2f})")
 ```
 
-#Direct Audio Translation to English
+### Direct Audio Translation to English
 
 Transcribing foreign audio directly into English text:
 
@@ -115,15 +115,20 @@ for segment in segments:
         print(f"[{word.start:.2f}s -> {word.end:.2f}s] {word.word}")
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target `faster-whisper` with `compute_type="float16"` or `"int8_float16"` for up to 4x throughput and lower VRAM.
-- **Do** enable `vad_filter=True` to filter out background silence and prevent hallucinated repetitive loops.
-- **Do** specify `language` explicitly when known in advance to bypass language identification overhead.
-- **Do** use `whisper-large-v3` or `whisper-large-v3-turbo` for optimal transcription accuracy.
-- **Don't** process long multi-hour audio files as a single unbuffered stream without VAD chunking.
-- **Don't** use standard OpenAI whisper Python package in production without checking if faster-whisper provides better throughput.
-- **Don't** feed extremely noisy audio without applying pre-processing bandpass filters or noise suppression.
+**Do**:
+
+- Target `faster-whisper` with `compute_type="float16"` or `"int8_float16"` for up to 4x throughput and lower VRAM.
+- Enable `vad_filter=True` to filter out background silence and prevent hallucinated repetitive loops.
+- Specify `language` explicitly when known in advance to bypass language identification overhead.
+- Use `whisper-large-v3` or `whisper-large-v3-turbo` for optimal transcription accuracy.
+
+**Don't**:
+
+- Process long multi-hour audio files as a single unbuffered stream without VAD chunking.
+- Use standard OpenAI whisper Python package in production without checking if faster-whisper provides better throughput.
+- Feed extremely noisy audio without applying pre-processing bandpass filters or noise suppression.
 
 ## Troubleshooting
 

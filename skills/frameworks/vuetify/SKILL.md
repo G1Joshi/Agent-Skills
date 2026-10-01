@@ -42,7 +42,7 @@ function showAlert() {
 
 ## Core Concepts
 
-#Theme Configuration & Component Blueprint Setup
+### Theme Configuration & Component Blueprint Setup
 
 Setting up Vuetify 3 with Material Design 3 tokens:
 
@@ -78,7 +78,7 @@ export const vuetify = createVuetify({
 });
 ```
 
-#Server-Side Data Table with v-data-table-server
+### Server-Side Data Table with v-data-table-server
 
 Displaying remote paginated data with sorting:
 
@@ -124,7 +124,7 @@ async function loadItems({ page, itemsPerPage, sortBy }: any) {
 </template>
 ```
 
-#Modern App Layout with v-app & Navigation Drawer
+### Modern App Layout with v-app & Navigation Drawer
 
 Building responsive responsive shell layout:
 
@@ -208,15 +208,20 @@ async function loadItems({ page, itemsPerPage, sortBy }) {
 </script>
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target Vuetify 3 with Vite plugin (`vite-plugin-vuetify`) for automatic treeshaking and minimal bundle size.
-- **Do** use `v-data-table-server` for datasets larger than 100 rows to avoid browser memory overhead.
-- **Do** use Vuetify validation rules functions (`:rules="[v => !!v || 'Required']"`) on `v-form`.
-- **Do** wrap applications in `<v-app>` and `<v-main>` to guarantee proper layout positioning.
-- **Don't** import all of `vuetify/components` in production builds; rely on automatic component treeshaking.
-- **Don't** override component styles with high-specificity global CSS; use Vuetify props (`density`, `variant`, `color`).
-- **Don't** forget to include `@mdi/font` or modern icon sets for Vuetify iconography.
+**Do**:
+
+- Target Vuetify 3 with Vite plugin (`vite-plugin-vuetify`) for automatic treeshaking and minimal bundle size.
+- Use `v-data-table-server` for datasets larger than 100 rows to avoid browser memory overhead.
+- Use Vuetify validation rules functions (`:rules="[v => !!v || 'Required']"`) on `v-form`.
+- Wrap applications in `<v-app>` and `<v-main>` to guarantee proper layout positioning.
+
+**Don't**:
+
+- Import all of `vuetify/components` in production builds; rely on automatic component treeshaking.
+- Override component styles with high-specificity global CSS; use Vuetify props (`density`, `variant`, `color`).
+- Forget to include `@mdi/font` or modern icon sets for Vuetify iconography.
 
 ## Troubleshooting
 

@@ -5,8 +5,7 @@ description: Expert legacy Atom editor assistance covering packages, keymaps, an
 
 # Atom (Legacy)
 
-> [!WARNING]
-> **Atom is Discontinued**. GitHub archived the project in 2022.
+> **Atom is Discontinued**. The project has been officially archived by GitHub; modern alternatives include VS Code, Zed, and Pulsar.
 
 Atom pioneered Electron-based editors and the modern extension model. Its spirit lives on in **VS Code** (Microsoft) and **Zed** (created by Atom's founder).
 
@@ -16,12 +15,6 @@ Atom pioneered Electron-based editors and the modern extension model. Its spirit
 - **Pulsar Community Fork**: Continuing to run the open-source community successor to the retired GitHub Atom editor.
 - **Custom Electron-Based Text Editor Tooling**: Analyzing Atom's architecture for desktop editor extensions.
 - **CSON & Keymap Configuration**: Converting `.cson` keymaps and snippet definitions to modern JSON/YAML formats.
-
-## Alternatives (2025)
-
-1.  **VS Code**: The direct successor in spirit and tech stack.
-2.  **Zed**: The spiritual successor by the same creator (Nathan Sobo).
-3.  **Pulsar**: A community fork attempting to keep Atom alive.
 
 ## Quick Start
 
@@ -33,7 +26,13 @@ apm list --installed --bare > atom-packages.txt
 
 ## Core Concepts
 
-#Migrating CSON Configuration to Modern JSON
+### Modern Migration Alternatives
+
+1. **VS Code**: Direct successor in spirit, architecture, and extension ecosystem.
+2. **Zed**: High-performance Rust-based editor created by Atom's original author.
+3. **Pulsar**: Community-driven open-source fork maintaining backward compatibility with Atom packages.
+
+### Migrating CSON Configuration to Modern JSON
 
 Converting legacy Atom CoffeeScript Object Notation:
 
@@ -66,7 +65,7 @@ Converted to modern VS Code / Pulsar `settings.json`:
 }
 ```
 
-#Keybindings & Package Management (APM)
+### Keybindings & Package Management (APM)
 
 Historical package inspection and migration:
 
@@ -75,11 +74,10 @@ Historical package inspection and migration:
 apm list --installed --bare
 
 # Migrate package list to modern editor extensions
-# Example: export list of packages to text file
 apm list --installed --bare | cut -d'@' -f1 > installed_packages.txt
 ```
 
-#TextMate Scope & Grammar Definitions
+### TextMate Scope & Grammar Definitions
 
 Understanding syntax highlighting scope selectors:
 
@@ -95,16 +93,6 @@ Understanding syntax highlighting scope selectors:
 }
 ```
 
-## Best Practices (2026)
-
-- **Do** migrate active development workflows from retired Atom to modern actively maintained editors (Zed, VS Code, Pulsar, Neovim).
-- **Do** convert `.cson` configuration files and keymaps into standardized `.json` files.
-- **Do** use Tree-sitter grammars rather than legacy TextMate regex grammars for syntax parsing.
-- **Do** back up legacy snippet libraries to standard snippets directories.
-- **Don't** install unverified packages from defunct repositories that no longer receive security patches.
-- **Don't** use Atom in production or security-critical environments where patched Electron runtimes are required.
-- **Don't** expect Atom Package Manager (`apm`) registries to be permanently available.
-
 ## Common Patterns
 
 ### Converting Atom Keybindings to VS Code keybindings.json
@@ -117,6 +105,21 @@ Install the official "Atom Keymap" extension in VS Code:
 ```bash
 code --install-extension ms-vscode.atom-keybindings
 ```
+
+## Best Practices
+
+**Do**:
+
+- Migrate active development workflows from retired Atom to modern actively maintained editors (Zed, VS Code, Pulsar, Neovim).
+- Convert `.cson` configuration files and keymaps into standardized `.json` files.
+- Use Tree-sitter grammars rather than legacy TextMate regex grammars for syntax parsing.
+- Back up legacy snippet libraries to standard snippets directories.
+
+**Don't**:
+
+- Install unverified packages from defunct repositories that no longer receive security patches.
+- Use Atom in production or security-critical environments where patched Electron runtimes are required.
+- Expect Atom Package Manager (`apm`) registries to be permanently available.
 
 ## Troubleshooting
 

@@ -34,7 +34,7 @@ class User {
 
 ## Core Concepts
 
-#Sound Null Safety
+### Sound Null Safety
 
 Variables cannot contain `null` unless explicitly declared with `?`; static analysis guarantees zero runtime null pointer crashes:
 
@@ -46,7 +46,7 @@ String formatGreeting(String name, String? title) {
 }
 ```
 
-#Records and Pattern Matching (Dart 3)
+### Records and Pattern Matching (Dart 3)
 
 Returns multiple strongly-typed values and destructures patterns cleanly:
 
@@ -62,7 +62,7 @@ void processLocation() {
 }
 ```
 
-#Asynchronous Streams & Reactive Pipelines
+### Asynchronous Streams & Reactive Pipelines
 
 Generates and consumes asynchronous streams of events:
 
@@ -77,7 +77,11 @@ Stream<int> countStream(int max) async* {
 
 ## Common Patterns
 
-### Async/Await
+### Asynchronous Network Fetching with Error Handling
+
+**Problem**: Handling asynchronous HTTP requests with robust error boundaries and JSON deserialization.
+
+**Solution**:
 
 ```dart
 Future<User> fetchUser(String id) async {
@@ -107,6 +111,10 @@ Stream<int> countStream(int max) async* {
 
 ### Extensions
 
+**Problem**: Adding helper methods to existing classes without inheritance or modifying external package code.
+
+**Solution**:
+
 ```dart
 extension StringExtension on String {
   String capitalize() =>
@@ -117,20 +125,20 @@ extension StringExtension on String {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Mark Immutable Widgets and Constants with `const`**: Allow the Flutter compiler to skip rebuilds for constant subtrees.
-- **Enforce Strict Linter Rules**: Configure `flutter_lints` or `very_good_analysis` in `analysis_options.yaml`.
-- **Use Sealed Classes for State Modeling**: Leverage `sealed class` to ensure exhaustive switch statements across UI states.
-- **Close Stream Controllers**: Always invoke `.close()` on `StreamController` instances inside dispose methods.
+- Mark Immutable Widgets and Constants with `const`: Allow the Flutter compiler to skip rebuilds for constant subtrees.
+- Enforce Strict Linter Rules: Configure `flutter_lints` or `very_good_analysis` in `analysis_options.yaml`.
+- Use Sealed Classes for State Modeling: Leverage `sealed class` to ensure exhaustive switch statements across UI states.
+- Close Stream Controllers: Always invoke `.close()` on `StreamController` instances inside dispose methods.
 
 **Don't**:
 
-- **Don't use the `!` null-assertion operator carelessly**: Unchecked `!` throws runtime exceptions; handle nulls with `??` or pattern matching.
-- **Don't execute heavy synchronous parsing in the main isolate**: Offload heavy JSON parsing or crypto to background isolates via `Isolate.run()`.
-- **Don't declare variables as `dynamic`**: Avoid `dynamic`; use `Object?` or explicit generic types to preserve compile-time safety.
+- Use the `!` null-assertion operator carelessly: Unchecked `!` throws runtime exceptions; handle nulls with `??` or pattern matching.
+- Execute heavy synchronous parsing in the main isolate: Offload heavy JSON parsing or crypto to background isolates via `Isolate.run()`.
+- Declare variables as `dynamic`: Avoid `dynamic`; use `Object?` or explicit generic types to preserve compile-time safety.
 
 ## Troubleshooting
 

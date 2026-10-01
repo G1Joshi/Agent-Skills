@@ -5,7 +5,7 @@ description: Expert NumPy numerical computing assistance covering ndarrays, broa
 
 # NumPy
 
-NumPy is the bedrock of the Python ecosystem. v2.0 (2024) brought the first major ABI change in 15 years, improving performance and API consistency.
+NumPy is the foundational library for scientific computing in Python, providing multidimensional array objects, vectorized mathematical operations, and unified C/C++ API bindings.
 
 ## When to Use
 
@@ -31,7 +31,7 @@ print("Row-wise sum:", np.sum(c, axis=1))
 
 ## Core Concepts
 
-#Vectorization, Broadcasting & Masking
+### Vectorization, Broadcasting & Masking
 
 Eliminating slow Python loops through vector operations:
 
@@ -55,7 +55,7 @@ anomaly_count = np.count_nonzero(anomaly_mask)
 print(f"Total readings: {readings.size}, Anomalies detected: {anomaly_count}")
 ```
 
-#Linear Algebra & Matrix Decomposition with np.linalg
+### Linear Algebra & Matrix Decomposition with np.linalg
 
 Solving linear equations and singular value decomposition:
 
@@ -73,7 +73,7 @@ U, S, Vt = np.linalg.svd(A)
 print("Singular values:", S)
 ```
 
-#Memory Layouts: Views vs. Copies
+### Memory Layouts: Views vs. Copies
 
 Understanding strides and C-contiguous memory:
 
@@ -112,15 +112,20 @@ print(view.base is data) # True - shares identical memory buffer
 positive_values = data[data > 500_000]
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target NumPy 2.0+ conventions and use `np.random.default_rng()` instead of legacy `np.random.seed()`.
-- **Do** utilize vectorization and boolean array indexing instead of iterating with `for` loops in Python.
-- **Do** specify appropriate `dtype` (e.g. `np.float32` vs `np.float64`) to minimize memory footprint in deep learning pipelines.
-- **Do** check `arr.flags['C_CONTIGUOUS']` before passing arrays to C/C++/Cython extensions.
-- **Don't** use `np.matrix`; it is deprecated—use standard 2D `np.ndarray` and the `@` matrix multiplication operator.
-- **Don't** mutate sliced arrays without knowing whether they are views or independent copies.
-- **Don't** append elements to arrays in loops with `np.append()`; allocate pre-sized arrays with `np.empty()` or `np.zeros()`.
+**Do**:
+
+- Target NumPy 2.0+ conventions and use `np.random.default_rng()` instead of legacy `np.random.seed()`.
+- Utilize vectorization and boolean array indexing instead of iterating with `for` loops in Python.
+- Specify appropriate `dtype` (e.g. `np.float32` vs `np.float64`) to minimize memory footprint in deep learning pipelines.
+- Check `arr.flags['C_CONTIGUOUS']` before passing arrays to C/C++/Cython extensions.
+
+**Don't**:
+
+- Use `np.matrix`; it is deprecated—use standard 2D `np.ndarray` and the `@` matrix multiplication operator.
+- Mutate sliced arrays without knowing whether they are views or independent copies.
+- Append elements to arrays in loops with `np.append()`; allocate pre-sized arrays with `np.empty()` or `np.zeros()`.
 
 ## Troubleshooting
 

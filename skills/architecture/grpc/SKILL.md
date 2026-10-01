@@ -42,7 +42,7 @@ func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloRe
 
 ## Core Concepts
 
-#Protocol Buffers (proto3) Contract Definition
+### Protocol Buffers (proto3) Contract Definition
 
 Compact binary serialization defined independently of programming languages:
 
@@ -68,18 +68,18 @@ message ProcessPaymentResponse {
 }
 ```
 
-#HTTP/2 Multiplexing & Binary Framing
+### HTTP/2 Multiplexing & Binary Framing
 
 Multiple concurrent RPC calls share a single TCP connection without head-of-line blocking:
 
-```
+```text
 TCP Connection
   ├── Stream 1: ProcessPayment(Req #1) ──→ Response #1
   ├── Stream 2: ProcessPayment(Req #2) ──→ Response #2
   └── Stream 3: ServerStream(Telemetry) ──→ Frame A -> Frame B -> Frame C
 ```
 
-#gRPC Interceptors (Middleware Pipeline)
+### gRPC Interceptors (Middleware Pipeline)
 
 Intercepts incoming and outgoing calls to inject authentication, tracing, and logging:
 
@@ -95,7 +95,8 @@ func loggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnarySe
 
 ## Common Patterns
 
-#Server Streaming RPC for Real-Time Updates
+### Server Streaming RPC for Real-Time Updates
+
 **Problem**: Polling server for updates wastes bandwidth and introduces latency.  
 **Solution**: Implement server streaming in Protocol Buffers.
 
@@ -125,20 +126,20 @@ func (s *server) StreamMetrics(req *pb.MetricsRequest, stream pb.SensorService_S
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Reuse gRPC Channels**: Keep gRPC client connections open; initializing new connections on every request destroys HTTP/2 performance.
-- **Propagate Context Deadlines / Timeouts**: Always attach timeouts to client contexts (`context.WithTimeout`) to prevent hanging RPCs.
-- **Use Protocol Buffer Field Numbers Conservatively**: Never change or delete field tag numbers; mark deprecated tags with `reserved`.
-- **Implement gRPC Health Checking Protocol**: Expose standard `grpc.health.v1.Health` for Kubernetes liveness and readiness probes.
+- Reuse gRPC Channels: Keep gRPC client connections open; initializing new connections on every request destroys HTTP/2 performance.
+- Propagate Context Deadlines / Timeouts: Always attach timeouts to client contexts (`context.WithTimeout`) to prevent hanging RPCs.
+- Use Protocol Buffer Field Numbers Conservatively: Never change or delete field tag numbers; mark deprecated tags with `reserved`.
+- Implement gRPC Health Checking Protocol: Expose standard `grpc.health.v1.Health` for Kubernetes liveness and readiness probes.
 
 **Don't**:
 
-- **Don't expose raw gRPC directly to public web browsers**: Use gRPC-Web or an API Gateway (Envoy/Kong) to translate HTTP/JSON.
-- **Don't send massive single messages**: Split multi-megabyte payloads into streaming chunks or use an object store with claim-check keys.
-- **Don't ignore status codes**: Use canonical gRPC status codes (`codes.NotFound`, `codes.InvalidArgument`) rather than generic errors.
+- Expose raw gRPC directly to public web browsers: Use gRPC-Web or an API Gateway (Envoy/Kong) to translate HTTP/JSON.
+- Send massive single messages: Split multi-megabyte payloads into streaming chunks or use an object store with claim-check keys.
+- Ignore status codes: Use canonical gRPC status codes (`codes.NotFound`, `codes.InvalidArgument`) rather than generic errors.
 
 ## Troubleshooting
 

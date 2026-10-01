@@ -5,7 +5,7 @@ description: Expert Linear issue tracking assistance covering cycles, projects, 
 
 # Linear
 
-Linear is the issue tracker that engineers actually like. It is famous for its **keyboard-first** design and speed. 2025 features **AI Prioritization** and **Triage Agents**.
+Linear is a streamlined, keyboard-first issue tracking and project management platform designed for high-velocity software engineering teams.
 
 ## When to Use
 
@@ -26,7 +26,7 @@ curl -X POST https://api.linear.app/graphql \
 
 ## Core Concepts
 
-#Linear GraphQL API Integration with Python
+### Linear GraphQL API Integration with Python
 
 Querying and creating issues programmatically:
 
@@ -71,7 +71,7 @@ res = requests.post(LINEAR_API_URL, json={"query": create_issue_mutation, "varia
 print("Created Issue:", res.json())
 ```
 
-#Git Branch & PR Automation Rules
+### Git Branch & PR Automation Rules
 
 Linking code to Linear issues automatically:
 
@@ -89,7 +89,7 @@ Linear automatically moves `ENG-402` to:
 - **In Review** when a Pull Request is opened.
 - **Done** when the Pull Request is merged into `main`.
 
-#Essential Keyboard Shortcuts
+### Essential Keyboard Shortcuts
 
 Operating Linear with speed:
 
@@ -101,7 +101,8 @@ Operating Linear with speed:
 
 ## Common Patterns
 
-#Automated Issue Creation via GraphQL API
+### Automated Issue Creation via GraphQL API
+
 **Problem**: Creating Linear tickets automatically from CI/CD alert hooks.  
 **Solution**: Execute Linear GraphQL mutation via curl or script.
 
@@ -121,15 +122,20 @@ curl -X POST "https://api.linear.app/graphql" \
   }'
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** name Git branches using the Linear issue identifier (`eng-102-fix-auth`) to enable automated status synchronization.
-- **Do** use Linear's Triage inbox to review and accept incoming bugs and feature requests before backlog addition.
-- **Do** set issue estimates (points or t-shirt sizes) to track team velocity across cycles.
-- **Do** use the Linear GraphQL API for automated triage bots and Slack integrations.
-- **Don't** leave completed issues un-merged or open; link pull requests so status updates automatically.
-- **Don't** create massive multi-month tickets; break large epics into distinct sub-issues.
-- **Don't** commit `LINEAR_API_KEY` to public repositories.
+**Do**:
+
+- Name Git branches using the Linear issue identifier (`eng-102-fix-auth`) to enable automated status synchronization.
+- Use Linear's Triage inbox to review and accept incoming bugs and feature requests before backlog addition.
+- Set issue estimates (points or t-shirt sizes) to track team velocity across cycles.
+- Use the Linear GraphQL API for automated triage bots and Slack integrations.
+
+**Don't**:
+
+- Leave completed issues un-merged or open; link pull requests so status updates automatically.
+- Create massive multi-month tickets; break large epics into distinct sub-issues.
+- Commit `LINEAR_API_KEY` to public repositories.
 
 ## Troubleshooting
 

@@ -5,7 +5,7 @@ description: Expert GitHub Actions assistance covering workflow syntax, matrices
 
 # GitHub Actions
 
-GitHub Actions is the CI/CD platform native to GitHub. In 2025, it is the dominant CI/CD tool, characterized by **Reusable Workflows** and **OIDC** integration for passwordless deployments.
+GitHub Actions is the CI/CD platform native to GitHub, characterized by Reusable Workflows, matrix builds, and OIDC integration for secure, passwordless cloud deployments.
 
 ## When to Use
 
@@ -35,7 +35,7 @@ jobs:
 
 ## Core Concepts
 
-#Production CI/CD Workflow with Dependency Caching
+### Production CI/CD Workflow with Dependency Caching
 
 Comprehensive workflow for testing and publishing:
 
@@ -82,7 +82,7 @@ jobs:
           path: coverage/
 ```
 
-#OIDC Authentication with Cloud Providers (AWS / GCP)
+### OIDC Authentication with Cloud Providers (AWS / GCP)
 
 Deploying securely without long-lived secret keys:
 
@@ -110,7 +110,7 @@ jobs:
           aws s3 sync dist/ s3://my-prod-bucket/ --delete
 ```
 
-#Matrix Builds Across OS and Versions
+### Matrix Builds Across OS and Versions
 
 Testing compatibility across platforms:
 
@@ -163,15 +163,20 @@ jobs:
       - run: aws s3 sync ./dist s3://my-prod-bucket
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** pin third-party actions to explicit commit SHAs (or trusted `@v4` releases) to protect against supply chain tampering.
-- **Do** use `concurrency` with `cancel-in-progress: true` to abort outdated CI runs on subsequent pushes.
-- **Do** authenticate to cloud infrastructure via OIDC (`permissions: id-token: write`) rather than long-lived API keys.
-- **Do** restrict workflow permissions explicitly with top-level `permissions` block following least privilege.
-- **Don't** use `pull_request_target` without strict sanitization of untrusted code from public repository forks.
-- **Don't** log sensitive variables or secrets in shell execution steps.
-- **Don't** run CI without dependency caching (`setup-node`, `setup-python`, `cache-action`); caching cuts runtime in half.
+**Do**:
+
+- Pin third-party actions to explicit commit SHAs (or trusted `@v4` releases) to protect against supply chain tampering.
+- Use `concurrency` with `cancel-in-progress: true` to abort outdated CI runs on subsequent pushes.
+- Authenticate to cloud infrastructure via OIDC (`permissions: id-token: write`) rather than long-lived API keys.
+- Restrict workflow permissions explicitly with top-level `permissions` block following least privilege.
+
+**Don't**:
+
+- Use `pull_request_target` without strict sanitization of untrusted code from public repository forks.
+- Log sensitive variables or secrets in shell execution steps.
+- Run CI without dependency caching (`setup-node`, `setup-python`, `cache-action`); caching cuts runtime in half.
 
 ## Troubleshooting
 

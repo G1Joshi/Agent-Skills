@@ -31,7 +31,7 @@ k9s
 
 ## Core Concepts
 
-#Custom Plugins Configuration (plugins.yaml)
+### Custom Plugins Configuration (plugins.yaml)
 
 Adding custom keyboard commands for rapid debugging:
 
@@ -72,7 +72,7 @@ plugin:
       - $NAMESPACE
 ```
 
-#Essential Navigation & Keyboard Shortcuts
+### Essential Navigation & Keyboard Shortcuts
 
 Accelerating cluster management:
 
@@ -84,7 +84,7 @@ Accelerating cluster management:
 - `Shift-F`: Port-forward local port to selected pod service port.
 - `y`: View full YAML manifest of selected resource.
 
-#Launching K9s with Custom Options
+### Launching K9s with Custom Options
 
 Starting K9s in secure modes:
 
@@ -98,7 +98,8 @@ k9s --context prod-eks-cluster --refresh 2
 
 ## Common Patterns
 
-#Custom K9s Shortcuts and Plugins
+### Custom K9s Shortcuts and Plugins
+
 **Problem**: Frequently running custom kubectl commands across different namespaces.  
 **Solution**: Define custom plugins in `~/.config/k9s/plugin.yaml`.
 
@@ -122,15 +123,20 @@ plugin:
       - $CONTEXT
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use `k9s --readonly` when connecting to production environments to prevent accidental deletions.
-- **Do** configure custom plugins in `~/.config/k9s/plugins.yaml` for repetitive `kubectl` commands.
-- **Do** use the port-forward shortcut (`Shift-F`) instead of typing long `kubectl port-forward` commands.
-- **Do** filter views using `<all>` namespaces or specific namespaces to reduce API server query loads.
-- **Don't** leave dozens of active port forwards open; manage and terminate them in the `:portforwards` view.
-- **Don't** run K9s against large enterprise clusters without setting appropriate `--refresh` intervals.
-- **Don't** delete persistent volume claims (PVCs) through K9s without verifying backups.
+**Do**:
+
+- Use `k9s --readonly` when connecting to production environments to prevent accidental deletions.
+- Configure custom plugins in `~/.config/k9s/plugins.yaml` for repetitive `kubectl` commands.
+- Use the port-forward shortcut (`Shift-F`) instead of typing long `kubectl port-forward` commands.
+- Filter views using `<all>` namespaces or specific namespaces to reduce API server query loads.
+
+**Don't**:
+
+- Leave dozens of active port forwards open; manage and terminate them in the `:portforwards` view.
+- Run K9s against large enterprise clusters without setting appropriate `--refresh` intervals.
+- Delete persistent volume claims (PVCs) through K9s without verifying backups.
 
 ## Troubleshooting
 

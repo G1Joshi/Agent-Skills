@@ -43,7 +43,7 @@ app.get("/api/events", (req, res) => {
 
 ## Core Concepts
 
-#`text/event-stream` Protocol Format
+### `text/event-stream` Protocol Format
 
 Data is pushed over an open HTTP connection formatted in plain text blocks ending with double newlines:
 
@@ -62,7 +62,7 @@ event: price_update
 data: {"symbol": "AAPL", "price": 224.10}
 ```
 
-#Browser `EventSource` Client API
+### Browser `EventSource` Client API
 
 Standard browser API with built-in automatic reconnection handling and event dispatching:
 
@@ -80,7 +80,7 @@ eventSource.onerror = (err) => {
 };
 ```
 
-#Resumable Streams with `Last-Event-ID`
+### Resumable Streams with `Last-Event-ID`
 
 When reconnections occur, the browser automatically transmits the last received ID so servers can replay missed events:
 
@@ -99,7 +99,8 @@ app.get("/api/live-stream", (req, res) => {
 
 ## Common Patterns
 
-#LLM Token Streaming via SSE
+### LLM Token Streaming via SSE
+
 **Problem**: Waiting for complete LLM responses takes seconds; users need instant incremental token streaming.  
 **Solution**: Stream chunks formatted as Server-Sent Events.
 
@@ -124,23 +125,23 @@ app.get("/api/stream", async (req, res) => {
 });
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Always Set `X-Accel-Buffering: no`**: Disable reverse proxy buffering in Nginx to ensure tokens and events flush instantly to clients.
-- **Assign Unique Monotonic Event IDs**: Include `id: <num>` with each event to enable automatic resumption upon network dropouts.
-- **Transmit Periodic Keep-Alive Comments**: Send a comment (`:
+- Always Set `X-Accel-Buffering: no`: Disable reverse proxy buffering in Nginx to ensure tokens and events flush instantly to clients.
+- Assign Unique Monotonic Event IDs: Include `id: <num>` with each event to enable automatic resumption upon network dropouts.
+- Transmit Periodic Keep-Alive Comments: Send a comment (`:
 
 `) every 15-30 seconds to prevent aggressive firewall timeouts.
 
-- **Use HTTP/2 in Production**: Avoid the legacy HTTP/1.1 6-connection per-domain browser limit by serving SSE over HTTP/2.
+- Use HTTP/2 in Production: Avoid the legacy HTTP/1.1 6-connection per-domain browser limit by serving SSE over HTTP/2.
 
 **Don't**:
 
-- **Don't use SSE when bidirectional client messages are needed**: If clients must push frequent messages upstream, choose WebSockets.
-- **Don't omit CORS headers on cross-origin streams**: Set appropriate `Access-Control-Allow-Origin` headers on stream endpoints.
-- **Don't leave server streams open indefinitely when clients disconnect**: Listen to `req.on('close')` to release backend resources immediately.
+- Use SSE when bidirectional client messages are needed: If clients must push frequent messages upstream, choose WebSockets.
+- Omit CORS headers on cross-origin streams: Set appropriate `Access-Control-Allow-Origin` headers on stream endpoints.
+- Leave server streams open indefinitely when clients disconnect: Listen to `req.on('close')` to release backend resources immediately.
 
 ## Troubleshooting
 

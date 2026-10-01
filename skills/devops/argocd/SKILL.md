@@ -5,7 +5,7 @@ description: Expert Argo CD GitOps assistance covering Application CRDs, sync po
 
 # ArgoCD
 
-ArgoCD is the industry standard for **GitOps**. It syncs the state of a Kubernetes cluster with a Git repository. 2025 features: **ApplicationSets** for multi-tenant management.
+Argo CD is a declarative GitOps continuous delivery tool for Kubernetes, continuously reconciling active cluster state against Git repositories using ApplicationSets.
 
 ## When to Use
 
@@ -36,7 +36,7 @@ spec:
 
 ## Core Concepts
 
-#Declarative Application CRD
+### Declarative Application CRD
 
 Defining GitOps synchronization between a Git repository and cluster namespace:
 
@@ -76,7 +76,7 @@ spec:
         maxDuration: 3m
 ```
 
-#App-of-Apps Pattern for Fleet Orchestration
+### App-of-Apps Pattern for Fleet Orchestration
 
 Root application orchestrating multiple microservices:
 
@@ -101,7 +101,7 @@ spec:
       selfHeal: true
 ```
 
-#Argo CD CLI Management
+### Argo CD CLI Management
 
 Syncing and monitoring deployments via the terminal:
 
@@ -148,15 +148,20 @@ spec:
       - CreateNamespace=true
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** enable `selfHeal: true` and `prune: true` to guarantee Git remains the single source of truth.
-- **Do** adopt the App-of-Apps or ApplicationSet pattern to manage cluster applications hierarchically.
-- **Do** pin production `targetRevision` to explicit Git commit SHAs or release tags rather than floating branch names.
-- **Do** protect secrets using external secret operators (Sealed Secrets, External Secrets Operator + Vault) rather than plain Git.
-- **Don't** allow direct `kubectl edit` in production clusters; enforce changes exclusively via Git pull requests.
-- **Don't** run Argo CD without RBAC and SSO integration (GitHub, Okta, or Keycloak).
-- **Don't** omit `ApplyOutOfSyncOnly=true` in large clusters; it prevents API server overload during reconcile loops.
+**Do**:
+
+- Enable `selfHeal: true` and `prune: true` to guarantee Git remains the single source of truth.
+- Adopt the App-of-Apps or ApplicationSet pattern to manage cluster applications hierarchically.
+- Pin production `targetRevision` to explicit Git commit SHAs or release tags rather than floating branch names.
+- Protect secrets using external secret operators (Sealed Secrets, External Secrets Operator + Vault) rather than plain Git.
+
+**Don't**:
+
+- Allow direct `kubectl edit` in production clusters; enforce changes exclusively via Git pull requests.
+- Run Argo CD without RBAC and SSO integration (GitHub, Okta, or Keycloak).
+- Omit `ApplyOutOfSyncOnly=true` in large clusters; it prevents API server overload during reconcile loops.
 
 ## Troubleshooting
 

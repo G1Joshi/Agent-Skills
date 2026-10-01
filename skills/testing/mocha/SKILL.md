@@ -31,7 +31,7 @@ describe("Array", function () {
 
 ## Core Concepts
 
-#BDD Interface & Hooks Lifecycle
+### BDD Interface & Hooks Lifecycle
 
 Coordinates test execution and lifecycle fixtures cleanly:
 
@@ -58,7 +58,7 @@ describe("Payment Gateway Service", () => {
 });
 ```
 
-#Granular Timeout & Retry Configuration
+### Granular Timeout & Retry Configuration
 
 Controls timeouts for slow network or integration operations:
 
@@ -73,7 +73,7 @@ it("completes slow third-party reconciliation", function (done) {
 });
 ```
 
-#Declarative .mocharc.json Configuration
+### Declarative .mocharc.json Configuration
 
 ```json
 {
@@ -117,20 +117,20 @@ describe("Order Processing Service", () => {
 });
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use Regular Functions When Accessing `this.timeout()`**: Arrow functions bind lexical context and break Mocha's `this` context binding.
-- **Commit a `.mocharc.json` Config**: Centralize timeout, reporter, and file patterns in a committed configuration file.
-- **Use Parallel Test Execution**: Enable `--parallel` in `.mocharc.json` on multi-core CI runners to accelerate test runs.
-- **Pair with Sinon for Stubs**: Use `sinon.stub()` and `sinon.spy()` for isolated unit test dependencies.
+- Use Regular Functions When Accessing `this.timeout()`: Arrow functions bind lexical context and break Mocha's `this` context binding.
+- Commit a `.mocharc.json` Config: Centralize timeout, reporter, and file patterns in a committed configuration file.
+- Use Parallel Test Execution: Enable `--parallel` in `.mocharc.json` on multi-core CI runners to accelerate test runs.
+- Pair with Sinon for Stubs: Use `sinon.stub()` and `sinon.spy()` for isolated unit test dependencies.
 
 **Don't**:
 
-- **Don't mix callback `done()` and `async/await`**: Mixing both causes multiple callback invocation errors.
-- **Don't leave `.only()` committed**: Use ESLint rules (`no-exclusive-tests`) to prevent committed `.only` blocks from skipping test suites.
-- **Don't rely on arbitrary static delays**: Use explicit polling helpers rather than `setTimeout` delays.
+- Mix callback `done()` and `async/await`: Mixing both causes multiple callback invocation errors.
+- Leave `.only()` committed: Use ESLint rules (`no-exclusive-tests`) to prevent committed `.only` blocks from skipping test suites.
+- Rely on arbitrary static delays: Use explicit polling helpers rather than `setTimeout` delays.
 
 ## Troubleshooting
 

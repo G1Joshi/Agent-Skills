@@ -39,11 +39,11 @@ spec:
 
 ## Core Concepts
 
-#Sidecar Proxy Architecture (Envoy)
+### Sidecar Proxy Architecture (Envoy)
 
 A lightweight network proxy intercepts all inbound and outbound pod network traffic transparently:
 
-```
+```text
 [ Pod: Billing ]
   [ App Container: port 8080 ] ──localhost──→ [ Envoy Sidecar Proxy ]
                                                        │ (Encrypted mTLS)
@@ -52,7 +52,7 @@ A lightweight network proxy intercepts all inbound and outbound pod network traf
   [ App Container: port 3000 ] ←──localhost── [ Envoy Sidecar Proxy ]
 ```
 
-#Mutual TLS (mTLS) & Workload Identity
+### Mutual TLS (mTLS) & Workload Identity
 
 Authenticates both client and server cryptographically without application-layer code changes:
 
@@ -68,7 +68,7 @@ spec:
     mode: STRICT # Enforces mTLS across all microservice communication
 ```
 
-#Canary Traffic Splitting (VirtualService)
+### Canary Traffic Splitting (VirtualService)
 
 Directs traffic dynamically based on weights or request headers:
 
@@ -113,20 +113,20 @@ spec:
     mode: STRICT
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Adopt Ambient / Sidecarless Meshes**: Evaluate Istio Ambient or Cilium Service Mesh to reduce sidecar memory and CPU overhead.
-- **Enforce STRICT mTLS**: Ensure plain unencrypted traffic cannot traverse internal Kubernetes node networks.
-- **Implement Network Egress Policies**: Restrict which external internet domains pods are permitted to reach.
-- **Monitor Envoy Proxy Resource Usage**: Size sidecar CPU and memory limits to prevent out-of-memory proxy crashes.
+- Adopt Ambient / Sidecarless Meshes: Evaluate Istio Ambient or Cilium Service Mesh to reduce sidecar memory and CPU overhead.
+- Enforce STRICT mTLS: Ensure plain unencrypted traffic cannot traverse internal Kubernetes node networks.
+- Implement Network Egress Policies: Restrict which external internet domains pods are permitted to reach.
+- Monitor Envoy Proxy Resource Usage: Size sidecar CPU and memory limits to prevent out-of-memory proxy crashes.
 
 **Don't**:
 
-- **Don't deploy a service mesh for simple 3-service clusters**: Service meshes add substantial operational complexity; adopt only when scale warrants it.
-- **Don't duplicate application-layer retries with mesh retries**: Cascading retries cause rapid request storms and amplify outages.
-- **Don't ignore mesh control plane upgrades**: Keep Istio/Linkerd control planes updated to prevent certificate rotation failures.
+- Deploy a service mesh for simple 3-service clusters: Service meshes add substantial operational complexity; adopt only when scale warrants it.
+- Duplicate application-layer retries with mesh retries: Cascading retries cause rapid request storms and amplify outages.
+- Ignore mesh control plane upgrades: Keep Istio/Linkerd control planes updated to prevent certificate rotation failures.
 
 ## Troubleshooting
 

@@ -37,15 +37,15 @@ test("button click", () => {
 
 ## Core Concepts
 
-#Guiding Principle: "The More Your Tests Resemble..."
+### Guiding Principle: "The More Your Tests Resemble..."
 
 "The more your tests resemble the way your software is used, the more confidence they can give you." Tests avoid inspecting internal component state:
 
-```
+```text
 [ User Interaction ] ──Finds by Role / Text──→ [ Clicks / Enters Text ] ──→ [ Asserts on DOM Text Output ]
 ```
 
-#The Query Priority Hierarchy
+### The Query Priority Hierarchy
 
 Selects elements following user-accessible priority:
 
@@ -80,7 +80,7 @@ test("submits login credentials correctly", async () => {
 });
 ```
 
-#Async Queries (`findBy*`) & Element Disappearance (`waitForElementToBeRemoved`)
+### Async Queries (`findBy*`) & Element Disappearance (`waitForElementToBeRemoved`)
 
 ```tsx
 // Waits automatically for async element to render in DOM
@@ -116,20 +116,20 @@ test("increments count on button click", async () => {
 });
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use `@testing-library/user-event` Over `fireEvent`**: `userEvent` dispatches realistic browser events (focus, hover, keydown, click).
-- **Use `getByRole` with the `name` Option**: Ensure your accessibility tree is sound by querying elements by role and accessible name.
-- **Use `screen` for Querying**: Query via `screen.getByRole` rather than destructuring from `render()`.
-- **Install `jest-dom` / `vitest-dom` Matchers**: Write fluent assertions like `expect(btn).toBeDisabled()`.
+- Use `@testing-library/user-event` Over `fireEvent`: `userEvent` dispatches realistic browser events (focus, hover, keydown, click).
+- Use `getByRole` with the `name` Option: Ensure your accessibility tree is sound by querying elements by role and accessible name.
+- Use `screen` for Querying: Query via `screen.getByRole` rather than destructuring from `render()`.
+- Install `jest-dom` / `vitest-dom` Matchers: Write fluent assertions like `expect(btn).toBeDisabled()`.
 
 **Don't**:
 
-- **Don't query by class name or tag name**: `container.querySelector('.btn')` couples tests to volatile CSS details.
-- **Don't use `waitFor` with empty callbacks**: Never write `await waitFor(() => {})`; assert on specific element conditions inside the callback.
-- **Don't use `getByTestId` as the primary selector**: Rely on accessibility roles; use test IDs only when semantic roles cannot apply.
+- Query by class name or tag name: `container.querySelector('.btn')` couples tests to volatile CSS details.
+- Use `waitFor` with empty callbacks: Never write `await waitFor(() => {})`; assert on specific element conditions inside the callback.
+- Use `getByTestId` as the primary selector: Rely on accessibility roles; use test IDs only when semantic roles cannot apply.
 
 ## Troubleshooting
 

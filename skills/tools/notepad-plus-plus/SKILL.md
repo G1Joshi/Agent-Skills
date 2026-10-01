@@ -67,7 +67,8 @@ cmd /c "ruff check $(FILE_NAME) && pytest -q $(FILE_NAME)"
 
 ## Common Patterns
 
-#Regex Data Extraction and Transformation
+### Regex Data Extraction and Transformation
+
 **Problem**: Parse unstructured server log entries into structured CSV or JSON.  
 **Solution**: Apply capture groups in Notepad++ Regex Find & Replace (`Ctrl + H`).
 
@@ -79,19 +80,24 @@ cmd /c "ruff check $(FILE_NAME) && pytest -q $(FILE_NAME)"
 {"date": "$1", "time": "$2", "level": "$3", "message": "$4"}
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** set Default Directory to "Remember last used directory" and encoding to **UTF-8 without BOM**.
-- **Do** use `Alt + Mouse Drag` for precise rectangular column editing across structured tabular files.
-- **Do** leverage the **Document Map** (`View -> Document Map`) for rapid visual navigation of large source files.
-- **Do** configure **Auto-Completion** for XML/HTML tags and word completion under **Settings -> Preferences -> Auto-Completion**.
-- **Don't** use standard Notepad++ for multi-gigabyte files without enabling Large File Mode or adjusting buffer sizes.
-- **Don't** save Windows CRLF line endings when collaborating on Linux/Docker container repositories; enforce LF via Status Bar.
-- **Don't** leave unsaved session snapshots enabled on shared or untrusted workstations.
+**Do**:
+
+- Set Default Directory to "Remember last used directory" and encoding to **UTF-8 without BOM**.
+- Use `Alt + Mouse Drag` for precise rectangular column editing across structured tabular files.
+- Leverage the **Document Map** (`View -> Document Map`) for rapid visual navigation of large source files.
+- Configure **Auto-Completion** for XML/HTML tags and word completion under **Settings -> Preferences -> Auto-Completion**.
+
+**Don't**:
+
+- Use standard Notepad++ for multi-gigabyte files without enabling Large File Mode or adjusting buffer sizes.
+- Save Windows CRLF line endings when collaborating on Linux/Docker container repositories; enforce LF via Status Bar.
+- Leave unsaved session snapshots enabled on shared or untrusted workstations.
 
 ## Troubleshooting
 
-| Error / Symptom                                            | Cause                                                          | Solution                                                                                                     |
+| Error                                                      | Cause                                                          | Solution                                                                                                     |
 | ---------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | Notepad++ crashes when opening multi-gigabyte log file     | 32-bit architecture memory limits or Scintilla buffer overflow | Use 64-bit Notepad++ build, or install `LargeFiles` plugin; disable syntax styling for `.log` files.         |
 | Regex search matches unexpectedly across unintended blocks | Greedy quantifier `.*` used instead of lazy `.*?`              | Change quantifier from `.*` to non-greedy `.*?` or restrict character classes `[^"]*`.                       |

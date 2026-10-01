@@ -31,18 +31,18 @@ describe("Example", () => {
 
 ## Core Concepts
 
-#Gray-Box Synchronization Architecture
+### Gray-Box Synchronization Architecture
 
 Detox monitors the app internally (network requests, animations, timers, UI layout passes) and executes actions only when the app is completely idle:
 
-```
+```text
 [ Detox Test Runner ] ──(WebSocket)──→ [ Native Detox Agent (Inside App) ]
                                               ├── Monitors React Native Bridge
                                               ├── Tracks Ongoing Network Requests
                                               └── Waits for Zero Pending Animations
 ```
 
-#Matchers & Actions Hierarchy
+### Matchers & Actions Hierarchy
 
 Interacts with native elements using accessibility IDs:
 
@@ -68,7 +68,7 @@ describe("Checkout Flow", () => {
 });
 ```
 
-#Device Control & Deep Linking
+### Device Control & Deep Linking
 
 Controls simulator state, permissions, and URL schemes:
 
@@ -103,20 +103,20 @@ describe("Authentication Flow", () => {
 });
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use `testID` for Element Matching**: Assign `testID="my_element"` on React Native components for unambiguous cross-platform matching.
-- **Disable Infinite Animations during Tests**: Infinite loops keep the app permanently busy, preventing Detox from synchronizing.
-- **Run on Release/Staging Builds in CI**: Test release configurations (`configuration: "ios.sim.release"`) for accurate performance metrics.
-- **Use Mock Servers (MSW or MockServer)**: Keep external API calls deterministic and isolated from external network outages.
+- Use `testID` for Element Matching: Assign `testID="my_element"` on React Native components for unambiguous cross-platform matching.
+- Disable Infinite Animations during Tests: Infinite loops keep the app permanently busy, preventing Detox from synchronizing.
+- Run on Release/Staging Builds in CI: Test release configurations (`configuration: "ios.sim.release"`) for accurate performance metrics.
+- Use Mock Servers (MSW or MockServer): Keep external API calls deterministic and isolated from external network outages.
 
 **Don't**:
 
-- **Don't use sleep timeouts**: Trust Detox's automatic idle synchronization instead of arbitrary delays.
-- **Don't test third-party social auth webviews with Detox**: Mock the auth response in the React Native state layer.
-- **Don't ignore detox build artifacts**: Capture videos and artifacts on failure (`--record-videos failing --take-screenshots failing`).
+- Use sleep timeouts: Trust Detox's automatic idle synchronization instead of arbitrary delays.
+- Test third-party social auth webviews with Detox: Mock the auth response in the React Native state layer.
+- Ignore detox build artifacts: Capture videos and artifacts on failure (`--record-videos failing --take-screenshots failing`).
 
 ## Troubleshooting
 

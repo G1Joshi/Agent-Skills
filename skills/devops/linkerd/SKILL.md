@@ -5,7 +5,7 @@ description: Expert Linkerd service mesh assistance covering ultralight Rust mic
 
 # Linkerd
 
-Linkerd is a lightweight Service Mesh. It focuses on simplicity and performance (Rust-based proxies). v2.15 (2025) enables **Mesh Expansion** to VMs.
+Linkerd is an ultralight, zero-config service mesh written in Rust, providing automatic mutual TLS (mTLS), layer-7 metrics, and transparent traffic shifting without administrative complexity.
 
 ## When to Use
 
@@ -32,7 +32,7 @@ kubectl get deploy -n my-app -o yaml | linkerd inject - | kubectl apply -f -
 
 ## Core Concepts
 
-#Automatic Proxy Injection Annotation
+### Automatic Proxy Injection Annotation
 
 Injecting micro-proxies into deployment pods via annotations:
 
@@ -61,7 +61,7 @@ spec:
             - containerPort: 8080
 ```
 
-#TrafficSplit for Canary Deployment
+### TrafficSplit for Canary Deployment
 
 Routing canary traffic across distinct service versions:
 
@@ -80,7 +80,7 @@ spec:
       weight: 200m # 20% traffic
 ```
 
-#Linkerd CLI Diagnostic & Telemetry Inspection
+### Linkerd CLI Diagnostic & Telemetry Inspection
 
 Inspecting real-time traffic statistics between pods:
 
@@ -119,15 +119,20 @@ spec:
       weight: 100
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** prefer Linkerd over heavier service meshes when simplicity, low memory (< 30MB/proxy), and ultra-low latency are paramount.
-- **Do** run `linkerd check` in CI and post-deployment validation scripts.
-- **Do** monitor the expiry of Linkerd identity issuer certificates using automated alerts or Cert-Manager.
-- **Do** use `linkerd viz tap` for live, real-time debugging of failing requests between pods.
-- **Don't** inject the Linkerd proxy into Kubernetes batch jobs without configuring automated sidecar shutdown.
-- **Don't** disable mTLS verification; Linkerd enables transparent mTLS out of the box with zero configuration.
-- **Don't** bypass readiness probes; Linkerd relies on pod health to route mesh traffic.
+**Do**:
+
+- Prefer Linkerd over heavier service meshes when simplicity, low memory (< 30MB/proxy), and ultra-low latency are paramount.
+- Run `linkerd check` in CI and post-deployment validation scripts.
+- Monitor the expiry of Linkerd identity issuer certificates using automated alerts or Cert-Manager.
+- Use `linkerd viz tap` for live, real-time debugging of failing requests between pods.
+
+**Don't**:
+
+- Inject the Linkerd proxy into Kubernetes batch jobs without configuring automated sidecar shutdown.
+- Disable mTLS verification; Linkerd enables transparent mTLS out of the box with zero configuration.
+- Bypass readiness probes; Linkerd relies on pod health to route mesh traffic.
 
 ## Troubleshooting
 

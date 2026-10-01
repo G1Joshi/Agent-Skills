@@ -35,7 +35,7 @@ app.get("/users/:id", async (req, res) => {
 
 ## Core Concepts
 
-#HTTP Semantics & Idempotency
+### HTTP Semantics & Idempotency
 
 Different HTTP verbs carry formal idempotency and safety guarantees:
 
@@ -47,7 +47,7 @@ Different HTTP verbs carry formal idempotency and safety guarantees:
 | `PATCH`  | No   | No / Yes   | Partially update resource             |
 | `DELETE` | No   | Yes        | Remove resource                       |
 
-#Standardized Error Representations (RFC 7807 / 9457)
+### Standardized Error Representations (RFC 7807 / 9457)
 
 Returns machine-readable `application/problem+json` error responses:
 
@@ -61,7 +61,7 @@ Returns machine-readable `application/problem+json` error responses:
 }
 ```
 
-#Content Negotiation & ETag Caching
+### Content Negotiation & ETag Caching
 
 Validates whether cached client data is still fresh without resending full payloads:
 
@@ -88,7 +88,8 @@ app.get("/api/v1/users/:id", async (req, res) => {
 
 ## Common Patterns
 
-#Cursor-Based Pagination
+### Cursor-Based Pagination
+
 **Problem**: Offset-based pagination (`OFFSET 10000`) degrades database performance and skips items on concurrent writes.  
 **Solution**: Use monotonic cursor identifiers (e.g. `created_at` + `id`).
 
@@ -115,20 +116,20 @@ app.get("/api/v1/posts", async (req, res) => {
 });
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use Nouns for Resource URIs**: Use `/api/v1/orders` rather than action verbs like `/api/v1/getOrders` or `/api/v1/createOrder`.
-- **Implement Idempotency Keys on Mutating Requests**: Require `Idempotency-Key` headers on POST/PATCH requests to prevent duplicate charges.
-- **Document with OpenAPI 3.1**: Generate automated Swagger docs, SDK clients, and request validation schemas from OpenAPI specs.
-- **Implement Monotonic Cursor Pagination**: Use `limit` and `starting_after` cursor pagination for high-volume datasets.
+- Use Nouns for Resource URIs: Use `/api/v1/orders` rather than action verbs like `/api/v1/getOrders` or `/api/v1/createOrder`.
+- Implement Idempotency Keys on Mutating Requests: Require `Idempotency-Key` headers on POST/PATCH requests to prevent duplicate charges.
+- Document with OpenAPI 3.1: Generate automated Swagger docs, SDK clients, and request validation schemas from OpenAPI specs.
+- Implement Monotonic Cursor Pagination: Use `limit` and `starting_after` cursor pagination for high-volume datasets.
 
 **Don't**:
 
-- **Don't return HTTP 200 with `{ "error": "..." }`**: Always return correct HTTP status codes (`400`, `401`, `403`, `404`, `422`, `500`).
-- **Don't break API contracts without versioning**: Prefix endpoints with `/v1/` or use header versioning when introducing breaking changes.
-- **Don't expose raw internal database column names**: Map private column names to clean, camelCased JSON fields.
+- Return HTTP 200 with `{ "error": "..." }`: Always return correct HTTP status codes (`400`, `401`, `403`, `404`, `422`, `500`).
+- Break API contracts without versioning: Prefix endpoints with `/v1/` or use header versioning when introducing breaking changes.
+- Expose raw internal database column names: Map private column names to clean, camelCased JSON fields.
 
 ## Troubleshooting
 

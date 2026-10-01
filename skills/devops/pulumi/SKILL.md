@@ -5,7 +5,7 @@ description: Expert Pulumi Infrastructure as Code (IaC) assistance covering real
 
 # Pulumi
 
-Pulumi lets you define infrastructure using TypeScript, Python, Go, or C#. It offers the power of a real language (loops, functions, classes) for IaC. 2025 highlights include **Pulumi ESC** for secret management.
+Pulumi is an Infrastructure as Code (IaC) platform that allows engineering teams to define, deploy, and manage cloud infrastructure using general-purpose languages like TypeScript, Python, and Go.
 
 ## When to Use
 
@@ -29,7 +29,7 @@ export const bucketName = bucket.id;
 
 ## Core Concepts
 
-#Modular Infrastructure Component with TypeScript
+### Modular Infrastructure Component with TypeScript
 
 Creating an encapsulated, reusable microservice infrastructure component:
 
@@ -86,7 +86,7 @@ const service = new ContainerMicroservice("billing", {
 export const endpoint = service.url;
 ```
 
-#Secret Management & Stack Configuration
+### Secret Management & Stack Configuration
 
 Encrypting sensitive credentials automatically:
 
@@ -102,7 +102,7 @@ const config = new pulumi.Config();
 const dbPassword = config.requireSecret("dbPassword"); // Returned as Output<string> (masked)
 ```
 
-#Pulumi CLI Operations
+### Pulumi CLI Operations
 
 Previewing and applying infrastructure changes:
 
@@ -169,15 +169,20 @@ export class Microservice extends pulumi.ComponentResource {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** encapsulate related infrastructure into custom `ComponentResource` classes for reusability.
-- **Do** treat secret values strictly as `pulumi.Output<string>` to ensure automated masking in console logs.
-- **Do** run unit tests against infrastructure mocks before executing deployments in CI/CD pipelines.
-- **Do** configure Pulumi Cloud or an S3/GCS backend for reliable stack state locking and auditing.
-- **Don't** call `.get()` on Pulumi Outputs during resource declaration; use `.apply()` to chain asynchronous outputs.
-- **Don't** commit plaintext secrets to `Pulumi.<stack>.yaml` files; use `--secret` flag.
-- **Don't** mix side-effects (e.g. database schema migrations) directly inside Pulumi IaC definitions.
+**Do**:
+
+- Encapsulate related infrastructure into custom `ComponentResource` classes for reusability.
+- Treat secret values strictly as `pulumi.Output<string>` to ensure automated masking in console logs.
+- Run unit tests against infrastructure mocks before executing deployments in CI/CD pipelines.
+- Configure Pulumi Cloud or an S3/GCS backend for reliable stack state locking and auditing.
+
+**Don't**:
+
+- Call `.get()` on Pulumi Outputs during resource declaration; use `.apply()` to chain asynchronous outputs.
+- Commit plaintext secrets to `Pulumi.<stack>.yaml` files; use `--secret` flag.
+- Mix side-effects (e.g. database schema migrations) directly inside Pulumi IaC definitions.
 
 ## Troubleshooting
 

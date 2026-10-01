@@ -5,7 +5,7 @@ description: Expert Apache Spark assistance covering PySpark, Spark SQL, DataFra
 
 # Apache Spark
 
-Spark is the king of Big Data. v4.0 (2024/2025) makes **Spark Connect** the default, allowing thin clients (like VS Code) to connect to massive clusters easily.
+Apache Spark is a multi-language engine for executing data engineering, data science, and machine learning on single-node machines or large distributed clusters with Spark Connect.
 
 ## When to Use
 
@@ -32,7 +32,7 @@ summary.write.mode("overwrite").parquet("s3a://data-lake/reports/summary/")
 
 ## Core Concepts
 
-#Structured DataFrame Transformations & Window Functions
+### Structured DataFrame Transformations & Window Functions
 
 Distributed analytical querying with PySpark:
 
@@ -65,7 +65,7 @@ enhanced_df.write \
     .parquet("s3a://data-lake/marts/customer_summary/")
 ```
 
-#Broadcast Joins for Skewed Dimensions
+### Broadcast Joins for Skewed Dimensions
 
 Optimizing distributed joins between large fact tables and small dimension lookup tables:
 
@@ -80,7 +80,7 @@ joined_df = df.join(
 )
 ```
 
-#Spark Structured Streaming from Kafka
+### Spark Structured Streaming from Kafka
 
 Continuous stream processing with checkpointing:
 
@@ -120,15 +120,20 @@ small_dim_df = spark.read.csv("country_codes.csv", header=True)
 result_df = large_fact_df.join(broadcast(small_dim_df), "country_id")
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** enable Adaptive Query Execution (`spark.sql.adaptive.enabled=true`) for automatic partition coalescing and join optimization.
-- **Do** use `F.broadcast()` when joining a large DataFrame with a small table (< 100MB) to eliminate shuffle overhead.
-- **Do** always specify an explicit `checkpointLocation` on durable cloud storage for Structured Streaming jobs.
-- **Do** cache or persist (`df.persist()`) intermediate DataFrames only when reused multiple times in the same job.
-- **Don't** collect massive DataFrames to the driver node (`df.collect()`); write directly to cloud storage.
-- **Don't** use Python UDFs (`@udf`) if native `pyspark.sql.functions` exist; native functions avoid JVM-Python serialization overhead.
-- **Don't** leave small file problems unaddressed; use Delta Lake `OPTIMIZE` or coalesce partitions before writing.
+**Do**:
+
+- Enable Adaptive Query Execution (`spark.sql.adaptive.enabled=true`) for automatic partition coalescing and join optimization.
+- Use `F.broadcast()` when joining a large DataFrame with a small table (< 100MB) to eliminate shuffle overhead.
+- Always specify an explicit `checkpointLocation` on durable cloud storage for Structured Streaming jobs.
+- Cache or persist (`df.persist()`) intermediate DataFrames only when reused multiple times in the same job.
+
+**Don't**:
+
+- Collect massive DataFrames to the driver node (`df.collect()`); write directly to cloud storage.
+- Use Python UDFs (`@udf`) if native `pyspark.sql.functions` exist; native functions avoid JVM-Python serialization overhead.
+- Leave small file problems unaddressed; use Delta Lake `OPTIMIZE` or coalesce partitions before writing.
 
 ## Troubleshooting
 

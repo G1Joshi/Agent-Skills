@@ -24,7 +24,7 @@ ON DUPLICATE KEY UPDATE name = 'Jane';
 
 ## Core Concepts
 
-#InnoDB Storage Engine & B+Tree Clustered Indexes
+### InnoDB Storage Engine & B+Tree Clustered Indexes
 
 InnoDB stores table rows clustered physically on disk by primary key, providing instant primary key lookups:
 
@@ -40,7 +40,7 @@ CREATE TABLE commerce.orders (
 ) ENGINE=InnoDB ROW_FORMAT=DYNAMIC;
 ```
 
-#JSON Functional Indexes
+### JSON Functional Indexes
 
 Creates virtual indexed columns over specific JSON paths to accelerate document queries:
 
@@ -54,11 +54,11 @@ SELECT * FROM commerce.orders
 WHERE details->>'$.customer.tier' = 'Platinum';
 ```
 
-#Semi-Synchronous Replication Topology
+### Semi-Synchronous Replication Topology
 
 Guarantees that at least one read replica has received transaction events before returning success:
 
-```
+```text
 [ Primary Master ] ──Replication Event──→ [ Replica 1 (Awaits ACK) ] ──ACK──→ [ Primary Commits ]
                                                   │
                                                   ▼
@@ -83,20 +83,20 @@ ORDER BY created_at DESC, id DESC
 LIMIT 20;
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Choose Compact Primary Keys**: Use `BIGINT UNSIGNED AUTO_INCREMENT` or ordered UUIDs (v7); secondary indexes store the primary key.
-- **Size `innodb_buffer_pool_size` Appropriately**: Allocate 70-80% of total physical RAM to the InnoDB buffer pool on dedicated servers.
-- **Use `EXPLAIN FORMAT=JSON`**: Inspect query execution plans to identify temporary tables, filesorts, and full table scans.
-- **Enable Binary Logging with Row Format**: Set `binlog_format = ROW` for safe, deterministic replication and point-in-time recovery.
+- Choose Compact Primary Keys: Use `BIGINT UNSIGNED AUTO_INCREMENT` or ordered UUIDs (v7); secondary indexes store the primary key.
+- Size `innodb_buffer_pool_size` Appropriately: Allocate 70-80% of total physical RAM to the InnoDB buffer pool on dedicated servers.
+- Use `EXPLAIN FORMAT=JSON`: Inspect query execution plans to identify temporary tables, filesorts, and full table scans.
+- Enable Binary Logging with Row Format: Set `binlog_format = ROW` for safe, deterministic replication and point-in-time recovery.
 
 **Don't**:
 
-- **Don't use random UUIDv4 as primary keys**: Random UUIDs cause index page fragmentation and severe disk I/O thrashing during inserts.
-- **Don't use `SELECT *` in production code**: Query only needed columns to leverage covering indexes.
-- **Don't store unstructured text without character sets**: Default to `utf8mb4` with `utf8mb4_0900_ai_ci` collation for full Unicode support.
+- Use random UUIDv4 as primary keys: Random UUIDs cause index page fragmentation and severe disk I/O thrashing during inserts.
+- Use `SELECT *` in production code: Query only needed columns to leverage covering indexes.
+- Store unstructured text without character sets: Default to `utf8mb4` with `utf8mb4_0900_ai_ci` collation for full Unicode support.
 
 ## Troubleshooting
 

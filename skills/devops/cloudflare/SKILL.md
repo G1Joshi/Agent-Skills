@@ -5,7 +5,7 @@ description: Expert Cloudflare assistance covering Workers, Pages, DNS records, 
 
 # Cloudflare
 
-Cloudflare is more than a CDN; it is a global super-cloud. In 2025, **Workers AI** (Edge GPU inference) and **R2** (Egress-free storage) are compelling reasons to build here.
+Cloudflare provides global edge networking, DDoS protection, edge serverless compute (Workers), and S3-compatible zero-egress object storage (R2).
 
 ## When to Use
 
@@ -26,7 +26,7 @@ npx wrangler deploy # Deploy globally to 300+ edge locations
 
 ## Core Concepts
 
-#Modern Cloudflare Worker with Fetch Handler
+### Modern Cloudflare Worker with Fetch Handler
 
 Sub-millisecond edge API handling requests:
 
@@ -79,7 +79,7 @@ export default {
 };
 ```
 
-#Wrangler Configuration (wrangler.jsonc)
+### Wrangler Configuration (wrangler.jsonc)
 
 Declarative configuration of bindings and environments:
 
@@ -96,7 +96,7 @@ Declarative configuration of bindings and environments:
 }
 ```
 
-#Secure Origin Access with Cloudflare Tunnels (cloudflared)
+### Secure Origin Access with Cloudflare Tunnels (cloudflared)
 
 Exposing internal services to the edge without opening firewall ports:
 
@@ -144,15 +144,20 @@ export default {
 };
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target `compatibility_date` with `nodejs_compat` enabled to access standard Node.js APIs at the edge.
-- **Do** offload asynchronous non-blocking work (e.g. analytics logging) to `ctx.waitUntil()` to avoid blocking user response.
-- **Do** use Cloudflare R2 for asset storage to eliminate egress bandwidth fees.
-- **Do** deploy Cloudflare Tunnels to connect private backends without opening public ports.
-- **Don't** store large relational datasets in KV; use Cloudflare D1 (SQL) or Hyperdrive for PostgreSQL connection pooling.
-- **Don't** perform CPU-bound tasks exceeding the Worker CPU time limit; offload heavy jobs to standard containers.
-- **Don't** commit `wrangler.jsonc` files containing unencrypted secret values; use `wrangler secret put`.
+**Do**:
+
+- Target `compatibility_date` with `nodejs_compat` enabled to access standard Node.js APIs at the edge.
+- Offload asynchronous non-blocking work (e.g. analytics logging) to `ctx.waitUntil()` to avoid blocking user response.
+- Use Cloudflare R2 for asset storage to eliminate egress bandwidth fees.
+- Deploy Cloudflare Tunnels to connect private backends without opening public ports.
+
+**Don't**:
+
+- Store large relational datasets in KV; use Cloudflare D1 (SQL) or Hyperdrive for PostgreSQL connection pooling.
+- Perform CPU-bound tasks exceeding the Worker CPU time limit; offload heavy jobs to standard containers.
+- Commit `wrangler.jsonc` files containing unencrypted secret values; use `wrangler secret put`.
 
 ## Troubleshooting
 

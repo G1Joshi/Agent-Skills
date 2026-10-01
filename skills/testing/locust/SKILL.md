@@ -36,7 +36,7 @@ Run `locust -f locustfile.py`.
 
 ## Core Concepts
 
-#User Classes & Task Hierarchy
+### User Classes & Task Hierarchy
 
 Defines virtual user behaviors using Python methods annotated with `@task`:
 
@@ -62,7 +62,7 @@ class WebsiteUser(HttpUser):
         self.client.post("/api/checkout", json={"itemId": 42})
 ```
 
-#Headless CI/CD Execution with Thresholds
+### Headless CI/CD Execution with Thresholds
 
 Runs headlessly in build pipelines, exiting with non-zero status codes if criteria fail:
 
@@ -74,7 +74,7 @@ locust --headless \
   --exit-code-on-error 1
 ```
 
-#Distributed Master / Worker Architecture
+### Distributed Master / Worker Architecture
 
 Coordinates load across multiple machines:
 
@@ -110,20 +110,20 @@ class WebsiteUser(HttpUser):
         self.client.post("/cart/checkout", json={"items": [1, 2]})
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use Weights on `@task(weight)`**: Reflect realistic user activity ratios (e.g. 10 browsing actions for every 1 checkout action).
-- **Run Headless in CI/CD**: Use `--headless` mode to automate performance checks in GitHub Actions or GitLab CI.
-- **Group Dynamic URLs with `name` Parameters**: Group `/users/1` and `/users/2` under a single endpoint name: `self.client.get("/users/1", name="/users/[id]")`.
-- **Use `FastHttpUser` for High Concurrency**: Inherit from `FastHttpUser` (geventhttpclient) for 5-6x higher throughput per worker CPU.
+- Use Weights on `@task(weight)`: Reflect realistic user activity ratios (e.g. 10 browsing actions for every 1 checkout action).
+- Run Headless in CI/CD: Use `--headless` mode to automate performance checks in GitHub Actions or GitLab CI.
+- Group Dynamic URLs with `name` Parameters: Group `/users/1` and `/users/2` under a single endpoint name: `self.client.get("/users/1", name="/users/[id]")`.
+- Use `FastHttpUser` for High Concurrency: Inherit from `FastHttpUser` (geventhttpclient) for 5-6x higher throughput per worker CPU.
 
 **Don't**:
 
-- **Don't perform heavy computational blocking in tasks**: Keep task code lean to prevent starving the gevent cooperative thread loop.
-- **Don't run single-process tests for heavy loads**: Spawn multiple worker processes (`--processes 4`) to leverage multi-core CPUs.
-- **Don't forget SSL verification options**: Pass `verify=False` only in isolated dev environments; never bypass security in prod.
+- Perform heavy computational blocking in tasks: Keep task code lean to prevent starving the gevent cooperative thread loop.
+- Run single-process tests for heavy loads: Spawn multiple worker processes (`--processes 4`) to leverage multi-core CPUs.
+- Forget SSL verification options: Pass `verify=False` only in isolated dev environments; never bypass security in prod.
 
 ## Troubleshooting
 

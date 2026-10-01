@@ -5,7 +5,7 @@ description: Expert React assistance covering React 19, Server Components (RSC),
 
 # React
 
-React is the standard library for building user interfaces. React 19 (2025) introduces a new era with the React Compiler, Server Components, and Actions.
+React is the standard library for building declarative user interfaces, featuring the React Compiler, Server Components, concurrent rendering, and native Actions.
 
 ## When to Use
 
@@ -100,18 +100,18 @@ export function useWindowWidth() {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Trust the Compiler**: Stop writing `useMemo`/`useCallback` unless you are building a library or strictly optimizing.
-- **Use Server Actions**: Replace manual `fetch('/api/...')` with robust Server Actions for data mutations.
-- **Use `ref` as a prop**: In React 19, `ref` is a plain prop. No more `forwardRef`.
+- Trust the Compiler: Stop writing `useMemo`/`useCallback` unless you are building a library or strictly optimizing.
+- Use Server Actions: Replace manual `fetch('/api/...')` with robust Server Actions for data mutations.
+- Use `ref` as a prop: In React 19, `ref` is a plain prop. No more `forwardRef`.
 
 **Don't**:
 
-- **Don't overuse `useEffect`**: Effects are for synchronization with external systems, not for data fetching or derived state.
-- **Don't spread props blindly**: Pass explicit props to make components easier to debug.
+- Overuse `useEffect`: Effects are for synchronization with external systems, not for data fetching or derived state.
+- Spread props blindly: Pass explicit props to make components easier to debug.
 
 ## Troubleshooting
 

@@ -5,7 +5,7 @@ description: Expert Ansible automation assistance covering playbooks, roles, inv
 
 # Ansible
 
-Ansible is an agentless automation tool. It handles Configuration Management (installing Nginx, editing configs). 2025 sees the **Automation Platform 2.5** unified UI and AI Lightspeed assistance.
+Ansible is an agentless automation engine for configuration management, infrastructure provisioning, and multi-tier application deployment via declarative YAML playbooks.
 
 ## When to Use
 
@@ -35,7 +35,7 @@ Ansible is an agentless automation tool. It handles Configuration Management (in
 
 ## Core Concepts
 
-#Idempotent Playbook Structure with Handlers
+### Idempotent Playbook Structure with Handlers
 
 Configuring web servers with automated restart triggers:
 
@@ -78,7 +78,7 @@ Configuring web servers with automated restart triggers:
         state: reloaded
 ```
 
-#Dynamic Inventory & Host Grouping
+### Dynamic Inventory & Host Grouping
 
 Targeting cloud infrastructure dynamically:
 
@@ -101,7 +101,7 @@ ansible_ssh_private_key_file=~/.ssh/prod_deploy.pem
 ansible_python_interpreter=/usr/bin/python3
 ```
 
-#Ansible Vault for Secret Protection
+### Ansible Vault for Secret Protection
 
 Encrypting credentials and sensitive environment variables:
 
@@ -148,15 +148,20 @@ Use notification handlers triggered by templated tasks:
         state: reloaded
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** always use fully qualified collection names (FQCN), e.g. `ansible.builtin.template`, `community.docker.docker_container`.
-- **Do** verify idempotency by running playbooks twice in CI; the second run must report `changed=0`.
-- **Do** store credentials, certificates, and passwords in `ansible-vault` or retrieve from HashiCorp Vault.
-- **Do** test roles and playbooks using Molecule and testinfra in automated CI pipelines.
-- **Don't** use `ansible.builtin.shell` or `command` when a dedicated idempotent Ansible module exists.
-- **Don't** commit unencrypted vault passwords or plain text secrets to version control.
-- **Don't** perform large inventory operations without `--forks` tuned for network concurrency.
+**Do**:
+
+- Always use fully qualified collection names (FQCN), e.g. `ansible.builtin.template`, `community.docker.docker_container`.
+- Verify idempotency by running playbooks twice in CI; the second run must report `changed=0`.
+- Store credentials, certificates, and passwords in `ansible-vault` or retrieve from HashiCorp Vault.
+- Test roles and playbooks using Molecule and testinfra in automated CI pipelines.
+
+**Don't**:
+
+- Use `ansible.builtin.shell` or `command` when a dedicated idempotent Ansible module exists.
+- Commit unencrypted vault passwords or plain text secrets to version control.
+- Perform large inventory operations without `--forks` tuned for network concurrency.
 
 ## Troubleshooting
 

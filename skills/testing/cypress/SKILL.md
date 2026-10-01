@@ -31,7 +31,7 @@ describe("My First Test", () => {
 
 ## Core Concepts
 
-#Asynchronous Command Queuing & Automatic Retries
+### Asynchronous Command Queuing & Automatic Retries
 
 Cypress commands do not return standard promises; they queue actions that automatically retry until assertions pass or timeout:
 
@@ -53,7 +53,7 @@ describe("Authentication Flow", () => {
 });
 ```
 
-#Network Interception & Dynamic Fixture Stubbing (`cy.intercept`)
+### Network Interception & Dynamic Fixture Stubbing (`cy.intercept`)
 
 Controls and mocks network traffic without external proxy dependencies:
 
@@ -71,7 +71,7 @@ it("handles network failure gracefully", () => {
 });
 ```
 
-#Custom Commands & Page Object Encapsulation
+### Custom Commands & Page Object Encapsulation
 
 Encapsulates reusable user workflows:
 
@@ -102,20 +102,20 @@ it("loads and displays user profile data", () => {
 });
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use Dedicated Test Attributes**: Select elements using `data-cy` or `data-testid` (`cy.get('[data-cy="submit"]')`) rather than CSS classes.
-- **Log In Programmatically via API**: Bypass UI login forms in setup hooks using `cy.request()` to accelerate test runs.
-- **Use `cy.intercept()` for Flake-Free Synchronization**: Wait on explicit network aliases (`cy.wait('@loadData')`) rather than `cy.wait(3000)`.
-- **Keep Tests Independent**: Each test must be able to run in isolation without depending on state left by previous tests.
+- Use Dedicated Test Attributes: Select elements using `data-cy` or `data-testid` (`cy.get('[data-cy="submit"]')`) rather than CSS classes.
+- Log In Programmatically via API: Bypass UI login forms in setup hooks using `cy.request()` to accelerate test runs.
+- Use `cy.intercept()` for Flake-Free Synchronization: Wait on explicit network aliases (`cy.wait('@loadData')`) rather than `cy.wait(3000)`.
+- Keep Tests Independent: Each test must be able to run in isolation without depending on state left by previous tests.
 
 **Don't**:
 
-- **Don't use `async/await` with Cypress commands**: Cypress manages its own internal command queue; mixing with `async/await` breaks execution order.
-- **Don't use hardcoded `cy.wait(number)`**: Static delays make test suites slow and flaky.
-- **Don't test third-party OAuth providers through the UI**: Mock OAuth callbacks or use API token injection.
+- Use `async/await` with Cypress commands: Cypress manages its own internal command queue; mixing with `async/await` breaks execution order.
+- Use hardcoded `cy.wait(number)`: Static delays make test suites slow and flaky.
+- Test third-party OAuth providers through the UI: Mock OAuth callbacks or use API token injection.
 
 ## Troubleshooting
 

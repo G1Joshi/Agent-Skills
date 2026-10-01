@@ -5,7 +5,7 @@ description: Expert Nim systems programming assistance covering Python-like synt
 
 # Nim
 
-Nim v2.0 (2023/2024) made **ORC** (Deterministic Memory Management) the default. It compiles to C/C++/JS and offers Python-like syntax with C-like speeds.
+Nim is a statically typed systems programming language offering Python-like expressive syntax, compile-time metaprogramming, and deterministic ARC/ORC memory management compiling to C, C++, and JavaScript.
 
 ## When to Use
 
@@ -31,7 +31,7 @@ greet(alice)
 
 ## Core Concepts
 
-#Pythonic Indentation with C-Level Performance
+### Pythonic Indentation with C-Level Performance
 
 Clean, readable syntax that compiles directly into optimized C/C++ code:
 
@@ -52,7 +52,7 @@ let vip = Customer(id: 415, name: "Alice", active: true)
 echo "Bonus earned: $", calculateBonus(vip, 1500.0)
 ```
 
-#ARC / ORC Deterministic Memory Management
+### ARC / ORC Deterministic Memory Management
 
 Automatic Reference Counting with cycle detection (ORC) eliminates stop-the-world garbage collection pauses:
 
@@ -61,7 +61,7 @@ Automatic Reference Counting with cycle detection (ORC) eliminates stop-the-worl
 nim c --mm:orc -d:release main.nim
 ```
 
-#Powerful Compile-Time Macro System
+### Powerful Compile-Time Macro System
 
 Manipulates the Abstract Syntax Tree (AST) directly during compilation:
 
@@ -97,20 +97,20 @@ let score = 98
 printVarNameAndValue(score) # Outputs: score = 98
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use `--mm:orc` by Default**: Standardize on ARC/ORC memory management for deterministic, low-latency execution.
-- **Compile with `-d:release` or `-d:danger`**: Enable optimizations and disable runtime assertions for maximum production speed.
-- **Leverage Method Chaining and UFCS**: Use Uniform Function Call Syntax (`data.filter().map()`) for clean readable pipelines.
-- **Document Code with `nim doc`**: Generate HTML API documentation directly from docstrings.
+- Use `--mm:orc` by Default: Standardize on ARC/ORC memory management for deterministic, low-latency execution.
+- Compile with `-d:release` or `-d:danger`: Enable optimizations and disable runtime assertions for maximum production speed.
+- Leverage Method Chaining and UFCS: Use Uniform Function Call Syntax (`data.filter().map()`) for clean readable pipelines.
+- Document Code with `nim doc`: Generate HTML API documentation directly from docstrings.
 
 **Don't**:
 
-- **Don't use legacy `--mm:refc`**: Deprecate the old mark-and-sweep GC; migrate to modern ORC.
-- **Don't write heavy macros when templates suffice**: Use simple `template` expansions before reaching for complex AST `macro` code.
-- **Don't ignore compiler hints**: Nim provides detailed compile-time diagnostics; address warnings before deploying.
+- Use legacy `--mm:refc`: Deprecate the old mark-and-sweep GC; migrate to modern ORC.
+- Write heavy macros when templates suffice: Use simple `template` expansions before reaching for complex AST `macro` code.
+- Ignore compiler hints: Nim provides detailed compile-time diagnostics; address warnings before deploying.
 
 ## Troubleshooting
 

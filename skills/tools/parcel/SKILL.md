@@ -148,19 +148,24 @@ Extending the default pipeline with custom transformers and compressors:
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use HTML files as entrypoints (`parcel src/index.html`) so Parcel automatically detects all dependent scripts, styles, and assets.
-- **Do** configure `targets` in `package.json` with Browserslist queries for precise polyfill generation.
-- **Do** cache `.parcel-cache` across CI/CD pipeline runs to achieve instantaneous subsequent builds.
-- **Do** enable `--detailed-report` during production builds to analyze asset bundle weights.
-- **Don't** mix conflicting custom webpack configs inside Parcel projects; rely on `.parcelrc`.
-- **Don't** commit `.parcel-cache` or `dist/` directories to version control.
-- **Don't** manually compile Sass or TypeScript before passing files to Parcel; let Parcel handle the transformation pipeline.
+**Do**:
+
+- Use HTML files as entrypoints (`parcel src/index.html`) so Parcel automatically detects all dependent scripts, styles, and assets.
+- Configure `targets` in `package.json` with Browserslist queries for precise polyfill generation.
+- Cache `.parcel-cache` across CI/CD pipeline runs to achieve instantaneous subsequent builds.
+- Enable `--detailed-report` during production builds to analyze asset bundle weights.
+
+**Don't**:
+
+- Mix conflicting custom webpack configs inside Parcel projects; rely on `.parcelrc`.
+- Commit `.parcel-cache` or `dist/` directories to version control.
+- Manually compile Sass or TypeScript before passing files to Parcel; let Parcel handle the transformation pipeline.
 
 ## Troubleshooting
 
-| Error / Symptom                                                                            | Cause                                                                      | Solution                                                                         |
+| Error                                                                                      | Cause                                                                      | Solution                                                                         |
 | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | Stale build output or cache corruption                                                     | `.parcel-cache/` containing invalid serialized graph states                | Run `rm -rf .parcel-cache dist` and restart `parcel`.                            |
 | `@parcel/core: Failed to resolve module`                                                   | Relative import missing extension or package missing in dependencies       | Verify file path casing, ensure module is listed in `package.json` dependencies. |

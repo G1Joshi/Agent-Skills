@@ -5,7 +5,7 @@ description: Expert HashiCorp Packer assistance covering HCL2 templates, builder
 
 # Packer
 
-Packer automates the creation of Machine Images (AMI, VMDK, ISO) for multiple platforms from a single configuration. In 2025, **HCL2** is the standard for configuration.
+HashiCorp Packer automates the generation of identical machine images across multiple cloud providers and hypervisors from a single declarative HCL configuration.
 
 ## When to Use
 
@@ -44,7 +44,7 @@ build {
 
 ## Core Concepts
 
-#Modern HCL2 Template for AWS Golden AMI
+### Modern HCL2 Template for AWS Golden AMI
 
 Building an encrypted, hardened Ubuntu AMI:
 
@@ -107,7 +107,7 @@ build {
 }
 ```
 
-#Validating, Formatting and Building Images
+### Validating, Formatting and Building Images
 
 Executing Packer CLI build workflow:
 
@@ -169,15 +169,20 @@ build {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target modern HCL2 templates (`.pkr.hcl`) instead of legacy deprecated JSON Packer templates.
-- **Do** set `encrypt_boot = true` on EBS volumes to ensure golden images are encrypted at rest with KMS.
-- **Do** use `source_ami_filter` with `most_recent = true` and official owner IDs to build on verified vendor base images.
-- **Do** clean up temporary shell history and SSH host keys before the image is finalized.
-- **Don't** bake sensitive production secrets or private API tokens into golden images; inject secrets at runtime.
-- **Don't** leave default administrative passwords set in base images.
-- **Don't** run Packer without `packer validate` in continuous integration builds.
+**Do**:
+
+- Target modern HCL2 templates (`.pkr.hcl`) instead of legacy deprecated JSON Packer templates.
+- Set `encrypt_boot = true` on EBS volumes to ensure golden images are encrypted at rest with KMS.
+- Use `source_ami_filter` with `most_recent = true` and official owner IDs to build on verified vendor base images.
+- Clean up temporary shell history and SSH host keys before the image is finalized.
+
+**Don't**:
+
+- Bake sensitive production secrets or private API tokens into golden images; inject secrets at runtime.
+- Leave default administrative passwords set in base images.
+- Run Packer without `packer validate` in continuous integration builds.
 
 ## Troubleshooting
 

@@ -32,7 +32,7 @@ export const { GET, POST } = handlers;
 
 ## Core Concepts
 
-#Auth.js Configuration Structure (v5)
+### Auth.js Configuration Structure (v5)
 
 Unified server configuration declared in `auth.ts`:
 
@@ -61,7 +61,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 });
 ```
 
-#Route Handler Integration (App Router)
+### Route Handler Integration (App Router)
 
 Exports GET and POST handlers directly in the catch-all API route:
 
@@ -71,7 +71,7 @@ import { handlers } from "@/auth";
 export const { GET, POST } = handlers;
 ```
 
-#Server Component Authentication (`auth()`)
+### Server Component Authentication (`auth()`)
 
 Inspects user session directly inside Server Components without client-side hooks:
 
@@ -122,20 +122,20 @@ export const authOptions: NextAuthOptions = {
 };
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Adopt Auth.js v5**: Migrate from legacy v4 `getServerSession` to modern unified `auth()` methods in Next.js 14/15.
-- **Set a Cryptographically Secure `AUTH_SECRET`**: Generate using `openssl rand -base64 33` and store in `.env.local`.
-- **Enforce Edge Middleware Route Protection**: Protect private routes in `middleware.ts` before requests reach Server Components.
-- **Use TypeScript Module Augmentation**: Extend `next-auth` types to ensure custom session fields (`role`, `id`) are strongly typed.
+- Adopt Auth.js v5: Migrate from legacy v4 `getServerSession` to modern unified `auth()` methods in Next.js 14/15.
+- Set a Cryptographically Secure `AUTH_SECRET`: Generate using `openssl rand -base64 33` and store in `.env.local`.
+- Enforce Edge Middleware Route Protection: Protect private routes in `middleware.ts` before requests reach Server Components.
+- Use TypeScript Module Augmentation: Extend `next-auth` types to ensure custom session fields (`role`, `id`) are strongly typed.
 
 **Don't**:
 
-- **Don't fetch session data using client hooks in Server Components**: Use server-side `await auth()` to avoid client waterfall delays.
-- **Don't store sensitive database credentials in session callbacks**: The session object is transmitted to client browsers; keep it lightweight.
-- **Don't forget to configure production trust host**: Set `AUTH_TRUST_HOST=true` when hosting on Docker, Kubernetes, or AWS behind reverse proxies.
+- Fetch session data using client hooks in Server Components: Use server-side `await auth()` to avoid client waterfall delays.
+- Store sensitive database credentials in session callbacks: The session object is transmitted to client browsers; keep it lightweight.
+- Forget to configure production trust host: Set `AUTH_TRUST_HOST=true` when hosting on Docker, Kubernetes, or AWS behind reverse proxies.
 
 ## Troubleshooting
 

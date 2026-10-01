@@ -5,7 +5,7 @@ description: Expert pnpm fast, disk-efficient package manager assistance coverin
 
 # pnpm
 
-pnpm is fast and disk-efficient. It uses a **Content Addressable Store** and hard links to avoid duplicating packages. v9 (2025) adds Catalogs.
+pnpm is a fast, disk-efficient package manager for JavaScript that uses a content-addressable store and symlinked node_modules to eliminate duplicate dependencies across projects.
 
 ## When to Use
 
@@ -26,7 +26,7 @@ pnpm add next
 
 ## Core Concepts
 
-#Configuring Monorepo Workspaces (pnpm-workspace.yaml)
+### Configuring Monorepo Workspaces (pnpm-workspace.yaml)
 
 Declaring workspace packages and root settings:
 
@@ -49,7 +49,7 @@ packages:
 }
 ```
 
-#Workspace Commands & Parallel Script Execution
+### Workspace Commands & Parallel Script Execution
 
 Running builds and tests across packages:
 
@@ -64,7 +64,7 @@ pnpm --filter "...[origin/main]" run build
 pnpm --filter @my-org/web-app add lucide-react
 ```
 
-#Hard Links and Content-Addressable Store
+### Hard Links and Content-Addressable Store
 
 Inspecting and pruning global package deduplication:
 
@@ -102,15 +102,20 @@ Consume internal package with `workspace:*` protocol:
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use `pnpm install --frozen-lockfile` in CI/CD pipelines to guarantee reproducible installs.
-- **Do** use `workspace:*` protocols for internal dependencies to ensure local development links without publishing.
-- **Do** leverage `--filter` to run commands only on modified packages and their dependents.
-- **Do** manage pnpm versions via Corepack (`corepack enable pnpm`) to align team versions.
-- **Don't** access transitive packages not explicitly declared in `package.json`; pnpm's strict layout prevents this.
-- **Don't** commit the global `.pnpm-store` to version control.
-- **Don't** mix multiple package managers (npm, yarn) in the same project directory.
+**Do**:
+
+- Use `pnpm install --frozen-lockfile` in CI/CD pipelines to guarantee reproducible installs.
+- Use `workspace:*` protocols for internal dependencies to ensure local development links without publishing.
+- Leverage `--filter` to run commands only on modified packages and their dependents.
+- Manage pnpm versions via Corepack (`corepack enable pnpm`) to align team versions.
+
+**Don't**:
+
+- Access transitive packages not explicitly declared in `package.json`; pnpm's strict layout prevents this.
+- Commit the global `.pnpm-store` to version control.
+- Mix multiple package managers (npm, yarn) in the same project directory.
 
 ## Troubleshooting
 

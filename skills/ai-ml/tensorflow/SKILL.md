@@ -5,7 +5,7 @@ description: Expert TensorFlow 2.x assistance covering tf.data pipelines, SavedM
 
 # TensorFlow
 
-TensorFlow is Google's mature ML framework. In 2025, it is largely in **maintenance mode** compared to JAX/PyTorch, but remains specific for **TFLite** and legacy production.
+TensorFlow is an end-to-end open-source machine learning platform with extensive production deployment tooling, Keras integrations, and mobile/embedded optimization via TensorFlow Lite.
 
 ## When to Use
 
@@ -31,7 +31,7 @@ model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=
 
 ## Core Concepts
 
-#High-Throughput Input Pipelines with tf.data
+### High-Throughput Input Pipelines with tf.data
 
 Asynchronous data loading with prefetching and parallel mapping:
 
@@ -56,7 +56,7 @@ def create_dataset(filenames, labels, batch_size=64):
     return dataset
 ```
 
-#Functional Model & Multi-GPU Distribution
+### Functional Model & Multi-GPU Distribution
 
 Training models across multiple GPUs with `MirroredStrategy`:
 
@@ -82,7 +82,7 @@ with strategy.scope():
 # model.fit(train_dataset, epochs=10)
 ```
 
-#Exporting to TensorFlow Lite (TFLite) with INT8 Quantization
+### Exporting to TensorFlow Lite (TFLite) with INT8 Quantization
 
 Compressing models for mobile deployment:
 
@@ -118,15 +118,20 @@ dataset = (
 model.fit(dataset, epochs=10)
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** always use `num_parallel_calls=tf.data.AUTOTUNE` and `.prefetch(tf.data.AUTOTUNE)` in input pipelines.
-- **Do** use `tf.distribute.MirroredStrategy` for seamless single-node multi-GPU data parallelism.
-- **Do** wrap heavy computation inside `@tf.function` to compile graphs via AutoGraph for C++ execution speeds.
-- **Do** save models in the modern `SavedModel` or `.keras` format rather than legacy checkpoint files.
-- **Don't** use Python operations inside `@tf.function`; use `tf.*` operations to ensure clean graph tracing.
-- **Don't** execute feed-dict or session APIs; legacy TensorFlow 1.x patterns are completely deprecated.
-- **Don't** train on CPU when GPU/TPU acceleration is available; verify devices with `tf.config.list_physical_devices('GPU')`.
+**Do**:
+
+- Always use `num_parallel_calls=tf.data.AUTOTUNE` and `.prefetch(tf.data.AUTOTUNE)` in input pipelines.
+- Use `tf.distribute.MirroredStrategy` for seamless single-node multi-GPU data parallelism.
+- Wrap heavy computation inside `@tf.function` to compile graphs via AutoGraph for C++ execution speeds.
+- Save models in the modern `SavedModel` or `.keras` format rather than legacy checkpoint files.
+
+**Don't**:
+
+- Use Python operations inside `@tf.function`; use `tf.*` operations to ensure clean graph tracing.
+- Execute feed-dict or session APIs; legacy TensorFlow 1.x patterns are completely deprecated.
+- Train on CPU when GPU/TPU acceleration is available; verify devices with `tf.config.list_physical_devices('GPU')`.
 
 ## Troubleshooting
 

@@ -64,7 +64,7 @@ struct ContentView: View {
 
 ## Core Concepts
 
-#Modern `@Observable` Architecture (iOS 17+)
+### Modern `@Observable` Architecture (iOS 17+)
 
 Replaces legacy `ObservableObject` and `@Published` with compiler-macro observations, tracking only properties actually read in the view:
 
@@ -106,7 +106,7 @@ struct WalletView: View {
 }
 ```
 
-#Declarative View Modifiers & Composition
+### Declarative View Modifiers & Composition
 
 Modifiers return new view structures, composing functionality through ordered transformations:
 
@@ -130,7 +130,7 @@ extension View {
 }
 ```
 
-#NavigationStack & Value-Based Routing
+### NavigationStack & Value-Based Routing
 
 Modern type-safe navigation using `NavigationStack` and `navigationDestination`:
 
@@ -161,39 +161,57 @@ struct MainCoordinator: View {
 
 ## Common Patterns
 
-### NavigationStack (Path-based)
+### Decoupled Path-Based NavigationStack
 
-Replace `NavigationView` with `NavigationStack` for robust programmatic navigation.
+**Problem**: Deprecated `NavigationView` tightly coupling view presentation logic to UI controls.
 
-- Use `.navigationDestination(for:)` to decouple navigation logic from views.
-- Manage navigation state (`NavigationPath`) in a model for deep linking support.
-
-### MVVM with Observation
-
-Bind Views to ViewModels marked with `@Observable`. The View purely renders the state exposed by the ViewModel.
+**Solution**:
+Use path-based `NavigationStack` with `.navigationDestination(for:)` to separate navigation state from UI buttons:
 
 ```swift
-@Observable class ProfileViewModel {
-    var profile: Profile?
-
-    func loadProfile() async { /* ... */ }
+NavigationStack(path: $router.path) {
+    UserListView()
+        .navigationDestination(for: Route.self) { route in
+            router.view(for: route)
+        }
 }
 ```
 
-## Best Practices (2026)
+### MVVM with Observation
+
+**Problem**: Over-invalidating view hierarchies and boilerplate publisher subscriptions in stateful SwiftUI screens.
+
+**Solution**:
+
+```swift
+@Observable
+class ProfileViewModel {
+    var profile: Profile?
+    var isLoading = false
+
+    @MainActor
+    func loadProfile(userId: String) async {
+        isLoading = true
+        defer { isLoading = false }
+        profile = try? await UserService.fetch(id: userId)
+    }
+}
+```
+
+## Best Practices
 
 **Do**:
 
-- **Adopt Swift 6 Strict Concurrency**: Ensure all view models and background tasks conform to `@MainActor` and Sendable protocols.
-- **Decompose Large Views into Subviews**: Break body properties into discrete subviews to allow SwiftUI to localize re-evaluations.
-- **Leverage Standard Semantic Colors**: Use `.foregroundStyle(.primary)` and `.background(.background)` to support Light and Dark modes automatically.
-- **Provide View Previews with Static Mock Data**: Utilize `#Preview` macro with sample models for instant canvas rendering.
+- Adopt Swift 6 Strict Concurrency: Ensure all view models and background tasks conform to `@MainActor` and Sendable protocols.
+- Decompose Large Views into Subviews: Break body properties into discrete subviews to allow SwiftUI to localize re-evaluations.
+- Leverage Standard Semantic Colors: Use `.foregroundStyle(.primary)` and `.background(.background)` to support Light and Dark modes automatically.
+- Provide View Previews with Static Mock Data: Utilize `#Preview` macro with sample models for instant canvas rendering.
 
 **Don't**:
 
-- **Don't store non-transient state in `@State`**: `@State` is for view-owned local state; domain business models belong in observable ViewModels.
-- **Don't block the main actor with heavy computations**: Move image processing and JSON decoding to non-isolated background actor tasks.
-- **Don't overuse `AnyView`**: Type-erasure prevents SwiftUI from performing structural diffing optimizations; use `@ViewBuilder` instead.
+- Store non-transient state in `@State`: `@State` is for view-owned local state; domain business models belong in observable ViewModels.
+- Block the main actor with heavy computations: Move image processing and JSON decoding to non-isolated background actor tasks.
+- Overuse `AnyView`: Type-erasure prevents SwiftUI from performing structural diffing optimizations; use `@ViewBuilder` instead.
 
 ## Troubleshooting
 

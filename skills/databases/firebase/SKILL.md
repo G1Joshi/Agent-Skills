@@ -34,11 +34,11 @@ await addDoc(collection(db, "users"), {
 
 ## Core Concepts
 
-#Document & Collection Hierarchy (Firestore)
+### Document & Collection Hierarchy (Firestore)
 
 Data is organized into documents containing fields, nested inside collections and subcollections:
 
-```
+```text
 users (Collection)
   └── user_101 (Document)
         ├── name: "Alex"
@@ -46,7 +46,7 @@ users (Collection)
               └── order_99 (Document)
 ```
 
-#Real-Time Snapshot Listeners
+### Real-Time Snapshot Listeners
 
 Subscribes to live document updates with zero polling boilerplate:
 
@@ -61,7 +61,7 @@ const unsub = onSnapshot(doc(db, "projects", "proj_415"), (docSnap) => {
 });
 ```
 
-#Declarative Security Rules Architecture
+### Declarative Security Rules Architecture
 
 Enforces authorization and schema validation at the database layer:
 
@@ -102,20 +102,20 @@ async function upvotePost(postId) {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Write Strict Security Rules**: Never ship rules with `allow read, write: if true;`; validate user auth and required fields.
-- **Always Unsubscribe from Listeners**: Call the returned unsubscribe function (`unsub()`) when UI components unmount to prevent memory leaks.
-- **Use Composite Indexes for Complex Queries**: Define composite indexes in `firestore.indexes.json` for queries with multiple filters and sort orders.
-- **Batch Writes with `writeBatch()`**: Execute up to 500 document writes atomically to ensure consistency and minimize network roundtrips.
+- Write Strict Security Rules: Never ship rules with `allow read, write: if true;`; validate user auth and required fields.
+- Always Unsubscribe from Listeners: Call the returned unsubscribe function (`unsub()`) when UI components unmount to prevent memory leaks.
+- Use Composite Indexes for Complex Queries: Define composite indexes in `firestore.indexes.json` for queries with multiple filters and sort orders.
+- Batch Writes with `writeBatch()`: Execute up to 500 document writes atomically to ensure consistency and minimize network roundtrips.
 
 **Don't**:
 
-- **Don't store large collections in single documents**: Avoid unbounded document arrays; single documents cannot exceed 1MB.
-- **Don't query without limits in mobile apps**: Always append `.limit(20)` to prevent consuming excessive read quotas.
-- **Don't write sensitive secrets in client Firebase config**: Firebase API keys in client code identify projects; protect data via Security Rules.
+- Store large collections in single documents: Avoid unbounded document arrays; single documents cannot exceed 1MB.
+- Query without limits in mobile apps: Always append `.limit(20)` to prevent consuming excessive read quotas.
+- Write sensitive secrets in client Firebase config: Firebase API keys in client code identify projects; protect data via Security Rules.
 
 ## Troubleshooting
 

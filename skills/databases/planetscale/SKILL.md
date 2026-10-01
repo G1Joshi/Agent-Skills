@@ -25,17 +25,17 @@ pscale shell my-database main
 
 ## Core Concepts
 
-#Vitess Horizontal Sharding Architecture
+### Vitess Horizontal Sharding Architecture
 
 VTGate proxies route queries transparently across underlying VTTablet MySQL instances based on a VSchema keyspace:
 
-```
+```text
 [ Application Client ] ──→ [ VTGate Stateless Proxy ]
                                     ├── Routes to Shard 1 (-80)
                                     └── Routes to Shard 2 (80-)
 ```
 
-#Non-Blocking Online DDL & Deploy Requests
+### Non-Blocking Online DDL & Deploy Requests
 
 Applies schema changes via an isolated shadow table in the background, syncing changes asynchronously before an atomic cutover:
 
@@ -51,7 +51,7 @@ pscale shell my-database add-indexes
 pscale deploy-request create my-database add-indexes
 ```
 
-#PlanetScale Serverless Driver over Fetch / HTTP
+### PlanetScale Serverless Driver over Fetch / HTTP
 
 Executes queries over HTTP/1.1 and HTTP/2 without persistent TCP connections:
 
@@ -86,20 +86,20 @@ pscale shell my-db add-index-branch < schema_update.sql
 pscale deploy-request create my-db add-index-branch
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Always Use Deploy Requests for Migrations**: Never attempt manual DDL migrations in production; let PlanetScale coordinate non-blocking cutovers.
-- **Define a Sharding Key (VSchema) Early**: If planning to shard, select a high-cardinality sharding key (e.g. `user_id` or `tenant_id`).
-- **Use Safe Migrations Mode**: Enable Safe Migrations on production branches to block accidental direct DDL executions.
-- **Leverage the Serverless Driver**: Use `@planetscale/database` for serverless environments (Vercel, AWS Lambda, Cloudflare).
+- Always Use Deploy Requests for Migrations: Never attempt manual DDL migrations in production; let PlanetScale coordinate non-blocking cutovers.
+- Define a Sharding Key (VSchema) Early: If planning to shard, select a high-cardinality sharding key (e.g. `user_id` or `tenant_id`).
+- Use Safe Migrations Mode: Enable Safe Migrations on production branches to block accidental direct DDL executions.
+- Leverage the Serverless Driver: Use `@planetscale/database` for serverless environments (Vercel, AWS Lambda, Cloudflare).
 
 **Don't**:
 
-- **Don't use Foreign Key Constraints in Sharded Keyspaces**: Vitess does not support distributed foreign key constraints; enforce integrity in application logic.
-- **Don't use auto-incrementing integers across sharded tables**: Use distributed ID generators (UUIDv7, Snowflake IDs).
-- **Don't execute cross-shard joins frequently**: Distributed joins across multiple shards incur heavy network latency.
+- Use Foreign Key Constraints in Sharded Keyspaces: Vitess does not support distributed foreign key constraints; enforce integrity in application logic.
+- Use auto-incrementing integers across sharded tables: Use distributed ID generators (UUIDv7, Snowflake IDs).
+- Execute cross-shard joins frequently: Distributed joins across multiple shards incur heavy network latency.
 
 ## Troubleshooting
 

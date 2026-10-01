@@ -5,7 +5,7 @@ description: Expert Android Studio IDE assistance covering Gradle sync, Logcat, 
 
 # Android Studio
 
-Android Studio is built on IntelliJ IDEA. 2025 versions (Narwhal/Otter) feature **Gemini** for code generation and crash analysis.
+Android Studio is the official integrated development environment (IDE) for Android application development, built on IntelliJ IDEA with rich profiling and emulator tools.
 
 ## When to Use
 
@@ -27,7 +27,7 @@ adb shell am start -n "com.example.app/.MainActivity"
 
 ## Core Concepts
 
-#Jetpack Compose Preview & UI Inspection
+### Jetpack Compose Preview & UI Inspection
 
 Authoring declarative UI with multi-device previews:
 
@@ -64,7 +64,7 @@ fun MetricCardPreview() {
 }
 ```
 
-#Modern Gradle Build Configuration (build.gradle.kts)
+### Modern Gradle Build Configuration (build.gradle.kts)
 
 Multi-module build setup with version catalogs:
 
@@ -98,7 +98,7 @@ android {
 }
 ```
 
-#Headless Emulator & ADB Operations
+### Headless Emulator & ADB Operations
 
 Managing testing devices from command line:
 
@@ -130,15 +130,20 @@ org.gradle.configuration-cache=true
 android.useAndroidX=true
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** migrate build scripts to Kotlin DSL (`build.gradle.kts`) and Gradle Version Catalogs (`libs.versions.toml`).
-- **Do** enable R8 code shrinking and resource minification (`isMinifyEnabled = true`) on release builds.
-- **Do** utilize Android Studio Profiler (CPU, Memory, Energy) before pushing production releases.
-- **Do** allocate sufficient heap memory to the Gradle daemon in `gradle.properties` (`org.gradle.jvmargs=-Xmx4096m`).
-- **Don't** leave debug signing credentials in open repositories; inject keystores via environment variables.
-- **Don't** run heavy unit tests on the Android Emulator if pure JVM unit tests (`src/test`) suffice.
-- **Don't** ignore Lint warnings; configure `lint { abortOnError = true }` in CI.
+**Do**:
+
+- Migrate build scripts to Kotlin DSL (`build.gradle.kts`) and Gradle Version Catalogs (`libs.versions.toml`).
+- Enable R8 code shrinking and resource minification (`isMinifyEnabled = true`) on release builds.
+- Utilize Android Studio Profiler (CPU, Memory, Energy) before pushing production releases.
+- Allocate sufficient heap memory to the Gradle daemon in `gradle.properties` (`org.gradle.jvmargs=-Xmx4096m`).
+
+**Don't**:
+
+- Leave debug signing credentials in open repositories; inject keystores via environment variables.
+- Run heavy unit tests on the Android Emulator if pure JVM unit tests (`src/test`) suffice.
+- Ignore Lint warnings; configure `lint { abortOnError = true }` in CI.
 
 ## Troubleshooting
 

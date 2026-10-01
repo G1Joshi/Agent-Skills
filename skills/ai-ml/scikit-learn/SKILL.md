@@ -5,7 +5,7 @@ description: Expert Scikit-Learn assistance covering classification, regression,
 
 # Scikit-learn
 
-Scikit-learn is the gold standard for "Classical ML" (Regression, SVM, Random Forest). v1.6 (2025) adds **Array API** support (running on GPUs via PyTorch/CuPy).
+Scikit-learn is the foundational Python library for classical machine learning, providing robust implementations of regression, classification, clustering, dimensionality reduction, and pipelines.
 
 ## When to Use
 
@@ -39,7 +39,7 @@ print(f"Test Accuracy: {score:.4f}")
 
 ## Core Concepts
 
-#Robust Pipeline with ColumnTransformer
+### Robust Pipeline with ColumnTransformer
 
 Handling heterogeneous numeric and categorical columns without data leakage:
 
@@ -93,7 +93,7 @@ model_pipeline.fit(X_train, y_train)
 print("Test Score:", model_pipeline.score(X_test, y_test))
 ```
 
-#Cross-Validation & Metric Evaluation
+### Cross-Validation & Metric Evaluation
 
 Evaluating classification performance comprehensively:
 
@@ -107,7 +107,7 @@ scores = cross_val_score(model_pipeline, X, y, cv=cv, scoring='accuracy')
 print(f"5-Fold CV Accuracy: {scores.mean():.4f} (+/- {scores.std():.4f})")
 ```
 
-#Hyperparameter Search with HalvingGridSearchCV
+### Hyperparameter Search with HalvingGridSearchCV
 
 Fast successive halving parameter search:
 
@@ -150,15 +150,20 @@ pipeline = Pipeline([
 ])
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** always use `Pipeline` and `ColumnTransformer` to prevent data leakage between training and validation sets.
-- **Do** use `HistGradientBoostingClassifier` / `Regressor` for tabular data; it is much faster than `GradientBoostingClassifier`.
-- **Do** set `sparse_output=False` in `OneHotEncoder` when piping into estimators that expect dense NumPy arrays.
-- **Do** evaluate models using appropriate metrics (e.g. `roc_auc`, `f1_weighted`, `brier_score_loss`) for imbalanced datasets.
-- **Don't** fit transformers on the entire dataset before splitting into train/test; always fit only on `X_train`.
-- **Don't** use standard `GridSearchCV` on massive parameter grids; use `HalvingGridSearchCV` or Optuna.
-- **Don't** use `StandardScaler` on sparse data without `with_mean=False`.
+**Do**:
+
+- Always use `Pipeline` and `ColumnTransformer` to prevent data leakage between training and validation sets.
+- Use `HistGradientBoostingClassifier` / `Regressor` for tabular data; it is much faster than `GradientBoostingClassifier`.
+- Set `sparse_output=False` in `OneHotEncoder` when piping into estimators that expect dense NumPy arrays.
+- Evaluate models using appropriate metrics (e.g. `roc_auc`, `f1_weighted`, `brier_score_loss`) for imbalanced datasets.
+
+**Don't**:
+
+- Fit transformers on the entire dataset before splitting into train/test; always fit only on `X_train`.
+- Use standard `GridSearchCV` on massive parameter grids; use `HalvingGridSearchCV` or Optuna.
+- Use `StandardScaler` on sparse data without `with_mean=False`.
 
 ## Troubleshooting
 

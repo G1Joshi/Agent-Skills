@@ -34,7 +34,7 @@ for ent in doc.ents:
 
 ## Core Concepts
 
-#High-Throughput Batch Processing with nlp.pipe
+### High-Throughput Batch Processing with nlp.pipe
 
 Processing document streams efficiently using multiprocessing and batching:
 
@@ -57,7 +57,7 @@ for doc in nlp.pipe(documents, batch_size=64, disable=["parser"]):
         print(f"Entity: {ent.text:25s} Label: {ent.label_}")
 ```
 
-#Rule-Based EntityRuler & Pattern Matching
+### Rule-Based EntityRuler & Pattern Matching
 
 Combining custom dictionary rules with statistical NER:
 
@@ -77,7 +77,7 @@ for ent in doc.ents:
     print(f"Match: {ent.text} -> {ent.label_}")
 ```
 
-#Syntactic Dependency Parsing & Semantic Traversal
+### Syntactic Dependency Parsing & Semantic Traversal
 
 Extracting subject-verb-object relationships:
 
@@ -113,15 +113,20 @@ for doc in nlp.pipe(texts, batch_size=50, disable=["tagger", "parser"]):
     print(entities)
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** always use `nlp.pipe(texts, batch_size=...)` instead of iterating with `[nlp(t) for t in texts]`.
-- **Do** disable pipeline components not required for the task (`nlp.pipe(texts, disable=["parser", "ner"])`) to gain up to 5x speedups.
-- **Do** call `spacy.require_gpu()` before loading models when running on CUDA-enabled servers.
-- **Do** train custom spaCy components using the declarative `config.cfg` system and `spacy train`.
-- **Don't** load the heavy transformer model (`en_core_web_trf`) if simple tokenization/POS with `en_core_web_sm` suffices.
-- **Don't** modify `doc.ents` directly without handling token boundary overlaps; use `spacy.util.filter_spans`.
-- **Don't** reload `spacy.load()` inside request handlers; load models once as global singletons.
+**Do**:
+
+- Always use `nlp.pipe(texts, batch_size=...)` instead of iterating with `[nlp(t) for t in texts]`.
+- Disable pipeline components not required for the task (`nlp.pipe(texts, disable=["parser", "ner"])`) to gain up to 5x speedups.
+- Call `spacy.require_gpu()` before loading models when running on CUDA-enabled servers.
+- Train custom spaCy components using the declarative `config.cfg` system and `spacy train`.
+
+**Don't**:
+
+- Load the heavy transformer model (`en_core_web_trf`) if simple tokenization/POS with `en_core_web_sm` suffices.
+- Modify `doc.ents` directly without handling token boundary overlaps; use `spacy.util.filter_spans`.
+- Reload `spacy.load()` inside request handlers; load models once as global singletons.
 
 ## Troubleshooting
 

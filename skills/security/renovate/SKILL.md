@@ -36,7 +36,7 @@ Renovate is the power-user alternative to Dependabot. It runs on any platform (G
 
 ## Core Concepts
 
-#Declarative renovate.json Configuration
+### Declarative renovate.json Configuration
 
 Centralizes dependency rules, schedules, and automation policies:
 
@@ -60,7 +60,7 @@ Centralizes dependency rules, schedules, and automation policies:
 }
 ```
 
-#Automated Package Grouping & Monorepo Co-Updates
+### Automated Package Grouping & Monorepo Co-Updates
 
 Groups related dependencies (e.g. all `@aws-sdk/*` or all ESLint plugins) into a single unified pull request:
 
@@ -75,7 +75,7 @@ Groups related dependencies (e.g. all `@aws-sdk/*` or all ESLint plugins) into a
 }
 ```
 
-#Regex Managers for Non-Standard Files
+### Regex Managers for Non-Standard Files
 
 Updates dependency versions declared inside custom shell scripts or Docker compose files:
 
@@ -121,20 +121,20 @@ Configure `renovate.json` to group related packages and auto-merge safe patches:
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Enable Dependency Dashboard**: Keep `"dependencyDashboard": true` active to monitor upcoming PRs and trigger manual updates.
-- **Automerge Safe Minor & Patch Updates**: Save engineering time by auto-merging updates that pass full CI/CD test suites.
-- **Group Related Packages**: Bundle framework ecosystem packages (`vitest`, `@vitest/*`) into unified PRs.
-- **Throttle Concurrent PRs**: Set `"prConcurrentLimit": 5` to prevent overwhelming CI runners with dozens of build jobs.
+- Enable Dependency Dashboard: Keep `"dependencyDashboard": true` active to monitor upcoming PRs and trigger manual updates.
+- Automerge Safe Minor & Patch Updates: Save engineering time by auto-merging updates that pass full CI/CD test suites.
+- Group Related Packages: Bundle framework ecosystem packages (`vitest`, `@vitest/*`) into unified PRs.
+- Throttle Concurrent PRs: Set `"prConcurrentLimit": 5` to prevent overwhelming CI runners with dozens of build jobs.
 
 **Don't**:
 
-- **Don't auto-merge major version updates**: Major releases contain breaking changes that require human code review and testing.
-- **Don't run Renovate without robust CI/CD**: Automerging without thorough automated test suites introduces production regressions.
-- **Don't hardcode host secrets in repository configs**: Use encrypted host rules or platform environment variables.
+- Auto-merge major version updates: Major releases contain breaking changes that require human code review and testing.
+- Run Renovate without robust CI/CD: Automerging without thorough automated test suites introduces production regressions.
+- Hardcode host secrets in repository configs: Use encrypted host rules or platform environment variables.
 
 ## Troubleshooting
 

@@ -31,7 +31,7 @@ SELECT * FROM t FOR SYSTEM_TIME AS OF TIMESTAMP '2024-01-01 00:00:00';
 
 ## Core Concepts
 
-#System-Versioned Tables (Automatic Audit Trails)
+### System-Versioned Tables (Automatic Audit Trails)
 
 Tracks complete historical lifecycles of rows automatically without application triggers:
 
@@ -49,18 +49,18 @@ FOR SYSTEM_TIME AS OF (NOW() - INTERVAL 1 DAY)
 WHERE department = 'Engineering';
 ```
 
-#Galera Cluster Synchronous Multi-Master Replication
+### Galera Cluster Synchronous Multi-Master Replication
 
 Enforces synchronous multi-node replication with zero replication lag and automated node joining:
 
-```
+```text
 [ Node 1 (Primary) ] ──Synchronous Write Certification (wsrep)──→ [ Node 2 (Primary) ]
                                       │
                                       ▼
                              [ Node 3 (Primary) ]
 ```
 
-#Modern Thread Pooling for High Concurrency
+### Modern Thread Pooling for High Concurrency
 
 Maintains stable throughput during connection spikes using server-side thread pools:
 
@@ -93,20 +93,20 @@ binlog_format=ROW
 default_storage_engine=InnoDB
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Leverage System-Versioned Tables for Compliance**: Use native versioning rather than complex manual audit trigger scripts.
-- **Use InnoDB as Default Storage Engine**: Reserve Aria storage for temporary tables and ColumnStore for analytical queries.
-- **Enable the Thread Pool Plugin**: Handle thousands of concurrent web connections without thread creation overhead.
-- **Configure Automated Galera Cluster Quorum**: Deploy odd numbers of nodes (minimum 3) to prevent split-brain conditions.
+- Leverage System-Versioned Tables for Compliance: Use native versioning rather than complex manual audit trigger scripts.
+- Use InnoDB as Default Storage Engine: Reserve Aria storage for temporary tables and ColumnStore for analytical queries.
+- Enable the Thread Pool Plugin: Handle thousands of concurrent web connections without thread creation overhead.
+- Configure Automated Galera Cluster Quorum: Deploy odd numbers of nodes (minimum 3) to prevent split-brain conditions.
 
 **Don't**:
 
-- **Don't use legacy MyISAM tables**: MyISAM lacks crash safety and row-level locking.
-- **Don't treat Galera Cluster as a multi-region WAN database**: High cross-region latency degrades synchronous write throughput.
-- **Don't skip slow query logging**: Enable `slow_query_log` and `long_query_time = 1.0` to identify missing indexes.
+- Use legacy MyISAM tables: MyISAM lacks crash safety and row-level locking.
+- Treat Galera Cluster as a multi-region WAN database: High cross-region latency degrades synchronous write throughput.
+- Skip slow query logging: Enable `slow_query_log` and `long_query_time = 1.0` to identify missing indexes.
 
 ## Troubleshooting
 

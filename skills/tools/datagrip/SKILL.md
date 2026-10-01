@@ -28,7 +28,7 @@ ORDER BY o.total DESC;
 
 ## Core Concepts
 
-#Query Console & Visual Execution Plan Inspection
+### Query Console & Visual Execution Plan Inspection
 
 Optimizing complex analytical SQL queries:
 
@@ -49,7 +49,7 @@ ORDER BY lifetime_value DESC;
 
 DataGrip displays visual trees showing cost percentages, index scans, and sequential scan bottlenecks.
 
-#Database Schema Introspection & Comparison
+### Database Schema Introspection & Comparison
 
 Generating migration scripts between staging and production:
 
@@ -58,7 +58,7 @@ Generating migration scripts between staging and production:
 3. Review colored DDL diff pane.
 4. Click **Create Migration Script** to export safe ALTER TABLE statements.
 
-#SSH Tunneling & Secure Connection Setup
+### SSH Tunneling & Secure Connection Setup
 
 Configuring secure bastion host routing:
 
@@ -74,7 +74,8 @@ SSH Tunnel:
 
 ## Common Patterns
 
-#Schema Diff and Migration Script Generation
+### Schema Diff and Migration Script Generation
+
 **Problem**: Identify schema drift between staging and production databases.  
 **Solution**: Generate migration DDL using DataGrip Schema Compare.
 
@@ -84,15 +85,20 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS phone_number VARCHAR(32);
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_users_phone ON users(phone_number);
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** configure database connections with read-only modes (`Transaction: Read-only`) when inspecting production databases.
-- **Do** inspect Visual Explain plans to identify missing indexes before deploying queries to production.
-- **Do** use parameter prompts (`:param_name`) in Query Consoles to test parameterized application SQL.
-- **Do** route database traffic through SSH bastions or AWS SSM tunnels rather than exposing DB ports to the public internet.
-- **Don't** execute raw `UPDATE` or `DELETE` statements in the Query Console without wrapping in transactions (`BEGIN; ... ROLLBACK;`).
-- **Don't** store unencrypted database passwords in shared project `.idea/` directories; use OS Keyring.
-- **Don't** run heavy unbounded analytical queries without limit clauses (`LIMIT 1000`).
+**Do**:
+
+- Configure database connections with read-only modes (`Transaction: Read-only`) when inspecting production databases.
+- Inspect Visual Explain plans to identify missing indexes before deploying queries to production.
+- Use parameter prompts (`:param_name`) in Query Consoles to test parameterized application SQL.
+- Route database traffic through SSH bastions or AWS SSM tunnels rather than exposing DB ports to the public internet.
+
+**Don't**:
+
+- Execute raw `UPDATE` or `DELETE` statements in the Query Console without wrapping in transactions (`BEGIN; ... ROLLBACK;`).
+- Store unencrypted database passwords in shared project `.idea/` directories; use OS Keyring.
+- Run heavy unbounded analytical queries without limit clauses (`LIMIT 1000`).
 
 ## Troubleshooting
 

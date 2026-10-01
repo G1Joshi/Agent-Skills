@@ -31,7 +31,7 @@ import puppeteer from "puppeteer";
 
 ## Core Concepts
 
-#Browser & Page Architecture over CDP
+### Browser & Page Architecture over CDP
 
 Puppeteer manages Chrome processes over WebSocket connections using the Chrome DevTools Protocol:
 
@@ -48,7 +48,7 @@ await page.setViewport({ width: 1920, height: 1080 });
 await page.goto("https://example.com", { waitUntil: "networkidle0" });
 ```
 
-#PDF Generation with CSS Print Styles
+### PDF Generation with CSS Print Styles
 
 Renders printable documents directly from HTML:
 
@@ -61,7 +61,7 @@ await page.pdf({
 });
 ```
 
-#Page Evaluation in Browser Context
+### Page Evaluation in Browser Context
 
 Executes JavaScript inside the browser context and serializes results back to Node:
 
@@ -101,20 +101,20 @@ async function generateInvoicePdf(url, outputPath) {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use `headless: 'new'`**: Leverage Chrome's modern native headless mode for identical rendering to headful Chrome.
-- **Always Close Browsers in `finally` Blocks**: Wrap browser actions in `try/finally` to prevent orphaned Chrome zombie processes.
-- **Block Unnecessary Assets during Scraping**: Block images, fonts, and tracking scripts via `page.setRequestInterception(true)` to speed up scraping 3-5x.
-- **Use `waitUntil: 'networkidle0'` for SPAs**: Ensure all client-side JavaScript hydration requests finish before taking screenshots.
+- Use `headless: 'new'`: Leverage Chrome's modern native headless mode for identical rendering to headful Chrome.
+- Always Close Browsers in `finally` Blocks: Wrap browser actions in `try/finally` to prevent orphaned Chrome zombie processes.
+- Block Unnecessary Assets during Scraping: Block images, fonts, and tracking scripts via `page.setRequestInterception(true)` to speed up scraping 3-5x.
+- Use `waitUntil: 'networkidle0'` for SPAs: Ensure all client-side JavaScript hydration requests finish before taking screenshots.
 
 **Don't**:
 
-- **Don't pass raw browser DOM elements back to Node**: Serialize return values to JSON or extract primitive values inside `page.evaluate()`.
-- **Don't launch a new browser instance for every request**: Reuse a single browser instance and create/close lightweight `page` contexts.
-- **Don't run Chrome as root without sandboxing precautions**: Follow secure Docker non-root user setup guidelines.
+- Pass raw browser DOM elements back to Node: Serialize return values to JSON or extract primitive values inside `page.evaluate()`.
+- Launch a new browser instance for every request: Reuse a single browser instance and create/close lightweight `page` contexts.
+- Run Chrome as root without sandboxing precautions: Follow secure Docker non-root user setup guidelines.
 
 ## Troubleshooting
 

@@ -178,19 +178,24 @@ windows:
 
 Run `tmuxp load myproject` to restore.
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** set `escape-time 0` in `~/.tmux.conf` to eliminate input lag when using Neovim/Vim inside Tmux.
-- **Do** enable `renumber-windows on` so window indexes remain sequential (1, 2, 3...) when closing intermediate tabs.
-- **Do** leverage **TPM** with `tmux-resurrect` to persist active layouts and terminal state across machine reboots.
-- **Do** use `#{pane_current_path}` when splitting panes so new panes open in the current working directory.
-- **Don't** leave detached sessions consuming gigabytes of forgotten Docker build or process logs; kill dead sessions with `tmux kill-session`.
-- **Don't** configure conflicting hotkeys between Tmux prefix and shell shortcuts (e.g. `C-a` for start of line).
-- **Don't** run Tmux inside another nested Tmux session over SSH without adjusting the escape prefix.
+**Do**:
+
+- Set `escape-time 0` in `~/.tmux.conf` to eliminate input lag when using Neovim/Vim inside Tmux.
+- Enable `renumber-windows on` so window indexes remain sequential (1, 2, 3...) when closing intermediate tabs.
+- Leverage **TPM** with `tmux-resurrect` to persist active layouts and terminal state across machine reboots.
+- Use `#{pane_current_path}` when splitting panes so new panes open in the current working directory.
+
+**Don't**:
+
+- Leave detached sessions consuming gigabytes of forgotten Docker build or process logs; kill dead sessions with `tmux kill-session`.
+- Configure conflicting hotkeys between Tmux prefix and shell shortcuts (e.g. `C-a` for start of line).
+- Run Tmux inside another nested Tmux session over SSH without adjusting the escape prefix.
 
 ## Troubleshooting
 
-| Error / Symptom                                   | Cause                                                       | Solution                                                                                          |
+| Error                                             | Cause                                                       | Solution                                                                                          |
 | ------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | Terminal colors washed out or italic text broken  | `default-terminal` not supporting true color in tmux        | Add `set-option -ga terminal-overrides ",xterm-256color:Tc"` to `~/.tmux.conf`.                   |
 | Mouse copy-paste copies line numbers across panes | Mouse drag copies raw terminal buffer instead of pane text  | Hold `Option` (macOS) / `Shift` (Linux) while selecting, or use tmux vi copy mode (`prefix + [`). |

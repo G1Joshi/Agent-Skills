@@ -5,7 +5,7 @@ description: Expert Nuxt 3 assistance covering Vue 3, auto-imports, file-based r
 
 # Nuxt
 
-Nuxt is the full-stack framework for Vue. Nuxt 4 (2025) simplifies directory structure and enhances performance with the Nitro server engine.
+Nuxt is an intuitive full-stack framework for Vue.js, providing automatic routing, server-side rendering, static site generation, and optimized Nitro server engine performance.
 
 ## When to Use
 
@@ -31,7 +31,7 @@ const { data: quote } = await useFetch("/api/quote");
 
 ## Core Concepts
 
-#Universal Data Fetching with useFetch & useAsyncData
+### Universal Data Fetching with useFetch & useAsyncData
 
 SSR-friendly data fetching with automated deduplication:
 
@@ -75,7 +75,7 @@ useSeoMeta({
 </template>
 ```
 
-#Nitro Server Engine API Routes
+### Nitro Server Engine API Routes
 
 Creating backend API endpoints directly inside `server/api`:
 
@@ -99,7 +99,7 @@ export default defineEventHandler(async (event) => {
 });
 ```
 
-#Nuxt Middleware & Route Guards
+### Nuxt Middleware & Route Guards
 
 Client and server route authentication verification:
 
@@ -142,15 +142,20 @@ const { data: products, pending, error } = await useFetch('/api/products');
 </template>
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use `useFetch` inside `<script setup>` for top-level component data fetching to eliminate SSR double-fetch.
-- **Do** leverage Nuxt Server API routes (`server/api/`) for backend proxying and secret key protection.
-- **Do** use `useSeoMeta()` for reactive, type-safe SEO management.
-- **Do** enable Nitro route rules (`routeRules`) for granular caching and ISR per page.
-- **Don't** use standard `fetch()` directly in setup scripts; it executes on both server and client without hydration transfer.
-- **Don't** access `window` or `document` outside `onMounted` or without checking `import.meta.client`.
-- **Don't** mutate server-side state across user requests.
+**Do**:
+
+- Use `useFetch` inside `<script setup>` for top-level component data fetching to eliminate SSR double-fetch.
+- Leverage Nuxt Server API routes (`server/api/`) for backend proxying and secret key protection.
+- Use `useSeoMeta()` for reactive, type-safe SEO management.
+- Enable Nitro route rules (`routeRules`) for granular caching and ISR per page.
+
+**Don't**:
+
+- Use standard `fetch()` directly in setup scripts; it executes on both server and client without hydration transfer.
+- Access `window` or `document` outside `onMounted` or without checking `import.meta.client`.
+- Mutate server-side state across user requests.
 
 ## Troubleshooting
 

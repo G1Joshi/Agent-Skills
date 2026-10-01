@@ -34,7 +34,7 @@ df <- data.frame(
 
 ## Core Concepts
 
-#The Grammar of Graphics (ggplot2)
+### The Grammar of Graphics (ggplot2)
 
 Composes statistical visualizations by layering data, aesthetic mappings, geometries, and facets:
 
@@ -53,7 +53,7 @@ ggplot(mpg, aes(x = displ, y = hwy, color = class)) +
   theme_minimal()
 ```
 
-#Tidy Data Transformations with `dplyr` and Native Pipe (`|>`)
+### Tidy Data Transformations with `dplyr` and Native Pipe (`|>`)
 
 Transforms tables using standardized verbs and R 4.1+ native forward pipes:
 
@@ -72,7 +72,7 @@ summary_stats <- starwars |>
   arrange(desc(avg_height))
 ```
 
-#Fast Columnar In-Memory Processing with `data.table`
+### Fast Columnar In-Memory Processing with `data.table`
 
 Blazing fast processing of multi-gigabyte datasets:
 
@@ -107,26 +107,26 @@ summary_stats <- mtcars %>%
 print(summary_stats)
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use the Native Pipe (`|>`)**: Standardize on R 4.1+ native pipe (`|>`) over legacy `magrittr` (`%>%`).
-- **Use `renv` for Reproducible Environments**: Lock exact package versions in `renv.lock` to ensure reproducible research.
-- **Adopt `data.table` or `arrow` for Big Data**: Avoid out-of-memory crashes on multi-million row datasets.
-- **Publish with Quarto**: Author reproducible reports, slides, and websites using modern Quarto (`.qmd`).
+- Use the Native Pipe (`|>`): Standardize on R 4.1+ native pipe (`|>`) over legacy `magrittr` (`%>%`).
+- Use `renv` for Reproducible Environments: Lock exact package versions in `renv.lock` to ensure reproducible research.
+- Adopt `data.table` or `arrow` for Big Data: Avoid out-of-memory crashes on multi-million row datasets.
+- Publish with Quarto: Author reproducible reports, slides, and websites using modern Quarto (`.qmd`).
 
 **Don't**:
 
-- **Don't use `attach()`**: `attach()` pollutes search namespaces and causes silent variable masking bugs.
-- **Don't grow arrays inside iterative loops**: Pre-allocate vector sizes or use vectorized vectorized functions (`lapply`, `purrr::map`).
-- **Don't use `1:length(x)`**: If `x` is empty, `1:0` creates an invalid 2-element vector; use `seq_along(x)` instead.
+- Use `attach()`: `attach()` pollutes search namespaces and causes silent variable masking bugs.
+- Grow arrays inside iterative loops: Pre-allocate vector sizes or use vectorized vectorized functions (`lapply`, `purrr::map`).
+- Use `1:length(x)`: If `x` is empty, `1:0` creates an invalid 2-element vector; use `seq_along(x)` instead.
 
 ## Troubleshooting
 
 | Error                                                | Cause                                                            | Solution                                                          |
 | :--------------------------------------------------- | :--------------------------------------------------------------- | :---------------------------------------------------------------- |
-| `Error in ... : could not find function "%>%"`       | Pipe operator used without loading `magrittr` or `dplyr`.        | Add `library(dplyr)` or use native R 4.1+ pipe `                  | >`. |
+| `Error in ... : could not find function "%>%"`       | Pipe operator used without loading `magrittr` or `dplyr`.        | Add `library(dplyr)` or use native R 4.1+ pipe `\|>`.             |
 | `cannot allocate vector of size ... (Out of memory)` | Dataset exceeds available RAM.                                   | Use `data.table` or chunk analysis with the `arrow` package.      |
 | `object '...' not found`                             | Variable evaluated before declaration or misspelled column name. | Verify spelling and check active environment objects with `ls()`. |
 

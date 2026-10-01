@@ -1,11 +1,11 @@
 ---
 name: biome
-description: Expert Biome toolchain assistance covering ultra-fast Rust-based formatting, linting, and imports sorting. Use as a high-performance replacement for Prettier and ESLint in JavaScript/TypeScript projects.
+description: Expert Biome toolchain assistance covering ultra-fast Rust-based formatting, linting, and imports sorting. Use when configuring Biome, replacing Prettier and ESLint, or enforcing sub-millisecond CI lint gates in JavaScript/TypeScript projects.
 ---
 
 # Biome
 
-Biome (formerly Rome) is a unified toolchain. It replaces **Prettier** and **ESLint**. v2.0 (2025) adds a plugin system (GritQL) and multi-file analysis.
+Biome is a unified, high-performance toolchain written in Rust that provides sub-millisecond code formatting and linting for JavaScript, TypeScript, and JSON.
 
 ## When to Use
 
@@ -26,7 +26,7 @@ npx @biomejs/biome check --write ./src
 
 ## Core Concepts
 
-#Declarative Configuration (biome.json)
+### Declarative Configuration (biome.json)
 
 Consolidating formatting, linting, and import sorting:
 
@@ -69,7 +69,7 @@ Consolidating formatting, linting, and import sorting:
 }
 ```
 
-#Biome CLI Execution in Workflows
+### Biome CLI Execution in Workflows
 
 Formatting, checking, and applying autofixes:
 
@@ -87,7 +87,7 @@ npx @biomejs/biome format --write ./src
 npx @biomejs/biome ci .
 ```
 
-#Migrating from Prettier & ESLint
+### Migrating from Prettier & ESLint
 
 Importing existing rules automatically:
 
@@ -128,15 +128,20 @@ Adopt unified `biome.json` replacing both:
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target Biome 1.9+ as a unified linter, formatter, and import-sorter to eliminate multiple competing tools.
-- **Do** run `biome ci .` in CI pipelines to enforce formatting and lint rules in a fraction of a second.
-- **Do** enable `useIgnoreFile: true` so Biome automatically respects your `.gitignore` rules.
-- **Do** install the official Biome VS Code / Neovim extension for instant formatting on save.
-- **Don't** run Prettier and Biome simultaneously on the same files; they will conflict.
-- **Don't** use `--unsafe` autofix flags in automated CI jobs without human review.
-- **Don't** ignore schema validation; keep `$schema` set in `biome.json` for IDE autocomplete.
+**Do**:
+
+- Target Biome 1.9+ as a unified linter, formatter, and import-sorter to eliminate multiple competing tools.
+- Run `biome ci .` in CI pipelines to enforce formatting and lint rules in a fraction of a second.
+- Enable `useIgnoreFile: true` so Biome automatically respects your `.gitignore` rules.
+- Install the official Biome VS Code / Neovim extension for instant formatting on save.
+
+**Don't**:
+
+- Run Prettier and Biome simultaneously on the same files; they will conflict.
+- Use `--unsafe` autofix flags in automated CI jobs without human review.
+- Ignore schema validation; keep `$schema` set in `biome.json` for IDE autocomplete.
 
 ## Troubleshooting
 

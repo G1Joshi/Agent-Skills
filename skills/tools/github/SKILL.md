@@ -27,7 +27,7 @@ gh pr create \
 
 ## Core Concepts
 
-#GitHub CLI (gh) Productivity & Scripting
+### GitHub CLI (gh) Productivity & Scripting
 
 Managing pull requests and releases from terminal:
 
@@ -50,7 +50,7 @@ gh release create v2026.1.0 \
   dist/app-v2026.1.0.tar.gz
 ```
 
-#Repository Governance with CODEOWNERS
+### Repository Governance with CODEOWNERS
 
 Automating code review assignments based on modified file paths:
 
@@ -68,7 +68,7 @@ Automating code review assignments based on modified file paths:
 /apps/web/            @org/frontend-leads
 ```
 
-#Querying GitHub GraphQL API via gh api
+### Querying GitHub GraphQL API via gh api
 
 Extracting structured data with GraphQL queries:
 
@@ -103,15 +103,20 @@ gh release create v1.4.0 \
   --generate-notes
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** configure strict Branch Protection or Rulesets on `main` requiring passing CI status checks and peer reviews.
-- **Do** maintain a `.github/CODEOWNERS` file to route pull request reviews to domain owners automatically.
-- **Do** use GitHub CLI (`gh secret set`) to inject secrets directly into repository or environment secret stores.
-- **Do** require GPG/SSH commit signature verification on production repositories.
-- **Don't** grant administrative permissions directly to individuals; manage access via GitHub Teams and RBAC.
-- **Don't** store long-lived cloud credentials in repository secrets; authenticate via OpenID Connect (OIDC).
-- **Don't** allow merge commits on linear history repos; enforce Squash Merge or Rebase Merge.
+**Do**:
+
+- Configure strict Branch Protection or Rulesets on `main` requiring passing CI status checks and peer reviews.
+- Maintain a `.github/CODEOWNERS` file to route pull request reviews to domain owners automatically.
+- Use GitHub CLI (`gh secret set`) to inject secrets directly into repository or environment secret stores.
+- Require GPG/SSH commit signature verification on production repositories.
+
+**Don't**:
+
+- Grant administrative permissions directly to individuals; manage access via GitHub Teams and RBAC.
+- Store long-lived cloud credentials in repository secrets; authenticate via OpenID Connect (OIDC).
+- Allow merge commits on linear history repos; enforce Squash Merge or Rebase Merge.
 
 ## Troubleshooting
 

@@ -5,7 +5,7 @@ description: Expert Obsidian assistance covering local markdown knowledge bases,
 
 # Obsidian
 
-Obsidian is a knowledge base that works on top of a local folder of Markdown files. 2025 features **Bases** (Database views) and native **Canvas**.
+Obsidian is a powerful knowledge base that operates on local plain-text Markdown files, featuring bi-directional linking, dynamic graph visualization, and extensive plugin ecosystems.
 
 ## When to Use
 
@@ -71,31 +71,28 @@ Migrating from session cookies to stateless JWT verification.
 
 Dynamic Dataview index query block in an index note:
 
-````markdown
 ```dataview
 TABLE status AS "Status", author AS "Author", created AS "Created Date"
 FROM #backend AND #security
 WHERE status = "approved"
 SORT created DESC
 ```
-````
 
 ### DataviewJS for Advanced Dynamic Visualizations
 
 Querying vault notes programmatically with JavaScript:
 
-````markdown
-```dataviewjs
-const adrs = dv.pages('#backend')
-  .where(p => p.type === 'architecture-decision-record')
-  .sort(p => p.created, 'desc');
+```javascript
+const adrs = dv
+  .pages("#backend")
+  .where((p) => p.type === "architecture-decision-record")
+  .sort((p) => p.created, "desc");
 
 dv.table(
   ["Decision Title", "Status", "Tags"],
-  adrs.map(p => [p.file.link, p.status, p.file.tags.join(", ")])
+  adrs.map((p) => [p.file.link, p.status, p.file.tags.join(", ")]),
 );
 ```
-````
 
 ### Git-Backed Vault Synchronization
 
@@ -124,24 +121,26 @@ git push -u origin main
 
 ### DataviewJS Dynamic Task Aggregator
 
-**Problem**: Aggregate open tasks across all project notes grouped by category.  
-**Solution**: Write a DataviewJS script inside a code block.
+**Problem**: Aggregate open tasks across all project notes grouped by category.
 
-````javascript
-```dataviewjs
-const pages = dv.pages('#project').where(p => p.file.tasks.length > 0);
+**Solution**:
+Write a DataviewJS script inside a code block:
 
-for (let group of pages.groupBy(p => p.category)) {
+```javascript
+const pages = dv.pages("#project").where((p) => p.file.tasks.length > 0);
+
+for (let group of pages.groupBy((p) => p.category)) {
   dv.header(3, group.key || "Uncategorized");
-  dv.taskList(group.rows.file.tasks.where(t => !t.completed));
+  dv.taskList(group.rows.file.tasks.where((t) => !t.completed));
 }
-````
-
-````
+```
 
 ### Git-Backed Automated Vault Sync
+
 **Problem**: Keep markdown vault synchronized across desktop and mobile machines without proprietary cloud locks.
-**Solution**: Configure Obsidian Git community plugin or automated cron script.
+
+**Solution**:
+Configure Obsidian Git community plugin or automated cron script:
 
 ```bash
 #!/bin/bash
@@ -151,21 +150,26 @@ git add -A
 git commit -m "vault backup $(date '+%Y-%m-%d %H:%M:%S')"
 git pull --rebase origin main
 git push origin main
-````
+```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use strict Wikilinks (`[[Note Name]]`) or Standard Markdown links (`[Title](note.md)`) consistently across the vault.
-- **Do** structure notes using standardized YAML frontmatter (`tags`, `date`, `status`, `aliases`) for reliable querying.
-- **Do** ignore `.obsidian/workspace.json` in `.gitignore` to prevent git conflict churn when syncing across machines.
-- **Do** leverage **Obsidian Canvas** (`.canvas` files) for interactive architecture and workflow diagrams.
-- **Don't** rely on proprietary plugins that alter raw markdown into non-portable custom syntax.
-- **Don't** store large binary assets or videos directly in the Git vault; store them in cloud object storage (S3) and link them.
-- **Don't** create deeply nested folder structures; favor atomic notes connected via bi-directional links and tags.
+**Do**:
+
+- Use strict Wikilinks (`[[Note Name]]`) or Standard Markdown links (`[Title](note.md)`) consistently across the vault.
+- Structure notes using standardized YAML frontmatter (`tags`, `date`, `status`, `aliases`) for reliable querying.
+- Ignore `.obsidian/workspace.json` in `.gitignore` to prevent git conflict churn when syncing across machines.
+- Leverage **Obsidian Canvas** (`.canvas` files) for interactive architecture and workflow diagrams.
+
+**Don't**:
+
+- Rely on proprietary plugins that alter raw markdown into non-portable custom syntax.
+- Store large binary assets or videos directly in the Git vault; store them in cloud object storage (S3) and link them.
+- Create deeply nested folder structures; favor atomic notes connected via bi-directional links and tags.
 
 ## Troubleshooting
 
-| Error / Symptom                                      | Cause                                                          | Solution                                                                                                    |
+| Error                                                | Cause                                                          | Solution                                                                                                    |
 | ---------------------------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `Dataview: Evaluation Error`                         | Field syntax mismatch or accessing undefined object properties | Use defensive checks `p.category ?? "None"` and verify frontmatter YAML syntax with no unquoted colons.     |
 | Broken wikilink `[[Note]]`                           | Note renamed outside Obsidian without updating file links      | Rename files inside Obsidian GUI so automatic internal link updater triggers across the vault.              |

@@ -172,19 +172,24 @@ module.exports = {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** install `@swc/helpers` and enable `externalHelpers: true` to avoid duplicating transpiler runtime helper stubs.
-- **Do** pair SWC with `tsc --noEmit` in CI/CD pipelines since SWC transpiles code without performing type checking.
-- **Do** configure `target: "es2022"` or newer to take advantage of native modern browser capabilities.
-- **Do** use `@swc/jest` or `@swc/register` to drastically accelerate unit test execution.
-- **Don't** rely on Babel plugins unless strictly necessary; check if native SWC plugins (Wasm plugins) exist.
-- **Don't** commit `.swc` build cache directories to Git repositories.
-- **Don't** run SWC minification without generating source maps for production troubleshooting.
+**Do**:
+
+- Install `@swc/helpers` and enable `externalHelpers: true` to avoid duplicating transpiler runtime helper stubs.
+- Pair SWC with `tsc --noEmit` in CI/CD pipelines since SWC transpiles code without performing type checking.
+- Configure `target: "es2022"` or newer to take advantage of native modern browser capabilities.
+- Use `@swc/jest` or `@swc/register` to drastically accelerate unit test execution.
+
+**Don't**:
+
+- Rely on Babel plugins unless strictly necessary; check if native SWC plugins (Wasm plugins) exist.
+- Commit `.swc` build cache directories to Git repositories.
+- Run SWC minification without generating source maps for production troubleshooting.
 
 ## Troubleshooting
 
-| Error / Symptom                                                            | Cause                                                                              | Solution                                                                                              |
+| Error                                                                      | Cause                                                                              | Solution                                                                                              |
 | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | `failed to handle: error parsing typescript`                               | TypeScript syntax (e.g. JSX or decorators) used without enabling flags in `.swcrc` | Ensure `"syntax": "typescript"`, `"tsx": true`, and `"decorators": true` are present in `jsc.parser`. |
 | Decorators metadata not emitting (`Reflect.getMetadata` returns undefined) | `transform.legacyDecorator` and `transform.decoratorMetadata` not configured       | Set `"legacyDecorator": true` and `"decoratorMetadata": true` inside `jsc.transform`.                 |

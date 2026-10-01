@@ -28,15 +28,15 @@ chromium --proxy-server="http://127.0.0.1:8080" --ignore-certificate-errors
 
 ## Core Concepts
 
-#Intercepting Proxy Architecture
+### Intercepting Proxy Architecture
 
 Burp Suite positions itself as a man-in-the-middle (MitM) HTTP/HTTPS proxy between client browsers and backend targets:
 
-```
+```text
 [ Browser / Mobile Device ] ──(Proxy: 127.0.0.1:8080)──→ [ Burp Proxy (Intercept ON/OFF) ] ──→ [ Target API Server ]
 ```
 
-#Burp Repeater & Manual Request Crafting
+### Burp Repeater & Manual Request Crafting
 
 Allows isolating individual requests and replaying modified payloads to analyze server responses:
 
@@ -49,7 +49,7 @@ Content-Type: application/json
 {"email": "attacker@exploit.com", "user_id": 415}
 ```
 
-#Burp Intruder Parameter Fuzzing
+### Burp Intruder Parameter Fuzzing
 
 Automates payload injection across specified positions to discover injection flaws and hidden endpoints:
 
@@ -77,20 +77,20 @@ Content-Type: application/json
 {"coupon": "§PROMO§", "quantity": 1}
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Install Burp CA Certificate Safely**: Trust the PortSwigger CA certificate only in dedicated testing browser profiles, never system-wide.
-- **Scope Target URLs Strictly**: Add target hostnames to **Target > Scope** and toggle "Show only in-scope items" to prevent scanning out-of-scope third parties.
-- **Rate-Limit Automated Intruder Attacks**: Throttle requests per second to avoid triggering WAF blocks or taking down staging databases.
-- **Leverage Burp Match and Replace**: Automatically replace authorization headers or user agents across all proxied traffic.
+- Install Burp CA Certificate Safely: Trust the PortSwigger CA certificate only in dedicated testing browser profiles, never system-wide.
+- Scope Target URLs Strictly: Add target hostnames to **Target > Scope** and toggle "Show only in-scope items" to prevent scanning out-of-scope third parties.
+- Rate-Limit Automated Intruder Attacks: Throttle requests per second to avoid triggering WAF blocks or taking down staging databases.
+- Leverage Burp Match and Replace: Automatically replace authorization headers or user agents across all proxied traffic.
 
 **Don't**:
 
-- **Don't run active scans against production environments without authorization**: Automated scanning can trigger destructive mutations or account lockouts.
-- **Don't leave Burp proxy listening on public interfaces (`0.0.0.0`)**: Bind proxy listeners strictly to `127.0.0.1` to prevent unauthorized proxy relay.
-- **Don't ignore Burp Logger / Event Log**: Monitor the event log to identify upstream connection timeouts and SSL negotiation failures.
+- Run active scans against production environments without authorization: Automated scanning can trigger destructive mutations or account lockouts.
+- Leave Burp proxy listening on public interfaces (`0.0.0.0`): Bind proxy listeners strictly to `127.0.0.1` to prevent unauthorized proxy relay.
+- Ignore Burp Logger / Event Log: Monitor the event log to identify upstream connection timeouts and SSL negotiation failures.
 
 ## Troubleshooting
 

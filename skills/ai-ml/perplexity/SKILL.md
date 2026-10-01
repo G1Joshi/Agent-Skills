@@ -37,7 +37,7 @@ print(response.choices[0].message.content)
 
 ## Core Concepts
 
-#Consuming Perplexity Sonar API with Citations
+### Consuming Perplexity Sonar API with Citations
 
 Querying live web search intelligence using OpenAI-compatible SDK:
 
@@ -68,7 +68,7 @@ for i, url in enumerate(citations, 1):
     print(f"[{i}] {url}")
 ```
 
-#Search Domain & Recency Filtering
+### Search Domain & Recency Filtering
 
 Restricting search context to authoritative domains and specific timeframes:
 
@@ -96,7 +96,7 @@ data = res.json()
 print(data['choices'][0]['message']['content'])
 ```
 
-#Structured Output Formatting with Sonar
+### Structured Output Formatting with Sonar
 
 Directing the model to output verified markdown data tables:
 
@@ -137,15 +137,20 @@ citations = getattr(response, "citations", [])
 print("Citations:", citations)
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target `sonar-pro` for deep analytical research and `sonar` for fast, lightweight web queries.
-- **Do** inspect and parse the `citations` array to display clickable references in user-facing interfaces.
-- **Do** apply `search_recency_filter` when querying time-sensitive or breaking news topics.
-- **Do** use `search_domain_filter` to limit search to trusted corporate, scientific, or government websites.
-- **Don't** use high temperature settings (> 0.3) if exact factual precision and strict web grounding are desired.
-- **Don't** assume web search is necessary for closed-domain math or pure coding tasks; standard LLMs are faster and cheaper.
-- **Don't** hardcode `PERPLEXITY_API_KEY` in scripts; load securely from environment variables.
+**Do**:
+
+- Target `sonar-pro` for deep analytical research and `sonar` for fast, lightweight web queries.
+- Inspect and parse the `citations` array to display clickable references in user-facing interfaces.
+- Apply `search_recency_filter` when querying time-sensitive or breaking news topics.
+- Use `search_domain_filter` to limit search to trusted corporate, scientific, or government websites.
+
+**Don't**:
+
+- Use high temperature settings (> 0.3) if exact factual precision and strict web grounding are desired.
+- Assume web search is necessary for closed-domain math or pure coding tasks; standard LLMs are faster and cheaper.
+- Hardcode `PERPLEXITY_API_KEY` in scripts; load securely from environment variables.
 
 ## Troubleshooting
 

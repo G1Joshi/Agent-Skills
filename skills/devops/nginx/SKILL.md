@@ -5,7 +5,7 @@ description: Expert Nginx web server assistance covering reverse proxying, load 
 
 # Nginx
 
-Nginx is the world's most popular web server. v1.25+ (2025) supports **HTTP/3 (QUIC)** natively.
+Nginx is a high-performance HTTP server, reverse proxy, and load balancer known for its asynchronous event-driven architecture and native HTTP/3 support.
 
 ## When to Use
 
@@ -36,7 +36,7 @@ server {
 
 ## Core Concepts
 
-#Hardened Reverse Proxy Configuration with HTTP/2 and Upstream Keepalive
+### Hardened Reverse Proxy Configuration with HTTP/2 and Upstream Keepalive
 
 Production server configuration with security headers:
 
@@ -105,7 +105,7 @@ http {
 }
 ```
 
-#Static Asset Caching & Single Page Application Routing
+### Static Asset Caching & Single Page Application Routing
 
 Serving static SPAs with browser caching:
 
@@ -130,7 +130,7 @@ server {
 }
 ```
 
-#Validating and Reloading Configuration
+### Validating and Reloading Configuration
 
 Testing syntax before reloading:
 
@@ -176,15 +176,20 @@ server {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** always test configuration syntax with `nginx -t` before issuing `nginx -s reload`.
-- **Do** set `proxy_http_version 1.1` and `proxy_set_header Connection ""` when using `upstream` keepalive pools.
-- **Do** enable `limit_req_zone` to protect login, payment, and search endpoints against abuse.
-- **Do** enable `server_tokens off;` to prevent revealing Nginx version information to attackers.
-- **Don't** use `if` directives inside `location` blocks (`if is evil` in Nginx); use `try_files` or maps.
-- **Don't** run worker processes as root; use unprivileged `nginx` or `www-data` system users.
-- **Don't** omit `Strict-Transport-Security` headers on production HTTPS endpoints.
+**Do**:
+
+- Always test configuration syntax with `nginx -t` before issuing `nginx -s reload`.
+- Set `proxy_http_version 1.1` and `proxy_set_header Connection ""` when using `upstream` keepalive pools.
+- Enable `limit_req_zone` to protect login, payment, and search endpoints against abuse.
+- Enable `server_tokens off;` to prevent revealing Nginx version information to attackers.
+
+**Don't**:
+
+- Use `if` directives inside `location` blocks (`if is evil` in Nginx); use `try_files` or maps.
+- Run worker processes as root; use unprivileged `nginx` or `www-data` system users.
+- Omit `Strict-Transport-Security` headers on production HTTPS endpoints.
 
 ## Troubleshooting
 

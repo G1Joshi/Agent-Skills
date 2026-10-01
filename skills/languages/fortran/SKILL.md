@@ -5,7 +5,7 @@ description: Expert modern Fortran (Fortran 90/2008/2018) assistance covering ar
 
 # Fortran
 
-Fortran is not dead; it drives global weather forecasting and computational physics (MPI). **Fortran 2023** adds better C-interop and conditional expressions.
+Modern Fortran is a high-performance compiled language engineered for numerical analysis, computational fluid dynamics, climate modeling, and large-scale parallel scientific computing (MPI/OpenMP).
 
 ## When to Use
 
@@ -29,7 +29,7 @@ end program main
 
 ## Core Concepts
 
-#Array Slicing & Pure Mathematical Syntax
+### Array Slicing & Pure Mathematical Syntax
 
 Fortran treats multi-dimensional arrays as first-class primitives with native vector slicing:
 
@@ -49,7 +49,7 @@ program matrix_ops
 end program matrix_ops
 ```
 
-#Modern Fortran Modules (Fortran 2018/2023)
+### Modern Fortran Modules (Fortran 2018/2023)
 
 Encapsulates data, interfaces, and subroutines cleanly:
 
@@ -70,7 +70,7 @@ contains
 end module physics_engine
 ```
 
-#Coarray Parallelism for High-Performance Computing (HPC)
+### Coarray Parallelism for High-Performance Computing (HPC)
 
 Built-in SPMD (Single Program, Multiple Data) parallel syntax without external MPI library calls:
 
@@ -112,20 +112,20 @@ program matrix_math
 end program matrix_math
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Always Declare `implicit none`**: Eliminate dangerous legacy implicit typing by placing `implicit none` at the top of every module.
-- **Use Modern Fortran Standards (2008/2018/2023)**: Avoid obsolete fixed-format Fortran 77; write clean free-format code.
-- **Mark Side-Effect-Free Functions as `pure`**: Enable aggressive compiler parallelization and optimization.
-- **Use `intent(in)`, `intent(out)`, and `intent(inout)`**: Explicitly document and enforce parameter passing semantics.
+- Always Declare `implicit none`: Eliminate dangerous legacy implicit typing by placing `implicit none` at the top of every module.
+- Use Modern Fortran Standards (2008/2018/2023): Avoid obsolete fixed-format Fortran 77; write clean free-format code.
+- Mark Side-Effect-Free Functions as `pure`: Enable aggressive compiler parallelization and optimization.
+- Use `intent(in)`, `intent(out)`, and `intent(inout)`: Explicitly document and enforce parameter passing semantics.
 
 **Don't**:
 
-- **Don't use common blocks (`COMMON`) or equivalence (`EQUIVALENCE`)**: Replace legacy shared memory with modern modules.
-- **Don't use fixed-form (column 7) syntax**: Modern Fortran files should use `.f90`, `.f08`, or `.f18` extensions with free-format layout.
-- **Don't ignore array bounds checking during development**: Compile with `-fcheck=all -Wall` during debugging.
+- Use common blocks (`COMMON`) or equivalence (`EQUIVALENCE`): Replace legacy shared memory with modern modules.
+- Use fixed-form (column 7) syntax: Modern Fortran files should use `.f90`, `.f08`, or `.f18` extensions with free-format layout.
+- Ignore array bounds checking during development: Compile with `-fcheck=all -Wall` during debugging.
 
 ## Troubleshooting
 

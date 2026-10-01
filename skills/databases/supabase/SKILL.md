@@ -36,7 +36,7 @@ const subscription = supabase
 
 ## Core Concepts
 
-#PostgreSQL Row-Level Security (RLS)
+### PostgreSQL Row-Level Security (RLS)
 
 Protects data at the database layer so clients can query the database directly from web/mobile apps safely:
 
@@ -52,7 +52,7 @@ USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
 ```
 
-#Modern Supabase JavaScript / TypeScript Client
+### Modern Supabase JavaScript / TypeScript Client
 
 Type-safe database queries, authentication, and file storage:
 
@@ -73,7 +73,7 @@ const { data: projects, error } = await supabase
   .order("created_at", { ascending: false });
 ```
 
-#Real-Time WebSocket Broadcasts & Presence
+### Real-Time WebSocket Broadcasts & Presence
 
 Streams live changes and synchronizes user presence states:
 
@@ -112,20 +112,20 @@ USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Always Enable Row-Level Security (RLS)**: Never expose a table to the public API without enabling and testing RLS policies.
-- **Generate Strict TypeScript Types**: Use the Supabase CLI (`supabase gen types typescript`) to keep database schemas strongly typed.
-- **Index Columns Used in RLS Policies**: Add indexes on `user_id` or `organization_id` to prevent slow table scans during policy evaluations.
-- **Use Edge Functions for Sensitive Logic**: Keep private API secrets and payment integrations inside server-side Edge Functions.
+- Always Enable Row-Level Security (RLS): Never expose a table to the public API without enabling and testing RLS policies.
+- Generate Strict TypeScript Types: Use the Supabase CLI (`supabase gen types typescript`) to keep database schemas strongly typed.
+- Index Columns Used in RLS Policies: Add indexes on `user_id` or `organization_id` to prevent slow table scans during policy evaluations.
+- Use Edge Functions for Sensitive Logic: Keep private API secrets and payment integrations inside server-side Edge Functions.
 
 **Don't**:
 
-- **Don't expose the `service_role` key in client code**: The `service_role` key bypasses all RLS policies; keep it strictly on secure servers.
-- **Don't write complex nested subqueries in RLS policies**: Slow RLS subqueries multiply latency on every single row check.
-- **Don't skip database migrations in Git**: Use `supabase migration new` and version control all database DDL changes.
+- Expose the `service_role` key in client code: The `service_role` key bypasses all RLS policies; keep it strictly on secure servers.
+- Write complex nested subqueries in RLS policies: Slow RLS subqueries multiply latency on every single row check.
+- Skip database migrations in Git: Use `supabase migration new` and version control all database DDL changes.
 
 ## Troubleshooting
 

@@ -31,7 +31,7 @@ SELECT * FROM events WHERE data->>'user' = 'alice';
 
 ## Core Concepts
 
-#Advanced JSONB & Generalized Inverted Indexes (GIN)
+### Advanced JSONB & Generalized Inverted Indexes (GIN)
 
 JSONB stores binary decomposed JSON with full indexing support:
 
@@ -50,7 +50,7 @@ SELECT * FROM users
 WHERE profile @> '{"role": "admin", "settings": {"notifications": true}}';
 ```
 
-#pgvector Semantic Similarity Search
+### pgvector Semantic Similarity Search
 
 Integrates AI vector embeddings directly alongside relational tables:
 
@@ -74,7 +74,7 @@ ORDER BY embedding <=> '[0.012, -0.045, ...]'
 LIMIT 5;
 ```
 
-#Multi-Version Concurrency Control (MVCC) & VACUUM
+### Multi-Version Concurrency Control (MVCC) & VACUUM
 
 PostgreSQL retains old row versions on update/delete; the autovacuum daemon reclaims dead tuples:
 
@@ -109,20 +109,20 @@ SELECT * FROM audit_events
 WHERE metadata @> '{"action": "LOGIN", "status": "FAILED"}';
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use Connection Poolers (PgBouncer)**: Prevent process-per-connection exhaustion by running PgBouncer in transaction pooling mode.
-- **Use `TIMESTAMPTZ` for Date Columns**: Always store timestamps with timezone information (`TIMESTAMPTZ`), never bare `TIMESTAMP`.
-- **Create Partial and Expression Indexes**: Index only active rows (`WHERE deleted_at IS NULL`) to keep index sizes compact.
-- **Run `EXPLAIN (ANALYZE, BUFFERS)`**: Analyze exact buffer hits and query execution plans before deploying new queries.
+- Use Connection Poolers (PgBouncer): Prevent process-per-connection exhaustion by running PgBouncer in transaction pooling mode.
+- Use `TIMESTAMPTZ` for Date Columns: Always store timestamps with timezone information (`TIMESTAMPTZ`), never bare `TIMESTAMP`.
+- Create Partial and Expression Indexes: Index only active rows (`WHERE deleted_at IS NULL`) to keep index sizes compact.
+- Run `EXPLAIN (ANALYZE, BUFFERS)`: Analyze exact buffer hits and query execution plans before deploying new queries.
 
 **Don't**:
 
-- **Don't use `SERIAL` for new tables**: Use standard SQL identity columns (`GENERATED ALWAYS AS IDENTITY`) or `UUIDv7`.
-- **Don't disable Autovacuum**: Disabling autovacuum causes catastrophic table bloat and transaction ID wraparound emergencies.
-- **Don't write long-running transactions**: Long open transactions block vacuuming and cause severe table bloat.
+- Use `SERIAL` for new tables: Use standard SQL identity columns (`GENERATED ALWAYS AS IDENTITY`) or `UUIDv7`.
+- Disable Autovacuum: Disabling autovacuum causes catastrophic table bloat and transaction ID wraparound emergencies.
+- Write long-running transactions: Long open transactions block vacuuming and cause severe table bloat.
 
 ## Troubleshooting
 

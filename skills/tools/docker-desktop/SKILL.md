@@ -5,7 +5,7 @@ description: Expert Docker Desktop assistance covering container resource alloca
 
 # Docker Desktop
 
-Docker Desktop provides the GUI, Kubernetes cluster, and extensions for Docker. 2025 features improved **Resource Saver** mode and **AI Extensions**.
+Docker Desktop provides a comprehensive GUI, integrated Kubernetes cluster, credential management, and development extensions for containerized software delivery.
 
 ## When to Use
 
@@ -29,7 +29,7 @@ docker info
 
 ## Core Concepts
 
-#VirtioFS & Resource Tuning Configuration
+### VirtioFS & Resource Tuning Configuration
 
 Optimizing disk performance in `settings.json`:
 
@@ -49,7 +49,7 @@ Optimizing disk performance in `settings.json`:
 }
 ```
 
-#Local Multi-Container Development Workflow
+### Local Multi-Container Development Workflow
 
 Orchestrating services with port publishing and health checks:
 
@@ -64,7 +64,7 @@ docker stats --no-stream
 docker system prune -a --volumes
 ```
 
-#Enabling Single-Node Kubernetes
+### Enabling Single-Node Kubernetes
 
 Testing Kubernetes manifests locally:
 
@@ -115,15 +115,20 @@ volumes:
   pgdata:
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** enable VirtioFS on macOS for up to 10x faster file-syncing in bind-mounted development directories.
-- **Do** enable Rosetta 2 emulation on Apple Silicon to run x86_64 images with near-native performance.
-- **Do** configure explicit memory and CPU limits in Docker Desktop settings to prevent starving host applications.
-- **Do** run `docker system prune --volumes` periodically to reclaim gigabytes of orphaned build cache.
-- **Don't** allocate 100% of host RAM to the Docker VM; leave at least 4GB-8GB for the host OS.
-- **Don't** use Docker Desktop in production server environments; deploy native Docker Engine or containerd on Linux.
-- **Don't** store persistent production data inside local Docker Desktop volumes.
+**Do**:
+
+- Enable VirtioFS on macOS for up to 10x faster file-syncing in bind-mounted development directories.
+- Enable Rosetta 2 emulation on Apple Silicon to run x86_64 images with near-native performance.
+- Configure explicit memory and CPU limits in Docker Desktop settings to prevent starving host applications.
+- Run `docker system prune --volumes` periodically to reclaim gigabytes of orphaned build cache.
+
+**Don't**:
+
+- Allocate 100% of host RAM to the Docker VM; leave at least 4GB-8GB for the host OS.
+- Use Docker Desktop in production server environments; deploy native Docker Engine or containerd on Linux.
+- Store persistent production data inside local Docker Desktop volumes.
 
 ## Troubleshooting
 

@@ -36,7 +36,7 @@ http:
 
 ## Core Concepts
 
-#Reverse Proxy & Dynamic Upstream Routing
+### Reverse Proxy & Dynamic Upstream Routing
 
 The gateway accepts client requests and transparently forwards them to healthy backend upstream instances using dynamic discovery:
 
@@ -61,7 +61,7 @@ spec:
           weight: 10
 ```
 
-#Edge Authentication Offloading (JWT Validation)
+### Edge Authentication Offloading (JWT Validation)
 
 Validates incoming bearer tokens and injects verified claims as internal headers, sparing internal microservices from repeating OAuth handshake verification:
 
@@ -78,7 +78,7 @@ config:
   key_claim_name: iss
 ```
 
-#Distributed Rate Limiting & Quota Management
+### Distributed Rate Limiting & Quota Management
 
 Protects downstream clusters from cascading overloads using sliding window or token bucket algorithms backed by Redis:
 
@@ -96,7 +96,8 @@ await fastify.register(rateLimit, {
 
 ## Common Patterns
 
-#Rate Limiting and Token Bucket Filter
+### Rate Limiting and Token Bucket Filter
+
 **Problem**: Public endpoints are vulnerable to DoS attacks and noisy-neighbor quota exhaustion.  
 **Solution**: Enforce rate limiting at gateway layer before requests reach downstream services.
 
@@ -116,24 +117,40 @@ spec:
         unit: Minute
 ```
 
-#Request Decoupling and Token Exchange
-**Problem**: Downstream microservices shouldn't handle public OAuth token exchanges and TLS termination.  
-**Solution**: Gateway validates public JWT and attaches internal user headers (`X-User-Id`, `X-User-Roles`).
+### Request Decoupling and Token Exchange
 
-## Best Practices (2026)
+**Problem**: Downstream microservices shouldn't handle public OAuth token exchanges and TLS termination.  
+**Solution**:
+Gateway validates public JWT and attaches internal user headers (`X-User-Id`, `X-User-Roles`):
+
+```yaml
+# Kong request-transformer plugin: attaches internal headers after validating JWT
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: token-exchange-transformer
+plugin: request-transformer
+config:
+  add:
+    headers:
+      - "X-User-Id:$(jwt_claims.sub)"
+      - "X-User-Roles:$(jwt_claims.roles)"
+```
+
+## Best Practices
 
 **Do**:
 
-- **Terminate TLS at the Edge**: Free downstream microservices from CPU-intensive cryptographic handshakes.
-- **Propagate Distributed Tracing Headers**: Forward `traceparent` (W3C standard) to correlate end-to-end logs across microservice hops.
-- **Implement Health Checks & Timeouts**: Enforce aggressive connection and read timeouts on upstream routes to prevent gateway thread exhaustion.
-- **Use Canary Deployments**: Route small percentages (5-10%) of traffic to canary versions via gateway weight configurations.
+- Terminate TLS at the Edge: Free downstream microservices from CPU-intensive cryptographic handshakes.
+- Propagate Distributed Tracing Headers: Forward `traceparent` (W3C standard) to correlate end-to-end logs across microservice hops.
+- Implement Health Checks & Timeouts: Enforce aggressive connection and read timeouts on upstream routes to prevent gateway thread exhaustion.
+- Use Canary Deployments: Route small percentages (5-10%) of traffic to canary versions via gateway weight configurations.
 
 **Don't**:
 
-- **Don't embed heavy business logic in the Gateway**: Keep the gateway thin; do not perform database queries or domain computations at the edge.
-- **Don't expose raw internal errors to clients**: Sanitize upstream 500 stack traces and return RFC 7807 `ProblemDetails` JSON.
-- **Don't ignore DDoS protection**: Pair the software API gateway with a cloud CDN / WAF (Cloudflare, AWS CloudFront/Shield).
+- Embed heavy business logic in the Gateway: Keep the gateway thin; do not perform database queries or domain computations at the edge.
+- Expose raw internal errors to clients: Sanitize upstream 500 stack traces and return RFC 7807 `ProblemDetails` JSON.
+- Ignore DDoS protection: Pair the software API gateway with a cloud CDN / WAF (Cloudflare, AWS CloudFront/Shield).
 
 ## Troubleshooting
 

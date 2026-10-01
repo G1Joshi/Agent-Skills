@@ -38,7 +38,7 @@ export default function Demo() {
 
 ## Core Concepts
 
-#Composable Dialog Primitive with Radix UI
+### Composable Dialog Primitive with Radix UI
 
 Accessible modal dialogs adhering to open standards:
 
@@ -79,7 +79,7 @@ export function ConfirmActionModal() {
 }
 ```
 
-#Type-Safe Forms with React Hook Form & Zod
+### Type-Safe Forms with React Hook Form & Zod
 
 Form validation with accessible field bindings:
 
@@ -137,7 +137,7 @@ export function SubscribeForm() {
 }
 ```
 
-#Component Styling with cn() & class-variance-authority (cva)
+### Component Styling with cn() & class-variance-authority (cva)
 
 Customizing variants with merge utility:
 
@@ -219,15 +219,20 @@ export function ConfirmModal() {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** install components on demand using the CLI (`npx shadcn@latest add button`) rather than copying everything at once.
-- **Do** use the `cn()` utility (`clsx` + `tailwind-merge`) to safely merge custom class names with defaults.
-- **Do** use `asChild` prop on triggers to avoid rendering invalid nested interactive HTML elements (e.g. button inside button).
-- **Do** define theme tokens in `globals.css` with HSL / OKLCH CSS variables for easy dark mode adaptation.
-- **Don't** treat `@/components/ui` as an external third-party library; feel free to modify components directly.
-- **Don't** bypass Radix accessibility primitives for complex interactive components like dropdowns and dialogs.
-- **Don't** remove ARIA attributes or focus styling from components.
+**Do**:
+
+- Install components on demand using the CLI (`npx shadcn@latest add button`) rather than copying everything at once.
+- Use the `cn()` utility (`clsx` + `tailwind-merge`) to safely merge custom class names with defaults.
+- Use `asChild` prop on triggers to avoid rendering invalid nested interactive HTML elements (e.g. button inside button).
+- Define theme tokens in `globals.css` with HSL / OKLCH CSS variables for easy dark mode adaptation.
+
+**Don't**:
+
+- Treat `@/components/ui` as an external third-party library; feel free to modify components directly.
+- Bypass Radix accessibility primitives for complex interactive components like dropdowns and dialogs.
+- Remove ARIA attributes or focus styling from components.
 
 ## Troubleshooting
 

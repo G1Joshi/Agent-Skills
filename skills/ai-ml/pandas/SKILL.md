@@ -5,7 +5,7 @@ description: Expert pandas assistance covering DataFrames, indexing, grouping, m
 
 # Pandas
 
-Pandas is the Excel of Python. v3.0 (2025/2026) enforces **Copy-on-Write (CoW)**, finally fixing the `SettingWithCopyWarning` confusion.
+Pandas provides expressive, flexible data structures for tabular data manipulation and analysis in Python, featuring optimized Copy-on-Write (CoW) memory management.
 
 ## When to Use
 
@@ -36,7 +36,7 @@ print(summary)
 
 ## Core Concepts
 
-#Method Chaining with Modern PyArrow Backend
+### Method Chaining with Modern PyArrow Backend
 
 Clean, functional data transformation pipelines without intermediate variables:
 
@@ -73,7 +73,7 @@ kpi_summary = (
 print(kpi_summary.head(10))
 ```
 
-#Time-Series Resampling & Rolling Windows
+### Time-Series Resampling & Rolling Windows
 
 Computing moving averages and periodic intervals:
 
@@ -94,7 +94,7 @@ weekly_summary = stock_prices.resample('W').agg(['first', 'max', 'min', 'last'])
 print(weekly_summary.head())
 ```
 
-#Safe Data Mutation Avoiding SettingWithCopyWarning
+### Safe Data Mutation Avoiding SettingWithCopyWarning
 
 Modifying slices explicitly:
 
@@ -128,15 +128,20 @@ clean_df = (
 )
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target Pandas 2.2+ with `dtype_backend="pyarrow"` to eliminate string object overhead and boost performance.
-- **Do** use method chaining (`.pipe()`, `.assign()`, `.query()`) for clear, readable, and reproducible data workflows.
-- **Do** use `.loc[row_indexer, col_indexer]` for assignments to prevent `SettingWithCopyWarning`.
-- **Do** downcast integer and float types (`float32`, `int16`) or use categorical types to slash memory on large tables.
-- **Don't** iterate over DataFrame rows using `iterrows()` or `itertuples()` if vectorized operations can do the work.
-- **Don't** use `inplace=True`; it is deprecated across modern Pandas methods.
-- **Don't** concatenate DataFrames inside a loop; collect records into a list and call `pd.concat(list_of_dfs)` once.
+**Do**:
+
+- Target Pandas 2.2+ with `dtype_backend="pyarrow"` to eliminate string object overhead and boost performance.
+- Use method chaining (`.pipe()`, `.assign()`, `.query()`) for clear, readable, and reproducible data workflows.
+- Use `.loc[row_indexer, col_indexer]` for assignments to prevent `SettingWithCopyWarning`.
+- Downcast integer and float types (`float32`, `int16`) or use categorical types to slash memory on large tables.
+
+**Don't**:
+
+- Iterate over DataFrame rows using `iterrows()` or `itertuples()` if vectorized operations can do the work.
+- Use `inplace=True`; it is deprecated across modern Pandas methods.
+- Concatenate DataFrames inside a loop; collect records into a list and call `pd.concat(list_of_dfs)` once.
 
 ## Troubleshooting
 

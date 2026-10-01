@@ -134,19 +134,24 @@ export default [
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** run `prettier --check .` in CI pipelines to ensure zero unformatted code enters the repository.
-- **Do** install official plugins such as `prettier-plugin-tailwindcss` to enforce deterministic class sorting.
-- **Do** disable all conflicting ESLint formatting rules using `eslint-config-prettier`.
-- **Do** specify `endOfLine: "lf"` to avoid cross-platform git line-ending conflicts between Windows and Unix.
-- **Don't** argue over code style details in code reviews; let Prettier make the formatting decisions automatically.
-- **Don't** run formatting on minified or third-party vendor bundles; exclude them via `.prettierignore`.
-- **Don't** configure ESLint rules that duplicate formatting (e.g. quotes, semi); delegate formatting exclusively to Prettier.
+**Do**:
+
+- Run `prettier --check .` in CI pipelines to ensure zero unformatted code enters the repository.
+- Install official plugins such as `prettier-plugin-tailwindcss` to enforce deterministic class sorting.
+- Disable all conflicting ESLint formatting rules using `eslint-config-prettier`.
+- Specify `endOfLine: "lf"` to avoid cross-platform git line-ending conflicts between Windows and Unix.
+
+**Don't**:
+
+- Argue over code style details in code reviews; let Prettier make the formatting decisions automatically.
+- Run formatting on minified or third-party vendor bundles; exclude them via `.prettierignore`.
+- Configure ESLint rules that duplicate formatting (e.g. quotes, semi); delegate formatting exclusively to Prettier.
 
 ## Troubleshooting
 
-| Error / Symptom                                      | Cause                                                     | Solution                                                                                       |
+| Error                                                | Cause                                                     | Solution                                                                                       |
 | ---------------------------------------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | `Code style issues found in 12 files` in CI          | Files modified without running Prettier before commit     | Add pre-commit hook with `lint-staged` or run `npx prettier --write .` and commit changes.     |
 | ESLint and Prettier fighting over quotes or indent   | ESLint rule `semi` or `quotes` enabled alongside Prettier | Add `eslint-config-prettier` to end of ESLint config to deactivate formatting rules in ESLint. |

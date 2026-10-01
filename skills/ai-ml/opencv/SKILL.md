@@ -5,7 +5,7 @@ description: Expert OpenCV assistance covering computer vision, image filtering,
 
 # OpenCV
 
-OpenCV is the fundamental library for Image Processing. v5.0 (2025) modernizes deep learning support and licensing.
+OpenCV (Open Source Computer Vision Library) is the standard library for real-time computer vision, image processing, camera calibration, and deep learning model inference.
 
 ## When to Use
 
@@ -30,7 +30,7 @@ cv2.imwrite("edges.jpg", edges)
 
 ## Core Concepts
 
-#Image Preprocessing, Thresholding & Contours
+### Image Preprocessing, Thresholding & Contours
 
 Detecting object shapes and drawing bounding boxes:
 
@@ -62,7 +62,7 @@ for cnt in contours:
 cv2.imwrite('detected_components.jpg', output)
 ```
 
-#Color Space Filtering with HSV Masking
+### Color Space Filtering with HSV Masking
 
 Isolating colored objects independent of scene brightness:
 
@@ -82,7 +82,7 @@ blue_segmented = cv2.bitwise_and(image, image, mask=mask)
 cv2.imwrite('blue_segmented.jpg', blue_segmented)
 ```
 
-#Video Stream Processing Loop
+### Video Stream Processing Loop
 
 Reading frames continuously from a camera feed or video file:
 
@@ -135,15 +135,20 @@ cap.release()
 cv2.destroyAllWindows()
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** remember OpenCV stores images in BGR format by default; convert with `cv2.COLOR_BGR2RGB` before Matplotlib/PyTorch.
-- **Do** always release hardware resources (`cap.release()`) and destroy windows (`cv2.destroyAllWindows()`).
-- **Do** use HSV or LAB color spaces rather than RGB when performing color-based segmentation under varying lighting.
-- **Do** apply Gaussian or bilateral blurring prior to edge detection to suppress noise.
-- **Don't** perform heavy deep learning inferences sequentially inside the video capture loop; use background threads.
-- **Don't** hardcode kernel sizes with even numbers; blurring and morphological kernels should be odd (e.g. 3x3, 5x5).
-- **Don't** assume `cv2.imread()` succeeded without checking if the returned array is not `None`.
+**Do**:
+
+- Remember OpenCV stores images in BGR format by default; convert with `cv2.COLOR_BGR2RGB` before Matplotlib/PyTorch.
+- Always release hardware resources (`cap.release()`) and destroy windows (`cv2.destroyAllWindows()`).
+- Use HSV or LAB color spaces rather than RGB when performing color-based segmentation under varying lighting.
+- Apply Gaussian or bilateral blurring prior to edge detection to suppress noise.
+
+**Don't**:
+
+- Perform heavy deep learning inferences sequentially inside the video capture loop; use background threads.
+- Hardcode kernel sizes with even numbers; blurring and morphological kernels should be odd (e.g. 3x3, 5x5).
+- Assume `cv2.imread()` succeeded without checking if the returned array is not `None`.
 
 ## Troubleshooting
 

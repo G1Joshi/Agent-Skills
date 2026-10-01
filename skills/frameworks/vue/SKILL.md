@@ -5,7 +5,7 @@ description: Expert Vue 3 assistance covering Composition API (<script setup>), 
 
 # Vue.js
 
-Vue is a progressive framework for building user interfaces. Vue 3.5 (2025) solidifies the Composition API and introduces "Vapor Mode" for solid-js like performance.
+Vue is a progressive framework for building user interfaces, featuring the reactive Composition API and high-performance Vapor Mode compilation.
 
 ## When to Use
 
@@ -37,7 +37,7 @@ function increment() {
 
 ## Core Concepts
 
-#Composition API with <script setup> & TypeScript
+### Composition API with <script setup> & TypeScript
 
 Reactive primitives using `ref`, `computed`, and `watch`:
 
@@ -85,7 +85,7 @@ function decrement() {
 </template>
 ```
 
-#State Management with Pinia
+### State Management with Pinia
 
 Centralized reactive store with type inference:
 
@@ -120,7 +120,7 @@ export const useCartStore = defineStore("cart", () => {
 });
 ```
 
-#Asynchronous Components & Suspense
+### Asynchronous Components & Suspense
 
 Lazy-loading components for optimal code splitting:
 
@@ -173,15 +173,20 @@ export function useMouse() {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use `<script setup lang="ts">` as the default syntax for all Vue 3 components.
-- **Do** use Pinia for global state management; deprecate legacy Vuex.
-- **Do** use `shallowRef` or `shallowReactive` for large arrays/objects that do not need deep reactivity.
-- **Do** scope component CSS (`<style scoped>`) to avoid leaking styles across the application.
-- **Don't** use Options API (`data()`, `methods`) in new greenfield TypeScript codebases.
-- **Don't** mutate props directly inside child components; emit events for the parent to update state.
-- **Don't** use `v-if` and `v-for` on the exact same HTML element.
+**Do**:
+
+- Use `<script setup lang="ts">` as the default syntax for all Vue 3 components.
+- Use Pinia for global state management; deprecate legacy Vuex.
+- Use `shallowRef` or `shallowReactive` for large arrays/objects that do not need deep reactivity.
+- Scope component CSS (`<style scoped>`) to avoid leaking styles across the application.
+
+**Don't**:
+
+- Use Options API (`data()`, `methods`) in new greenfield TypeScript codebases.
+- Mutate props directly inside child components; emit events for the parent to update state.
+- Use `v-if` and `v-for` on the exact same HTML element.
 
 ## Troubleshooting
 

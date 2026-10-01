@@ -5,7 +5,7 @@ description: Expert Event-Driven Architecture assistance covering message broker
 
 # Event-Driven Architecture (EDA)
 
-EDA is a software architecture paradigm promoting the production, detection, consumption of, and reaction to events. In 2025, it is the backbone of real-time, scalable, and decoupled systems.
+Event-Driven Architecture (EDA) is a distributed systems paradigm decoupling producers and consumers through asynchronous event streams, enabling horizontal scalability and fault-tolerant processing.
 
 ## When to Use
 
@@ -40,18 +40,18 @@ messageBroker.subscribe("order.created", async (event) => {
 
 ## Core Concepts
 
-#Pub/Sub Topology & Fan-Out
+### Pub/Sub Topology & Fan-Out
 
 Producers publish events without knowing consumers; brokers fan out events to multiple subscriber queues:
 
-```
+```text
 [ Order Service ] ──Publish(OrderPlaced)──→ [ Topic: orders.events ]
                                                      ├──→ [ Queue: Inventory ] ──→ [ Inventory Service ]
                                                      ├──→ [ Queue: Billing ]   ──→ [ Payment Service ]
                                                      └──→ [ Queue: Email ]     ──→ [ Notification Service ]
 ```
 
-#CloudEvents Specification Standard
+### CloudEvents Specification Standard
 
 Standardizes event metadata across distributed platforms:
 
@@ -71,7 +71,7 @@ Standardizes event metadata across distributed platforms:
 }
 ```
 
-#Idempotent Event Consumer Pattern
+### Idempotent Event Consumer Pattern
 
 Guarantees safety against message broker duplicate deliveries:
 
@@ -95,9 +95,16 @@ export async function handleOrderPlaced(event: CloudEvent) {
 }
 ```
 
+### Event Broker Tooling Matrix
+
+- **Kafka / Redpanda**: High throughput, log-based event streaming and replayable message logs.
+- **RabbitMQ / ActiveMQ**: AMQP message broker with complex topic and header routing.
+- **AWS SNS/SQS / Google Cloud Pub/Sub**: Cloud-native managed pub/sub and distributed queuing.
+
 ## Common Patterns
 
-#Transactional Outbox Pattern
+### Transactional Outbox Pattern
+
 **Problem**: Dual-write hazard: saving database entity succeeds, but message broker publish fails.  
 **Solution**: Write outgoing domain events to an outbox table within the same database transaction.
 
@@ -127,26 +134,20 @@ await db.transaction(async (tx) => {
 });
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use the Transactional Outbox Pattern**: Prevent dual-write anomalies by saving domain entities and outbox events in one database transaction.
-- **Design Every Consumer to be Idempotent**: Always record processed message IDs to handle at-least-once message broker retries safely.
-- **Version Your Event Schemas**: Evolve schemas using backwards-compatible additions; use Protobuf or JSON Schema registries.
-- **Implement Dead Letter Queues (DLQ)**: Route malformed or persistently failing messages to a DLQ for operational inspection.
+- Use the Transactional Outbox Pattern: Prevent dual-write anomalies by saving domain entities and outbox events in one database transaction.
+- Design Every Consumer to be Idempotent: Always record processed message IDs to handle at-least-once message broker retries safely.
+- Version Your Event Schemas: Evolve schemas using backwards-compatible additions; use Protobuf or JSON Schema registries.
+- Implement Dead Letter Queues (DLQ): Route malformed or persistently failing messages to a DLQ for operational inspection.
 
 **Don't**:
 
-- **Don't use events for RPC / Request-Response queries**: Do not simulate synchronous HTTP calls using two-way event streams.
-- **Don't broadcast massive binary payloads in events**: Send lightweight event notifications with a resource URL/ID (Claim Check pattern).
-- **Don't ignore message ordering limitations**: Remember that partition keys determine ordering in Kafka/Kinesis; global ordering is not guaranteed.
-
-## Tools
-
-- **Kafka / Redpanda**: High throughput, log-based (replayable).
-- **RabbitMQ / ActiveMQ**: Queue-based, complex routing.
-- **AWS SNS/SQS / Google PubSub**: Cloud native.
+- Use events for RPC / Request-Response queries: Do not simulate synchronous HTTP calls using two-way event streams.
+- Broadcast massive binary payloads in events: Send lightweight event notifications with a resource URL/ID (Claim Check pattern).
+- Ignore message ordering limitations: Remember that partition keys determine ordering in Kafka/Kinesis; global ordering is not guaranteed.
 
 ## Troubleshooting
 

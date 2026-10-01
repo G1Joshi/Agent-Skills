@@ -5,7 +5,7 @@ description: Expert Zig systems programming assistance covering comptime code ex
 
 # Zig
 
-Zig is a modern system language competing with C/Rust. v0.13 (2025) stabilizes the stdlib and build system. It is famous for its **C toolchain** capabilities (`zig cc`).
+Zig is a modern systems programming language offering manual memory management, compile-time code execution (`comptime`), and a built-in cross-compiling C/C++ toolchain.
 
 ## When to Use
 
@@ -28,7 +28,7 @@ pub fn main() !void {
 
 ## Core Concepts
 
-#Explicit Memory Allocation with GeneralPurposeAllocator
+### Explicit Memory Allocation with GeneralPurposeAllocator
 
 Zero hidden allocations—every data structure requires an explicit allocator:
 
@@ -60,7 +60,7 @@ pub fn main() !void {
 }
 ```
 
-#Comptime Generics & Metaprogramming
+### Comptime Generics & Metaprogramming
 
 Compile-time code execution replacing C++ templates and C macros:
 
@@ -95,7 +95,7 @@ pub fn Queue(comptime T: type) type {
 }
 ```
 
-#Error Handling, Defer & Errdefer
+### Error Handling, Defer & Errdefer
 
 Deterministic resource management and lightweight error unions:
 
@@ -158,15 +158,20 @@ pub fn main() !void {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** always pass explicit `std.mem.Allocator` to functions and structs that perform dynamic allocation.
-- **Do** use `defer` for cleanup immediately following successful resource acquisition, and `errdefer` for failure rollbacks.
-- **Do** leverage `zig test` with built-in leak tracking to test functions and algorithms thoroughly.
-- **Do** take advantage of `zig build` as a unified, portable build system replacing Make and CMake.
-- **Don't** use `@ptrCast` or `@alignCast` without verifying alignment and layout safety.
-- **Don't** ignore error return values; handle with `try`, `catch`, or explicit pattern matching.
-- **Don't** allocate inside tight inner loops; pass pre-allocated buffers or slice views.
+**Do**:
+
+- Always pass explicit `std.mem.Allocator` to functions and structs that perform dynamic allocation.
+- Use `defer` for cleanup immediately following successful resource acquisition, and `errdefer` for failure rollbacks.
+- Leverage `zig test` with built-in leak tracking to test functions and algorithms thoroughly.
+- Take advantage of `zig build` as a unified, portable build system replacing Make and CMake.
+
+**Don't**:
+
+- Use `@ptrCast` or `@alignCast` without verifying alignment and layout safety.
+- Ignore error return values; handle with `try`, `catch`, or explicit pattern matching.
+- Allocate inside tight inner loops; pass pre-allocated buffers or slice views.
 
 ## Troubleshooting
 

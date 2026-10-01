@@ -30,7 +30,7 @@ func main() {
 
 ## Core Concepts
 
-#Delve Debugger & Goroutine Inspection
+### Delve Debugger & Goroutine Inspection
 
 Configuring launch settings and inspecting runtime state:
 
@@ -60,7 +60,7 @@ During a breakpoint pause:
 - Open **Goroutines View** to inspect all paused and running goroutines.
 - Inspect channel buffer capacities and blocked channel readers/writers.
 
-#Built-in Profiling with pprof & Flame Graphs
+### Built-in Profiling with pprof & Flame Graphs
 
 Running benchmarks with integrated memory and CPU profiling:
 
@@ -78,7 +78,7 @@ func BenchmarkUserSerialization(b *testing.B) {
 - Right click benchmark -> **Run 'BenchmarkUserSerialization' with Profile** -> Select **CPU** or **Memory Allocation**.
 - GoLand opens interactive **Flame Graphs** and **Method Call Trees** directly in the IDE.
 
-#Build Tags & Cross-Compilation Run Configurations
+### Build Tags & Cross-Compilation Run Configurations
 
 Switching between build environments:
 
@@ -96,7 +96,8 @@ func TestRemoteDatabaseIntegration(t *testing.T) {
 
 ## Common Patterns
 
-#Headless Remote Delve Debugging
+### Headless Remote Delve Debugging
+
 **Problem**: Debug Go services running inside Kubernetes or Docker containers.  
 **Solution**: Connect GoLand to remote Delve debugger.
 
@@ -115,15 +116,20 @@ dlv exec ./my-binary --headless --listen=:2345 --api-version=2 --accept-multicli
 </component>
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use GoLand's visual pprof flame graphs to profile memory allocations before optimizing code.
-- **Do** leverage GoLand inspections for detecting unchecked errors, unhandled goroutine leaks, and shadowed variables.
-- **Do** configure **Go Modules** integration with proper GOPROXY and GOPRIVATE settings for corporate repositories.
-- **Do** use structural search and replace for large-scale type and signature refactorings.
-- **Don't** ignore GoLand lint and staticcheck warnings; resolve warnings before committing.
-- **Don't** commit `.idea/` workspace files containing local absolute paths or SDK bindings to Git.
-- **Don't** run heavy tests without `-race` flag enabled to detect concurrent data races.
+**Do**:
+
+- Use GoLand's visual pprof flame graphs to profile memory allocations before optimizing code.
+- Leverage GoLand inspections for detecting unchecked errors, unhandled goroutine leaks, and shadowed variables.
+- Configure **Go Modules** integration with proper GOPROXY and GOPRIVATE settings for corporate repositories.
+- Use structural search and replace for large-scale type and signature refactorings.
+
+**Don't**:
+
+- Ignore GoLand lint and staticcheck warnings; resolve warnings before committing.
+- Commit `.idea/` workspace files containing local absolute paths or SDK bindings to Git.
+- Run heavy tests without `-race` flag enabled to detect concurrent data races.
 
 ## Troubleshooting
 

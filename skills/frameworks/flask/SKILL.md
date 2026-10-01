@@ -5,7 +5,7 @@ description: Expert Flask assistance covering Blueprints, application factories,
 
 # Flask
 
-Flask is a lightweight WSGI web application framework. It is designed to make getting started quick and easy, with the ability to scale up to complex applications. Flask 3.0 (2025) fully supports async routes.
+Flask is a lightweight WSGI web framework for Python, offering modular blueprints, extensible request handling, and flexible integration with database ORMs and async handlers.
 
 ## When to Use
 
@@ -30,7 +30,7 @@ async def hello():
 
 ## Core Concepts
 
-#Application Factory & Blueprint Pattern
+### Application Factory & Blueprint Pattern
 
 Structuring scalable Flask applications:
 
@@ -51,7 +51,7 @@ def create_app(config_object="app.config.ProductionConfig"):
     return app
 ```
 
-#Type-Safe Request Handling & JSON Responses
+### Type-Safe Request Handling & JSON Responses
 
 Parsing payloads and handling route parameters:
 
@@ -80,7 +80,7 @@ def create_user():
     return jsonify({"id": 42, "email": data["email"]}), 201
 ```
 
-#Centralized Error Handling & RFC 7807
+### Centralized Error Handling & RFC 7807
 
 Formatting consistent API exceptions:
 
@@ -130,15 +130,20 @@ def create_app(config_name="default"):
     return app
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** always structure applications using the Application Factory pattern (`create_app()`) and Blueprints.
-- **Do** run Flask applications behind a production WSGI/ASGI server like Gunicorn or Uvicorn with Gevent workers.
-- **Do** use environment variables for `SECRET_KEY` and database credentials (`python-dotenv`).
-- **Do** use extensions like `Flask-SQLAlchemy` and `Flask-Migrate` for relational data management.
-- **Don't** use the built-in development server (`flask run`) in production environments.
-- **Don't** commit default secret keys to version control; use cryptographically random secrets.
-- **Don't** use global state variables to store request-specific user data; use Flask's `g` context object.
+**Do**:
+
+- Always structure applications using the Application Factory pattern (`create_app()`) and Blueprints.
+- Run Flask applications behind a production WSGI/ASGI server like Gunicorn or Uvicorn with Gevent workers.
+- Use environment variables for `SECRET_KEY` and database credentials (`python-dotenv`).
+- Use extensions like `Flask-SQLAlchemy` and `Flask-Migrate` for relational data management.
+
+**Don't**:
+
+- Use the built-in development server (`flask run`) in production environments.
+- Commit default secret keys to version control; use cryptographically random secrets.
+- Use global state variables to store request-specific user data; use Flask's `g` context object.
 
 ## Troubleshooting
 

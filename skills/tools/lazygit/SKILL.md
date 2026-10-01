@@ -31,7 +31,7 @@ lazygit
 
 ## Core Concepts
 
-#Core Keybindings & Panel Navigation
+### Core Keybindings & Panel Navigation
 
 Navigating git repository state with single keystrokes:
 
@@ -43,7 +43,7 @@ Navigating git repository state with single keystrokes:
 - `b`: Create or checkout branch.
 - `z`: Undo last Git action (uses Git reflog).
 
-#Interactive Rebase & Commit Squashing
+### Interactive Rebase & Commit Squashing
 
 Streamlining commit histories visually:
 
@@ -57,7 +57,7 @@ Streamlining commit histories visually:
    - `e`: Edit commit contents.
 5. Press `m` to open merge / rebase options.
 
-#Custom Commands Configuration (config.yml)
+### Custom Commands Configuration (config.yml)
 
 Adding customized workflows to Lazygit:
 
@@ -82,7 +82,8 @@ customCommands:
 
 ## Common Patterns
 
-#Custom Lazygit Commands
+### Custom Lazygit Commands
+
 **Problem**: Need one-key git workflow actions (e.g. git standup, prune remote branches).  
 **Solution**: Define custom keybindings in `~/.config/lazygit/config.yml`.
 
@@ -102,15 +103,20 @@ customCommands:
         body: "Are you sure you want to delete all merged local branches?"
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use `v` in the diff panel to enter line-by-line staging mode for atomic commits.
-- **Do** use `git push --force-with-lease` rather than raw `--force` when pushing rebased feature branches.
-- **Do** press `z` in Lazygit to safely undo accidental rebases or commits using the reflog.
-- **Do** configure Nerd Fonts support in `config.yml` for clean file and branch iconography.
-- **Don't** perform interactive rebases on shared public branches (`main`, `production`).
-- **Don't** stage files without reviewing the visual diff panel on the right.
-- **Don't** leave abandoned rebases in progress; abort with `m -> Abort rebase`.
+**Do**:
+
+- Use `v` in the diff panel to enter line-by-line staging mode for atomic commits.
+- Use `git push --force-with-lease` rather than raw `--force` when pushing rebased feature branches.
+- Press `z` in Lazygit to safely undo accidental rebases or commits using the reflog.
+- Configure Nerd Fonts support in `config.yml` for clean file and branch iconography.
+
+**Don't**:
+
+- Perform interactive rebases on shared public branches (`main`, `production`).
+- Stage files without reviewing the visual diff panel on the right.
+- Leave abandoned rebases in progress; abort with `m -> Abort rebase`.
 
 ## Troubleshooting
 

@@ -5,7 +5,7 @@ description: Expert Chakra UI assistance covering accessible React components, t
 
 # Chakra UI
 
-Chakra UI v3 (2025) moves to a **Zero-runtime** engine (Panda CSS under the hood) to solve performance issues, while keeping the developer experience of style props.
+Chakra UI is an accessible component library for React, utilizing style props and modular design tokens to rapidly compose responsive, themeable user interfaces.
 
 ## When to Use
 
@@ -37,7 +37,7 @@ export function App() {
 
 ## Core Concepts
 
-#Style Props & Responsive Layout Tokens
+### Style Props & Responsive Layout Tokens
 
 Building layouts using tokenized props:
 
@@ -78,7 +78,7 @@ export function HeroBanner() {
 }
 ```
 
-#Custom Theme Extension & Semantic Tokens
+### Custom Theme Extension & Semantic Tokens
 
 Extending themes with brand colors and dark mode variants:
 
@@ -109,7 +109,7 @@ const customConfig = defineConfig({
 export const system = createSystem(defaultConfig, customConfig);
 ```
 
-#Accessible Form Controls & Modal Dialogs
+### Accessible Form Controls & Modal Dialogs
 
 Composing dialogs with focus traps and keyboard navigation:
 
@@ -184,15 +184,20 @@ export const theme = extendTheme({
 });
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target Chakra UI v3 / Snippets architecture for reduced bundle sizes and better server component compatibility.
-- **Do** use semantic tokens for colors and spacing to support dark mode without manual condition checks.
-- **Do** favor composition via `asChild` prop over polymorphic `as` props for type safety.
-- **Do** wrap the application root in `<ChakraProvider value={system}>`.
-- **Don't** hardcode raw hex values in style props; reference theme tokens (`blue.500`, `gray.100`).
-- **Don't** create deep nested `Box` hierarchies when standard semantic elements (`Flex`, `Stack`, `Grid`) suffice.
-- **Don't** disable focus rings (`outline="none"`) without providing an accessible alternative.
+**Do**:
+
+- Target Chakra UI v3 / Snippets architecture for reduced bundle sizes and better server component compatibility.
+- Use semantic tokens for colors and spacing to support dark mode without manual condition checks.
+- Favor composition via `asChild` prop over polymorphic `as` props for type safety.
+- Wrap the application root in `<ChakraProvider value={system}>`.
+
+**Don't**:
+
+- Hardcode raw hex values in style props; reference theme tokens (`blue.500`, `gray.100`).
+- Create deep nested `Box` hierarchies when standard semantic elements (`Flex`, `Stack`, `Grid`) suffice.
+- Disable focus rings (`outline="none"`) without providing an accessible alternative.
 
 ## Troubleshooting
 

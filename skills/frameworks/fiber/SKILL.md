@@ -37,7 +37,7 @@ func main() {
 
 ## Core Concepts
 
-#High-Speed Routing & Context Handlers
+### High-Speed Routing & Context Handlers
 
 Routing requests with Fasthttp-powered zero-allocation context:
 
@@ -79,7 +79,7 @@ func main() {
 }
 ```
 
-#JSON Body Parsing & Struct Validation
+### JSON Body Parsing & Struct Validation
 
 Binding request payloads efficiently:
 
@@ -108,7 +108,7 @@ func createOrder(c *fiber.Ctx) error {
 }
 ```
 
-#Native Fiber Rate Limiter Middleware
+### Native Fiber Rate Limiter Middleware
 
 Protecting endpoints against brute-force and DDoS traffic:
 
@@ -162,15 +162,20 @@ func CreateUser(c *fiber.Ctx) error {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use `c.CopyString()` or allocate heap copies if passing `c.Params()` or `c.Body()` to background goroutines.
-- **Do** attach `recover.New()` middleware to prevent unhandled panics from terminating the process.
-- **Do** evaluate whether Fiber's prefork feature fits the target deployment architecture (e.g. bare metal vs Kubernetes).
-- **Do** use `fiber.Map{}` for quick JSON responses and strongly typed structs for domain schemas.
-- **Don't** retain `*fiber.Ctx` references across goroutines; Fiber reuses contexts after the handler returns.
-- **Don't** bypass validation when using `c.BodyParser()`.
-- **Don't** enable `Prefork: true` inside multi-threaded container environments unless ports are properly balanced.
+**Do**:
+
+- Use `c.CopyString()` or allocate heap copies if passing `c.Params()` or `c.Body()` to background goroutines.
+- Attach `recover.New()` middleware to prevent unhandled panics from terminating the process.
+- Evaluate whether Fiber's prefork feature fits the target deployment architecture (e.g. bare metal vs Kubernetes).
+- Use `fiber.Map{}` for quick JSON responses and strongly typed structs for domain schemas.
+
+**Don't**:
+
+- Retain `*fiber.Ctx` references across goroutines; Fiber reuses contexts after the handler returns.
+- Bypass validation when using `c.BodyParser()`.
+- Enable `Prefork: true` inside multi-threaded container environments unless ports are properly balanced.
 
 ## Troubleshooting
 

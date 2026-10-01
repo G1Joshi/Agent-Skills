@@ -33,18 +33,18 @@ await client.send(command);
 
 ## Core Concepts
 
-#Partition Key (PK) & Sort Key (SK) Architecture
+### Partition Key (PK) & Sort Key (SK) Architecture
 
 The Partition Key determines physical partition routing; the Sort Key dictates B-Tree ordering within the partition:
 
-```
+```text
 [ Single DynamoDB Table ]
   ├── PK: USER#101 | SK: METADATA        -> User Profile Record
   ├── PK: USER#101 | SK: ORDER#2026-0901 -> Order Record 1
   └── PK: USER#101 | SK: ORDER#2026-0925 -> Order Record 2
 ```
 
-#Global Secondary Indexes (GSI) Inversion
+### Global Secondary Indexes (GSI) Inversion
 
 Enables reverse lookups without scanning the entire table:
 
@@ -71,11 +71,11 @@ const { Items } = await ddbDoc.send(
 );
 ```
 
-#DynamoDB Streams & Event-Driven Processing
+### DynamoDB Streams & Event-Driven Processing
 
 Captures item-level change events to trigger asynchronous AWS Lambda functions:
 
-```
+```text
 [ Table Write ] ──Capture Mutation──→ [ DynamoDB Streams ] ──Trigger──→ [ Lambda Worker ] ──→ [ OpenSearch Sync ]
 ```
 
@@ -117,20 +117,20 @@ const params = {
 };
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Adopt Single-Table Design**: Group related entity types into a single table to fetch parent and children in a single `Query` call.
-- **Always Prefer `Query` Over `Scan`**: Never run `Scan` operations in production application code paths; scans consume massive RCU/WCU.
-- **Use On-Demand Capacity for Variable Workloads**: Avoid provisioned throttling errors by starting with On-Demand billing.
-- **Configure Time to Live (TTL)**: Automatically expire session records, temporary tokens, and transient logs at zero cost.
+- Adopt Single-Table Design: Group related entity types into a single table to fetch parent and children in a single `Query` call.
+- Always Prefer `Query` Over `Scan`: Never run `Scan` operations in production application code paths; scans consume massive RCU/WCU.
+- Use On-Demand Capacity for Variable Workloads: Avoid provisioned throttling errors by starting with On-Demand billing.
+- Configure Time to Live (TTL): Automatically expire session records, temporary tokens, and transient logs at zero cost.
 
 **Don't**:
 
-- **Don't use low-cardinality Partition Keys**: Keys like `gender` or `status` route all traffic to a single partition, triggering hot-partition throttling.
-- **Don't project all attributes into GSIs (`ALL`)**: Project only needed attributes (`KEYS_ONLY` or `INCLUDE`) to reduce storage and write costs.
-- **Don't execute transactions (`TransactWriteItems`) unnecessarily**: Transactions cost double the write capacity units of standard puts.
+- Use low-cardinality Partition Keys: Keys like `gender` or `status` route all traffic to a single partition, triggering hot-partition throttling.
+- Project all attributes into GSIs (`ALL`): Project only needed attributes (`KEYS_ONLY` or `INCLUDE`) to reduce storage and write costs.
+- Execute transactions (`TransactWriteItems`) unnecessarily: Transactions cost double the write capacity units of standard puts.
 
 ## Troubleshooting
 

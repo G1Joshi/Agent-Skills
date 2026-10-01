@@ -5,7 +5,7 @@ description: Expert WordPress assistance covering themes, plugins, REST API, Gut
 
 # WordPress
 
-WordPress 6.6 (2025) continues the **Full Site Editing (FSE)** revolution. Everything is a block.
+WordPress is an extensible open-source content management system featuring Full Site Editing (FSE), block-based theming, and headless REST/GraphQL architectures.
 
 ## When to Use
 
@@ -38,7 +38,7 @@ add_action('rest_api_init', function () {
 
 ## Core Concepts
 
-#Gutenberg Custom Block with @wordpress/scripts
+### Gutenberg Custom Block with @wordpress/scripts
 
 Building editorial blocks using React and block.json metadata:
 
@@ -83,7 +83,7 @@ registerBlockType("custom/hero-banner", {
 });
 ```
 
-#Type-Safe WP REST API Endpoint Registration
+### Type-Safe WP REST API Endpoint Registration
 
 Exposing custom REST endpoints with permission callbacks:
 
@@ -107,7 +107,7 @@ add_action('rest_api_init', function () {
 });
 ```
 
-#Secure Database Queries with $wpdb
+### Secure Database Queries with $wpdb
 
 Preventing SQL injection using prepared statements:
 
@@ -154,15 +154,20 @@ $args = [
 $query = new WP_Query($args);
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target WordPress 6.x+ with Block API v3 and Full Site Editing (FSE) block themes.
-- **Do** always use `permission_callback` in `register_rest_route()` to prevent unauthorized API access.
-- **Do** use `$wpdb->prepare()` for all custom SQL statements to eliminate SQL injection vulnerabilities.
-- **Do** sanitize incoming inputs (`sanitize_text_field()`) and escape outgoing outputs (`esc_html()`, `esc_url()`).
-- **Don't** write raw SQL queries when native `WP_Query` or `get_posts()` can fulfill the requirement.
-- **Don't** build classic PHP widget-based themes for new projects; adopt Block Themes and Gutenberg.
-- **Don't** commit secrets, database credentials, or security salts to version control.
+**Do**:
+
+- Target WordPress 6.x+ with Block API v3 and Full Site Editing (FSE) block themes.
+- Always use `permission_callback` in `register_rest_route()` to prevent unauthorized API access.
+- Use `$wpdb->prepare()` for all custom SQL statements to eliminate SQL injection vulnerabilities.
+- Sanitize incoming inputs (`sanitize_text_field()`) and escape outgoing outputs (`esc_html()`, `esc_url()`).
+
+**Don't**:
+
+- Write raw SQL queries when native `WP_Query` or `get_posts()` can fulfill the requirement.
+- Build classic PHP widget-based themes for new projects; adopt Block Themes and Gutenberg.
+- Commit secrets, database credentials, or security salts to version control.
 
 ## Troubleshooting
 

@@ -5,7 +5,7 @@ description: Expert Notion assistance covering relational database design, formu
 
 # Notion
 
-Notion is a wiki, database, and project tracker. 2025 (Notion 3.0) introduces **Autonomous Agents** that updates databases and **MCP** support.
+Notion is an all-in-one collaborative workspace combining technical documentation wikis, relational databases, project roadmaps, and API integrations.
 
 ## When to Use
 
@@ -203,19 +203,24 @@ await notion.blocks.children.append({
 });
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** store integration tokens securely in environment variables and grant integrations access only to specific parent pages.
-- **Do** utilize Database Rollups and 2-way Relations to link Sprints, Epics, and individual Engineering Tasks.
-- **Do** handle API rate limits (average 3 requests per second) with exponential backoff and jitter.
-- **Do** paginate database query results using `start_cursor` and `has_more` for datasets larger than 100 records.
-- **Don't** store sensitive API secrets, database passwords, or private SSH keys in Notion pages.
-- **Don't** create deep, unorganized page hierarchies; rely on searchable relational databases with views.
-- **Don't** perform unbounded queries without filters on databases containing thousands of historical rows.
+**Do**:
+
+- Store integration tokens securely in environment variables and grant integrations access only to specific parent pages.
+- Utilize Database Rollups and 2-way Relations to link Sprints, Epics, and individual Engineering Tasks.
+- Handle API rate limits (average 3 requests per second) with exponential backoff and jitter.
+- Paginate database query results using `start_cursor` and `has_more` for datasets larger than 100 records.
+
+**Don't**:
+
+- Store sensitive API secrets, database passwords, or private SSH keys in Notion pages.
+- Create deep, unorganized page hierarchies; rely on searchable relational databases with views.
+- Perform unbounded queries without filters on databases containing thousands of historical rows.
 
 ## Troubleshooting
 
-| Error / Symptom          | Cause                                                           | Solution                                                                                      |
+| Error                    | Cause                                                           | Solution                                                                                      |
 | ------------------------ | --------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
 | `object_not_found` (404) | Integration does not have access to the target page or database | In Notion UI, open page menu (`...`), go to **Connections**, and invite/add your Integration. |
 | `rate_limited` (429)     | Exceeded 3 requests per second limit                            | Implement exponential backoff retry logic in API client wrappers.                             |

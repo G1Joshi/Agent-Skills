@@ -5,7 +5,7 @@ description: Expert Zed editor assistance covering high-performance Rust-based t
 
 # Zed
 
-Zed is a high-performance editor from the creators of Atom. Built in Rust with a GPU-accelerated UI. 2025 brings **Zeta** (Open Model AI) and **ACP** (Agent Client Protocol).
+Zed is a high-performance, multiplayer code editor written in Rust with a GPU-accelerated UI, native Tree-sitter parsing, and fast Language Server Protocol (LSP) intelligence.
 
 ## When to Use
 
@@ -119,13 +119,20 @@ Customizing keymaps for high-speed navigation:
 
 ### Multi-Buffer Project Search & Replace
 
-**Problem**: Search across entire codebase and edit results simultaneously in a single unified buffer.  
-**Solution**: Open multi-buffer editor.
+**Problem**: Searching across entire codebase and editing results simultaneously in a single unified buffer.
 
-1. Press `Cmd + Shift + F` to open Project Search.
-2. Enter search term and press `Enter`.
-3. Press `Option + Enter` to expand all matches into an editable multi-buffer.
-4. Make code edits across multiple files in place and save (`Cmd + S`) to write to all files.
+**Solution**:
+
+```json
+[
+  {
+    "context": "ProjectSearchView",
+    "bindings": {
+      "alt-enter": "project_search::OpenInMultiBuffer"
+    }
+  }
+]
+```
 
 ### Configuring Custom Language Servers in Zed
 
@@ -149,19 +156,24 @@ Customizing keymaps for high-speed navigation:
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** configure `format_on_save: "on"` with external tools (Prettier, Ruff, Rustfmt) for automated code cleanliness.
-- **Do** use `vtsls` for TypeScript development in Zed for superior performance and memory efficiency.
-- **Do** enable Vim mode (`"vim_mode": true`) if accustomed to modal editing workflows.
-- **Do** leverage the native Assistant Panel (`Cmd + ?`) with codebase context for rapid refactoring.
-- **Don't** overload project folders with unexcluded build caches (`target`, `dist`, `.next`).
-- **Don't** hardcode private API keys in `settings.json`; use system keychain or environment variables.
-- **Don't** leave collaborative rooms open and public when editing sensitive production configuration files.
+**Do**:
+
+- Configure `format_on_save: "on"` with external tools (Prettier, Ruff, Rustfmt) for automated code cleanliness.
+- Use `vtsls` for TypeScript development in Zed for superior performance and memory efficiency.
+- Enable Vim mode (`"vim_mode": true`) if accustomed to modal editing workflows.
+- Leverage the native Assistant Panel (`Cmd + ?`) with codebase context for rapid refactoring.
+
+**Don't**:
+
+- Overload project folders with unexcluded build caches (`target`, `dist`, `.next`).
+- Hardcode private API keys in `settings.json`; use system keychain or environment variables.
+- Leave collaborative rooms open and public when editing sensitive production configuration files.
 
 ## Troubleshooting
 
-| Error / Symptom                        | Cause                                                               | Solution                                                                                                    |
+| Error                                  | Cause                                                               | Solution                                                                                                    |
 | -------------------------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | Language server fails to initialize    | Server binary (e.g. `gopls`, `pyright`) not found in system `$PATH` | Install server binary globally or ensure it is accessible in user shell environment.                        |
 | Keybinding clash with system shortcuts | Mac system keyboard shortcuts intercepting Zed keystrokes           | Check `settings.json` keymap overrides under `~/.config/zed/keymap.json`.                                   |

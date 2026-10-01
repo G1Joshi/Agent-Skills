@@ -27,7 +27,7 @@ int main() {
 
 ## Core Concepts
 
-#Explicit Memory Management & Pointer Arithmetic
+### Explicit Memory Management & Pointer Arithmetic
 
 Direct manipulation of memory addresses, stack allocation, and heap lifetimes:
 
@@ -63,7 +63,7 @@ void buffer_free(StringBuffer *buf) {
 }
 ```
 
-#Modern C Standards (C23 / C17) Features
+### Modern C Standards (C23 / C17) Features
 
 C23 introduces standardized `bool`, `nullptr`, and `auto` type inference:
 
@@ -78,7 +78,7 @@ int main(void) {
 }
 ```
 
-#Memory Sanitizers (ASan & UBSan)
+### Memory Sanitizers (ASan & UBSan)
 
 Instruments binary builds to detect buffer overflows, use-after-free, and undefined behavior at runtime:
 
@@ -119,20 +119,20 @@ int process_data(size_t n) {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Compile with Strict Warnings**: Use `-Wall -Wextra -Wpedantic -Wconversion -Werror` to catch bugs at compile time.
-- **Run AddressSanitizer and Valgrind**: Test test binaries under ASan to eliminate memory leaks and buffer overruns before release.
-- **Use `snprintf` Instead of `sprintf`**: Always specify buffer boundaries to prevent catastrophic stack-based buffer overflows.
-- **Initialize Every Variable**: Avoid undefined behavior by zero-initializing structs (`StringBuffer buf = {0};`).
+- Compile with Strict Warnings: Use `-Wall -Wextra -Wpedantic -Wconversion -Werror` to catch bugs at compile time.
+- Run AddressSanitizer and Valgrind: Test test binaries under ASan to eliminate memory leaks and buffer overruns before release.
+- Use `snprintf` Instead of `sprintf`: Always specify buffer boundaries to prevent catastrophic stack-based buffer overflows.
+- Initialize Every Variable: Avoid undefined behavior by zero-initializing structs (`StringBuffer buf = {0};`).
 
 **Don't**:
 
-- **Don't use `gets()` or unbounded `strcpy()`**: Legacy unbounded string functions are major attack vectors for remote code execution.
-- **Don't access memory after calling `free()`**: Set pointers to `NULL` after freeing to prevent use-after-free exploits.
-- **Don't assume integer overflow wraps safely**: Signed integer overflow is undefined behavior in C; check limits explicitly.
+- Use `gets()` or unbounded `strcpy()`: Legacy unbounded string functions are major attack vectors for remote code execution.
+- Access memory after calling `free()`: Set pointers to `NULL` after freeing to prevent use-after-free exploits.
+- Assume integer overflow wraps safely: Signed integer overflow is undefined behavior in C; check limits explicitly.
 
 ## Troubleshooting
 

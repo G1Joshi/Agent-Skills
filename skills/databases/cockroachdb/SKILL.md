@@ -17,7 +17,7 @@ CockroachDB is a cloud-native, distributed SQL database. It survives disk, machi
 ## Quick Start
 
 ```sql
--- Create a table (Primary Key defaults to UUID in 2025 best practices)
+-- Create a table with UUID primary key for distributed scale
 CREATE TABLE accounts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     balance DECIMAL(19,4)
@@ -32,17 +32,17 @@ COMMIT;
 
 ## Core Concepts
 
-#Raft Consensus Ranges & Distributed Storage
+### Raft Consensus Ranges & Distributed Storage
 
 Tables are automatically split into 64MB ordered contiguous chunks called Ranges, replicated across nodes via Raft:
 
-```
+```text
 [ Table: orders ]
   ├── Range 1 (Keys: 000-100) ──→ Replicated via Raft (Node 1, Node 2, Node 3)
   └── Range 2 (Keys: 101-200) ──→ Replicated via Raft (Node 2, Node 3, Node 4)
 ```
 
-#Multi-Region Table Topologies (REGIONAL vs GLOBAL)
+### Multi-Region Table Topologies (REGIONAL vs GLOBAL)
 
 Optimizes data locality to keep data close to users and comply with data residency regulations (GDPR):
 
@@ -61,7 +61,7 @@ CREATE TABLE enterprise_crm.customers (
 ) LOCALITY REGIONAL BY ROW AS region;
 ```
 
-#Strict Serializable Transaction Isolation
+### Strict Serializable Transaction Isolation
 
 CockroachDB runs all transactions at `SERIALIZABLE` isolation using hybrid logical clocks (HLC) and multi-version concurrency control (MVCC):
 
@@ -93,20 +93,20 @@ CREATE TABLE global_store.accounts (
 ) LOCALITY REGIONAL BY ROW AS region;
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use Multi-Region Survivability Goals**: Configure `SURVIVE REGION FAILURE` to allow clusters to operate through entire cloud region outages.
-- **Use UUIDs or Hash-Sharded Indexes**: Avoid monotonically increasing primary keys (`SERIAL` / timestamps) which create hot-spot ranges.
-- **Implement Client-Side Transaction Retries**: Handle error code `40001` (transaction serialization retry errors) with exponential backoff.
-- **Use `AS OF SYSTEM TIME` for Analytical Queries**: Read from historical MVCC snapshots to eliminate read lock contention.
+- Use Multi-Region Survivability Goals: Configure `SURVIVE REGION FAILURE` to allow clusters to operate through entire cloud region outages.
+- Use UUIDs or Hash-Sharded Indexes: Avoid monotonically increasing primary keys (`SERIAL` / timestamps) which create hot-spot ranges.
+- Implement Client-Side Transaction Retries: Handle error code `40001` (transaction serialization retry errors) with exponential backoff.
+- Use `AS OF SYSTEM TIME` for Analytical Queries: Read from historical MVCC snapshots to eliminate read lock contention.
 
 **Don't**:
 
-- **Don't use sequential integer IDs as primary keys**: Sequential IDs force all insert writes onto a single Raft range node.
-- **Don't execute massive unbounded transactions**: Transactions affecting millions of rows create heavy memory pressure on the Raft coordinator.
-- **Don't ignore table locality configurations**: Missing multi-region locality rules forces cross-continental WAN roundtrips on every commit.
+- Use sequential integer IDs as primary keys: Sequential IDs force all insert writes onto a single Raft range node.
+- Execute massive unbounded transactions: Transactions affecting millions of rows create heavy memory pressure on the Raft coordinator.
+- Ignore table locality configurations: Missing multi-region locality rules forces cross-continental WAN roundtrips on every commit.
 
 ## Troubleshooting
 

@@ -5,7 +5,7 @@ description: Expert ComfyUI node-based generative AI assistance covering Stable 
 
 # ComfyUI
 
-ComfyUI is a node-based GUI for Stable Diffusion. It gives you infinite control over the generation pipeline. 2025 update (UI Overhaul) makes it more accessible.
+ComfyUI is a modular, node-based graph execution engine and GUI for Stable Diffusion and generative AI pipelines, offering granular control over every step of diffusion workflows.
 
 ## When to Use
 
@@ -28,7 +28,7 @@ python main.py --listen 127.0.0.1 --port 8188
 
 ## Core Concepts
 
-#ComfyUI API Execution via Python
+### ComfyUI API Execution via Python
 
 Triggering generation workflows programmatically via the REST API:
 
@@ -67,7 +67,7 @@ workflow_example = {
 }
 ```
 
-#Developing Custom ComfyUI Extension Nodes
+### Developing Custom ComfyUI Extension Nodes
 
 Creating a Python custom node module:
 
@@ -104,7 +104,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
 }
 ```
 
-#Model Checkpoint & LoRA Weight Stacking
+### Model Checkpoint & LoRA Weight Stacking
 
 Combining base models with style and character LoRAs:
 
@@ -144,15 +144,20 @@ def queue_prompt(prompt_workflow: dict):
 # prompt_workflow is exported from ComfyUI as 'Save (API Format)'
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** save workflows as API-format JSON (`Save (API Format)`) when building automated backend pipelines.
-- **Do** use `torch.cuda.empty_cache()` inside custom nodes processing large latent batches.
-- **Do** store model weights (`.safetensors`) on high-speed NVMe drives to minimize checkpoint switching latency.
-- **Do** utilize fp8 / nf4 quantized weights for Flux.1 and SD3 when running on consumer GPUs (16GB VRAM or less).
-- **Don't** use untrusted third-party custom nodes without reviewing their Python scripts for arbitrary remote execution.
-- **Don't** bake text watermarks into prompts; use negative embeddings and ControlNet masks.
-- **Don't** execute long render batches synchronously in UI processes; decouple generation with Redis queues.
+**Do**:
+
+- Save workflows as API-format JSON (`Save (API Format)`) when building automated backend pipelines.
+- Use `torch.cuda.empty_cache()` inside custom nodes processing large latent batches.
+- Store model weights (`.safetensors`) on high-speed NVMe drives to minimize checkpoint switching latency.
+- Utilize fp8 / nf4 quantized weights for Flux.1 and SD3 when running on consumer GPUs (16GB VRAM or less).
+
+**Don't**:
+
+- Use untrusted third-party custom nodes without reviewing their Python scripts for arbitrary remote execution.
+- Bake text watermarks into prompts; use negative embeddings and ControlNet masks.
+- Execute long render batches synchronously in UI processes; decouple generation with Redis queues.
 
 ## Troubleshooting
 

@@ -42,7 +42,7 @@ public class TestNGExample {
 
 ## Core Concepts
 
-#Declarative testng.xml Suite Management
+### Declarative testng.xml Suite Management
 
 Orchestrates multi-suite, multi-thread test runs across packages:
 
@@ -58,7 +58,7 @@ Orchestrates multi-suite, multi-thread test runs across packages:
 </suite>
 ```
 
-#Method Dependencies (`dependsOnMethods`)
+### Method Dependencies (`dependsOnMethods`)
 
 Ensures downstream tests execute only if prerequisite tests pass:
 
@@ -79,7 +79,7 @@ public class UserWorkflowTest {
 }
 ```
 
-#Native DataProviders
+### Native DataProviders
 
 Feeds parameterized data to test methods:
 
@@ -129,20 +129,20 @@ Organize tests into groups and configure parallel execution in `testng.xml`:
 </suite>
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Leverage `parallel="methods"` for Fast Execution**: Run independent tests concurrently by configuring thread counts in `testng.xml`.
-- **Use Groups for Test Categorization**: Tag tests with `@Test(groups = {"smoke", "nightly"})` for selective execution.
-- **Implement `ITestListener` for Reporting**: Create custom listeners to log failures, capture screenshots, and publish metrics.
-- **Soft Assertions for Multi-Field Validations**: Use `SoftAssert` to collect all field discrepancies before failing the test.
+- Leverage `parallel="methods"` for Fast Execution: Run independent tests concurrently by configuring thread counts in `testng.xml`.
+- Use Groups for Test Categorization: Tag tests with `@Test(groups = {"smoke", "nightly"})` for selective execution.
+- Implement `ITestListener` for Reporting: Create custom listeners to log failures, capture screenshots, and publish metrics.
+- Soft Assertions for Multi-Field Validations: Use `SoftAssert` to collect all field discrepancies before failing the test.
 
 **Don't**:
 
-- **Don't overuse `dependsOnMethods`**: Keep tests independent whenever possible; method dependencies hinder parallel execution.
-- **Don't hardcode browser parameters in code**: Pass configuration parameters dynamically via `testng.xml` parameters.
-- **Don't ignore thread safety in parallel suites**: Ensure shared drivers and utilities use `ThreadLocal<WebDriver>`.
+- Overuse `dependsOnMethods`: Keep tests independent whenever possible; method dependencies hinder parallel execution.
+- Hardcode browser parameters in code: Pass configuration parameters dynamically via `testng.xml` parameters.
+- Ignore thread safety in parallel suites: Ensure shared drivers and utilities use `ThreadLocal<WebDriver>`.
 
 ## Troubleshooting
 

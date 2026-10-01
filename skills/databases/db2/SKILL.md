@@ -33,7 +33,7 @@ CREATE INDEX HR.IDX_EMP_DEPT ON HR.EMPLOYEES (DEPARTMENT, SALARY DESC);
 
 ## Core Concepts
 
-#Table Spaces & Storage Groups Architecture
+### Table Spaces & Storage Groups Architecture
 
 Fine-grained control over physical storage containers, buffer pools, and disk layouts:
 
@@ -53,7 +53,7 @@ CREATE TABLE ENTERPRISE.ORDERS (
 ) IN TS_ORDERS;
 ```
 
-#pureQuery & Static SQL Execution
+### pureQuery & Static SQL Execution
 
 Pre-compiles and optimizes SQL queries into static execution plans for maximum mainframe execution efficiency:
 
@@ -73,11 +73,11 @@ BEGIN
 END@
 ```
 
-#High Availability Disaster Recovery (HADR)
+### High Availability Disaster Recovery (HADR)
 
 Replicates transaction log buffers synchronously from primary to standby instances:
 
-```
+```text
 [ Primary DB2 Server ] ──Synchronous Log Shipping (HADR)──→ [ Standby DB2 Server ]
 ```
 
@@ -98,20 +98,20 @@ RUNSTATS ON TABLE HR.EMPLOYEES WITH DISTRIBUTION AND DETAILED INDEXES ALL;
 FLUSH PACKAGE CACHE DYNAMIC;
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Run `RUNSTATS` Regularly**: Ensure optimizer statistics are current (`RUNSTATS ON TABLE schema.table WITH DISTRIBUTION AND DETAILED INDEXES ALL`).
-- **Tune Buffer Pools**: Allocate adequate physical memory to buffer pools to minimize disk I/O wait times.
-- **Use Lock Avoidance Techniques**: Set `DB2_EVALUNCOMMITTED=YES` to skip rows that do not satisfy search predicates during scans.
-- **Implement Reorg Checks**: Monitor table and index fragmentation and schedule automated reorganizations (`REORG TABLE`).
+- Run `RUNSTATS` Regularly: Ensure optimizer statistics are current (`RUNSTATS ON TABLE schema.table WITH DISTRIBUTION AND DETAILED INDEXES ALL`).
+- Tune Buffer Pools: Allocate adequate physical memory to buffer pools to minimize disk I/O wait times.
+- Use Lock Avoidance Techniques: Set `DB2_EVALUNCOMMITTED=YES` to skip rows that do not satisfy search predicates during scans.
+- Implement Reorg Checks: Monitor table and index fragmentation and schedule automated reorganizations (`REORG TABLE`).
 
 **Don't**:
 
-- **Don't use unindexed foreign keys**: Unindexed child foreign keys cause table-level locks during parent row deletions.
-- **Don't run long-running analytical queries against the OLTP primary**: Direct analytical queries to HADR read-on-standby replicas.
-- **Don't omit isolation levels**: Explicitly declare isolation levels (`WITH CS`, `WITH UR`) to prevent unnecessary row locking.
+- Use unindexed foreign keys: Unindexed child foreign keys cause table-level locks during parent row deletions.
+- Run long-running analytical queries against the OLTP primary: Direct analytical queries to HADR read-on-standby replicas.
+- Omit isolation levels: Explicitly declare isolation levels (`WITH CS`, `WITH UR`) to prevent unnecessary row locking.
 
 ## Troubleshooting
 

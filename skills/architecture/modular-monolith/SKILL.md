@@ -5,7 +5,7 @@ description: Expert Modular Monolith architecture assistance covering bounded mo
 
 # Modular Monolith
 
-A Modular Monolith is a single deployable unit (Monolith) where the code is structured into independent modules (like Microservices) with strict boundaries. In 2025, this is the **recommended default** architecture for most startups and medium-scale apps.
+A Modular Monolith structures a single deployment artifact into discrete, loosely-coupled domain modules with strict encapsulation boundaries, balancing microservice-level separation with monolithic operational simplicity.
 
 ## When to Use
 
@@ -16,7 +16,7 @@ A Modular Monolith is a single deployable unit (Monolith) where the code is stru
 
 ## Quick Start
 
-```
+```text
 /src
   /Modules
     /Catalog       <-- Public Interface defined here
@@ -43,11 +43,11 @@ public class OrderService {
 
 ## Core Concepts
 
-#Strict Module Encapsulation & Public API Facades
+### Strict Module Encapsulation & Public API Facades
 
 Modules interact exclusively through explicit public facades; internal repositories, models, and helpers are unexported:
 
-```
+```text
 src/modules/
   ├── billing/
   │   ├── internal/        # Private tables, services, entities
@@ -57,7 +57,7 @@ src/modules/
       └── index.ts
 ```
 
-#In-Process Domain Events
+### In-Process Domain Events
 
 Modules communicate asynchronously across boundaries using in-memory event buses:
 
@@ -75,7 +75,7 @@ inProcessBus.on("order.created", (payload) => {
 });
 ```
 
-#Architecture Linter Boundary Enforcement
+### Architecture Linter Boundary Enforcement
 
 Enforces boundary rules in CI using tools like `eslint-plugin-boundaries` or ArchUnit:
 
@@ -92,9 +92,16 @@ rules: {
 }
 ```
 
+### Architectural Advantages over Microservices
+
+- **Zero-Latency In-Memory Invocation**: Module boundaries communicate through typed facades without network serialization or RPC latency.
+- **Local Transactional Consistency**: ACID transactions remain possible across co-located tables without distributed 2PC or complex Saga orchestration.
+- **Unified Toolchain Refactoring**: IDE refactorings, cross-cutting interface changes, and atomic commits span the full system without multi-repo drift.
+
 ## Common Patterns
 
-#Internal Module Public API Facade
+### Internal Module Public API Facade
+
 **Problem**: Modules access each other's private tables, destroying encapsulation and preventing future service extraction.  
 **Solution**: Expose an explicit Public API interface per module.
 
@@ -120,26 +127,20 @@ export class BillingFacade implements BillingModuleApi {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Enforce Boundaries with Build Tools**: Use ESLint rules, TypeScript project references, or ArchUnit to prevent illegal module cross-imports.
-- **Isolate Module Schemas**: Use separate database schemas (`billing.*`, `users.*`) within the same database to prevent illicit SQL joins.
-- **Communicate Across Modules via Facades or Events**: Disallow direct access to another module's internal classes or database repositories.
-- **Keep Deployment Pipeline Unified**: Enjoy the speed of atomic single-binary deployments and coordinated database migrations.
+- Enforce Boundaries with Build Tools: Use ESLint rules, TypeScript project references, or ArchUnit to prevent illegal module cross-imports.
+- Isolate Module Schemas: Use separate database schemas (`billing.*`, `users.*`) within the same database to prevent illicit SQL joins.
+- Communicate Across Modules via Facades or Events: Disallow direct access to another module's internal classes or database repositories.
+- Keep Deployment Pipeline Unified: Enjoy the speed of atomic single-binary deployments and coordinated database migrations.
 
 **Don't**:
 
-- **Don't execute direct cross-module foreign key joins**: Reference entities from foreign modules by ID only; do not write `LEFT JOIN shipping.parcels`.
-- **Don't share mutable memory state across modules**: Pass immutable DTOs or primitive values through public facade methods.
-- **Don't prematurely split into microservices**: Extract a module into a microservice only when deployment frequency or scaling demands it.
-
-## Advantages over Microservices
-
-- **Zero Latency** communication.
-- **Transactional Consistency** (ACID) is easier (though ideally, avoid cross-module transactions).
-- **Refactoring** is cheap (IDE "Rename" works globally).
+- Execute direct cross-module foreign key joins: Reference entities from foreign modules by ID only; do not write `LEFT JOIN shipping.parcels`.
+- Share mutable memory state across modules: Pass immutable DTOs or primitive values through public facade methods.
+- Prematurely split into microservices: Extract a module into a microservice only when deployment frequency or scaling demands it.
 
 ## Troubleshooting
 

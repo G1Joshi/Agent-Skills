@@ -36,7 +36,7 @@ func main() {
 
 ## Core Concepts
 
-#Goroutines & Channels (CSP Concurrency)
+### Goroutines & Channels (CSP Concurrency)
 
 Lightweight green threads managed by the Go runtime scheduler, communicating via channels:
 
@@ -66,7 +66,7 @@ func main() {
 }
 ```
 
-#Implicit Interface Implementation
+### Implicit Interface Implementation
 
 Types satisfy interfaces automatically without declaring `implements`:
 
@@ -78,7 +78,7 @@ type Reader interface {
 // Any struct with a matching Read() method satisfies Reader implicitly
 ```
 
-#Explicit Error Handling & Sentinel Errors
+### Explicit Error Handling & Sentinel Errors
 
 Errors are regular values returned explicitly as the last return argument:
 
@@ -132,20 +132,20 @@ func worker(ctx context.Context, id int, jobs <-chan int, results chan<- int, wg
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Always Pass `context.Context`**: Propagate context across function calls to support cancellation, timeouts, and distributed tracing.
-- **Handle Every Error Explicitly**: Check `if err != nil` immediately; wrap errors with `fmt.Errorf("context: %w", err)`.
-- **Use `sync.Pool` for High-Allocation Code**: Reuse byte buffers and temporary structs to alleviate garbage collector pressure.
-- **Run `golangci-lint` in CI**: Catch bugs, memory leaks, and style inconsistencies with comprehensive static analysis.
+- Always Pass `context.Context`: Propagate context across function calls to support cancellation, timeouts, and distributed tracing.
+- Handle Every Error Explicitly: Check `if err != nil` immediately; wrap errors with `fmt.Errorf("context: %w", err)`.
+- Use `sync.Pool` for High-Allocation Code: Reuse byte buffers and temporary structs to alleviate garbage collector pressure.
+- Run `golangci-lint` in CI: Catch bugs, memory leaks, and style inconsistencies with comprehensive static analysis.
 
 **Don't**:
 
-- **Don't ignore Goroutine Leaks**: Ensure every spawned goroutine has an exit condition or context cancellation listener.
-- **Don't use `panic` for standard error flows**: Reserve `panic` for unrecoverable startup issues; return `error` for business failures.
-- **Don't pass large structs by value**: Pass structs by pointer (`*User`) to avoid memory copying overhead on function calls.
+- Ignore Goroutine Leaks: Ensure every spawned goroutine has an exit condition or context cancellation listener.
+- Use `panic` for standard error flows: Reserve `panic` for unrecoverable startup issues; return `error` for business failures.
+- Pass large structs by value: Pass structs by pointer (`*User`) to avoid memory copying overhead on function calls.
 
 ## Troubleshooting
 

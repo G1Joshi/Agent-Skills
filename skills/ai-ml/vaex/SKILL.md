@@ -30,7 +30,7 @@ print("Mean amount:", mean_val)
 
 ## Core Concepts
 
-#Opening & Querying Billion-Row Datasets Lazily
+### Opening & Querying Billion-Row Datasets Lazily
 
 Memory-mapping huge datasets without RAM exhaustion:
 
@@ -56,7 +56,7 @@ total_passengers = filtered_df.passenger_count.sum()
 print(f"Mean Speed: {mean_speed:.2f} mph, Total Passengers: {total_passengers:,}")
 ```
 
-#High-Speed Binned Aggregations & Heatmaps
+### High-Speed Binned Aggregations & Heatmaps
 
 Computing 2D binned histograms across millions of points:
 
@@ -72,7 +72,7 @@ plt.title("Pickup Density Heatmap (Computed in 150ms)")
 plt.savefig("pickup_density.png")
 ```
 
-#Exporting and Converting Large Datasets
+### Exporting and Converting Large Datasets
 
 Converting CSV files to fast memory-mapped Apache Arrow format:
 
@@ -98,15 +98,20 @@ df['tax'] = df.amount * 0.2
 heatmap = df.count(binby=[df.x, df.y], shape=128)
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** convert raw CSV or JSON files to Apache Arrow (`.arrow`) or HDF5 format to enable memory-mapping.
-- **Do** leverage virtual columns (`df['col'] = ...`) rather than materializing copies to minimize RAM usage.
-- **Do** use Vaex binned statistics (`df.count(binby=...)`) for large-scale data visualization rather than raw scatter plots.
-- **Do** keep calculations within Vaex expressions to maintain multi-threaded C++ execution speeds.
-- **Don't** convert massive Vaex DataFrames to Pandas (`df.to_pandas_df()`) if the dataset exceeds system RAM.
-- **Don't** iterate over rows with Python loops; use Vaex aggregation expressions.
-- **Don't** write intermediate datasets to uncompressed CSV; use Arrow or Parquet.
+**Do**:
+
+- Convert raw CSV or JSON files to Apache Arrow (`.arrow`) or HDF5 format to enable memory-mapping.
+- Leverage virtual columns (`df['col'] = ...`) rather than materializing copies to minimize RAM usage.
+- Use Vaex binned statistics (`df.count(binby=...)`) for large-scale data visualization rather than raw scatter plots.
+- Keep calculations within Vaex expressions to maintain multi-threaded C++ execution speeds.
+
+**Don't**:
+
+- Convert massive Vaex DataFrames to Pandas (`df.to_pandas_df()`) if the dataset exceeds system RAM.
+- Iterate over rows with Python loops; use Vaex aggregation expressions.
+- Write intermediate datasets to uncompressed CSV; use Arrow or Parquet.
 
 ## Troubleshooting
 

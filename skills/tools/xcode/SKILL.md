@@ -5,7 +5,7 @@ description: Expert Xcode assistance covering Swift/SwiftUI development, iOS/mac
 
 # Xcode
 
-Xcode is the only IDE for native Apple platforms. 2025 (Xcode 17) brings **Swift Assist** and **Predictive Code Completion** running locally on Apple Silicon.
+Xcode is Apple's unified IDE for developing software across iOS, iPadOS, macOS, watchOS, and visionOS, featuring Instruments profiling, LLDB debugging, and Swift Package Manager.
 
 ## When to Use
 
@@ -129,27 +129,33 @@ c
 
 ### Instruments Memory Leak Profiling
 
-**Problem**: Identify retain cycles and memory leaks in SwiftUI/UIKit navigation flows.  
-**Solution**: Profile with Leaks instrument.
+**Problem**: Identifying retain cycles and memory leaks in SwiftUI and UIKit navigation flows.
 
-1. In Xcode: **Product > Profile** (`Cmd + I`).
-2. Select **Leaks** template.
-3. Record app interactions.
-4. Inspect red leak markers and trace cycle reference graph to pinpoint unweakened closures (`[weak self]`).
+**Solution**:
 
-## Best Practices (2026)
+```bash
+# Run Leaks instrument on application bundle from command line
+xcrun xctrace record   --template "Leaks"   --device "iPhone 15 Pro"   --launch -- com.example.MyApp   --output ./build/MyAppLeaks.trace
+```
 
-- **Do** enable **Complete Strict Concurrency Checking** (`SWIFT_STRICT_CONCURRENCY = complete`) for Swift 6 safety.
-- **Do** manage build configuration flags using `.xcconfig` files rather than modifying `.xcodeproj` project files directly.
-- **Do** profile memory leaks, retain cycles, and allocation graphs using **Xcode Instruments** (`Cmd + I`).
-- **Do** automate archiving and TestFlight distribution using `fastlane gym` and `fastlane pilot`.
-- **Don't** commit `xcuserdata/` directories inside `.xcodeproj` or `.xcworkspace` to Git.
-- **Don't** store private distribution certificates or provisioning profile passwords in plaintext CI scripts.
-- **Don't** force-unwrap optionals (`!`) or ignore Swift Concurrency compiler warnings.
+## Best Practices
+
+**Do**:
+
+- Enable **Complete Strict Concurrency Checking** (`SWIFT_STRICT_CONCURRENCY = complete`) for Swift 6 safety.
+- Manage build configuration flags using `.xcconfig` files rather than modifying `.xcodeproj` project files directly.
+- Profile memory leaks, retain cycles, and allocation graphs using **Xcode Instruments** (`Cmd + I`).
+- Automate archiving and TestFlight distribution using `fastlane gym` and `fastlane pilot`.
+
+**Don't**:
+
+- Commit `xcuserdata/` directories inside `.xcodeproj` or `.xcworkspace` to Git.
+- Store private distribution certificates or provisioning profile passwords in plaintext CI scripts.
+- Force-unwrap optionals (`!`) or ignore Swift Concurrency compiler warnings.
 
 ## Troubleshooting
 
-| Error / Symptom                                     | Cause                                                                       | Solution                                                                                              |
+| Error                                               | Cause                                                                       | Solution                                                                                              |
 | --------------------------------------------------- | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | `Code Signing Error: No signing certificate found`  | Apple Developer account credentials expired or provisioning profile missing | Check **Signing & Capabilities** tab; select your team and enable **Automatically manage signing**.   |
 | DerivedData corruption causing phantom build errors | Stale module cache or build artifacts                                       | Run `rm -rf ~/Library/Developer/Xcode/DerivedData` and restart Xcode.                                 |

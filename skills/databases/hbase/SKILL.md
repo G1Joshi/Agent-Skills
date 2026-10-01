@@ -26,17 +26,17 @@ get 'users', 'row1'
 
 ## Core Concepts
 
-#Master-RegionServer & HDFS Architecture
+### Master-RegionServer & HDFS Architecture
 
 Tables are split into Regions, managed by RegionServers, and backed persistently by HDFS HFiles:
 
-```
+```text
 [ HBase Master (Coordination via ZooKeeper) ]
         ├── [ RegionServer 1 ] ──→ Region A (Keys: A-M) ──→ Writes to HDFS WAL & MemStore
         └── [ RegionServer 2 ] ──→ Region B (Keys: N-Z) ──→ Flushes to HFiles on HDFS
 ```
 
-#RowKey, Column Families, and Timestamps
+### RowKey, Column Families, and Timestamps
 
 Coordinates are addressed via `(RowKey, ColumnFamily, ColumnQualifier, Timestamp)`:
 
@@ -49,11 +49,11 @@ put 'telemetry_events', 'sensor_101_20260927', 'sensor_data:temp', '24.5'
 put 'telemetry_events', 'sensor_101_20260927', 'metadata:location', 'Building A'
 ```
 
-#LSM-Tree Write Path (WAL & MemStore to HFile)
+### LSM-Tree Write Path (WAL & MemStore to HFile)
 
 Writes append to Write-Ahead-Log (WAL), buffer in memory (MemStore), and flush to immutable HFiles:
 
-```
+```text
 [ Client Write ] ──→ [ Write Ahead Log (WAL) ] ──→ [ In-Memory MemStore ] ──Flush──→ [ On-Disk HFile ]
 ```
 
@@ -77,20 +77,20 @@ put.addColumn(Bytes.toBytes("metrics"), Bytes.toBytes("cpu"), Bytes.toBytes(95.4
 table.put(put);
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Salt or Hash RowKeys**: Prepend a hash or bucket prefix (`hash(id) + id`) to distribute writes evenly and prevent hotspotting single RegionServers.
-- **Keep Column Family Names Short**: Column family names are repeated in every cell on disk; use concise names (`d` for data, `m` for meta).
-- **Pre-Split Tables on Creation**: Pre-split regions based on expected rowkey distributions to avoid sudden region split pauses during bulk loads.
-- **Use Scan Caching and Batching**: Set `scan.setCaching(500)` when iterating over large ranges to reduce RPC roundtrips.
+- Salt or Hash RowKeys: Prepend a hash or bucket prefix (`hash(id) + id`) to distribute writes evenly and prevent hotspotting single RegionServers.
+- Keep Column Family Names Short: Column family names are repeated in every cell on disk; use concise names (`d` for data, `m` for meta).
+- Pre-Split Tables on Creation: Pre-split regions based on expected rowkey distributions to avoid sudden region split pauses during bulk loads.
+- Use Scan Caching and Batching: Set `scan.setCaching(500)` when iterating over large ranges to reduce RPC roundtrips.
 
 **Don't**:
 
-- **Don't use monotonically increasing rowkeys (timestamps)**: Appending timestamps causes all writes to strike a single RegionServer at any moment.
-- **Don't create more than 2-3 Column Families**: HBase is optimized for 1-2 column families; multiple families cause uneven flush behavior.
-- **Don't neglect ZooKeeper health**: ZooKeeper manages RegionServer heartbeats; cluster instability results if ZooKeeper loses quorum.
+- Use monotonically increasing rowkeys (timestamps): Appending timestamps causes all writes to strike a single RegionServer at any moment.
+- Create more than 2-3 Column Families: HBase is optimized for 1-2 column families; multiple families cause uneven flush behavior.
+- Neglect ZooKeeper health: ZooKeeper manages RegionServer heartbeats; cluster instability results if ZooKeeper loses quorum.
 
 ## Troubleshooting
 

@@ -52,17 +52,17 @@ async function runSaga<T>(context: T, steps: SagaStep<T>[]) {
 
 ## Core Concepts
 
-#Orchestration vs Choreography Sagas
+### Orchestration vs Choreography Sagas
 
 Sagas coordinate multi-service transactions using either a centralized orchestrator or decentralized events:
 
-```
+```text
 [ Orchestrator ] ──1. Reserve Stock──→ [ Inventory Service ]
                  ──2. Charge Card───→ [ Payment Service ] (FAILS!)
                  ──3. Compensate: Release Stock ──→ [ Inventory Service ]
 ```
 
-#Compensating Transactions (Semantic Rollback)
+### Compensating Transactions (Semantic Rollback)
 
 Because local transactions commit at each step, failures must be undone semantically through compensating transactions:
 
@@ -72,7 +72,7 @@ Because local transactions commit at each step, failures must be undone semantic
 | `ChargeCreditCard(amount)`     | `RefundCreditCard(amount)`     |
 | `CreateShipmentLabel()`        | `CancelShipmentLabel()`        |
 
-#Orchestrator State Machine Definition
+### Orchestrator State Machine Definition
 
 Tracks workflow progression and triggers compensation on error:
 
@@ -119,20 +119,20 @@ async function processPayment(orderId: string, idempotencyKey: string) {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Prefer Orchestration for Complex Multi-Step Sagas**: Use workflow orchestrators (Temporal, AWS Step Functions) for complex multi-branch sagas.
-- **Make Compensating Transactions Idempotent**: Ensure compensation actions can be safely retried multiple times without side effects.
-- **Record Saga State Persistently**: Store the current step and execution state in a durable outbox/database before calling external services.
-- **Design for Forward Recovery**: When possible, retry or alert operators to fix transient issues rather than compensating immediately.
+- Prefer Orchestration for Complex Multi-Step Sagas: Use workflow orchestrators (Temporal, AWS Step Functions) for complex multi-branch sagas.
+- Make Compensating Transactions Idempotent: Ensure compensation actions can be safely retried multiple times without side effects.
+- Record Saga State Persistently: Store the current step and execution state in a durable outbox/database before calling external services.
+- Design for Forward Recovery: When possible, retry or alert operators to fix transient issues rather than compensating immediately.
 
 **Don't**:
 
-- **Don't assume compensating transactions can never fail**: Implement alerts and manual intervention queues for failed compensations.
-- **Don't use distributed locks across sagas**: Avoid blocking local resources while waiting for distant service responses.
-- **Don't use choreography for sagas with > 4 services**: Event-driven choreography becomes impossible to trace and reason about at scale.
+- Assume compensating transactions can never fail: Implement alerts and manual intervention queues for failed compensations.
+- Use distributed locks across sagas: Avoid blocking local resources while waiting for distant service responses.
+- Use choreography for sagas with > 4 services: Event-driven choreography becomes impossible to trace and reason about at scale.
 
 ## Troubleshooting
 

@@ -5,7 +5,7 @@ description: Expert Express.js assistance covering routing, middleware pipelines
 
 # Express
 
-Express is the standard web framework for Node.js. Express 5 (2025) finally stabilizes modern features like Promise support in middleware, removing the need for `express-async-errors`.
+Express is a minimalist, unopinionated web framework for Node.js, providing robust HTTP utility methods, extensible middleware architectures, and async handler support.
 
 ## When to Use
 
@@ -31,7 +31,7 @@ app.listen(3000);
 
 ## Core Concepts
 
-#Modular Route Handlers & Express Router
+### Modular Route Handlers & Express Router
 
 Structuring scalable APIs with decoupled sub-routers:
 
@@ -80,7 +80,7 @@ userRouter.post(
 export default userRouter;
 ```
 
-#Custom Middleware & Security Pipeline
+### Custom Middleware & Security Pipeline
 
 Hardening Express with Helmet, CORS, and compression:
 
@@ -106,7 +106,7 @@ app.listen(3000, () => {
 });
 ```
 
-#Centralized Error Handling Middleware
+### Centralized Error Handling Middleware
 
 Uniform error trapping conforming to 4-argument signature:
 
@@ -166,15 +166,20 @@ app.use((err, req, res, next) => {
 });
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** always mount the 4-argument error-handling middleware (`(err, req, res, next)`) at the very end of the middleware stack.
-- **Do** use `helmet()` to secure HTTP headers (HSTS, CSP, X-Frame-Options) against common exploits.
-- **Do** wrap async handler functions or use Express 5 to catch rejected promises automatically.
-- **Do** limit request body payload size (`express.json({ limit: '100kb' })`) to defend against DoS attacks.
-- **Don't** use synchronous I/O operations (`fs.readFileSync`) inside route handlers.
-- **Don't** omit `return` after sending responses (`res.json(...)`) inside conditional branches.
-- **Don't** expose stack traces in production error responses (`NODE_ENV === 'production'`).
+**Do**:
+
+- Always mount the 4-argument error-handling middleware (`(err, req, res, next)`) at the very end of the middleware stack.
+- Use `helmet()` to secure HTTP headers (HSTS, CSP, X-Frame-Options) against common exploits.
+- Wrap async handler functions or use Express 5 to catch rejected promises automatically.
+- Limit request body payload size (`express.json({ limit: '100kb' })`) to defend against DoS attacks.
+
+**Don't**:
+
+- Use synchronous I/O operations (`fs.readFileSync`) inside route handlers.
+- Omit `return` after sending responses (`res.json(...)`) inside conditional branches.
+- Expose stack traces in production error responses (`NODE_ENV === 'production'`).
 
 ## Troubleshooting
 

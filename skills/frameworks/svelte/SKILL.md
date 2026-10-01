@@ -5,7 +5,7 @@ description: Expert Svelte assistance covering Svelte 5 Runes, reactive declarat
 
 # Svelte
 
-Svelte is a component framework that compiles your code to tiny, framework-less vanilla JS. Svelte 5 (2025) introduces "Runes" for explicit reactivity.
+Svelte compiles declarative components into minimal vanilla JavaScript, utilizing explicit Runes for fine-grained reactivity without Virtual DOM overhead.
 
 ## When to Use
 
@@ -80,17 +80,18 @@ Use modern Svelte 5 Runes (`$state`, `$derived`, `$effect`):
 </button>
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use Runes**: Migrate from `let` + `$` syntax to `$state` and `$derived` for explicit reactivity.
-- **Use `onclick`**: Svelte 5 prefers native attributes (`onclick`) over `on:click` directives.
-- **Use Snippets**: Replace `slots` with Snippets for better type safety and flexibility.
+- Use Runes: Migrate from legacy `let` syntax to `$state` and `$derived` for explicit reactivity.
+- Use `onclick`: Svelte 5 prefers native attributes (`onclick`) over `on:click` directives.
+- Use Snippets: Replace `slots` with Snippets for better type safety and flexibility.
 
 **Don't**:
 
-- **Don't rely on auto-reactivity (Legacy)**: In Svelte 5 settings, opting into Runes disables the "magic" assignment tracking of Svelte 3/4. This is good for predictability.
+- Rely on auto-reactivity (Legacy): In Svelte 5 settings, opting into Runes disables the "magic" assignment tracking of Svelte 3/4.
+- Mutate state directly across component boundaries without explicit callbacks or binding props.
 
 ## Troubleshooting
 

@@ -29,15 +29,15 @@ RETURN fof.name;
 
 ## Core Concepts
 
-#Labeled Property Graph (LPG) Model
+### Labeled Property Graph (LPG) Model
 
 Vertices are Nodes with Labels; connections are directed Relationships with Types; both store arbitrary key-value Properties:
 
-```
+```text
 (:Person {name: "Alice"}) ──[:MANAGES {since: 2023}]──→ (:Person {name: "Bob"})
 ```
 
-#Cypher Query Language Graph Matching
+### Cypher Query Language Graph Matching
 
 Declarative pattern matching queries relationships visually:
 
@@ -51,7 +51,7 @@ ORDER BY mutualFriends DESC
 LIMIT 10;
 ```
 
-#Graph Data Science (GDS) Algorithms
+### Graph Data Science (GDS) Algorithms
 
 Executes graph algorithms (PageRank, Community Detection, Shortest Path) natively in memory:
 
@@ -81,20 +81,20 @@ RETURN path,
        reduce(total = 0, r in relationships(path) | total + r.amount) as totalTransferred;
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use Relationship Types Meaningfully**: Name relationships with active verbs (`[:PURCHASED]`, `[:FOLLOWS]`) to eliminate ambiguity.
-- **Create Schema Constraints**: Create uniqueness constraints (`CREATE CONSTRAINT FOR (u:User) REQUIRE u.id IS UNIQUE`) for index lookups.
-- **Profile Cypher Queries with `PROFILE`**: Inspect execution operators, memory allocations, and DB hits to optimize graph navigations.
-- **Use Parameters in Cypher**: Always pass query variables as `$params` to allow Neo4j to cache compiled execution plans.
+- Use Relationship Types Meaningfully: Name relationships with active verbs (`[:PURCHASED]`, `[:FOLLOWS]`) to eliminate ambiguity.
+- Create Schema Constraints: Create uniqueness constraints (`CREATE CONSTRAINT FOR (u:User) REQUIRE u.id IS UNIQUE`) for index lookups.
+- Profile Cypher Queries with `PROFILE`: Inspect execution operators, memory allocations, and DB hits to optimize graph navigations.
+- Use Parameters in Cypher: Always pass query variables as `$params` to allow Neo4j to cache compiled execution plans.
 
 **Don't**:
 
-- **Don't create "Supernodes" with millions of relationships**: Supernodes cause massive memory overhead during traversals; refactor into intermediate nodes.
-- **Don't run unbounded relationship traversals**: Never run `MATCH (a)-[*]->(b)`; set explicit depth bounds (`MATCH (a)-[*1..4]->(b)`).
-- **Don't use Neo4j for bulk tabular aggregations**: Graph databases excel at traversals; use columnar databases for wide table analytics.
+- Create "Supernodes" with millions of relationships: Supernodes cause massive memory overhead during traversals; refactor into intermediate nodes.
+- Run unbounded relationship traversals: Never run `MATCH (a)-[*]->(b)`; set explicit depth bounds (`MATCH (a)-[*1..4]->(b)`).
+- Use Neo4j for bulk tabular aggregations: Graph databases excel at traversals; use columnar databases for wide table analytics.
 
 ## Troubleshooting
 

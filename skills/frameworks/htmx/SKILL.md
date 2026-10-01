@@ -25,7 +25,7 @@ High power tools for HTML. Allows you to build modern user interfaces with the s
 
 ## Core Concepts
 
-#Declarative AJAX with Trigger & Swap Directives
+### Declarative AJAX with Trigger & Swap Directives
 
 Making async requests and swapping server HTML directly into DOM targets:
 
@@ -49,7 +49,7 @@ Making async requests and swapping server HTML directly into DOM targets:
 </div>
 ```
 
-#Inline Editing with Target Swapping
+### Inline Editing with Target Swapping
 
 Updating tabular records in-place without page reloads:
 
@@ -71,7 +71,7 @@ Updating tabular records in-place without page reloads:
 </tr>
 ```
 
-#Out-of-Band (OOB) Updates & Server-Sent Events
+### Out-of-Band (OOB) Updates & Server-Sent Events
 
 Updating multiple disconnected DOM regions from a single response:
 
@@ -110,15 +110,20 @@ Use declarative htmx attributes on standard HTML input:
 <div id="search-results"></div>
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** return clean HTML partials/fragments from the server instead of entire HTML document trees for htmx endpoints.
-- **Do** use `hx-indicator` to provide visual loading indicators and spinners for every network interaction.
-- **Do** leverage `hx-boost="true"` on root layout links and forms for instant progressive enhancement.
-- **Do** validate and sanitize all server-rendered HTML to neutralize Cross-Site Scripting (XSS).
-- **Don't** return JSON from htmx endpoints; htmx is fundamentally designed for server-rendered HTML.
-- **Don't** neglect accessibility; announce dynamic swaps to screen readers using `aria-live="polite"`.
-- **Don't** overuse client-side scripting when declarative htmx attributes can achieve the desired interaction.
+**Do**:
+
+- Return clean HTML partials/fragments from the server instead of entire HTML document trees for htmx endpoints.
+- Use `hx-indicator` to provide visual loading indicators and spinners for every network interaction.
+- Leverage `hx-boost="true"` on root layout links and forms for instant progressive enhancement.
+- Validate and sanitize all server-rendered HTML to neutralize Cross-Site Scripting (XSS).
+
+**Don't**:
+
+- Return JSON from htmx endpoints; htmx is fundamentally designed for server-rendered HTML.
+- Neglect accessibility; announce dynamic swaps to screen readers using `aria-live="polite"`.
+- Overuse client-side scripting when declarative htmx attributes can achieve the desired interaction.
 
 ## Troubleshooting
 

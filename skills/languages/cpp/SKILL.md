@@ -39,7 +39,7 @@ auto user = std::make_unique<User>("John", "john@example.com");
 
 ## Core Concepts
 
-#RAII & Modern Smart Pointers (C++20/C++23)
+### RAII & Modern Smart Pointers (C++20/C++23)
 
 Resource Acquisition Is Initialization (RAII) ties resource management directly to object lifetime:
 
@@ -65,7 +65,7 @@ void execute_task() {
 } // conn goes out of scope here; destructor executes automatically
 ```
 
-#Move Semantics & `std::move`
+### Move Semantics & `std::move`
 
 Transfers ownership of heavy heap resources without expensive deep memory copying:
 
@@ -78,7 +78,7 @@ std::vector<int> generate_data() {
 }
 ```
 
-#C++20 Concepts & Constexpr Metaprogramming
+### C++20 Concepts & Constexpr Metaprogramming
 
 Constrains template arguments with readable compile-time predicates:
 
@@ -96,7 +96,11 @@ T calculate_mean(T a, T b) {
 
 ## Common Patterns
 
-### Modern C++ Features
+### Structured Bindings & Optional Returns
+
+**Problem**: Returning multiple values safely without error-prone output pointers or boilerplate structs.
+
+**Solution**:
 
 ```cpp
 // Structured bindings (C++17)
@@ -124,6 +128,10 @@ auto result = numbers
 
 ### RAII Pattern
 
+**Problem**: Manual resource management risks leaks when exceptions interrupt execution flow.
+
+**Solution**:
+
 ```cpp
 class FileHandle {
 public:
@@ -148,20 +156,20 @@ private:
 };
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use Smart Pointers (`std::unique_ptr`, `std::shared_ptr`)**: Completely avoid raw `new` and `delete` expressions.
-- **Pass Heavy Read-Only Objects by `const&`**: Prevent accidental copy overhead (`void process(const std::string& data)`).
-- **Use `std::string_view` and `std::span`**: Reference continuous memory without copying or allocating heap strings.
-- **Enable Clang-Tidy & AddressSanitizer in CI**: Enforce modern standards and catch memory leaks automatically.
+- Use Smart Pointers (`std::unique_ptr`, `std::shared_ptr`): Completely avoid raw `new` and `delete` expressions.
+- Pass Heavy Read-Only Objects by `const&`: Prevent accidental copy overhead (`void process(const std::string& data)`).
+- Use `std::string_view` and `std::span`: Reference continuous memory without copying or allocating heap strings.
+- Enable Clang-Tidy & AddressSanitizer in CI: Enforce modern standards and catch memory leaks automatically.
 
 **Don't**:
 
-- **Don't use C-style casts (`(int)x`)**: Use explicit C++ casts (`static_cast`, `reinterpret_cast`) to retain compiler safety checks.
-- **Don't return references to local stack variables**: Returning local references causes dangling pointers and immediate undefined behavior.
-- **Don't use macros (`#define`) for constants**: Use `constexpr` or `inline constexpr` variables.
+- Use C-style casts (`(int)x`): Use explicit C++ casts (`static_cast`, `reinterpret_cast`) to retain compiler safety checks.
+- Return references to local stack variables: Returning local references causes dangling pointers and immediate undefined behavior.
+- Use macros (`#define`) for constants: Use `constexpr` or `inline constexpr` variables.
 
 ## Troubleshooting
 

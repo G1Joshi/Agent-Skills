@@ -5,7 +5,7 @@ description: Expert Perl assistance covering regular expressions, hashes, CPAN m
 
 # Perl
 
-Perl 5.40 (2024) introduced a **native `try/catch`** and the `__CLASS__` keyword. It remains unbeatable for text processing one-liners.
+Perl is a highly capable, feature-rich programming language renowned for powerful regular expression processing, system administration automation, and robust text transformation.
 
 ## When to Use
 
@@ -31,7 +31,7 @@ for my $name (sort keys %scores) {
 
 ## Core Concepts
 
-#Regular Expressions as First-Class Language Primitives
+### Regular Expressions as First-Class Language Primitives
 
 Perl regular expressions are deeply integrated into language syntax:
 
@@ -50,7 +50,7 @@ if ($log_entry =~ /\[(.*?)\]\s+(\w+):\s+(.*)/) {
 }
 ```
 
-#Modern Perl (v5.36+ / v5.38+) Native Subroutine Signatures
+### Modern Perl (v5.36+ / v5.38+) Native Subroutine Signatures
 
 Replaces manual `@_` unpacking with native typed signatures and experimental class features:
 
@@ -74,7 +74,7 @@ $acc->deposit(50);
 say "Balance: ", $acc->get_balance(); # 150
 ```
 
-#Context Awareness (Scalar vs List Context)
+### Context Awareness (Scalar vs List Context)
 
 Functions dynamically change return values based on whether a scalar or list is expected:
 
@@ -110,20 +110,20 @@ __DATA__
 [2025-03-01 12:01:23] ERROR Database connection failed
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Always Declare `use strict; use warnings;`**: Eliminate dangerous silent global variables and undeclared lexical bugs.
-- **Use `use v5.36;` or Higher**: Automatically enables strict, warnings, modern subroutine signatures, and say syntax.
-- **Use Mojolicious for Web APIs**: Build modern non-blocking web backends and WebSockets with Mojolicious.
-- **Manage Dependencies with `cpanm` and `Carton`**: Isolate project dependencies locally in `local/` rather than modifying system Perl.
+- Always Declare `use strict; use warnings;`: Eliminate dangerous silent global variables and undeclared lexical bugs.
+- Use `use v5.36;` or Higher: Automatically enables strict, warnings, modern subroutine signatures, and say syntax.
+- Use Mojolicious for Web APIs: Build modern non-blocking web backends and WebSockets with Mojolicious.
+- Manage Dependencies with `cpanm` and `Carton`: Isolate project dependencies locally in `local/` rather than modifying system Perl.
 
 **Don't**:
 
-- **Don't use single-character global punctuation variables**: Replace `$@`, `$/`, and `$_` with readable `English` module aliases or modern signatures.
-- **Don't use two-argument `open`**: Always use 3-argument open (`open(my $fh, "<", $filename)`) with lexical filehandles.
-- **Don't write new OO code with bare blessed hashes**: Use modern `use v5.38; use experimental 'class';` or `Moo`/`Moose`.
+- Use single-character global punctuation variables: Replace `$@`, `$/`, and `$_` with readable `English` module aliases or modern signatures.
+- Use two-argument `open`: Always use 3-argument open (`open(my $fh, "<", $filename)`) with lexical filehandles.
+- Write new OO code with bare blessed hashes: Use modern `use v5.38; use experimental 'class';` or `Moo`/`Moose`.
 
 ## Troubleshooting
 

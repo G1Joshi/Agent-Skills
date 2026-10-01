@@ -5,7 +5,7 @@ description: Expert Sentry error monitoring assistance covering exception tracki
 
 # Sentry
 
-Sentry provides self-hosted and cloud-based error monitoring. In 2025, it excels at **Performance Monitoring** and identifying **AI Model** hallucinations or errors.
+Sentry provides real-time application performance monitoring, distributed tracing, and code-level error diagnostics across frontend, backend, and mobile stacks.
 
 ## When to Use
 
@@ -33,7 +33,7 @@ try {
 
 ## Core Concepts
 
-#Node.js / Next.js SDK Initialization with Performance Tracing
+### Node.js / Next.js SDK Initialization with Performance Tracing
 
 Instrumenting application with trace sampling and error capture:
 
@@ -57,7 +57,7 @@ Sentry.init({
 });
 ```
 
-#Manual Error Capture with Custom Context
+### Manual Error Capture with Custom Context
 
 Enriching errors with user context and custom tags:
 
@@ -82,7 +82,7 @@ async function processPayment(userId: string, amountCents: number) {
 }
 ```
 
-#Custom Performance Spans
+### Custom Performance Spans
 
 Measuring execution duration of critical code blocks:
 
@@ -131,15 +131,20 @@ app.use((req, res, next) => {
 Sentry.setupExpressErrorHandler(app);
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** configure `release` tags to correlate error occurrences with specific Git commits and deployments.
-- **Do** upload source maps during CI/CD using `@sentry/cli` to get clear TypeScript line numbers in stack traces.
-- **Do** sanitize sensitive PII, credit card numbers, and authorization headers in `beforeSend`.
-- **Do** tune `tracesSampleRate` in high-throughput environments to prevent excessive ingestion costs.
-- **Don't** leave DSN keys exposed in public repositories without domain restriction rules.
-- **Don't** catch exceptions silently without logging or passing to `Sentry.captureException()`.
-- **Don't** log high-frequency expected user validation errors (e.g. invalid form fields) as Sentry exceptions.
+**Do**:
+
+- Configure `release` tags to correlate error occurrences with specific Git commits and deployments.
+- Upload source maps during CI/CD using `@sentry/cli` to get clear TypeScript line numbers in stack traces.
+- Sanitize sensitive PII, credit card numbers, and authorization headers in `beforeSend`.
+- Tune `tracesSampleRate` in high-throughput environments to prevent excessive ingestion costs.
+
+**Don't**:
+
+- Leave DSN keys exposed in public repositories without domain restriction rules.
+- Catch exceptions silently without logging or passing to `Sentry.captureException()`.
+- Log high-frequency expected user validation errors (e.g. invalid form fields) as Sentry exceptions.
 
 ## Troubleshooting
 

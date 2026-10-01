@@ -5,7 +5,7 @@ description: Expert Turbopack assistance covering Next.js incremental compilatio
 
 # Turbopack
 
-Turbopack is the build engine built by Vercel. In 2025, it is **Stable** in Next.js and powers the fastest dev server in the ecosystem.
+Turbopack is an incremental build engine written in Rust, optimized for lightning-fast development servers and module bundling in Next.js applications.
 
 ## When to Use
 
@@ -158,19 +158,24 @@ module.exports = nextConfig;
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** run `next dev --turbopack` during local development to gain up to 10x faster startup and HMR times.
-- **Do** define path aliases in `tsconfig.json` so Turbopack automatically resolves module imports.
-- **Do** use native CSS Modules and Tailwind CSS, which are deeply optimized for Turbopack compilation.
-- **Do** monitor memory consumption on massive monorepos using Turborepo daemon (`turbo daemon`).
-- **Don't** use legacy Webpack plugins that do not have Turbopack loader equivalents.
-- **Don't** disable persistent caching in production CI pipelines; configure Turborepo Remote Caching.
-- **Don't** perform heavy synchronous file system reads inside client component code.
+**Do**:
+
+- Run `next dev --turbopack` during local development to gain up to 10x faster startup and HMR times.
+- Define path aliases in `tsconfig.json` so Turbopack automatically resolves module imports.
+- Use native CSS Modules and Tailwind CSS, which are deeply optimized for Turbopack compilation.
+- Monitor memory consumption on massive monorepos using Turborepo daemon (`turbo daemon`).
+
+**Don't**:
+
+- Use legacy Webpack plugins that do not have Turbopack loader equivalents.
+- Disable persistent caching in production CI pipelines; configure Turborepo Remote Caching.
+- Perform heavy synchronous file system reads inside client component code.
 
 ## Troubleshooting
 
-| Error / Symptom                    | Cause                                                                 | Solution                                                                                               |
+| Error                              | Cause                                                                 | Solution                                                                                               |
 | ---------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | Unsupported Webpack plugin warning | Custom Webpack plugins in `next.config.js` not supported in Turbopack | Migrate logic to Turbopack loader rules under `experimental.turbo.rules` or run without `--turbopack`. |
 | CSS module class name mismatch     | Conflicting PostCSS or Tailwind CSS configuration                     | Verify `postcss.config.js` uses standard `@tailwindcss/postcss` plugin compatible with Rust compiler.  |

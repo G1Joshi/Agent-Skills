@@ -33,7 +33,7 @@ console.log(time.format("%d.%m.%Y"));
 
 ## Core Concepts
 
-#Direct Native Runtime Bridge
+### Direct Native Runtime Bridge
 
 NativeScript generates JavaScript runtime bindings for all platform APIs at compile time, allowing direct native instantiation:
 
@@ -71,7 +71,7 @@ export function showNativeNotification(title: string, message: string) {
 }
 ```
 
-#Declarative Native Layout Containers
+### Declarative Native Layout Containers
 
 NativeScript layouts translate directly into native ViewGroup components:
 
@@ -93,7 +93,7 @@ NativeScript layouts translate directly into native ViewGroup components:
 </Page>
 ```
 
-#Native Plugin Integration via CocoaPods & Gradle
+### Native Plugin Integration via CocoaPods & Gradle
 
 Seamlessly bundles third-party native libraries:
 
@@ -138,20 +138,20 @@ export function showToast(message: string): void {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use Modern Framework Flavors**: Prefer `@nativescript/angular` or `@nativescript/vue` for modern component architectures.
-- **Cache Native Object Lookups**: Store repeated native references instead of constantly traversing the JS-to-native reflection bridge.
-- **Implement Virtualized Lists**: Always use `ListView` or `CollectionView` rather than repeating items inside a `ScrollView`.
-- **Test on Physical Devices**: Native bridge behavior and memory performance differ significantly between simulators and actual devices.
+- Use Modern Framework Flavors: Prefer `@nativescript/angular` or `@nativescript/vue` for modern component architectures.
+- Cache Native Object Lookups: Store repeated native references instead of constantly traversing the JS-to-native reflection bridge.
+- Implement Virtualized Lists: Always use `ListView` or `CollectionView` rather than repeating items inside a `ScrollView`.
+- Test on Physical Devices: Native bridge behavior and memory performance differ significantly between simulators and actual devices.
 
 **Don't**:
 
-- **Don't use HTML/DOM APIs**: There is no browser DOM in NativeScript; do not reference `document.getElementById` or `window`.
-- **Don't block the Native UI Thread**: Offload heavy computational algorithms to background Web Workers.
-- **Don't ignore Platform Differences**: Account for distinct iOS navigation controllers versus Android activity back-stack lifecycles.
+- Use HTML/DOM APIs: There is no browser DOM in NativeScript; do not reference `document.getElementById` or `window`.
+- Block the Native UI Thread: Offload heavy computational algorithms to background Web Workers.
+- Ignore Platform Differences: Account for distinct iOS navigation controllers versus Android activity back-stack lifecycles.
 
 ## Troubleshooting
 

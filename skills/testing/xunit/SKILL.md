@@ -40,16 +40,16 @@ public class CalculatorTests
 
 ## Core Concepts
 
-#Instance-Per-Test Lifecycle Architecture
+### Instance-Per-Test Lifecycle Architecture
 
 Unlike NUnit and MSTest, xUnit instantiates a completely new instance of the test class for every `[Fact]`, preventing shared instance field state:
 
-```
+```text
 [ Test Class ] ──new()──→ Runs Fact 1 ──Dispose()
 [ Test Class ] ──new()──→ Runs Fact 2 ──Dispose()
 ```
 
-#Facts vs Theories (`[Fact]` vs `[Theory]`)
+### Facts vs Theories (`[Fact]` vs `[Theory]`)
 
 - `[Fact]`: Test that is always true and tests invariant conditions.
 - `[Theory]`: Parameterized test that executes across datasets:
@@ -78,7 +78,7 @@ public class OrderValidatorTests
 }
 ```
 
-#Shared Context via Class Fixtures (`IClassFixture<T>`)
+### Shared Context via Class Fixtures (`IClassFixture<T>`)
 
 Shares expensive setup (database, web test servers) across tests without static state:
 
@@ -127,20 +127,20 @@ public class MathTests
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use Constructors for Setup and `Dispose()` for Teardown**: Implement `IDisposable` or `IAsyncLifetime` rather than looking for `[SetUp]`.
-- **Use `IClassFixture<T>` for Shared State**: Share heavy dependencies (like Testcontainers or WebApplicationFactory) cleanly.
-- **Inject `ITestOutputHelper` for Logging**: Write test logs via `ITestOutputHelper` rather than `Console.WriteLine()`.
-- **Run Tests in Parallel**: Leverage xUnit's default parallelization across test collections.
+- Use Constructors for Setup and `Dispose()` for Teardown: Implement `IDisposable` or `IAsyncLifetime` rather than looking for `[SetUp]`.
+- Use `IClassFixture<T>` for Shared State: Share heavy dependencies (like Testcontainers or WebApplicationFactory) cleanly.
+- Inject `ITestOutputHelper` for Logging: Write test logs via `ITestOutputHelper` rather than `Console.WriteLine()`.
+- Run Tests in Parallel: Leverage xUnit's default parallelization across test collections.
 
 **Don't**:
 
-- **Don't use static variables in test classes**: xUnit runs test classes in parallel; static state introduces race conditions.
-- **Don't write `Assert.True(x == y)`**: Use `Assert.Equal(expected, actual)` for informative failure diff messages.
-- **Don't create asynchronous void tests**: Always return `async Task` from test methods; `async void` exceptions crash the test runner.
+- Use static variables in test classes: xUnit runs test classes in parallel; static state introduces race conditions.
+- Write `Assert.True(x == y)`: Use `Assert.Equal(expected, actual)` for informative failure diff messages.
+- Create asynchronous void tests: Always return `async Task` from test methods; `async void` exceptions crash the test runner.
 
 ## Troubleshooting
 

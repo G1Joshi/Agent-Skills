@@ -30,18 +30,18 @@ async function getUsers() {
 
 ## Core Concepts
 
-#Separation of Compute and Storage Architecture
+### Separation of Compute and Storage Architecture
 
 Stateless PostgreSQL compute nodes query a custom, distributed, multi-tenant storage engine backed by cloud object storage:
 
-```
+```text
 [ Stateless Postgres Compute Node ] ──Page Service Protocol──→ [ Distributed Storage Engine ]
                                                                         │ (LSM Tree)
                                                                         ▼
                                                              [ Immutable Cloud S3 ]
 ```
 
-#Copy-on-Write Database Branching
+### Copy-on-Write Database Branching
 
 Creates instant, isolated point-in-time database clones using copy-on-write storage:
 
@@ -51,7 +51,7 @@ neon branch create --name pr-415-preview --from main
 # Creates an isolated, fully functional Postgres instance in 500ms!
 ```
 
-#Serverless Driver over WebSockets / HTTP
+### Serverless Driver over WebSockets / HTTP
 
 Bypasses TCP connection handshake overhead from serverless environments:
 
@@ -85,20 +85,20 @@ DATABASE_URL=$BRANCH_CONN npm run test:e2e
 neon branch delete pr-tests-42
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Integrate Database Branching into GitHub Actions**: Spin up isolated preview databases for each pull request; destroy them on merge.
-- **Use the Serverless HTTP Driver for Edge Functions**: Prevent connection starvation using `@neondatabase/serverless`.
-- **Enable Autosuspend for Non-Production Branches**: Configure dev branches to suspend after 5 minutes of inactivity to minimize costs.
-- **Leverage Connection Pooling**: Connect via the pooled connection string (`-pooler`) when connecting from serverless backends.
+- Integrate Database Branching into GitHub Actions: Spin up isolated preview databases for each pull request; destroy them on merge.
+- Use the Serverless HTTP Driver for Edge Functions: Prevent connection starvation using `@neondatabase/serverless`.
+- Enable Autosuspend for Non-Production Branches: Configure dev branches to suspend after 5 minutes of inactivity to minimize costs.
+- Leverage Connection Pooling: Connect via the pooled connection string (`-pooler`) when connecting from serverless backends.
 
 **Don't**:
 
-- **Don't open direct TCP connections from thousands of Lambda functions**: Direct TCP exhausted Postgres connection limits; use the pooled endpoint.
-- **Don't keep preview branches alive indefinitely**: Automate cleanup of merged pull request database branches via GitHub Actions.
-- **Don't omit query parameters in template strings**: Always use tagged template literals (`sql`SELECT * FROM users WHERE id = ${id}``) to prevent SQLi.
+- Open direct TCP connections from thousands of Lambda functions: Direct TCP exhausted Postgres connection limits; use the pooled endpoint.
+- Keep preview branches alive indefinitely: Automate cleanup of merged pull request database branches via GitHub Actions.
+- Omit query parameters in template strings: Always use tagged template literals (`sql`SELECT * FROM users WHERE id = ${id}``) to prevent SQLi.
 
 ## Troubleshooting
 

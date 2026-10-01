@@ -30,7 +30,7 @@ serde = "1.0"
 
 ## Core Concepts
 
-#Cargo Workspace Configuration (Cargo.toml)
+### Cargo Workspace Configuration (Cargo.toml)
 
 Managing multiple interdependent crates in a monorepo:
 
@@ -59,7 +59,7 @@ panic = "abort"        # Eliminate unwinding code overhead
 strip = true           # Automatically strip symbols from binary
 ```
 
-#High-Speed Testing, Benchmarking & Lints
+### High-Speed Testing, Benchmarking & Lints
 
 Automating quality checks in CI/CD pipelines:
 
@@ -77,7 +77,7 @@ cargo test --workspace --all-features
 cargo audit
 ```
 
-#Adding and Managing Dependencies
+### Adding and Managing Dependencies
 
 Adding pinned crates with specific feature sets:
 
@@ -109,15 +109,20 @@ panic = "abort"        # Strip unwind tables
 strip = true           # Strip all debug symbols
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use `lto = "fat"`, `codegen-units = 1`, and `strip = true` in release profiles to minimize binary size.
-- **Do** commit `Cargo.lock` for all binary application crates to guarantee reproducible builds.
-- **Do** run `cargo clippy -- -D warnings` and `cargo audit` in all CI pipelines.
-- **Do** leverage workspace-level dependencies (`workspace.dependencies`) to synchronize versions across crates.
-- **Don't** ignore `Cargo.lock` in application repositories (only libraries should consider omitting it).
-- **Don't** enable heavy, unneeded crate features; include only the specific feature flags your application uses.
-- **Don't** deploy debug build artifacts (`target/debug`); always compile production releases with `cargo build --release`.
+**Do**:
+
+- Use `lto = "fat"`, `codegen-units = 1`, and `strip = true` in release profiles to minimize binary size.
+- Commit `Cargo.lock` for all binary application crates to guarantee reproducible builds.
+- Run `cargo clippy -- -D warnings` and `cargo audit` in all CI pipelines.
+- Leverage workspace-level dependencies (`workspace.dependencies`) to synchronize versions across crates.
+
+**Don't**:
+
+- Ignore `Cargo.lock` in application repositories (only libraries should consider omitting it).
+- Enable heavy, unneeded crate features; include only the specific feature flags your application uses.
+- Deploy debug build artifacts (`target/debug`); always compile production releases with `cargo build --release`.
 
 ## Troubleshooting
 

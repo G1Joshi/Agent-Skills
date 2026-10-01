@@ -5,7 +5,7 @@ description: Expert Docker containerization assistance covering multi-stage Dock
 
 # Docker
 
-Docker standardizes software delivery by packaging apps into containers. In 2025, Docker emphasizes **BuildKit** for high-performance builds and **Docker Scout** for supply chain security.
+Docker standardizes application delivery by packaging software into portable OCI containers, utilizing BuildKit multi-stage builds and vulnerability scanning for secure supply chains.
 
 ## When to Use
 
@@ -33,7 +33,7 @@ CMD ["node", "index.js"]
 
 ## Core Concepts
 
-#Multi-Stage Production Dockerfile
+### Multi-Stage Production Dockerfile
 
 Building a minimal, secure Node.js container with non-root user:
 
@@ -69,7 +69,7 @@ HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
 ENTRYPOINT ["node", "dist/index.js"]
 ```
 
-#Multi-Container Orchestration with Docker Compose
+### Multi-Container Orchestration with Docker Compose
 
 Defining local development stacks with health checks:
 
@@ -111,7 +111,7 @@ volumes:
   postgres_data:
 ```
 
-#Image Build Caching & Optimization
+### Image Build Caching & Optimization
 
 Accelerating builds using Docker Buildx:
 
@@ -154,15 +154,20 @@ EXPOSE 3000
 CMD ["node", "dist/main.js"]
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** always use multi-stage builds to exclude compilers, test frameworks, and development dependencies from final images.
-- **Do** run containers as non-root users (`USER appuser`) to mitigate container breakout vulnerabilities.
-- **Do** order Dockerfile instructions by change frequency: copy package manifests first to leverage layer caching.
-- **Do** include an explicit `HEALTHCHECK` instruction to allow orchestrators to assess container readiness.
-- **Don't** use `:latest` tags in production; pin specific immutable version tags or digest SHAs.
-- **Don't** store sensitive secrets or `.env` files in images; use BuildKit secret mounts (`--mount=type=secret`).
-- **Don't** run systemd or multiple processes inside a single container; maintain one responsibility per container.
+**Do**:
+
+- Always use multi-stage builds to exclude compilers, test frameworks, and development dependencies from final images.
+- Run containers as non-root users (`USER appuser`) to mitigate container breakout vulnerabilities.
+- Order Dockerfile instructions by change frequency: copy package manifests first to leverage layer caching.
+- Include an explicit `HEALTHCHECK` instruction to allow orchestrators to assess container readiness.
+
+**Don't**:
+
+- Use `:latest` tags in production; pin specific immutable version tags or digest SHAs.
+- Store sensitive secrets or `.env` files in images; use BuildKit secret mounts (`--mount=type=secret`).
+- Run systemd or multiple processes inside a single container; maintain one responsibility per container.
 
 ## Troubleshooting
 

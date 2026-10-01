@@ -24,7 +24,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    # Grouping (2025 feature) reduces noise
+    # Grouping updates reduces notification noise
     groups:
       dependencies:
         patterns:
@@ -33,7 +33,7 @@ updates:
 
 ## Core Concepts
 
-#Declarative dependabot.yml Manifest
+### Declarative dependabot.yml Manifest
 
 Configures ecosystem targets, schedules, directories, and grouping policies:
 
@@ -60,7 +60,7 @@ updates:
       interval: "monthly"
 ```
 
-#Security-Only vs Version-Update Modes
+### Security-Only vs Version-Update Modes
 
 - **Security Updates**: Automatically triggered when a CVE alert is opened in GitHub Advisory Database.
 - **Version Updates**: Scheduled cron checks that propose upgrading dependencies to latest stable releases:
@@ -77,7 +77,7 @@ updates:
     open-pull-requests-limit: 0
 ```
 
-#GitHub Actions Integration with Dependabot Secrets
+### GitHub Actions Integration with Dependabot Secrets
 
 Injects credentials for private artifactory and npm package registries:
 
@@ -113,20 +113,20 @@ updates:
           - "major"
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Enable Grouped Updates**: Use `groups` in `dependabot.yml` to bundle minor/patch bumps into a single reviewable PR.
-- **Require Passing CI/CD Status Checks**: Ensure automated test suites pass on Dependabot branches before merging.
-- **Use Automated Merge Actions**: Combine Dependabot with GitHub Auto-Merge (`gh pr merge --auto --rebase`) for low-risk patch updates.
-- **Pin GitHub Actions to Full Commit SHAs**: Require Dependabot to pin GitHub Actions to immutable SHAs rather than mutable tags.
+- Enable Grouped Updates: Use `groups` in `dependabot.yml` to bundle minor/patch bumps into a single reviewable PR.
+- Require Passing CI/CD Status Checks: Ensure automated test suites pass on Dependabot branches before merging.
+- Use Automated Merge Actions: Combine Dependabot with GitHub Auto-Merge (`gh pr merge --auto --rebase`) for low-risk patch updates.
+- Pin GitHub Actions to Full Commit SHAs: Require Dependabot to pin GitHub Actions to immutable SHAs rather than mutable tags.
 
 **Don't**:
 
-- **Don't set daily intervals for all ecosystems**: Daily updates cause PR spam; use weekly or grouped schedules for production dependencies.
-- **Don't ignore Dependabot security alerts**: Treat critical security PRs with immediate priority.
-- **Don't merge major version bumps without manual regression testing**: Major version upgrades introduce breaking API changes.
+- Set daily intervals for all ecosystems: Daily updates cause PR spam; use weekly or grouped schedules for production dependencies.
+- Ignore Dependabot security alerts: Treat critical security PRs with immediate priority.
+- Merge major version bumps without manual regression testing: Major version upgrades introduce breaking API changes.
 
 ## Troubleshooting
 

@@ -25,7 +25,7 @@ curl -X GET "https://mycompany.atlassian.net/wiki/api/v2/pages/{page-id}" \
 
 ## Core Concepts
 
-#Publishing Documentation via Confluence REST API v2
+### Publishing Documentation via Confluence REST API v2
 
 Creating a technical architecture page programmatically using Python:
 
@@ -70,7 +70,7 @@ response = requests.post(url, json=payload, headers=headers, auth=auth)
 print(f"Created Page ID: {response.json().get('id')}")
 ```
 
-#Searching Pages with Confluence Query Language (CQL)
+### Searching Pages with Confluence Query Language (CQL)
 
 Searching across spaces programmatically:
 
@@ -80,7 +80,7 @@ curl -s -u "$ATLASSIAN_EMAIL:$ATLASSIAN_API_TOKEN" \
   "https://your-company.atlassian.net/wiki/rest/api/content/search?cql=space=ENG+and+title~'Runbook'+order+by+lastmodified+desc" | jq .
 ```
 
-#Architecture Decision Records (ADRs)
+### Architecture Decision Records (ADRs)
 
 Documenting engineering trade-offs in Confluence:
 
@@ -104,7 +104,8 @@ Documenting engineering trade-offs in Confluence:
 
 ## Common Patterns
 
-#Automated Page Generation via REST API
+### Automated Page Generation via REST API
+
 **Problem**: Manually updating release notes and deployment runbooks is time consuming and error prone.  
 **Solution**: Publish documentation updates automatically using the Confluence Cloud API.
 
@@ -123,15 +124,20 @@ curl -X POST "https://your-domain.atlassian.net/wiki/api/v2/pages" \
   }'
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target the modern Confluence REST API v2 for all automated documentation scripts.
-- **Do** organize engineering spaces with structured hierarchies (Architecture, Runbooks, ADRs, Postmortems).
-- **Do** automate the publication of API documentation and schemas from CI/CD pipelines to Confluence.
-- **Do** use scoped Atlassian API tokens with least privilege rather than raw user passwords.
-- **Don't** leave obsolete documentation active; archive pages or flag them with deprecation notices.
-- **Don't** store plain credentials or internal network passwords in Confluence pages.
-- **Don't** paste unformatted text; use structured macros (Code Block, Info/Warning panels, Tables).
+**Do**:
+
+- Target the modern Confluence REST API v2 for all automated documentation scripts.
+- Organize engineering spaces with structured hierarchies (Architecture, Runbooks, ADRs, Postmortems).
+- Automate the publication of API documentation and schemas from CI/CD pipelines to Confluence.
+- Use scoped Atlassian API tokens with least privilege rather than raw user passwords.
+
+**Don't**:
+
+- Leave obsolete documentation active; archive pages or flag them with deprecation notices.
+- Store plain credentials or internal network passwords in Confluence pages.
+- Paste unformatted text; use structured macros (Code Block, Info/Warning panels, Tables).
 
 ## Troubleshooting
 

@@ -27,7 +27,7 @@ glab mr create \
 
 ## Core Concepts
 
-#Managing Merge Requests via GitLab REST API v4
+### Managing Merge Requests via GitLab REST API v4
 
 Querying and creating merge requests programmatically:
 
@@ -46,7 +46,7 @@ curl -s -X POST \
   "https://gitlab.example.com/api/v4/projects/12345/merge_requests" | jq .
 ```
 
-#Project Badges & Pipeline Status Tracking
+### Project Badges & Pipeline Status Tracking
 
 Configuring pipeline status, test coverage, and release version badges:
 
@@ -58,7 +58,7 @@ Configuring pipeline status, test coverage, and release version badges:
 [![Latest Release](https://gitlab.example.com/org/project/-/badges/release.svg)](https://gitlab.example.com/org/project/-/releases)
 ```
 
-#Security Approval Policies & Protected Branches
+### Security Approval Policies & Protected Branches
 
 Restricting production branch access:
 
@@ -85,15 +85,20 @@ upload_binary:
     - if: $CI_COMMIT_TAG
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** protect default branches (`main`) by allowing merges only through reviewed Merge Requests.
-- **Do** leverage GitLab Container Registry and Dependency Proxy to speed up container caching in pipelines.
-- **Do** configure Merge Request approval rules requiring Security and QA approval on sensitive repositories.
-- **Do** rotate Personal Access Tokens (PATs) regularly or use short-lived Project Access Tokens.
-- **Don't** allow force pushes to protected branches.
-- **Don't** store unmasked secrets in CI/CD variables; mark variables as **Protected** and **Masked**.
-- **Don't** allow unreviewed commits to bypass CI pipelines.
+**Do**:
+
+- Protect default branches (`main`) by allowing merges only through reviewed Merge Requests.
+- Leverage GitLab Container Registry and Dependency Proxy to speed up container caching in pipelines.
+- Configure Merge Request approval rules requiring Security and QA approval on sensitive repositories.
+- Rotate Personal Access Tokens (PATs) regularly or use short-lived Project Access Tokens.
+
+**Don't**:
+
+- Allow force pushes to protected branches.
+- Store unmasked secrets in CI/CD variables; mark variables as **Protected** and **Masked**.
+- Allow unreviewed commits to bypass CI pipelines.
 
 ## Troubleshooting
 

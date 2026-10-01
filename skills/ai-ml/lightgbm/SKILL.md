@@ -39,7 +39,7 @@ model = lgb.train(params, train_data, num_boost_round=100, valid_sets=[val_data]
 
 ## Core Concepts
 
-#High-Speed Classification with Early Stopping
+### High-Speed Classification with Early Stopping
 
 Training LightGBM on tabular datasets with categorical feature support:
 
@@ -87,7 +87,7 @@ preds = clf.predict_proba(X_val)[:, 1]
 print("Validation AUC:", roc_auc_score(y_val, preds))
 ```
 
-#Feature Importance & Visualization
+### Feature Importance & Visualization
 
 Extracting gain-based feature contributions:
 
@@ -100,7 +100,7 @@ for feat, imp in sorted(zip(features, importance_gain), key=lambda x: x[1], reve
     print(f"Feature: {feat:15s} Gain: {imp:.2f}")
 ```
 
-#Saving Model & ONNX Conversion
+### Saving Model & ONNX Conversion
 
 Persisting trained booster for fast inference:
 
@@ -134,15 +134,20 @@ train_data = lgb.Dataset(df[['category', 'feature']], label=df['target'],
                          categorical_feature=['category'])
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** cast categorical columns to pandas `category` dtype; LightGBM handles them natively without one-hot encoding.
-- **Do** control tree complexity via `num_leaves` (should be smaller than `2^(max_depth)`) to prevent severe overfitting.
-- **Do** use `lgb.early_stopping()` and `lgb.log_evaluation()` callbacks during model training.
-- **Do** use `device="gpu"` when training datasets with more than 100 features and 1 million rows.
-- **Don't** set `max_depth` without tuning `num_leaves`; in LightGBM, `num_leaves` is the primary complexity parameter.
-- **Don't** one-hot encode high-cardinality categorical variables; use native categorical support.
-- **Don't** evaluate final model performance on the validation split used for early stopping.
+**Do**:
+
+- Cast categorical columns to pandas `category` dtype; LightGBM handles them natively without one-hot encoding.
+- Control tree complexity via `num_leaves` (should be smaller than `2^(max_depth)`) to prevent severe overfitting.
+- Use `lgb.early_stopping()` and `lgb.log_evaluation()` callbacks during model training.
+- Use `device="gpu"` when training datasets with more than 100 features and 1 million rows.
+
+**Don't**:
+
+- Set `max_depth` without tuning `num_leaves`; in LightGBM, `num_leaves` is the primary complexity parameter.
+- One-hot encode high-cardinality categorical variables; use native categorical support.
+- Evaluate final model performance on the validation split used for early stopping.
 
 ## Troubleshooting
 

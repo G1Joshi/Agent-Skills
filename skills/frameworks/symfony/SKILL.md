@@ -5,7 +5,7 @@ description: Expert Symfony assistance covering PHP HTTP kernel, Twig, Doctrine 
 
 # Symfony
 
-Symfony v7.1 (2025) is the bedrock of modern PHP (Drupal, Laravel components). It emphasizes **Attributes** (Annotations) and strict typing.
+Symfony is a decoupled, reusable PHP framework and set of components, emphasizing strict typing, PHP Attributes, and enterprise application architecture.
 
 ## When to Use
 
@@ -36,7 +36,7 @@ class ApiController extends AbstractController
 
 ## Core Concepts
 
-#Modern Attribute Routing & Dependency Injection
+### Modern Attribute Routing & Dependency Injection
 
 Writing controllers with PHP 8.2+ native attributes:
 
@@ -70,7 +70,7 @@ class CustomerController extends AbstractController
 }
 ```
 
-#Doctrine ORM Entities & Attributes
+### Doctrine ORM Entities & Attributes
 
 Mapping database tables with native PHP attributes:
 
@@ -105,7 +105,7 @@ class Order
 }
 ```
 
-#Symfony Messenger for Async Processing
+### Symfony Messenger for Async Processing
 
 Decoupled message dispatching and handling:
 
@@ -168,15 +168,20 @@ class ProductRepository extends ServiceEntityRepository
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target Symfony 7+ using PHP 8.2+ native attributes for routing, entities, and validation.
-- **Do** utilize Symfony Messenger for all asynchronous and queue-based background processing.
-- **Do** run `bin/console lint:container` and `bin/console lint:yaml` in CI/CD pipelines.
-- **Do** configure Symfony Cache with Redis for high-traffic session and doctrine result caching.
-- **Don't** put business logic inside controllers; encapsulate workflows in domain services.
-- **Don't** run `cache:clear` directly on active production traffic; warm up cache in a staging release directory.
-- **Don't** disable CSRF protection on state-changing web form submissions.
+**Do**:
+
+- Target Symfony 7+ using PHP 8.2+ native attributes for routing, entities, and validation.
+- Utilize Symfony Messenger for all asynchronous and queue-based background processing.
+- Run `bin/console lint:container` and `bin/console lint:yaml` in CI/CD pipelines.
+- Configure Symfony Cache with Redis for high-traffic session and doctrine result caching.
+
+**Don't**:
+
+- Put business logic inside controllers; encapsulate workflows in domain services.
+- Run `cache:clear` directly on active production traffic; warm up cache in a staging release directory.
+- Disable CSRF protection on state-changing web form submissions.
 
 ## Troubleshooting
 

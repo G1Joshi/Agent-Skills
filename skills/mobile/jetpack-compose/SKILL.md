@@ -60,7 +60,7 @@ fun MyApp(viewModel: CounterViewModel = viewModel()) {
 
 ## Core Concepts
 
-#Declarative UI & Recomposition Lifecycle
+### Declarative UI & Recomposition Lifecycle
 
 Compose functions describe UI directly in Kotlin. Recomposition skips functions whose inputs have not changed:
 
@@ -83,7 +83,7 @@ fun OrderStatusBadge(status: String, modifier: Modifier = Modifier) {
 }
 ```
 
-#State Hoisting with `remember` & `mutableStateOf`
+### State Hoisting with `remember` & `mutableStateOf`
 
 State flows down to composables through parameters; events flow up through lambda callbacks:
 
@@ -105,7 +105,7 @@ fun SearchBar(
 }
 ```
 
-#Side-Effects & Coroutine Scopes (LaunchedEffect)
+### Side-Effects & Coroutine Scopes (LaunchedEffect)
 
 Manages side-effects that execute outside the composition lifecycle safely without restarting on irrelevant recompositions:
 
@@ -121,7 +121,8 @@ fun UserSessionTracker(userId: String, analytics: AnalyticsTracker) {
 
 ## Common Patterns
 
-#State Hoisting and ViewModel Integration
+### State Hoisting and ViewModel Integration
+
 **Problem**: Tight coupling of state management inside composable functions prevents UI previews and testing.  
 **Solution**: Hoist state into ViewModel and pass state down with event callbacks up.
 
@@ -143,20 +144,20 @@ fun CounterContent(count: Int, onIncrement: () -> Unit) {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use `@Stable` and `@Immutable` Annotations**: Mark domain model classes to enable Compose compiler smart recomposition optimizations.
-- **Always Pass `modifier: Modifier = Modifier`**: Allow parent composables to specify sizing, padding, and constraints.
-- **Collect State with Lifecycle Awareness**: Use `collectAsStateWithLifecycle()` from Kotlin Flow to prevent background state emissions.
-- **Provide `@Preview` Annotations**: Create previews with light and dark mode variants to validate designs without deploying to devices.
+- Use `@Stable` and `@Immutable` Annotations: Mark domain model classes to enable Compose compiler smart recomposition optimizations.
+- Always Pass `modifier: Modifier = Modifier`: Allow parent composables to specify sizing, padding, and constraints.
+- Collect State with Lifecycle Awareness: Use `collectAsStateWithLifecycle()` from Kotlin Flow to prevent background state emissions.
+- Provide `@Preview` Annotations: Create previews with light and dark mode variants to validate designs without deploying to devices.
 
 **Don't**:
 
-- **Don't instantiate heavy objects inside composables**: Wrap object allocations in `remember { ... }` to prevent reinstantiation on every frame.
-- **Don't perform I/O in Composable functions**: Keep composables pure; delegate data fetching to ViewModels and Coroutine dispatchers.
-- **Don't hardcode color values**: Reference `MaterialTheme.colorScheme` tokens to ensure seamless dark theme support.
+- Instantiate heavy objects inside composables: Wrap object allocations in `remember { ... }` to prevent reinstantiation on every frame.
+- Perform I/O in Composable functions: Keep composables pure; delegate data fetching to ViewModels and Coroutine dispatchers.
+- Hardcode color values: Reference `MaterialTheme.colorScheme` tokens to ensure seamless dark theme support.
 
 ## Troubleshooting
 

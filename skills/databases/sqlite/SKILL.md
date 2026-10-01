@@ -32,15 +32,15 @@ CREATE TABLE contacts (
 
 ## Core Concepts
 
-#Single-File Serverless Engine
+### Single-File Serverless Engine
 
 SQLite runs directly in the host application's memory space, reading and writing to a single cross-platform disk file:
 
-```
+```text
 [ Application Process (Python / Go / Node / Swift) ] ──Direct In-Memory Access──→ [ database.sqlite (Single File) ]
 ```
 
-#Write-Ahead Logging (WAL Mode)
+### Write-Ahead Logging (WAL Mode)
 
 Enables concurrent readers while a writer commits changes simultaneously:
 
@@ -53,7 +53,7 @@ PRAGMA foreign_keys = ON;           -- Enforce relational foreign key constraint
 PRAGMA cache_size = -64000;         -- Allocate 64MB memory page cache
 ```
 
-#Full-Text Search with FTS5
+### Full-Text Search with FTS5
 
 Built-in full-text search engine with BM25 relevancy ranking:
 
@@ -96,20 +96,20 @@ PRAGMA temp_store = MEMORY;
 PRAGMA foreign_keys = ON;
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Always Enable WAL Mode in Production**: Run `PRAGMA journal_mode = WAL;` to prevent writers from blocking readers.
-- **Set a `busy_timeout`**: Configure `PRAGMA busy_timeout = 5000;` to avoid `SQLITE_BUSY` errors during concurrent transactions.
-- **Enable Foreign Keys Explicitly**: SQLite disables foreign keys by default; execute `PRAGMA foreign_keys = ON;` on every connection.
-- **Use Prepared Statements**: Eliminate SQL injection and optimize query plan reuse.
+- Always Enable WAL Mode in Production: Run `PRAGMA journal_mode = WAL;` to prevent writers from blocking readers.
+- Set a `busy_timeout`: Configure `PRAGMA busy_timeout = 5000;` to avoid `SQLITE_BUSY` errors during concurrent transactions.
+- Enable Foreign Keys Explicitly: SQLite disables foreign keys by default; execute `PRAGMA foreign_keys = ON;` on every connection.
+- Use Prepared Statements: Eliminate SQL injection and optimize query plan reuse.
 
 **Don't**:
 
-- **Don't run multiple concurrent write transactions**: SQLite supports only one writer at a time; queue writes or serialize them.
-- **Don't use SQLite over Network Filesystems (NFS/SMB)**: Network file locking bugs can corrupt SQLite database files.
-- **Don't store multi-gigabyte binary files directly**: Store media in filesystem directories or object storage; store file paths in SQLite.
+- Run multiple concurrent write transactions: SQLite supports only one writer at a time; queue writes or serialize them.
+- Use SQLite over Network Filesystems (NFS/SMB): Network file locking bugs can corrupt SQLite database files.
+- Store multi-gigabyte binary files directly: Store media in filesystem directories or object storage; store file paths in SQLite.
 
 ## Troubleshooting
 

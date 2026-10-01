@@ -29,7 +29,7 @@ duckdb.sql("SELECT count(*) FROM 's3://my-bucket/data.parquet'")
 
 ## Core Concepts
 
-#Direct In-Place Parquet & S3 Scanning
+### Direct In-Place Parquet & S3 Scanning
 
 DuckDB queries compressed Parquet files directly from local disk or remote S3 without loading them into database storage:
 
@@ -49,7 +49,7 @@ ORDER BY visitor_count DESC
 LIMIT 10;
 ```
 
-#Zero-Copy Apache Arrow Integration
+### Zero-Copy Apache Arrow Integration
 
 Passes data between Python/Pandas/Polars and DuckDB memory structures with zero serialization overhead:
 
@@ -63,7 +63,7 @@ rel = duckdb.arrow(table)
 result_df = rel.filter("revenue > 10000").aggregate("sum(revenue)", "region").df()
 ```
 
-#Persistent Single-File Database Storage
+### Persistent Single-File Database Storage
 
 Stores gigabytes of relational data in a single, high-compression, portable file:
 
@@ -106,20 +106,20 @@ df = conn.execute("""
 print(df)
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Query Parquet Files Directly**: Benefit from Parquet metadata column projection and predicate pushdown.
-- **Use Memory Limits in Constrained Environments**: Set `SET max_memory = '4GB'` to prevent out-of-memory errors in serverless containers.
-- **Leverage Vectorized Execution**: Write declarative analytical aggregations (`SUM`, `AVG`, `WINDOW`) to utilize hardware CPU SIMD parallelism.
-- **Use DuckDB Extensions**: Utilize extensions (`httpfs`, `aws`, `spatial`, `json`, `sqlite`) dynamically via `INSTALL` and `LOAD`.
+- Query Parquet Files Directly: Benefit from Parquet metadata column projection and predicate pushdown.
+- Use Memory Limits in Constrained Environments: Set `SET max_memory = '4GB'` to prevent out-of-memory errors in serverless containers.
+- Leverage Vectorized Execution: Write declarative analytical aggregations (`SUM`, `AVG`, `WINDOW`) to utilize hardware CPU SIMD parallelism.
+- Use DuckDB Extensions: Utilize extensions (`httpfs`, `aws`, `spatial`, `json`, `sqlite`) dynamically via `INSTALL` and `LOAD`.
 
 **Don't**:
 
-- **Don't use DuckDB for high-concurrency multi-client OLTP**: DuckDB is an in-process analytical engine; do not run concurrent multi-client web applications on it.
-- **Don't read CSV files repeatedly in production loops**: Convert raw CSV files to Parquet once; Parquet queries are 20-50x faster.
-- **Don't leave database file handles unclosed**: Ensure `conn.close()` executes to prevent locking the database file on disk.
+- Use DuckDB for high-concurrency multi-client OLTP: DuckDB is an in-process analytical engine; do not run concurrent multi-client web applications on it.
+- Read CSV files repeatedly in production loops: Convert raw CSV files to Parquet once; Parquet queries are 20-50x faster.
+- Leave database file handles unclosed: Ensure `conn.close()` executes to prevent locking the database file on disk.
 
 ## Troubleshooting
 

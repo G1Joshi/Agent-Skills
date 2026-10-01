@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
 
 ## Core Concepts
 
-#Activity & Fragment Lifecycles
+### Activity & Fragment Lifecycles
 
 Activities represent single screens with user interfaces; lifecycle callbacks manage resource acquisition and release to prevent memory leaks during configuration changes:
 
@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity() {
 }
 ```
 
-#Dependency Injection with Hilt
+### Dependency Injection with Hilt
 
 Hilt standardizes Dagger dependency injection across Android components with predefined scopes tied to Android lifecycles:
 
@@ -75,7 +75,7 @@ class UserProfileFragment : Fragment() {
 }
 ```
 
-#Permissions Architecture & Runtime Requests
+### Permissions Architecture & Runtime Requests
 
 Modern Android requires fine-grained runtime permission requests before accessing sensitive hardware or user records:
 
@@ -96,7 +96,8 @@ requestPermissionLauncher.launch(Manifest.permission.CAMERA)
 
 ## Common Patterns
 
-#Background Processing with WorkManager
+### Background Processing with WorkManager
+
 **Problem**: Long-running background sync operations get terminated by modern Android battery optimization (Doze mode).  
 **Solution**: Schedule persistent background jobs with WorkManager and constraints.
 
@@ -127,20 +128,20 @@ WorkManager.getInstance(context).enqueueUniquePeriodicWork(
 )
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Adopt Edge-to-Edge Display**: Target Android 15+ edge-to-edge system bars using WindowInsetsCompat.
-- **Use WorkManager for Background Tasks**: Never spawn unmanaged background threads that get killed by battery optimizations (Doze).
-- **Enforce ViewBinding / Compose**: Eliminate error-prone `findViewById` lookups by using ViewBinding or modern Jetpack Compose.
-- **Validate Scoped Storage**: Store application files in private app storage (`context.filesDir`) or use the Storage Access Framework for public files.
+- Adopt Edge-to-Edge Display: Target Android 15+ edge-to-edge system bars using WindowInsetsCompat.
+- Use WorkManager for Background Tasks: Never spawn unmanaged background threads that get killed by battery optimizations (Doze).
+- Enforce ViewBinding / Compose: Eliminate error-prone `findViewById` lookups by using ViewBinding or modern Jetpack Compose.
+- Validate Scoped Storage: Store application files in private app storage (`context.filesDir`) or use the Storage Access Framework for public files.
 
 **Don't**:
 
-- **Don't block the Main (UI) Thread**: Keep networking, JSON parsing, and database transactions strictly on IO coroutine dispatchers.
-- **Don't hardcode dimensions or text**: Always use `res/values/strings.xml` for localization and `res/values/dimens.xml` or density-independent pixels (`dp`).
-- **Don't hold static references to Context**: Retaining an Activity context in static singletons causes permanent memory leaks.
+- Block the Main (UI) Thread: Keep networking, JSON parsing, and database transactions strictly on IO coroutine dispatchers.
+- Hardcode dimensions or text: Always use `res/values/strings.xml` for localization and `res/values/dimens.xml` or density-independent pixels (`dp`).
+- Hold static references to Context: Retaining an Activity context in static singletons causes permanent memory leaks.
 
 ## Troubleshooting
 

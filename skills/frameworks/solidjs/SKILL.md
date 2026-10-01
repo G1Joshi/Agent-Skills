@@ -5,7 +5,7 @@ description: Expert SolidJS assistance covering fine-grained reactivity, signals
 
 # SolidJS
 
-SolidJS looks like React but has **no Virtual DOM**. It compiles to direct DOM updates using fine-grained reactivity (Signals). 2025 focuses on SolidStart (meta-framework).
+SolidJS is a declarative JavaScript library for building user interfaces without a Virtual DOM, compiling templates to direct DOM operations powered by fine-grained Signals reactivity.
 
 ## When to Use
 
@@ -30,7 +30,7 @@ export function Counter() {
 
 ## Core Concepts
 
-#Fine-Grained Reactive Primitives: Signals & Memos
+### Fine-Grained Reactive Primitives: Signals & Memos
 
 Components execute only once; signals trigger targeted DOM node updates:
 
@@ -58,7 +58,7 @@ export function Counter() {
 }
 ```
 
-#Asynchronous Data with createResource & Suspense
+### Asynchronous Data with createResource & Suspense
 
 Declarative async data fetching with Suspense boundaries:
 
@@ -89,7 +89,7 @@ export function UserView(props: { userId: number }) {
 }
 ```
 
-#Control Flow with For, Show, and Switch
+### Control Flow with For, Show, and Switch
 
 Optimized DOM rendering primitives replacing array `.map()`:
 
@@ -161,15 +161,20 @@ export function TodoApp() {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use `<For>` and `<Show>` instead of `.map()` or ternary operators to minimize unnecessary DOM recreations.
-- **Do** remember that Solid components run only once; never destructure `props` directly (use `props.title` or `mergeProps`).
-- **Do** use `createResource` for async data loading with `<Suspense>`.
-- **Do** call `onCleanup` inside effects and primitives to clear timers and event listeners.
-- **Don't** destructure props in component argument signatures; it breaks fine-grained reactivity tracking.
-- **Don't** update signals inside `createMemo`; memos must remain pure derivation functions.
-- **Don't** use Virtual DOM assumptions (like re-rendering whole component trees).
+**Do**:
+
+- Use `<For>` and `<Show>` instead of `.map()` or ternary operators to minimize unnecessary DOM recreations.
+- Remember that Solid components run only once; never destructure `props` directly (use `props.title` or `mergeProps`).
+- Use `createResource` for async data loading with `<Suspense>`.
+- Call `onCleanup` inside effects and primitives to clear timers and event listeners.
+
+**Don't**:
+
+- Destructure props in component argument signatures; it breaks fine-grained reactivity tracking.
+- Update signals inside `createMemo`; memos must remain pure derivation functions.
+- Use Virtual DOM assumptions (like re-rendering whole component trees).
 
 ## Troubleshooting
 

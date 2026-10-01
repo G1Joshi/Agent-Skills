@@ -26,7 +26,7 @@ COBOL runs 70% of the world's business transactions. Modern COBOL (GnuCOBOL 3.2 
 
 ## Core Concepts
 
-#Four Classical Divisions Architecture
+### Four Classical Divisions Architecture
 
 Every COBOL program is structured strictly across four standard functional divisions:
 
@@ -48,7 +48,7 @@ PROCEDURE DIVISION.
     GOBACK.
 ```
 
-#Picture Clauses (`PIC`) for Fixed-Point Arithmetic
+### Picture Clauses (`PIC`) for Fixed-Point Arithmetic
 
 Eliminates floating-point rounding discrepancies by defining exact digit layouts and implied decimals (`V`):
 
@@ -58,7 +58,7 @@ Eliminates floating-point rounding discrepancies by defining exact digit layouts
 *> COMP-3: Packed Decimal (2 digits per byte) optimized for mainframe ALU
 ```
 
-#Structured Paragraphs & PERFORM Loops
+### Structured Paragraphs & PERFORM Loops
 
 Modern COBOL (COBOL 2002/2014) utilizes structured control statements:
 
@@ -103,20 +103,20 @@ Use structured `READ` loop with `AT END` flag:
            STOP RUN.
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use `COMP-3` (Packed Decimal) for Financial Numbers**: Maximize mathematical computation performance on IBM Z enterprise hardware.
-- **Adopt Modern Free-Format COBOL**: Eliminate column 7-72 restrictions when supported by modern compilers (GnuCOBOL, IBM Enterprise COBOL).
-- **Use Explicit Scope Terminators**: Always close control blocks with `END-IF`, `END-PERFORM`, and `END-READ` rather than terminal periods.
-- **Validate Input Data with `NUMERIC` Tests**: Run `IF WS-INPUT-VAL IS NUMERIC` to prevent data exception abends (`0C7`).
+- Use `COMP-3` (Packed Decimal) for Financial Numbers: Maximize mathematical computation performance on IBM Z enterprise hardware.
+- Adopt Modern Free-Format COBOL: Eliminate column 7-72 restrictions when supported by modern compilers (GnuCOBOL, IBM Enterprise COBOL).
+- Use Explicit Scope Terminators: Always close control blocks with `END-IF`, `END-PERFORM`, and `END-READ` rather than terminal periods.
+- Validate Input Data with `NUMERIC` Tests: Run `IF WS-INPUT-VAL IS NUMERIC` to prevent data exception abends (`0C7`).
 
 **Don't**:
 
-- **Don't use `GO TO` statements**: Eliminate unstructured `GO TO` jumps; use modern structured `PERFORM` paragraphs.
-- **Don't rely on terminal periods for logic flow**: Stray periods terminate all nested `IF` conditions prematurely.
-- **Don't neglect binary fields initialization**: Always initialize working-storage variables with `VALUE` clauses to prevent garbage data.
+- Use `GO TO` statements: Eliminate unstructured `GO TO` jumps; use modern structured `PERFORM` paragraphs.
+- Rely on terminal periods for logic flow: Stray periods terminate all nested `IF` conditions prematurely.
+- Neglect binary fields initialization: Always initialize working-storage variables with `VALUE` clauses to prevent garbage data.
 
 ## Troubleshooting
 

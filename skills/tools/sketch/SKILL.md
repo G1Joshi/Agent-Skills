@@ -5,7 +5,7 @@ description: Expert Sketch assistance covering vector UI/UX design, symbol libra
 
 # Sketch
 
-Sketch is the native Mac design tool. While Figma dominates the web, Sketch remains beloved for its native performance and privacy. 2025 updates focus on **Command Bar** and **Stacks**.
+Sketch is a native macOS design platform providing vector editing, shared design system libraries, symbols, and developer asset handoff workflows.
 
 ## When to Use
 
@@ -100,13 +100,20 @@ Creating a developer handoff plugin for Sketch:
 
 ### Reusable Symbol Design with Smart Layout
 
-**Problem**: Buttons and card components break layout when text labels change in length.  
-**Solution**: Apply Smart Layout to Symbols.
+**Problem**: Buttons and card components break layout when text labels change in length.
 
-1. Select button group (Background + Text).
-2. In the Inspector panel, configure **Smart Layout**: Horizontal (Center or Left-to-Right).
-3. Set text layer alignment and fixed paddings.
-4. When overriding label in instances, the button auto-expands while preserving margins.
+**Solution**:
+
+```json
+{
+  "group": "Button/Primary",
+  "smartLayout": {
+    "direction": "HORIZONTAL_CENTER",
+    "minWidth": 120,
+    "padding": { "top": 12, "right": 24, "bottom": 12, "left": 24 }
+  }
+}
+```
 
 ### Design System Token Export to Code
 
@@ -126,19 +133,24 @@ Creating a developer handoff plugin for Sketch:
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** organize UI components into **Smart Layout Symbols** with flexible resizing constraints (Pin to edge, Fixed width/height).
-- **Do** maintain a central **Shared Library** file hosted on Sketch Cloud for typography, colors, and elevation styles.
-- **Do** run automated exports via `sketchtool` CLI in continuous integration pipelines for asset synchronization.
-- **Do** name layers semantically (`header/search-input`, `button/primary/hover`) to improve developer handoff clarity.
-- **Don't** leave detached symbols with unlinked layer styles across production design files.
-- **Don't** commit multi-gigabyte `.sketch` binary files into standard Git repos; use Git LFS or Sketch Cloud.
-- **Don't** export unoptimized SVGs; process exported vectors with SVGO before committing to frontend codebases.
+**Do**:
+
+- Organize UI components into **Smart Layout Symbols** with flexible resizing constraints (Pin to edge, Fixed width/height).
+- Maintain a central **Shared Library** file hosted on Sketch Cloud for typography, colors, and elevation styles.
+- Run automated exports via `sketchtool` CLI in continuous integration pipelines for asset synchronization.
+- Name layers semantically (`header/search-input`, `button/primary/hover`) to improve developer handoff clarity.
+
+**Don't**:
+
+- Leave detached symbols with unlinked layer styles across production design files.
+- Commit multi-gigabyte `.sketch` binary files into standard Git repos; use Git LFS or Sketch Cloud.
+- Export unoptimized SVGs; process exported vectors with SVGO before committing to frontend codebases.
 
 ## Troubleshooting
 
-| Error / Symptom                                                 | Cause                                                             | Solution                                                                                         |
+| Error                                                           | Cause                                                             | Solution                                                                                         |
 | --------------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `sketchtool: command not found`                                 | Sketch command line tools not linked in system path               | Run `sudo /Applications/Sketch.app/Contents/Resources/sketchtool/bin/sketchtool-install.sh`.     |
 | Symbol overrides reset when library updates                     | Symbol layer structure was modified or layer names desynchronized | Keep layer names identical in both base library and modified components to preserve overrides.   |

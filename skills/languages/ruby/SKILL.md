@@ -35,7 +35,7 @@ g.say_hi
 
 ## Core Concepts
 
-#Object-Oriented Everything & Dynamic Metaprogramming
+### Object-Oriented Everything & Dynamic Metaprogramming
 
 Every value in Ruby is a full-fledged object; classes can be modified dynamically at runtime:
 
@@ -49,7 +49,7 @@ end
 puts 100.to_usd # "$100.00"
 ```
 
-#Blocks, Procs & Enumerable Power
+### Blocks, Procs & Enumerable Power
 
 Passes executable code blocks to methods for clean data manipulation:
 
@@ -67,7 +67,7 @@ completed_revenue = orders
 puts "Completed Revenue: $#{completed_revenue}" # 130.0
 ```
 
-#Modern Concurrency (Fibers & Ractor)
+### Modern Concurrency (Fibers & Ractor)
 
 Runs true parallel execution without Global VM Lock (GVL) contention using Ractors (Ruby 3+):
 
@@ -105,20 +105,20 @@ def handle_response(response)
 end
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Enable YJIT in Production**: Launch Ruby with `--yjit` to enable the native Just-in-Time compiler, boosting performance 20-40%.
-- **Use RuboCop with Modern Presets**: Enforce style consistency and detect security pitfalls with automated RuboCop linting.
-- **Freeze String Literals**: Add `# frozen_string_literal: true` at the top of files to reduce heap string allocations.
-- **Use `Sorbet` or RBS for Type Checking**: Add static typing to mission-critical business modules.
+- Enable YJIT in Production: Launch Ruby with `--yjit` to enable the native Just-in-Time compiler, boosting performance 20-40%.
+- Use RuboCop with Modern Presets: Enforce style consistency and detect security pitfalls with automated RuboCop linting.
+- Freeze String Literals: Add `# frozen_string_literal: true` at the top of files to reduce heap string allocations.
+- Use `Sorbet` or RBS for Type Checking: Add static typing to mission-critical business modules.
 
 **Don't**:
 
-- **Don't use monkey-patching in application code**: Overriding core methods globally creates fragile, untraceable bugs across gems.
-- **Don't query the database inside loops (N+1)**: Use `.includes()` or `.preload()` in ActiveRecord to eager-load associations.
-- **Don't rescue `Exception`**: Always rescue `StandardError` (`rescue => e`); rescuing `Exception` catches system exit and termination signals.
+- Use monkey-patching in application code: Overriding core methods globally creates fragile, untraceable bugs across gems.
+- Query the database inside loops (N+1): Use `.includes()` or `.preload()` in ActiveRecord to eager-load associations.
+- Rescue `Exception`: Always rescue `StandardError` (`rescue => e`); rescuing `Exception` catches system exit and termination signals.
 
 ## Troubleshooting
 

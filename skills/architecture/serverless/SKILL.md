@@ -48,7 +48,7 @@ functions:
 
 ## Core Concepts
 
-#Ephemeral Stateless Execution
+### Ephemeral Stateless Execution
 
 Instances spin up on demand and shut down after idle periods; in-memory state is destroyed when containers terminate:
 
@@ -67,11 +67,11 @@ export const handler = async (
 };
 ```
 
-#Cold Start Lifecycle & Mitigation
+### Cold Start Lifecycle & Mitigation
 
 Understanding initialization phases:
 
-```
+```text
 [ Download Runtime ] ──→ [ Init Execution Context (Cold Start) ] ──→ [ Execute Handler (Warm) ]
 ```
 
@@ -82,7 +82,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 const ddbClient = new DynamoDBClient({ region: "us-east-1" }); // Reused on warm starts
 ```
 
-#Cloud BaaS Integration & Event Mappings
+### Cloud BaaS Integration & Event Mappings
 
 Connects functions directly to cloud managed services without polling:
 
@@ -101,7 +101,8 @@ functions:
 
 ## Common Patterns
 
-#Connection Pool Management Outside Handler
+### Connection Pool Management Outside Handler
+
 **Problem**: Serverless functions initialize new database connections on every invocation, exhausting connection limits.  
 **Solution**: Initialize database pools outside the lambda handler to reuse connections across warm invocations.
 
@@ -128,20 +129,20 @@ export const handler = async (event: any) => {
 };
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Keep Deployment Packages Compact**: Minify JavaScript with esbuild; keep lambda zip files small to reduce cold start initialization times.
-- **Reuse Persistent Connections in Global Scope**: Instantiate database connection pools, AWS SDK clients, and HTTP agents outside the handler.
-- **Enforce Fine-Grained IAM Permissions**: Grant functions least-privilege access to only the specific database tables or S3 buckets needed.
-- **Implement Structured Logging with Correlation IDs**: Inject invocation request IDs and tracing headers into every log output.
+- Keep Deployment Packages Compact: Minify JavaScript with esbuild; keep lambda zip files small to reduce cold start initialization times.
+- Reuse Persistent Connections in Global Scope: Instantiate database connection pools, AWS SDK clients, and HTTP agents outside the handler.
+- Enforce Fine-Grained IAM Permissions: Grant functions least-privilege access to only the specific database tables or S3 buckets needed.
+- Implement Structured Logging with Correlation IDs: Inject invocation request IDs and tracing headers into every log output.
 
 **Don't**:
 
-- **Don't run long-running monolithic services in Lambda**: Functions exceeding 15-minute limits or requiring continuous memory belong in ECS/Kubernetes.
-- **Don't create unpooled relational database connections**: Use RDS Proxy or HTTP-based database drivers (Neon, PlanetScale) to prevent connection exhaustion.
-- **Don't store files on local disk**: The `/tmp` directory is ephemeral and shared only during warm invocations; store assets in S3.
+- Run long-running monolithic services in Lambda: Functions exceeding 15-minute limits or requiring continuous memory belong in ECS/Kubernetes.
+- Create unpooled relational database connections: Use RDS Proxy or HTTP-based database drivers (Neon, PlanetScale) to prevent connection exhaustion.
+- Store files on local disk: The `/tmp` directory is ephemeral and shared only during warm invocations; store assets in S3.
 
 ## Troubleshooting
 

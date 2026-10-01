@@ -5,7 +5,7 @@ description: Expert Django assistance covering ORM, models, class-based views, a
 
 # Django
 
-Django is a high-level Python web framework that encourages rapid development and clean, pragmatic design. Django 5.0 (2025) introduces database-computed default values and expanded async support.
+Django is a high-level Python web framework encouraging rapid development, pragmatic clean design, built-in ORM security, robust migrations, and asynchronous view support.
 
 ## When to Use
 
@@ -32,7 +32,7 @@ class Post(models.Model):
 
 ## Core Concepts
 
-#Django ORM Models & Migrations
+### Django ORM Models & Migrations
 
 Relational schema definition with indexing and query optimizations:
 
@@ -63,7 +63,7 @@ class Order(models.Model):
         ]
 ```
 
-#High-Performance Querying with select_related & prefetch_related
+### High-Performance Querying with select_related & prefetch_related
 
 Eliminating N+1 database queries:
 
@@ -81,7 +81,7 @@ def order_report_view(request):
     return render(request, 'orders/report.html', {'orders': orders})
 ```
 
-#Fast Async APIs with Django Ninja
+### Fast Async APIs with Django Ninja
 
 Type-safe REST API endpoints powered by Pydantic:
 
@@ -122,15 +122,20 @@ for book in books:
     print(f"{book.title} published by {book.publisher.name}")
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** always use `select_related` and `prefetch_related` to eliminate N+1 database query bottlenecks.
-- **Do** configure `django-environ` to keep secret keys, database credentials, and API tokens out of code.
-- **Do** run migrations in CI pipelines (`python manage.py check --deploy` and `makemigrations --check`).
-- **Do** use `Bulk` operations (`bulk_create`, `bulk_update`) when modifying more than 10 records.
-- **Don't** leave `DEBUG = True` in production environments; it leaks memory and sensitive stack traces.
-- **Don't** put business logic inside templates or views; encapsulate domain rules in model methods or service layers.
-- **Don't** use synchronous external HTTP calls in view handlers; use async views or Celery/Redis tasks.
+**Do**:
+
+- Always use `select_related` and `prefetch_related` to eliminate N+1 database query bottlenecks.
+- Configure `django-environ` to keep secret keys, database credentials, and API tokens out of code.
+- Run migrations in CI pipelines (`python manage.py check --deploy` and `makemigrations --check`).
+- Use `Bulk` operations (`bulk_create`, `bulk_update`) when modifying more than 10 records.
+
+**Don't**:
+
+- Leave `DEBUG = True` in production environments; it leaks memory and sensitive stack traces.
+- Put business logic inside templates or views; encapsulate domain rules in model methods or service layers.
+- Use synchronous external HTTP calls in view handlers; use async views or Celery/Redis tasks.
 
 ## Troubleshooting
 

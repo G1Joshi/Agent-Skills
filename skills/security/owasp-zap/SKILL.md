@@ -23,7 +23,7 @@ docker run -t owasp/zap2docker-stable zap-baseline.py -t https://www.example.com
 
 ## Core Concepts
 
-#Active vs Passive Scanning
+### Active vs Passive Scanning
 
 - **Passive Scan**: Inspects proxied requests and responses without mutating data (safe for production; detects missing CSP, cookie flags).
 - **Active Scan**: Injects malicious payloads (SQLi, XSS, Path Traversal) to find exploitable vulnerabilities (mutates data; staging only):
@@ -34,7 +34,7 @@ docker run -v $(pwd):/zap/wrk/:rw -t ghcr.io/zaproxy/zaproxy:stable zap-baseline
   -t https://staging.example.com -r zap_report.html
 ```
 
-#ZAP Automation Framework (YAML)
+### ZAP Automation Framework (YAML)
 
 Declarative configuration for running complex automated security workflows in CI/CD:
 
@@ -58,7 +58,7 @@ jobs:
       reportFile: zap-active-report.html
 ```
 
-#Automated API Scanning from OpenAPI Specification
+### Automated API Scanning from OpenAPI Specification
 
 Imports OpenAPI / Swagger endpoints and tests each parameter for injection vulnerabilities:
 
@@ -85,20 +85,20 @@ Run automated ZAP baseline container scans in CI/CD:
     fail_action: true
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Incorporate ZAP Baseline Scan into Pull Request CI**: Fail builds if high-confidence vulnerabilities (e.g. SQLi) or critical missing headers appear.
-- **Authenticate Scans with Script-Based Authentication**: Provide ZAP with credentials to spider and scan authenticated user routes.
-- **Configure Scan Rulesets**: Ignore non-critical warnings or third-party tracking scripts by tuning ZAP alert thresholds.
-- **Archive HTML and SARIF Reports as CI Artifacts**: Upload SARIF scan results directly into GitHub Security Code Scanning alerts.
+- Incorporate ZAP Baseline Scan into Pull Request CI: Fail builds if high-confidence vulnerabilities (e.g. SQLi) or critical missing headers appear.
+- Authenticate Scans with Script-Based Authentication: Provide ZAP with credentials to spider and scan authenticated user routes.
+- Configure Scan Rulesets: Ignore non-critical warnings or third-party tracking scripts by tuning ZAP alert thresholds.
+- Archive HTML and SARIF Reports as CI Artifacts: Upload SARIF scan results directly into GitHub Security Code Scanning alerts.
 
 **Don't**:
 
-- **Don't run Active Scans against live production environments**: Active testing submits random payloads that can corrupt real database records.
-- **Don't rely solely on DAST**: Combine ZAP dynamic testing with SAST (Semgrep, SonarQube) and dependency scanning (Trivy).
-- **Don't scan external third-party services**: Constrain scanning strictly to your verified staging domain context.
+- Run Active Scans against live production environments: Active testing submits random payloads that can corrupt real database records.
+- Rely solely on DAST: Combine ZAP dynamic testing with SAST (Semgrep, SonarQube) and dependency scanning (Trivy).
+- Scan external third-party services: Constrain scanning strictly to your verified staging domain context.
 
 ## Troubleshooting
 

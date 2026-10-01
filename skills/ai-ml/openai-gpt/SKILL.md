@@ -5,7 +5,7 @@ description: Expert OpenAI API assistance covering GPT-4o, GPT-4o-mini, o1/o3 re
 
 # OpenAI GPT
 
-GPT (Generative Pre-trained Transformer) is the foundation of the modern AI revolution. In 2025, **GPT-5** offers agentic capabilities, deep reasoning, and native multimodal integration.
+OpenAI GPT models provide leading natural language generation, reasoning, and multimodal understanding via structured outputs, tool-calling APIs, and streaming inference.
 
 ## When to Use
 
@@ -42,7 +42,7 @@ print(event.name, event.date, event.participants)
 
 ## Core Concepts
 
-#Guaranteed Structured Outputs with Pydantic
+### Guaranteed Structured Outputs with Pydantic
 
 Parsing responses with 100% schema reliability:
 
@@ -74,7 +74,7 @@ for i, step in enumerate(plan.steps, 1):
     print(f"{i}. {step}")
 ```
 
-#Multi-Tool Function Calling & Execution
+### Multi-Tool Function Calling & Execution
 
 Supplying tools and handling tool call requests:
 
@@ -114,7 +114,7 @@ if tool_calls:
         print(f"Tool to invoke: {tc.function.name} with args: {tc.function.arguments}")
 ```
 
-#Streaming Responses with Async Client
+### Streaming Responses with Async Client
 
 Processing tokens in real-time for responsive UIs:
 
@@ -159,15 +159,20 @@ if tool_calls:
         print(f"Executing: {tool_call.function.name}({tool_call.function.arguments})")
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use `client.beta.chat.completions.parse` with Pydantic models for guaranteed structured responses.
-- **Do** choose `gpt-4o-mini` for fast, cost-effective high-volume tasks and `gpt-4o` / `o3-mini` for heavy reasoning.
-- **Do** use `temperature=1.0` or default for reasoning models (o1/o3-mini), and `0.0` for structured extraction with GPT-4o.
-- **Do** leverage the OpenAI Batch API for non-real-time jobs to reduce costs by 50%.
-- **Don't** embed API keys in client-side code; proxy all OpenAI requests through an authenticated backend.
-- **Don't** use standard completion parsing with regex when Structured Outputs guarantee exact JSON.
-- **Don't** omit error handling for rate limits (`openai.RateLimitError`); implement exponential backoff.
+**Do**:
+
+- Use `client.beta.chat.completions.parse` with Pydantic models for guaranteed structured responses.
+- Choose `gpt-4o-mini` for fast, cost-effective high-volume tasks and `gpt-4o` / `o3-mini` for heavy reasoning.
+- Use `temperature=1.0` or default for reasoning models (o1/o3-mini), and `0.0` for structured extraction with GPT-4o.
+- Leverage the OpenAI Batch API for non-real-time jobs to reduce costs by 50%.
+
+**Don't**:
+
+- Embed API keys in client-side code; proxy all OpenAI requests through an authenticated backend.
+- Use standard completion parsing with regex when Structured Outputs guarantee exact JSON.
+- Omit error handling for rate limits (`openai.RateLimitError`); implement exponential backoff.
 
 ## Troubleshooting
 

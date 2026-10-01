@@ -38,22 +38,22 @@ def create_order(request):
 
 ## Core Concepts
 
-#Unified Codebase & Atomic Deployments
+### Unified Codebase & Atomic Deployments
 
 All features share a single repository, database connection, and deployment lifecycle:
 
-```
+```text
 [ Monolithic Application (Next.js / Rails / Django / Spring) ]
               │
               ▼
     ( Unified Database )
 ```
 
-#Vertical Slice Architecture
+### Vertical Slice Architecture
 
 Organizes code by business feature rather than technical layer:
 
-```
+```text
 src/features/
   ├── authentication/
   │   ├── auth.controller.ts
@@ -65,7 +65,7 @@ src/features/
       └── checkout.schema.ts
 ```
 
-#In-Memory Transactions & Locks
+### In-Memory Transactions & Locks
 
 Executes multi-table updates within native database transactions without distributed coordinator complexity:
 
@@ -82,11 +82,12 @@ await db.transaction(async (tx) => {
 
 ## Common Patterns
 
-#Vertical Slice Architecture in Monoliths
+### Vertical Slice Architecture in Monoliths
+
 **Problem**: Layered architecture (Controllers, Services, Repositories) scatters single-feature code across dozens of folders.  
 **Solution**: Group by business capability (feature folder contains handler, model, schema, and UI).
 
-```
+```text
 src/features/
   ├── auth/
   │   ├── login.command.ts
@@ -98,20 +99,20 @@ src/features/
       └── invoice.router.ts
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Structure Code by Features (Vertical Slices)**: Avoid flat technical folders (`controllers/`, `models/`) with hundreds of unrelated files.
-- **Use Feature Flags for Continuous Deployment**: Deploy code dark behind feature toggles to uncouple deployment from feature release.
-- **Automate Comprehensive Test Suites**: Invest heavily in automated integration tests to catch unintended regressions across features.
-- **Scale Horizontally with Stateless Replicas**: Run multiple identical stateless application instances behind an Nginx or ALB load balancer.
+- Structure Code by Features (Vertical Slices): Avoid flat technical folders (`controllers/`, `models/`) with hundreds of unrelated files.
+- Use Feature Flags for Continuous Deployment: Deploy code dark behind feature toggles to uncouple deployment from feature release.
+- Automate Comprehensive Test Suites: Invest heavily in automated integration tests to catch unintended regressions across features.
+- Scale Horizontally with Stateless Replicas: Run multiple identical stateless application instances behind an Nginx or ALB load balancer.
 
 **Don't**:
 
-- **Don't store session state in local server memory**: Store sessions in Redis or encrypted cookies to allow painless multi-instance scaling.
-- **Don't allow circular dependencies between feature directories**: Keep dependency flow hierarchical and clean.
-- **Don't write blocking long-running background jobs in HTTP threads**: Offload background jobs to BullMQ/Sidekiq queues.
+- Store session state in local server memory: Store sessions in Redis or encrypted cookies to allow painless multi-instance scaling.
+- Allow circular dependencies between feature directories: Keep dependency flow hierarchical and clean.
+- Write blocking long-running background jobs in HTTP threads: Offload background jobs to BullMQ/Sidekiq queues.
 
 ## Troubleshooting
 

@@ -26,18 +26,18 @@ sudo certbot --nginx
 
 ## Core Concepts
 
-#Automated Certificate Management Environment (ACME)
+### Automated Certificate Management Environment (ACME)
 
 Certbot proves domain ownership to the Let's Encrypt Certificate Authority through challenge-response protocols:
 
-```
+```text
 [ Web Server (Certbot) ] ──1. Request Certificate──→ [ Let's Encrypt CA ]
                          ←─2. Challenge (HTTP-01)───
 [ Let's Encrypt CA ]     ──3. Fetch /.well-known/acme-challenge/<token>──→ [ Web Server ]
 [ Let's Encrypt CA ]     ──4. Issue Signed Certificate (90 Days)─────────→ [ Web Server ]
 ```
 
-#HTTP-01 vs DNS-01 Challenge Types
+### HTTP-01 vs DNS-01 Challenge Types
 
 - **HTTP-01**: Serves a challenge file over port 80 at `/.well-known/acme-challenge/`. Simple, but cannot issue wildcard certificates.
 - **DNS-01**: Creates a TXT record `_acme-challenge.example.com`. Required for wildcard certificates and internal/private servers:
@@ -50,7 +50,7 @@ certbot certonly \
   -d "example.com" -d "*.example.com"
 ```
 
-#Non-Interactive Standalone Mode
+### Non-Interactive Standalone Mode
 
 Spins up a temporary standalone web server to validate domain control on machines without existing web servers:
 
@@ -75,20 +75,20 @@ certbot certonly \
   --agree-tos --email security@example.com --non-interactive
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Test with `--dry-run` First**: Always test issuance and renewal against the Let's Encrypt staging environment to avoid hitting production rate limits.
-- **Automate Service Reloads with Deploy Hooks**: Use `--deploy-hook "systemctl reload nginx"` so web servers reload new certificates upon renewal.
-- **Retain Port 80 Open**: Keep HTTP port 80 open to allow HTTP-01 renewal challenges to succeed smoothly.
-- **Monitor Expiration Dates with Prometheus / Datadog**: Set up alerts if certificates have fewer than 20 days remaining.
+- Test with `--dry-run` First: Always test issuance and renewal against the Let's Encrypt staging environment to avoid hitting production rate limits.
+- Automate Service Reloads with Deploy Hooks: Use `--deploy-hook "systemctl reload nginx"` so web servers reload new certificates upon renewal.
+- Retain Port 80 Open: Keep HTTP port 80 open to allow HTTP-01 renewal challenges to succeed smoothly.
+- Monitor Expiration Dates with Prometheus / Datadog: Set up alerts if certificates have fewer than 20 days remaining.
 
 **Don't**:
 
-- **Don't forget to configure renewal timers**: Verify that `systemctl list-timers | grep certbot` is active and running twice daily.
-- **Don't hardcode DNS provider API tokens with global write access**: Restrict cloud DNS API tokens to modify only the `_acme-challenge` TXT records.
-- **Don't delete `/etc/letsencrypt/` files manually**: Use `certbot delete --cert-name <domain>` to remove decommissioned certificate configs.
+- Forget to configure renewal timers: Verify that `systemctl list-timers | grep certbot` is active and running twice daily.
+- Hardcode DNS provider API tokens with global write access: Restrict cloud DNS API tokens to modify only the `_acme-challenge` TXT records.
+- Delete `/etc/letsencrypt/` files manually: Use `certbot delete --cert-name <domain>` to remove decommissioned certificate configs.
 
 ## Troubleshooting
 

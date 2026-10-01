@@ -5,7 +5,7 @@ description: Expert Jupyter Notebook assistance covering interactive Python, ker
 
 # Jupyter
 
-Jupyter is the de facto standard for interactive data science. v7 (2025) of the Notebook is built on JupyterLab components, offering a modern, extensible experience.
+Jupyter provides the standard interactive computing architecture for data science and machine learning, featuring reproducible notebook workflows, interactive widgets, and polyglot kernels.
 
 ## When to Use
 
@@ -32,7 +32,7 @@ eig = np.linalg.eigvals(arr)
 
 ## Core Concepts
 
-#Essential IPython Magic Commands
+### Essential IPython Magic Commands
 
 Optimizing execution, timing, and module reloading:
 
@@ -55,7 +55,7 @@ eigvals = np.linalg.eigvals(arr)
 %config InlineBackend.figure_format = 'retina'
 ```
 
-#Interactive UI Widgets with ipywidgets
+### Interactive UI Widgets with ipywidgets
 
 Building interactive parameter tuning controls inside the notebook:
 
@@ -84,7 +84,7 @@ widgets.interact(
 );
 ```
 
-#Parameterized Execution with Papermill
+### Parameterized Execution with Papermill
 
 Running notebooks programmatically in production data workflows:
 
@@ -120,15 +120,20 @@ def plot_wave(frequency=2.0, amplitude=1.0):
     plt.show()
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** restart kernel and run all cells (`Kernel -> Restart and Run All`) before committing to verify reproducibility.
-- **Do** use `nbstripout` or `jupytext` in Git hooks to avoid committing huge binary outputs and image outputs.
-- **Do** move complex, reusable functions from notebook cells into tested `.py` modules and import them.
-- **Do** configure `%config InlineBackend.figure_format = 'retina'` for crisp charts on high-DPI displays.
-- **Don't** leave notebooks with out-of-order execution states (e.g. In [45] before In [2]).
-- **Don't** commit sensitive database passwords, cloud tokens, or API keys inside notebook output cells.
-- **Don't** use Jupyter notebooks for complex long-running production services; export production logic to scripts/packages.
+**Do**:
+
+- Restart kernel and run all cells (`Kernel -> Restart and Run All`) before committing to verify reproducibility.
+- Use `nbstripout` or `jupytext` in Git hooks to avoid committing huge binary outputs and image outputs.
+- Move complex, reusable functions from notebook cells into tested `.py` modules and import them.
+- Configure `%config InlineBackend.figure_format = 'retina'` for crisp charts on high-DPI displays.
+
+**Don't**:
+
+- Leave notebooks with out-of-order execution states (e.g. In [45] before In [2]).
+- Commit sensitive database passwords, cloud tokens, or API keys inside notebook output cells.
+- Use Jupyter notebooks for complex long-running production services; export production logic to scripts/packages.
 
 ## Troubleshooting
 

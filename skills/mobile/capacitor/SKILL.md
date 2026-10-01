@@ -35,7 +35,7 @@ const printCurrentPosition = async () => {
 
 ## Core Concepts
 
-#Web-to-Native Bridge Architecture
+### Web-to-Native Bridge Architecture
 
 Capacitor embeds web applications inside a hardware-accelerated native WebView (WKWebView on iOS, Android System WebView) and exposes a bi-directional JSON RPC bridge:
 
@@ -56,7 +56,7 @@ const printCurrentPosition = async () => {
 };
 ```
 
-#Custom Native Plugin Implementation
+### Custom Native Plugin Implementation
 
 Custom plugins allow writing native Swift or Kotlin code that hooks directly into the Capacitor TypeScript interface:
 
@@ -78,7 +78,7 @@ public class CustomHapticsPlugin: CAPPlugin, CAPBridgedPlugin {
 }
 ```
 
-#Configuration & Environment Management
+### Configuration & Environment Management
 
 Capacitor configurations dictate bundle identifiers, plugins, server hosting modes, and security policies:
 
@@ -103,7 +103,8 @@ export default config;
 
 ## Common Patterns
 
-#Custom Native Plugin Bridge
+### Custom Native Plugin Bridge
+
 **Problem**: Need native platform functionality not provided by community plugins.  
 **Solution**: Create a custom Capacitor plugin bridge.
 
@@ -122,20 +123,20 @@ export default CustomHaptics;
 await CustomHaptics.vibratePattern({ pattern: [100, 200, 100] });
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use `npx cap sync`**: Always run sync after web build to copy web assets and update native plugin dependencies.
-- **Use Secure Storage Plugins**: Store auth tokens in iOS Keychain and Android Keystore via `@capacitor-community/secure-storage`.
-- **Implement Live Updates Carefully**: Use platforms like Capgo or Ionic Appflow for OTA bugfixes while complying with Apple guidelines.
-- **Optimize Web Performance**: Keep initial bundle sizes small and ensure UI responsiveness meets native 60fps standards.
+- Use `npx cap sync`: Always run sync after web build to copy web assets and update native plugin dependencies.
+- Use Secure Storage Plugins: Store auth tokens in iOS Keychain and Android Keystore via `@capacitor-community/secure-storage`.
+- Implement Live Updates Carefully: Use platforms like Capgo or Ionic Appflow for OTA bugfixes while complying with Apple guidelines.
+- Optimize Web Performance: Keep initial bundle sizes small and ensure UI responsiveness meets native 60fps standards.
 
 **Don't**:
 
-- **Don't edit generated `public` web folders inside native projects**: Modify the source web app and run `npx cap copy`.
-- **Don't leave debug live-reload URLs in production**: Remove `server.url` from `capacitor.config.ts` prior to release builds.
-- **Don't ignore notch safe areas**: Apply `viewport-fit=cover` and CSS `env(safe-area-inset-top)` to prevent status bar collisions.
+- Edit generated `public` web folders inside native projects: Modify the source web app and run `npx cap copy`.
+- Leave debug live-reload URLs in production: Remove `server.url` from `capacitor.config.ts` prior to release builds.
+- Ignore notch safe areas: Apply `viewport-fit=cover` and CSS `env(safe-area-inset-top)` to prevent status bar collisions.
 
 ## Troubleshooting
 

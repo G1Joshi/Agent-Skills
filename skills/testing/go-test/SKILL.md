@@ -35,7 +35,7 @@ Run with `go test ./...`.
 
 ## Core Concepts
 
-#Table-Driven Test Structure
+### Table-Driven Test Structure
 
 The idiomatic Go approach for executing multiple test cases using an anonymous slice of structs:
 
@@ -67,7 +67,7 @@ func TestCalculateDiscount(t *testing.T) {
 }
 ```
 
-#Race Detection (`-race`)
+### Race Detection (`-race`)
 
 Instruments memory accesses to detect unsafe concurrent reads/writes:
 
@@ -76,7 +76,7 @@ Instruments memory accesses to detect unsafe concurrent reads/writes:
 go test -race ./...
 ```
 
-#Benchmark Functions (`testing.B`)
+### Benchmark Functions (`testing.B`)
 
 Profiles memory allocations and loop throughput:
 
@@ -123,20 +123,20 @@ func TestCalculateDiscount(t *testing.T) {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Always Run `go test -race ./...` in CI**: Catch elusive concurrency data races before deploying to production.
-- **Use Subtests with `t.Run()`**: Enable granular reporting, isolated setup, and parallel subtest execution (`t.Parallel()`).
-- **Use `t.Cleanup()` for Resource Teardown**: Register cleanup functions adjacent to resource creation rather than relying on deferred functions.
-- **Measure Code Coverage**: Generate HTML coverage reports using `go test -coverprofile=coverage.out ./... && go tool cover -html=coverage.out`.
+- Always Run `go test -race ./...` in CI: Catch elusive concurrency data races before deploying to production.
+- Use Subtests with `t.Run()`: Enable granular reporting, isolated setup, and parallel subtest execution (`t.Parallel()`).
+- Use `t.Cleanup()` for Resource Teardown: Register cleanup functions adjacent to resource creation rather than relying on deferred functions.
+- Measure Code Coverage: Generate HTML coverage reports using `go test -coverprofile=coverage.out ./... && go tool cover -html=coverage.out`.
 
 **Don't**:
 
-- **Don't use heavy assertion libraries when `if got != want` suffices**: Idiomatic Go favors simple `if` checks over opaque assertion magic.
-- **Don't leave goroutines leaking in tests**: Ensure test goroutines exit cleanly before tests finish.
-- **Don't ignore `-short` flag**: Support `if testing.Short() { t.Skip() }` to allow developers to run quick test cycles locally.
+- Use heavy assertion libraries when `if got != want` suffices: Idiomatic Go favors simple `if` checks over opaque assertion magic.
+- Leave goroutines leaking in tests: Ensure test goroutines exit cleanly before tests finish.
+- Ignore `-short` flag: Support `if testing.Short() { t.Skip() }` to allow developers to run quick test cycles locally.
 
 ## Troubleshooting
 

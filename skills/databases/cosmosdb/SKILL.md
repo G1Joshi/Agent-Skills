@@ -31,7 +31,7 @@ await container.CreateItemAsync(item, new PartitionKey(item.Category));
 
 ## Core Concepts
 
-#Request Units (RU/s) Throughput Currency
+### Request Units (RU/s) Throughput Currency
 
 Throughput is normalized into Request Units; a 1KB point read costs 1 RU:
 
@@ -53,7 +53,7 @@ const { resource, requestCharge } = await container
 console.log(`Retrieved order. Request Charge: ${requestCharge} RUs`);
 ```
 
-#Partition Key Selection (Physical vs Logical Partitions)
+### Partition Key Selection (Physical vs Logical Partitions)
 
 The partition key determines how items are distributed across physical servers; high-cardinality keys ensure even distribution:
 
@@ -67,7 +67,7 @@ The partition key determines how items are distributed across physical servers; 
 }
 ```
 
-#Change Feed Microservice Architecture
+### Change Feed Microservice Architecture
 
 Streams real-time container mutations to trigger Azure Functions, microservices, or search index updates:
 
@@ -107,20 +107,20 @@ const userProfile = {
 await container.items.create(userProfile);
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Choose High-Cardinality Partition Keys**: Select partition keys like `userId`, `tenantId`, or `deviceDate` to prevent hot-partition throttle errors (HTTP 429).
-- **Default to Session Consistency**: Use Session consistency for 90% of web apps; it guarantees read-your-own-writes at optimal cost.
-- **Enable Autoscale RU/s**: Configure autoscale (e.g. 1,000 to 10,000 RU/s) for unpredictable production workloads to eliminate manual scaling.
-- **Leverage the Change Feed**: Decouple post-write integrations (sending emails, updating caches) using Cosmos DB Change Feed triggers.
+- Choose High-Cardinality Partition Keys: Select partition keys like `userId`, `tenantId`, or `deviceDate` to prevent hot-partition throttle errors (HTTP 429).
+- Default to Session Consistency: Use Session consistency for 90% of web apps; it guarantees read-your-own-writes at optimal cost.
+- Enable Autoscale RU/s: Configure autoscale (e.g. 1,000 to 10,000 RU/s) for unpredictable production workloads to eliminate manual scaling.
+- Leverage the Change Feed: Decouple post-write integrations (sending emails, updating caches) using Cosmos DB Change Feed triggers.
 
 **Don't**:
 
-- **Don't execute cross-partition queries frequently**: Queries without a partition key scan all physical partitions, consuming hundreds of RUs.
-- **Don't use Cosmos DB for heavy OLAP data warehousing**: Use Azure Synapse or Fabric for petabyte analytical batch jobs.
-- **Don't leave index policies unoptimized**: Exclude unused string paths from indexing to reduce write RU consumption.
+- Execute cross-partition queries frequently: Queries without a partition key scan all physical partitions, consuming hundreds of RUs.
+- Use Cosmos DB for heavy OLAP data warehousing: Use Azure Synapse or Fabric for petabyte analytical batch jobs.
+- Leave index policies unoptimized: Exclude unused string paths from indexing to reduce write RU consumption.
 
 ## Troubleshooting
 

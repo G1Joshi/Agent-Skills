@@ -5,7 +5,7 @@ description: Expert Deno runtime assistance covering secure defaults, TypeScript
 
 # Deno
 
-Deno v2.0 (2024/2025) focuses on **Node.js Compatibility**. It can now run most npm packages and `package.json` projects, removing the biggest barrier to entry.
+Deno is a modern runtime for JavaScript, TypeScript, and WebAssembly with secure defaults, built-in developer tooling, and direct npm package compatibility.
 
 ## When to Use
 
@@ -33,7 +33,7 @@ deno run --allow-net main.ts
 
 ## Core Concepts
 
-#Modern HTTP Server with Deno.serve()
+### Modern HTTP Server with Deno.serve()
 
 Built-in high-performance HTTP server using Web Standard `Request` and `Response`:
 
@@ -60,7 +60,7 @@ Deno.serve({ port: 8000 }, (req: Request) => {
 });
 ```
 
-#Fine-Grained Permission Model
+### Fine-Grained Permission Model
 
 Explicit security sandbox permissions:
 
@@ -72,7 +72,7 @@ deno run --allow-net=api.github.com:443 --allow-read=/data main.ts
 deno task start
 ```
 
-#Deno KV Key-Value Database
+### Deno KV Key-Value Database
 
 Native ACID key-value store built into the runtime:
 
@@ -110,15 +110,20 @@ Specify restricted read/write and network allowlists:
 deno run   --allow-read=./config   --allow-net=api.stripe.com,auth.mycompany.com   --allow-env=PORT,DATABASE_URL   server.ts
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target Deno 2 with native `deno.json` workspace and dependency management.
-- **Do** run scripts with minimal permissions (`--allow-net=api.domain.com`) rather than `--allow-all` in production.
-- **Do** use `deno fmt` and `deno lint` to enforce formatting and static analysis across projects.
-- **Do** utilize `Deno.serve()` instead of legacy `std/http` server modules.
-- **Don't** grant `--allow-all` (-A) in production deployment scripts; adhere to least privilege.
-- **Don't** use Node.js proprietary modules (`fs`, `http`) when Web Standard APIs (`fetch`, `ReadableStream`) are available.
-- **Don't** commit untracked remote URLs without lockfiles; use `deno.lock` for reproducible dependency graphs.
+**Do**:
+
+- Target Deno 2 with native `deno.json` workspace and dependency management.
+- Run scripts with minimal permissions (`--allow-net=api.domain.com`) rather than `--allow-all` in production.
+- Use `deno fmt` and `deno lint` to enforce formatting and static analysis across projects.
+- Utilize `Deno.serve()` instead of legacy `std/http` server modules.
+
+**Don't**:
+
+- Grant `--allow-all` (-A) in production deployment scripts; adhere to least privilege.
+- Use Node.js proprietary modules (`fs`, `http`) when Web Standard APIs (`fetch`, `ReadableStream`) are available.
+- Commit untracked remote URLs without lockfiles; use `deno.lock` for reproducible dependency graphs.
 
 ## Troubleshooting
 

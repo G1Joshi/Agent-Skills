@@ -5,7 +5,7 @@ description: Expert DBeaver open-source multi-platform database tool assistance 
 
 # DBeaver
 
-DBeaver is the free, open-source universal database manager. 2025 updates add **Gemini AI** integration to write SQL for you.
+DBeaver is a universal, open-source database tool supporting relational, document, key-value, and analytical databases with an intuitive SQL editor and data browser.
 
 ## When to Use
 
@@ -29,7 +29,7 @@ ORDER BY pg_total_relation_size(quote_ident(table_name)) DESC;
 
 ## Core Concepts
 
-#Configuring JDBC Connection with SSL & SSH Tunnel
+### Configuring JDBC Connection with SSL & SSH Tunnel
 
 Setting up encrypted database connectivity:
 
@@ -48,7 +48,7 @@ SSL Settings:
   Root Certificate: /etc/ssl/certs/rds-combined-ca-bundle.pem
 ```
 
-#Generating Visual Entity-Relationship Diagrams (ERD)
+### Generating Visual Entity-Relationship Diagrams (ERD)
 
 Visualizing database schema topology:
 
@@ -57,7 +57,7 @@ Visualizing database schema topology:
 3. DBeaver renders entity boxes with columns, data types, and foreign key connector arrows.
 4. Export diagram to SVG or PNG for architecture documentation.
 
-#Exporting Datasets with Custom Formatters
+### Exporting Datasets with Custom Formatters
 
 Exporting query results to SQL Inserts or JSON:
 
@@ -74,7 +74,8 @@ WHERE is_active = true;
 
 ## Common Patterns
 
-#Mock Data Generation
+### Mock Data Generation
+
 **Problem**: Populate development database with realistic test datasets.  
 **Solution**: Configure DBeaver Mock Data Generator.
 
@@ -89,15 +90,20 @@ SELECT
   NOW() - (random() * interval '30 days');
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** set connection type to **Production** (sets background color to red and enforces auto-commit warnings).
-- **Do** use SSH Tunneling with public key authentication for all cloud-hosted database connections.
-- **Do** configure `dbeaver.ini` to allocate sufficient JVM heap memory (`-Xmx2048m`) when querying large datasets.
-- **Do** use the Data Transfer wizard for moving schema tables and data across different database engines.
-- **Don't** leave **Auto-Commit** enabled on production databases; use **Manual Commit** mode.
-- **Don't** commit `dbeaver-data-sources.xml` containing plain text credentials to version control.
-- **Don't** fetch hundreds of thousands of rows at once; configure result set fetch size limits.
+**Do**:
+
+- Set connection type to **Production** (sets background color to red and enforces auto-commit warnings).
+- Use SSH Tunneling with public key authentication for all cloud-hosted database connections.
+- Configure `dbeaver.ini` to allocate sufficient JVM heap memory (`-Xmx2048m`) when querying large datasets.
+- Use the Data Transfer wizard for moving schema tables and data across different database engines.
+
+**Don't**:
+
+- Leave **Auto-Commit** enabled on production databases; use **Manual Commit** mode.
+- Commit `dbeaver-data-sources.xml` containing plain text credentials to version control.
+- Fetch hundreds of thousands of rows at once; configure result set fetch size limits.
 
 ## Troubleshooting
 

@@ -5,7 +5,7 @@ description: Expert Caddy web server assistance covering automatic HTTPS, Caddyf
 
 # Caddy
 
-Caddy 2 is a powerful, enterprise-ready web server with **automatic HTTPS** by default. v2.8 (2025) improves **HTTP/3** performance and certificate management.
+Caddy is an enterprise-grade web server written in Go, featuring automatic TLS certificate provisioning by default, modern HTTP/3 support, and concise configuration syntax.
 
 ## When to Use
 
@@ -27,7 +27,7 @@ example.com {
 
 ## Core Concepts
 
-#Production Reverse Proxy Caddyfile with Security Headers
+### Production Reverse Proxy Caddyfile with Security Headers
 
 Clean reverse proxy configuration with automatic HTTPS:
 
@@ -67,7 +67,7 @@ api.example.com {
 }
 ```
 
-#Static File Server with Gzip & Zstandard Compression
+### Static File Server with Gzip & Zstandard Compression
 
 Serving high-performance frontends with fallback for Single Page Apps (SPAs):
 
@@ -82,7 +82,7 @@ app.example.com {
 }
 ```
 
-#Live Configuration Updates via Admin API
+### Live Configuration Updates via Admin API
 
 Modifying configuration dynamically without server restarts:
 
@@ -125,15 +125,20 @@ api.example.com {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use `encode zstd gzip` on static routes to reduce bandwidth and speed up client loading.
-- **Do** use `try_files {path} /index.html` for client-side Single Page Application (SPA) routing.
-- **Do** test configuration files with `caddy validate` before reloading in production pipelines.
-- **Do** configure structured JSON logging with automated log rolling.
-- **Don't** expose Caddy's internal Admin API port (`2019`) to public network interfaces.
-- **Don't** use Caddy without persistent storage volumes for `/data` in containers; certificates will be re-requested on restart.
-- **Don't** disable automatic HTTPS (`http://`) unless strictly operating behind an external cloud load balancer.
+**Do**:
+
+- Use `encode zstd gzip` on static routes to reduce bandwidth and speed up client loading.
+- Use `try_files {path} /index.html` for client-side Single Page Application (SPA) routing.
+- Test configuration files with `caddy validate` before reloading in production pipelines.
+- Configure structured JSON logging with automated log rolling.
+
+**Don't**:
+
+- Expose Caddy's internal Admin API port (`2019`) to public network interfaces.
+- Use Caddy without persistent storage volumes for `/data` in containers; certificates will be re-requested on restart.
+- Disable automatic HTTPS (`http://`) unless strictly operating behind an external cloud load balancer.
 
 ## Troubleshooting
 

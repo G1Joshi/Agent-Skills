@@ -16,14 +16,14 @@ PyCharm is the best IDE for serious Python development. It excels in **Django** 
 
 ## Quick Start
 
-#1. Launch via Terminal
+### 1. Launch via Terminal
 
 ```bash
 # Open directory in PyCharm
 pycharm .
 ```
 
-#2. Configure Poetry / Virtualenv Interpreter
+### 2. Configure Poetry / Virtualenv Interpreter
 
 ```bash
 # Ensure local virtualenv exists
@@ -102,7 +102,8 @@ Configuring Ruff as the primary linter and formatter inside PyCharm:
 
 ## Common Patterns
 
-#Remote Docker Compose Interpreter
+### Remote Docker Compose Interpreter
+
 **Problem**: Application dependencies require system libraries or services running inside Docker.  
 **Solution**: Configure Docker Compose as remote interpreter in PyCharm Professional.
 
@@ -119,7 +120,8 @@ services:
       - "8000:8000"
 ```
 
-#Automated File Watcher Configuration
+### Automated File Watcher Configuration
+
 **Problem**: Automatically format and lint Python files on save with Ruff.  
 **Solution**: Define File Watcher configuration in PyCharm.
 
@@ -128,19 +130,24 @@ services:
 format --stdin-filename $FilePath$ -
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** configure **Ruff** plugin or file watcher for sub-second linting and auto-formatting.
-- **Do** use PyCharm's built-in **HTTP Client** (`.http` files) with environment support for testing REST APIs.
-- **Do** set up Docker Compose interpreters to maintain identical runtime environments across teams.
-- **Do** use **Python Profiler** (`Run -> Profile 'App'`) to locate algorithmic CPU and memory bottlenecks.
-- **Don't** commit `.idea/` directory without adding `.idea/workspace.xml` to `.gitignore`.
-- **Don't** leave PyCharm indexing large data directories; right-click data folders -> **Mark Directory as -> Excluded**.
-- **Don't** run untrusted Jupyter notebooks with elevated host permissions.
+**Do**:
+
+- Configure **Ruff** plugin or file watcher for sub-second linting and auto-formatting.
+- Use PyCharm's built-in **HTTP Client** (`.http` files) with environment support for testing REST APIs.
+- Set up Docker Compose interpreters to maintain identical runtime environments across teams.
+- Use **Python Profiler** (`Run -> Profile 'App'`) to locate algorithmic CPU and memory bottlenecks.
+
+**Don't**:
+
+- Commit `.idea/` directory without adding `.idea/workspace.xml` to `.gitignore`.
+- Leave PyCharm indexing large data directories; right-click data folders -> **Mark Directory as -> Excluded**.
+- Run untrusted Jupyter notebooks with elevated host permissions.
 
 ## Troubleshooting
 
-| Error / Symptom                                   | Cause                                                           | Solution                                                                                                         |
+| Error                                             | Cause                                                           | Solution                                                                                                         |
 | ------------------------------------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `No module named '...'` inside PyCharm terminal   | PyCharm internal terminal opened outside the project virtualenv | Verify `Settings > Tools > Terminal > Activate virtualenv` is checked; manually run `source .venv/bin/activate`. |
 | Unresolved reference inspection on local packages | Root source directories not marked as Sources Root              | Right-click `src` or root folder > **Mark Directory as > Sources Root**.                                         |

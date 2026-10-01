@@ -5,7 +5,7 @@ description: Expert Red Hat OpenShift assistance covering oc CLI, DeploymentConf
 
 # OpenShift
 
-Red Hat OpenShift is an enterprise-ready Kubernetes container platform with full-stack automated operations. In 2025, **OpenShift Virtualization** (running VMs side-by-side with containers) is a key feature.
+Red Hat OpenShift is an enterprise Kubernetes platform offering full-stack automated operations, integrated developer tooling, and OpenShift Virtualization for co-locating VMs and containers.
 
 ## When to Use
 
@@ -29,7 +29,7 @@ oc new-app nodejs~https://github.com/sclorg/nodejs-ex.git
 
 ## Core Concepts
 
-#OpenShift BuildConfig & ImageStream (S2I)
+### OpenShift BuildConfig & ImageStream (S2I)
 
 Building containers from Git inside the cluster:
 
@@ -70,7 +70,7 @@ spec:
     - type: ConfigChange
 ```
 
-#OpenShift Route for External Traffic
+### OpenShift Route for External Traffic
 
 Exposing services with edge TLS termination:
 
@@ -93,7 +93,7 @@ spec:
     insecureEdgeTerminationPolicy: Redirect
 ```
 
-#OpenShift CLI (oc) Operations
+### OpenShift CLI (oc) Operations
 
 Logging in and managing cluster projects:
 
@@ -135,15 +135,20 @@ spec:
     insecureEdgeTerminationPolicy: Redirect
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use Red Hat Universal Base Images (`ubi9-minimal`) for enterprise security and CVE patching guarantees.
-- **Do** manage OpenShift resources declaratively via GitOps using OpenShift GitOps (Argo CD).
-- **Do** adhere strictly to OpenShift `restricted-v2` Security Context Constraints (SCC); never run containers as root.
-- **Do** use `insecureEdgeTerminationPolicy: Redirect` on Routes to force HTTPS.
-- **Don't** grant `anyuid` or `privileged` SCC permissions to service accounts unless strictly necessary.
-- **Don't** hardcode external cluster hostnames; use OpenShift Route domain wildcards.
-- **Don't** perform manual cluster modifications via OpenShift Web Console without tracking in Git.
+**Do**:
+
+- Use Red Hat Universal Base Images (`ubi9-minimal`) for enterprise security and CVE patching guarantees.
+- Manage OpenShift resources declaratively via GitOps using OpenShift GitOps (Argo CD).
+- Adhere strictly to OpenShift `restricted-v2` Security Context Constraints (SCC); never run containers as root.
+- Use `insecureEdgeTerminationPolicy: Redirect` on Routes to force HTTPS.
+
+**Don't**:
+
+- Grant `anyuid` or `privileged` SCC permissions to service accounts unless strictly necessary.
+- Hardcode external cluster hostnames; use OpenShift Route domain wildcards.
+- Perform manual cluster modifications via OpenShift Web Console without tracking in Git.
 
 ## Troubleshooting
 

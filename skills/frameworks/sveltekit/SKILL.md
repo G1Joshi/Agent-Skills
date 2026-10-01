@@ -9,7 +9,7 @@ SvelteKit is the meta-framework for Svelte, similar to Next.js for React. It use
 
 ## When to Use
 
-- **Svelte Apps**: The standard way to build Svelte apps in 2025.
+- **Svelte Apps**: The standard framework for building full-stack Svelte applications.
 - **Full Stack**: Unified backend and frontend.
 - **Edge Deployment**: Runs on any platform via Adapters (Vercel, Cloudflare, Netlify, Node).
 
@@ -93,17 +93,18 @@ export const actions: Actions = {
 </form>
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use Svelte 5 Runes**: SvelteKit 2+ fully supports Runes mode.
-- **Use `App.State`**: New SvelteKit interface for typesafe global app state.
-- **Stream Data**: Return promises in `load` functions to stream non-critical data.
+- Use Svelte 5 Runes: SvelteKit 2+ fully supports Runes mode.
+- Use `App.State`: New SvelteKit interface for typesafe global app state.
+- Stream Data: Return promises in `load` functions to stream non-critical data.
 
 **Don't**:
 
-- **Don't use `store` for server data**: Use `page.data` (Context) for data passing down the tree to avoid state leakage on valid server execution.
+- Use `store` for server data: Use `page.data` (Context) for data passing down the tree to avoid state leakage on valid server execution.
+- Perform sensitive database queries or secret token lookups in client-facing `+page.ts` files; place them in `+page.server.ts` instead.
 
 ## Troubleshooting
 

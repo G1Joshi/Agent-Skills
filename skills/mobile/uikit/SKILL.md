@@ -46,7 +46,7 @@ class HomeViewController: UIViewController {
 
 ## Core Concepts
 
-#UICollectionView Diffable Data Sources & Compositional Layout
+### UICollectionView Diffable Data Sources & Compositional Layout
 
 Eliminates index-path calculation bugs by managing list state through unique hashable identifiers and snapshots:
 
@@ -83,7 +83,7 @@ final class FeedViewController: UIViewController {
 }
 ```
 
-#UIViewController Lifecycle Flow
+### UIViewController Lifecycle Flow
 
 Strictly isolates setup, layout, and appearance phases to ensure optimal memory and rendering performance:
 
@@ -106,7 +106,7 @@ class OrderDetailViewController: UIViewController {
 }
 ```
 
-#Programmatic Layout Anchor Constraints
+### Programmatic Layout Anchor Constraints
 
 Constructs responsive layouts programmatically without external dependencies:
 
@@ -121,7 +121,8 @@ NSLayoutConstraint.activate([
 
 ## Common Patterns
 
-#Programmatic Auto Layout with NSLayoutConstraint
+### Programmatic Auto Layout with NSLayoutConstraint
+
 **Problem**: Storyboard merge conflicts and fragile constraint debugging in team repositories.  
 **Solution**: Construct view hierarchies and constraints purely in Swift.
 
@@ -147,20 +148,20 @@ final class ProfileViewController: UIViewController {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Adopt Diffable Data Sources**: Replace error-prone `reloadData()` and `performBatchUpdates()` with atomic `NSDiffableDataSourceSnapshot`.
-- **Use `translatesAutoresizingMaskIntoConstraints = false`**: Always disable autotranslation on programmatically created views before activating constraints.
-- **Bridge with SwiftUI**: Wrap new feature views in `UIHostingController` rather than rebuilding everything in UIKit.
-- **Audit Retain Cycles in Closures**: Capture `[weak self]` in completion handlers and event closures to prevent ViewController leaks.
+- Adopt Diffable Data Sources: Replace error-prone `reloadData()` and `performBatchUpdates()` with atomic `NSDiffableDataSourceSnapshot`.
+- Use `translatesAutoresizingMaskIntoConstraints = false`: Always disable autotranslation on programmatically created views before activating constraints.
+- Bridge with SwiftUI: Wrap new feature views in `UIHostingController` rather than rebuilding everything in UIKit.
+- Audit Retain Cycles in Closures: Capture `[weak self]` in completion handlers and event closures to prevent ViewController leaks.
 
 **Don't**:
 
-- **Don't trigger expensive layout inside `draw(_:)`**: Keep custom core graphics rendering strictly inside draw methods; avoid layout passes.
-- **Don't hardcode frame coordinates**: Avoid explicit `CGRect(x: ..., y: ...)` math; use Auto Layout or safe area layout guides.
-- **Don't block the main thread**: Perform data decoding and persistence asynchronously and update UIKit views on `MainActor`.
+- Trigger expensive layout inside `draw(_:)`: Keep custom core graphics rendering strictly inside draw methods; avoid layout passes.
+- Hardcode frame coordinates: Avoid explicit `CGRect(x: ..., y: ...)` math; use Auto Layout or safe area layout guides.
+- Block the main thread: Perform data decoding and persistence asynchronously and update UIKit views on `MainActor`.
 
 ## Troubleshooting
 

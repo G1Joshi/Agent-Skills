@@ -30,7 +30,7 @@ struct User: Identifiable, Codable {
 
 ## Core Concepts
 
-#Modern Swift 6 Concurrency: Actors & Structured Tasks
+### Modern Swift 6 Concurrency: Actors & Structured Tasks
 
 Data-race safety guaranteed at compile time with Sendable enforcement and actors:
 
@@ -72,7 +72,7 @@ func fetchUserMetrics(userIds: [UUID]) async throws -> [UUID: Decimal] {
 }
 ```
 
-#Protocol-Oriented Architecture & Primary Associated Types
+### Protocol-Oriented Architecture & Primary Associated Types
 
 Expressive type contracts using Swift 5.7+ `some` and `any` semantics:
 
@@ -107,7 +107,7 @@ func makeDefaultRepo() -> some Repository<User> {
 }
 ```
 
-#Result Builders & Custom DSLs
+### Result Builders & Custom DSLs
 
 Constructing declarative hierarchies modeled after SwiftUI:
 
@@ -140,7 +140,11 @@ let page = htmlDoc {
 
 ## Common Patterns
 
-### Async/Await
+### Modern Async/Await Network Request
+
+**Problem**: Deeply nested completion handler callbacks and error propagation bugs in asynchronous code.
+
+**Solution**:
 
 ```swift
 func fetchUser(id: UUID) async throws -> User {
@@ -163,6 +167,10 @@ let (userResult, ordersResult) = try await (user, orders)
 
 ### Actors
 
+**Problem**: Preventing concurrent data race bugs when mutating shared mutable state across asynchronous tasks.
+
+**Solution**:
+
 ```swift
 actor UserCache {
     private var cache: [UUID: User] = [:]
@@ -172,15 +180,20 @@ actor UserCache {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** enable Swift 6 complete concurrency checking (`-strict-concurrency=complete`) to catch data races at compile time.
-- **Do** prefer `struct` and value types over `class` unless reference identity or Objective-C runtime bridging is explicitly required.
-- **Do** favor `some Protocol` (opaque types) over `any Protocol` (existential types) to eliminate dynamic dispatch overhead.
-- **Do** use `async/await` and structured `withTaskGroup` rather than legacy completion handlers and Grand Central Dispatch (`DispatchQueue`).
-- **Don't** force unwrap optionals (`!`) in production; use `guard let`, `if let`, or default coalescing (`??`).
-- **Don't** capture strong `self` references in escaping closures; use `[weak self]` to avoid retain cycles.
-- **Don't** bypass actor isolation with `@unchecked Sendable` without verifying thread-safety invariants.
+**Do**:
+
+- Enable Swift 6 complete concurrency checking (`-strict-concurrency=complete`) to catch data races at compile time.
+- Prefer `struct` and value types over `class` unless reference identity or Objective-C runtime bridging is explicitly required.
+- Favor `some Protocol` (opaque types) over `any Protocol` (existential types) to eliminate dynamic dispatch overhead.
+- Use `async/await` and structured `withTaskGroup` rather than legacy completion handlers and Grand Central Dispatch (`DispatchQueue`).
+
+**Don't**:
+
+- Force unwrap optionals (`!`) in production; use `guard let`, `if let`, or default coalescing (`??`).
+- Capture strong `self` references in escaping closures; use `[weak self]` to avoid retain cycles.
+- Bypass actor isolation with `@unchecked Sendable` without verifying thread-safety invariants.
 
 ## Troubleshooting
 

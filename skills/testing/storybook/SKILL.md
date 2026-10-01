@@ -45,7 +45,7 @@ export const Primary: Story = {
 
 ## Core Concepts
 
-#Component Story Format (CSF 3)
+### Component Story Format (CSF 3)
 
 Defines component variants using declarative, typed JavaScript exports:
 
@@ -83,7 +83,7 @@ export const Disabled: Story = {
 };
 ```
 
-#Component Interaction Testing (`play` Function)
+### Component Interaction Testing (`play` Function)
 
 Simulates user interactions inside the story using Testing Library and asserts on outcomes:
 
@@ -102,7 +102,7 @@ export const InteractiveLoginForm: Story = {
 };
 ```
 
-#Mocking API Calls with MSW Addon
+### Mocking API Calls with MSW Addon
 
 Intercepts component network requests inside the Storybook canvas:
 
@@ -155,28 +155,28 @@ export const ValidSubmission: Story = {
 };
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Adopt CSF 3 Standard**: Use object-based CSF 3 stories for cleaner syntax and reduced boilerplate.
-- **Enable `@storybook/addon-a11y`**: Catch WCAG accessibility violations directly inside the component development workflow.
-- **Automate Visual Testing with Chromatic**: Capture regression snapshots of all stories on every pull request.
-- **Use Mock Service Worker (MSW)**: Mock API backends to enable stories to render realistic asynchronous states.
+- Adopt CSF 3 Standard: Use object-based CSF 3 stories for cleaner syntax and reduced boilerplate.
+- Enable `@storybook/addon-a11y`: Catch WCAG accessibility violations directly inside the component development workflow.
+- Automate Visual Testing with Chromatic: Capture regression snapshots of all stories on every pull request.
+- Use Mock Service Worker (MSW): Mock API backends to enable stories to render realistic asynchronous states.
 
 **Don't**:
 
-- **Don't import application routers or global state in components**: Pass callbacks and state down as props to keep components isolated.
-- **Don't hardcode static story args**: Leverage Storybook controls (`args`) to allow designers to test edge-case content lengths.
-- **Don't neglect loading and error states**: Create dedicated stories for loading skeletons, empty data, and network error states.
+- Import application routers or global state in components: Pass callbacks and state down as props to keep components isolated.
+- Hardcode static story args: Leverage Storybook controls (`args`) to allow designers to test edge-case content lengths.
+- Neglect loading and error states: Create dedicated stories for loading skeletons, empty data, and network error states.
 
 ## Troubleshooting
 
-| Error                                                   | Cause                                                                  | Solution                                                            |
-| :------------------------------------------------------ | :--------------------------------------------------------------------- | :------------------------------------------------------------------ |
-| `Cannot find module in .storybook/preview`              | Path alias or CSS import not recognized by Storybook builder.          | Add path aliases to `.storybook/main.ts` webpackFinal or viteFinal. |
-| `No stories found`                                      | Stories glob pattern in `main.ts` does not match component file paths. | Verify `stories: ['../src/**/*.stories.@(js                         | jsx | ts  | tsx)']` in config. |
-| `Component won't render: hook called outside component` | Decorator missing required React context or router provider.           | Wrap story with appropriate context provider in preview decorators. |
+| Error                                                   | Cause                                                                  | Solution                                                                 |
+| :------------------------------------------------------ | :--------------------------------------------------------------------- | :----------------------------------------------------------------------- |
+| `Cannot find module in .storybook/preview`              | Path alias or CSS import not recognized by Storybook builder.          | Add path aliases to `.storybook/main.ts` webpackFinal or viteFinal.      |
+| `No stories found`                                      | Stories glob pattern in `main.ts` does not match component file paths. | Verify `stories: ['../src/**/*.stories.@(js\|jsx\|ts\|tsx)']` in config. |
+| `Component won't render: hook called outside component` | Decorator missing required React context or router provider.           | Wrap story with appropriate context provider in preview decorators.      |
 
 ## References
 

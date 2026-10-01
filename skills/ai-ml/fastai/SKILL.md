@@ -32,7 +32,7 @@ learn.fine_tune(1)
 
 ## Core Concepts
 
-#Computer Vision Classifier with DataBlock API
+### Computer Vision Classifier with DataBlock API
 
 Building an image classification pipeline with automated transforms:
 
@@ -63,7 +63,7 @@ print(f"Optimal Learning Rate: {suggested_lr.valley}")
 learn.fine_tune(epochs=4, base_lr=suggested_lr.valley)
 ```
 
-#Tabular Deep Learning with Categorical Embeddings
+### Tabular Deep Learning with Categorical Embeddings
 
 Training neural networks on structured tabular data:
 
@@ -84,7 +84,7 @@ learn = tabular_learner(dls, layers=[200, 100], metrics=accuracy)
 learn.fit_one_cycle(5, 1e-2)
 ```
 
-#Exporting and Serving Model for Inference
+### Exporting and Serving Model for Inference
 
 Serializing the learner pipeline into a production artifact:
 
@@ -117,15 +117,20 @@ learn.unfreeze()
 learn.fit_one_cycle(4, slice(1e-5, lr_valley))
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** always run `learn.lr_find()` before training and use `learn.fine_tune()` for pre-trained weights.
-- **Do** use `aug_transforms()` with resize-presizing (`item_tfms=Resize(460)`, `batch_tfms=aug_transforms(size=224)`) to minimize blur.
-- **Do** call `learn.export()` to package architecture, weights, and pre-processing transforms together.
-- **Do** inspect misclassified instances using `ClassificationInterpretation.from_learner(learn).plot_top_losses()`.
-- **Don't** train pre-trained models with standard `fit()`; use `fine_tune()` to preserve backbone weights.
-- **Don't** process single inference images in raw PyTorch without applying fastai's exported transform pipeline.
-- **Don't** ignore class imbalance; supply custom weights to `CrossEntropyLossFlat`.
+**Do**:
+
+- Always run `learn.lr_find()` before training and use `learn.fine_tune()` for pre-trained weights.
+- Use `aug_transforms()` with resize-presizing (`item_tfms=Resize(460)`, `batch_tfms=aug_transforms(size=224)`) to minimize blur.
+- Call `learn.export()` to package architecture, weights, and pre-processing transforms together.
+- Inspect misclassified instances using `ClassificationInterpretation.from_learner(learn).plot_top_losses()`.
+
+**Don't**:
+
+- Train pre-trained models with standard `fit()`; use `fine_tune()` to preserve backbone weights.
+- Process single inference images in raw PyTorch without applying fastai's exported transform pipeline.
+- Ignore class imbalance; supply custom weights to `CrossEntropyLossFlat`.
 
 ## Troubleshooting
 

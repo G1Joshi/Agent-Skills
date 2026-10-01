@@ -34,7 +34,7 @@ end
 
 ## Core Concepts
 
-#Phoenix LiveView: Server-Driven Interactivity
+### Phoenix LiveView: Server-Driven Interactivity
 
 Real-time UI state management over WebSockets without JavaScript client state:
 
@@ -63,7 +63,7 @@ defmodule MyAppWeb.CounterLive do
 end
 ```
 
-#Ecto Contexts & Composability
+### Ecto Contexts & Composability
 
 Decoupled business logic and transactional database access:
 
@@ -86,7 +86,7 @@ defmodule MyApp.Accounts do
 end
 ```
 
-#Phoenix Channels: Low-Latency Pub/Sub
+### Phoenix Channels: Low-Latency Pub/Sub
 
 Real-time broadcasting across connected clients:
 
@@ -135,15 +135,20 @@ defmodule MyAppWeb.CounterLive do
 end
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target Phoenix 1.7+ with verified routes (`~p"/users"`) and HEEx functional components.
-- **Do** structure domain boundaries using Phoenix Contexts rather than exposing Ecto queries in controllers.
-- **Do** use LiveView streams (`stream/3`) for large collections to minimize memory usage on both client and server.
-- **Do** use Ecto Multi (`Ecto.Multi`) for atomic multi-table transactional workflows.
-- **Don't** store large binary data or huge collections in LiveView socket assigns; use temporary assigns or streams.
-- **Don't** make blocking third-party HTTP calls directly in LiveView processes without wrapping in `Task`.
-- **Don't** bypass Ecto changesets for user input validation.
+**Do**:
+
+- Target Phoenix 1.7+ with verified routes (`~p"/users"`) and HEEx functional components.
+- Structure domain boundaries using Phoenix Contexts rather than exposing Ecto queries in controllers.
+- Use LiveView streams (`stream/3`) for large collections to minimize memory usage on both client and server.
+- Use Ecto Multi (`Ecto.Multi`) for atomic multi-table transactional workflows.
+
+**Don't**:
+
+- Store large binary data or huge collections in LiveView socket assigns; use temporary assigns or streams.
+- Make blocking third-party HTTP calls directly in LiveView processes without wrapping in `Task`.
+- Bypass Ecto changesets for user input validation.
 
 ## Troubleshooting
 

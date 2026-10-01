@@ -5,7 +5,7 @@ description: Expert DigitalOcean cloud assistance covering Droplets, App Platfor
 
 # DigitalOcean
 
-DigitalOcean (DO) focuses on simplicity and developer experience. In 2025, it has expanded into **Managed AI** (GenAI Platform) and robust PaaS offerings (App Platform).
+DigitalOcean provides developer-centric cloud infrastructure, offering Droplets, managed Kubernetes (DOKS), App Platform PaaS, and S3-compatible Spaces storage.
 
 ## When to Use
 
@@ -30,7 +30,7 @@ doctl compute droplet create web-prod-01 \
 
 ## Core Concepts
 
-#Declarative App Platform Specification (.do/app.yaml)
+### Declarative App Platform Specification (.do/app.yaml)
 
 Deploying full-stack applications with managed PostgreSQL:
 
@@ -64,7 +64,7 @@ databases:
     size: db-s-1vcpu-1gb
 ```
 
-#DigitalOcean CLI (doctl) Scripting
+### DigitalOcean CLI (doctl) Scripting
 
 Automating Droplet and Kubernetes cluster provisioning:
 
@@ -82,7 +82,7 @@ doctl kubernetes cluster create k8s-prod-nyc \
 doctl kubernetes cluster kubeconfig save k8s-prod-nyc
 ```
 
-#Managed Spaces S3-Compatible Uploads with Boto3
+### Managed Spaces S3-Compatible Uploads with Boto3
 
 Uploading backups to DigitalOcean Spaces:
 
@@ -132,15 +132,20 @@ static_sites:
     output_dir: dist
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** enable Cloud Firewalls on all Droplets, restricting SSH access to trusted VPN IP ranges.
-- **Do** use VPC networks to isolate private traffic between Droplets, Managed Databases, and DOKS nodes.
-- **Do** enable automated weekly backups and monitoring alerts on production Droplets.
-- **Do** leverage App Platform for microservices to offload OS patching, TLS certificates, and deployments.
-- **Don't** run stateful databases inside ephemeral Droplets without persistent Block Storage volumes.
-- **Don't** use root passwords for Droplet access; strictly enforce SSH key authentication.
-- **Don't** store unencrypted database backups in public Spaces buckets.
+**Do**:
+
+- Enable Cloud Firewalls on all Droplets, restricting SSH access to trusted VPN IP ranges.
+- Use VPC networks to isolate private traffic between Droplets, Managed Databases, and DOKS nodes.
+- Enable automated weekly backups and monitoring alerts on production Droplets.
+- Leverage App Platform for microservices to offload OS patching, TLS certificates, and deployments.
+
+**Don't**:
+
+- Run stateful databases inside ephemeral Droplets without persistent Block Storage volumes.
+- Use root passwords for Droplet access; strictly enforce SSH key authentication.
+- Store unencrypted database backups in public Spaces buckets.
 
 ## Troubleshooting
 

@@ -35,11 +35,11 @@ mod tests {
 
 ## Core Concepts
 
-#Unit Tests vs Integration Tests Layout
+### Unit Tests vs Integration Tests Layout
 
 Unit tests live inside `src/` adjacent to source modules with `#[cfg(test)]`; integration tests live in root `tests/`:
 
-```
+```text
 my_crate/
   ├── src/
   │   └── parser.rs          # Contains #[cfg(test)] mod tests { ... }
@@ -47,7 +47,7 @@ my_crate/
       └── integration_test.rs # Compiles as an external crate consuming public API
 ```
 
-#Test Attributes & Failure Assertions
+### Test Attributes & Failure Assertions
 
 Rust provides idiomatic test macros and expected failure annotations:
 
@@ -72,7 +72,7 @@ mod tests {
 }
 ```
 
-#Filtering & Concurrency Flags
+### Filtering & Concurrency Flags
 
 Targeting specific tests and controlling execution threads:
 
@@ -108,20 +108,20 @@ fn test_public_api_flow() {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Annotate Test Modules with `#[cfg(test)]`**: Prevent test code and mock dependencies from being compiled into release production binaries.
-- **Use `cargo-nextest` in CI**: Adopt Nextest (`cargo install cargo-nextest`) for faster parallel test execution and cleaner failure summaries.
-- **Write Instructive Doc-Tests**: Use `/// ```rust` examples on public structs to keep documentation verified and up to date.
-- **Leverage Test Fixtures with Tempdir**: Use crates like `tempfile` for testing filesystem mutations in isolated temporary folders.
+- Annotate Test Modules with `#[cfg(test)]`: Prevent test code and mock dependencies from being compiled into release production binaries.
+- Use `cargo-nextest` in CI: Adopt Nextest (`cargo install cargo-nextest`) for faster parallel test execution and cleaner failure summaries.
+- Write Instructive Doc-Tests: Use `///` code examples on public structs to keep documentation verified and up to date.
+- Leverage Test Fixtures with Tempdir: Use crates like `tempfile` for testing filesystem mutations in isolated temporary folders.
 
 **Don't**:
 
-- **Don't share mutable global state across parallel tests**: Tests run in parallel by default; shared static variables cause intermittent test flakiness.
-- **Don't ignore compiler warnings in tests**: Run `cargo clippy --tests` to enforce identical code quality on test suites.
-- **Don't ignore `--release` test runs**: Test critical numerical code with `cargo test --release` to catch overflow behavior.
+- Share mutable global state across parallel tests: Tests run in parallel by default; shared static variables cause intermittent test flakiness.
+- Ignore compiler warnings in tests: Run `cargo clippy --tests` to enforce identical code quality on test suites.
+- Ignore `--release` test runs: Test critical numerical code with `cargo test --release` to catch overflow behavior.
 
 ## Troubleshooting
 

@@ -27,7 +27,7 @@ GROUP BY room
 
 ## Core Concepts
 
-#Line Protocol Data Ingestion
+### Line Protocol Data Ingestion
 
 The compact text format for streaming time-series data:
 
@@ -37,7 +37,7 @@ cpu_usage,host=serverA,region=us-east idle=84.2,system=3.8,user=12.0 17274204000
 mem_usage,host=serverA,region=us-east used_percent=64.1 1727420400000000000
 ```
 
-#InfluxQL / SQL Engine Architecture (InfluxDB 3.0 / IOx)
+### InfluxQL / SQL Engine Architecture (InfluxDB 3.0 / IOx)
 
 Powered by Apache Arrow and DataFusion, supporting standard SQL over columnar Parquet files:
 
@@ -55,7 +55,7 @@ GROUP BY window_time, host
 ORDER BY window_time DESC;
 ```
 
-#Tags vs Fields (Index Cardinality)
+### Tags vs Fields (Index Cardinality)
 
 - **Tags**: Indexed metadata strings (e.g. `host`, `datacenter`, `environment`). Used for fast filtering and grouping.
 - **Fields**: Unindexed metrics values (e.g. `temperature`, `cpu_usage`, `memory_bytes`). Stored as columnar values.
@@ -74,20 +74,20 @@ Use compact InfluxDB Line Protocol:
 curl -XPOST "http://localhost:8086/api/v2/write?bucket=telemetry&org=myorg"   -H "Authorization: Token $INFLUX_TOKEN"   --data-raw 'cpu_usage,host=server01,region=us-west cpu_idle=72.5,cpu_system=12.1 1711530000000000000'
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Adopt InfluxDB 3.0**: Migrate to the modern Apache Arrow-based InfluxDB 3.0 engine with standard SQL support.
-- **Keep Tag Cardinality Constrained**: Never store high-cardinality values (UUIDs, timestamps, raw URLs) as tags; store them as fields.
-- **Write in Batches**: Transmit points in batches of 1,000 to 5,000 lines over gRPC or HTTP to optimize network throughput.
-- **Configure Retention Policies**: Define retention rules (e.g. 30 days for raw data, 1 year for downsampled rollups) to control disk usage.
+- Adopt InfluxDB 3.0: Migrate to the modern Apache Arrow-based InfluxDB 3.0 engine with standard SQL support.
+- Keep Tag Cardinality Constrained: Never store high-cardinality values (UUIDs, timestamps, raw URLs) as tags; store them as fields.
+- Write in Batches: Transmit points in batches of 1,000 to 5,000 lines over gRPC or HTTP to optimize network throughput.
+- Configure Retention Policies: Define retention rules (e.g. 30 days for raw data, 1 year for downsampled rollups) to control disk usage.
 
 **Don't**:
 
-- **Don't store timestamps in fields**: The timestamp is a native first-class attribute; use line protocol timestamps.
-- **Don't send single-point HTTP writes**: Writing individual points creates severe network overhead and CPU thrashing.
-- **Don't create unbounded tag keys**: High cardinality tags explode memory usage in the time-series index (TSI).
+- Store timestamps in fields: The timestamp is a native first-class attribute; use line protocol timestamps.
+- Send single-point HTTP writes: Writing individual points creates severe network overhead and CPU thrashing.
+- Create unbounded tag keys: High cardinality tags explode memory usage in the time-series index (TSI).
 
 ## Troubleshooting
 

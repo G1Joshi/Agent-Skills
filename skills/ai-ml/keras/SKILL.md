@@ -35,7 +35,7 @@ model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=
 
 ## Core Concepts
 
-#Multi-Backend Functional Model Architecture
+### Multi-Backend Functional Model Architecture
 
 Building deep learning architectures compatible with PyTorch, JAX, and TensorFlow:
 
@@ -74,7 +74,7 @@ model.compile(
 model.summary()
 ```
 
-#Custom Layer with Backend-Agnostic ops
+### Custom Layer with Backend-Agnostic ops
 
 Writing custom layers using universal `keras.ops`:
 
@@ -105,7 +105,7 @@ class ScaleAndShiftLayer(layers.Layer):
         return ops.add(ops.multiply(inputs, self.scale), self.shift)
 ```
 
-#Robust Training with Modern Callbacks
+### Robust Training with Modern Callbacks
 
 Automating early stopping, learning rate reduction, and model checkpointing:
 
@@ -158,15 +158,20 @@ class SimpleDense(keras.layers.Layer):
         return ops.matmul(inputs, self.w) + self.b
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target Keras 3 with multi-backend compatibility (`os.environ["KERAS_BACKEND"] = "jax"` or `"torch"`).
-- **Do** use `keras.ops` instead of backend-specific tensor libraries (`torch.*` or `tf.*`) in custom layers.
-- **Do** save models in the native `.keras` zip-based format (`model.save("model.keras")`).
-- **Do** always include `EarlyStopping` with `restore_best_weights=True` to prevent overfitting.
-- **Don't** use legacy `keras` 2.x patterns tied exclusively to `tf.keras`.
-- **Don't** write custom training loops unless necessary; `model.compile()` and `model.fit()` provide high optimization.
-- **Don't** save models using legacy H5 (`.h5`) format; use modern `.keras`.
+**Do**:
+
+- Target Keras 3 with multi-backend compatibility (`os.environ["KERAS_BACKEND"] = "jax"` or `"torch"`).
+- Use `keras.ops` instead of backend-specific tensor libraries (`torch.*` or `tf.*`) in custom layers.
+- Save models in the native `.keras` zip-based format (`model.save("model.keras")`).
+- Always include `EarlyStopping` with `restore_best_weights=True` to prevent overfitting.
+
+**Don't**:
+
+- Use legacy `keras` 2.x patterns tied exclusively to `tf.keras`.
+- Write custom training loops unless necessary; `model.compile()` and `model.fit()` provide high optimization.
+- Save models using legacy H5 (`.h5`) format; use modern `.keras`.
 
 ## Troubleshooting
 

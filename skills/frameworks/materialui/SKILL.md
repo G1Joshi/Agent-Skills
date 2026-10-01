@@ -49,7 +49,7 @@ export default function MuiDemo() {
 
 ## Core Concepts
 
-#Theme Customization & CSS Theme Variables
+### Theme Customization & CSS Theme Variables
 
 Configuring design tokens and light/dark color schemes with MUI:
 
@@ -87,7 +87,7 @@ export function AppThemeProvider({ children }: { children: React.ReactNode }) {
 }
 ```
 
-#The SX Prop & Dynamic System Styling
+### The SX Prop & Dynamic System Styling
 
 Applying theme-aware styles directly to components:
 
@@ -122,7 +122,7 @@ export function StatCard({ label, value }: { label: string; value: string }) {
 }
 ```
 
-#Accessible Form Controls & Dialog Composition
+### Accessible Form Controls & Dialog Composition
 
 Building composable modal workflows with focus trap:
 
@@ -202,15 +202,20 @@ const theme = createTheme({
 // Wrap app: <ThemeProvider theme={theme}><App /></ThemeProvider>
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** enable `cssVariables: true` in `createTheme` to prevent SSR dark-mode flicker.
-- **Do** import icons using path imports (`import AddIcon from '@mui/icons-material/Add'`) to reduce bundle size.
-- **Do** use MUI Joy UI or MUI Base UI for unstyled / modern non-Material design requirements.
-- **Do** wrap inputs with `FormControl`, `InputLabel`, and `FormHelperText` for accessibility.
-- **Don't** use inline style objects (`style={{...}}`); use the theme-aware `sx` prop.
-- **Don't** override MUI internal classnames (`.MuiButton-root`) directly; use theme overrides or `sx`.
-- **Don't** nest multiple `ThemeProvider` instances without inheritance.
+**Do**:
+
+- Enable `cssVariables: true` in `createTheme` to prevent SSR dark-mode flicker.
+- Import icons using path imports (`import AddIcon from '@mui/icons-material/Add'`) to reduce bundle size.
+- Use MUI Joy UI or MUI Base UI for unstyled / modern non-Material design requirements.
+- Wrap inputs with `FormControl`, `InputLabel`, and `FormHelperText` for accessibility.
+
+**Don't**:
+
+- Use inline style objects (`style={{...}}`); use the theme-aware `sx` prop.
+- Override MUI internal classnames (`.MuiButton-root`) directly; use theme overrides or `sx`.
+- Nest multiple `ThemeProvider` instances without inheritance.
 
 ## Troubleshooting
 

@@ -35,7 +35,7 @@ primary_region = "iad"
 
 ## Core Concepts
 
-#Declarative Configuration with fly.toml
+### Declarative Configuration with fly.toml
 
 Defining machine resources, scaling rules, and health checks:
 
@@ -71,7 +71,7 @@ primary_region = "ord" # Chicago primary
   path = "/healthz"
 ```
 
-#Global SQLite Replication with LiteFS
+### Global SQLite Replication with LiteFS
 
 Configuring distributed SQLite clusters with automated failover:
 
@@ -96,7 +96,7 @@ lease:
   candidate: ${FLY_REGION == "ord"} # Only Chicago is eligible for primary
 ```
 
-#Fly CLI (flyctl) Deployment Workflows
+### Fly CLI (flyctl) Deployment Workflows
 
 Deploying and scaling applications across geographic regions:
 
@@ -142,15 +142,20 @@ primary_region = "ord"
 
 Provision volume: `fly volumes create data_vol --region ord --size 10`
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** set `auto_stop_machines = 'stop'` and `auto_start_machines = true` to reduce costs on low-traffic endpoints.
-- **Do** deploy in regions closest to your primary database or users to minimize latency.
-- **Do** use persistent Fly Volumes (`fly volumes create`) for services requiring local storage.
-- **Do** use `fly secrets set` to encrypt and inject environment variables securely.
-- **Don't** commit sensitive environment secrets into `fly.toml`.
-- **Don't** run multi-node primary-write databases without LiteFS or managed PostgreSQL clusters.
-- **Don't** neglect health checks; Fly requires passing checks to route HTTP traffic to instances.
+**Do**:
+
+- Set `auto_stop_machines = 'stop'` and `auto_start_machines = true` to reduce costs on low-traffic endpoints.
+- Deploy in regions closest to your primary database or users to minimize latency.
+- Use persistent Fly Volumes (`fly volumes create`) for services requiring local storage.
+- Use `fly secrets set` to encrypt and inject environment variables securely.
+
+**Don't**:
+
+- Commit sensitive environment secrets into `fly.toml`.
+- Run multi-node primary-write databases without LiteFS or managed PostgreSQL clusters.
+- Neglect health checks; Fly requires passing checks to route HTTP traffic to instances.
 
 ## Troubleshooting
 

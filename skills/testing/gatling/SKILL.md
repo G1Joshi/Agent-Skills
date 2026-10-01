@@ -39,15 +39,15 @@ public class BasicSimulation extends Simulation {
 
 ## Core Concepts
 
-#Non-Blocking Asynchronous Engine (Netty & Akka)
+### Non-Blocking Asynchronous Engine (Netty & Akka)
 
 Unlike thread-per-user load tools, Gatling uses non-blocking actors to simulate thousands of users on a single OS thread:
 
-```
+```text
 [ Gatling Scenario Engine ] ──(Netty Event Loop)──→ [ Thousands of Async Virtual Users ]
 ```
 
-#Scenario DSL & Injection Profiles (Java / TypeScript)
+### Scenario DSL & Injection Profiles (Java / TypeScript)
 
 Defines user journeys, think times, and virtual user ramp-up profiles:
 
@@ -82,7 +82,7 @@ public class ApiLoadSimulation extends Simulation {
 }
 ```
 
-#Feeders for Dynamic Parameterized Test Data
+### Feeders for Dynamic Parameterized Test Data
 
 Injects dynamic user credentials and search queries from CSV or JSON files:
 
@@ -130,20 +130,20 @@ class ApiLoadTest extends Simulation {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Enforce Service Level Agreements (SLAs) with Assertions**: Define explicit assertions on p95/p99 response times and error rates.
-- **Ramp Virtual Users Smoothly**: Use `rampUsers` or `rampUsersPerSec` to allow connection pools and autoscalers to adapt realistically.
-- **Model Realistic Think Times**: Use `pause(min, max)` to replicate human user behavior rather than firing continuous request loops.
-- **Generate Real-Time Reports with Graphite / InfluxDB**: Stream Gatling metrics live into Grafana dashboards during tests.
+- Enforce Service Level Agreements (SLAs) with Assertions: Define explicit assertions on p95/p99 response times and error rates.
+- Ramp Virtual Users Smoothly: Use `rampUsers` or `rampUsersPerSec` to allow connection pools and autoscalers to adapt realistically.
+- Model Realistic Think Times: Use `pause(min, max)` to replicate human user behavior rather than firing continuous request loops.
+- Generate Real-Time Reports with Graphite / InfluxDB: Stream Gatling metrics live into Grafana dashboards during tests.
 
 **Don't**:
 
-- **Don't run load tests from the same machine hosting the application**: CPU contention corrupts latency measurements.
-- **Don't ignore network bandwidth limits on test runners**: Saturated runner network cards artificially degrade response percentiles.
-- **Don't hardcode fixed authentication tokens**: Rotate users via feeders to test realistic database index and cache hit rates.
+- Run load tests from the same machine hosting the application: CPU contention corrupts latency measurements.
+- Ignore network bandwidth limits on test runners: Saturated runner network cards artificially degrade response percentiles.
+- Hardcode fixed authentication tokens: Rotate users via feeders to test realistic database index and cache hit rates.
 
 ## Troubleshooting
 

@@ -5,7 +5,7 @@ description: Expert Render cloud platform assistance covering render.yaml bluepr
 
 # Render
 
-Render is a unified cloud platform. It competes with Heroku and AWS. 2025 features: **Blueprints** (Infrastructure as Code) and **Preview Environments**.
+Render is a modern cloud application hosting platform offering zero-downtime deploys, managed databases, preview environments, and Infrastructure as Code via Render Blueprints.
 
 ## When to Use
 
@@ -33,7 +33,7 @@ services:
 
 ## Core Concepts
 
-#Declarative Blueprint Specification (render.yaml)
+### Declarative Blueprint Specification (render.yaml)
 
 Defining web APIs, background workers, and managed databases:
 
@@ -83,7 +83,7 @@ databases:
     postgresMajorVersion: "16"
 ```
 
-#Static Site Hosting with Zero-Downtime Edge CDN
+### Static Site Hosting with Zero-Downtime Edge CDN
 
 Deploying frontend static apps with SPA rewrite rules:
 
@@ -98,7 +98,7 @@ Deploying frontend static apps with SPA rewrite rules:
       destination: /index.html
 ```
 
-#Render API & Deploy Hooks
+### Render API & Deploy Hooks
 
 Triggering deployments programmatically:
 
@@ -137,23 +137,28 @@ databases:
     user: dbuser
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** manage all services, databases, and cron tasks declaratively using `render.yaml` Blueprints.
-- **Do** configure `healthCheckPath` on all web services to ensure zero-downtime rolling deploys.
-- **Do** use environment variable linking (`fromDatabase`, `fromService`) to avoid hardcoding connection strings.
-- **Do** enable Point-in-Time Recovery (PITR) on production PostgreSQL databases.
-- **Don't** store persistent files on web service local disks; attach a persistent Disk or use S3/R2 storage.
-- **Don't** commit secrets to `render.yaml`; mark variables as `sync: false` and set them in the Render Dashboard.
-- **Don't** run long-running batch jobs in web service instances; offload to dedicated Background Workers.
+**Do**:
+
+- Manage all services, databases, and cron tasks declaratively using `render.yaml` Blueprints.
+- Configure `healthCheckPath` on all web services to ensure zero-downtime rolling deploys.
+- Use environment variable linking (`fromDatabase`, `fromService`) to avoid hardcoding connection strings.
+- Enable Point-in-Time Recovery (PITR) on production PostgreSQL databases.
+
+**Don't**:
+
+- Store persistent files on web service local disks; attach a persistent Disk or use S3/R2 storage.
+- Commit secrets to `render.yaml`; mark variables as `sync: false` and set them in the Render Dashboard.
+- Run long-running batch jobs in web service instances; offload to dedicated Background Workers.
 
 ## Troubleshooting
 
-| Error                                       | Cause                                                                             | Solution                                                             |
-| :------------------------------------------ | :-------------------------------------------------------------------------------- | :------------------------------------------------------------------- |
-| `Port binding failed / Service unavailable` | Server not listening on port 10000 or `$PORT`.                                    | Configure server to listen on `process.env.PORT                      |     | 10000`and host`0.0.0.0`. |
-| `Build exceeded memory limit`               | Memory-intensive build step (e.g. Next.js static generation) exhausting plan RAM. | Pre-build artifacts in external CI or upgrade to higher Render plan. |
-| `Database connection limit exceeded`        | Serverless connections overwhelming Render starter database.                      | Enable Render connection pooling or deploy external PgBouncer.       |
+| Error                                       | Cause                                                                             | Solution                                                                        |
+| :------------------------------------------ | :-------------------------------------------------------------------------------- | :------------------------------------------------------------------------------ |
+| `Port binding failed / Service unavailable` | Server not listening on port 10000 or `$PORT`.                                    | Configure server to listen on `process.env.PORT \|\| 10000` and host `0.0.0.0`. |
+| `Build exceeded memory limit`               | Memory-intensive build step (e.g. Next.js static generation) exhausting plan RAM. | Pre-build artifacts in external CI or upgrade to higher Render plan.            |
+| `Database connection limit exceeded`        | Serverless connections overwhelming Render starter database.                      | Enable Render connection pooling or deploy external PgBouncer.                  |
 
 ## References
 
