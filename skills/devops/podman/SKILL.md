@@ -5,7 +5,7 @@ description: Expert Podman container engine assistance covering rootless contain
 
 # Podman
 
-Podman is a daemonless container engine for developing, managing, and running OCI Containers. It is a drop-in replacement for Docker (`alias docker=podman`). Podman v5 (2025) features a rewritten hypervisor support for Mac/Windows.
+Podman is a daemonless, rootless container engine for developing, running, and managing OCI containers and pods, functioning as a secure drop-in alternative to Docker.
 
 ## When to Use
 
@@ -29,7 +29,7 @@ podman kube play pod.yaml
 
 ## Core Concepts
 
-#Rootless Pod Architecture & Container Execution
+### Rootless Pod Architecture & Container Execution
 
 Running containers without root privileges or central daemons:
 
@@ -48,7 +48,7 @@ podman run -d --pod microservice-pod --name api-service my-api:latest
 podman run -d --pod microservice-pod --name redis-cache redis:alpine
 ```
 
-#Systemd Integration with Podman Quadlets
+### Systemd Integration with Podman Quadlets
 
 Managing containers as native systemd services:
 
@@ -78,7 +78,7 @@ systemctl --user daemon-reload
 systemctl --user start api-service
 ```
 
-#Exporting Pods to Kubernetes YAML
+### Exporting Pods to Kubernetes YAML
 
 Generating native Kubernetes manifests directly from local Podman pods:
 
@@ -108,15 +108,20 @@ systemctl --user enable --now container-web-api.service
 loginctl enable-linger $USER
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** run containers rootless (`--userns=keep-id`) to neutralize container breakout risks.
-- **Do** manage production containers on Linux servers using Podman Quadlets (`.container` systemd files).
-- **Do** use `podman generate kube` to prototype Kubernetes pod manifests locally.
-- **Do** configure `registries.conf` with explicit, secure container registry search paths.
-- **Don't** run containers with `--privileged` unless strictly managing bare-metal kernel hardware.
-- **Don't** assume ports < 1024 are accessible rootless; use ports >= 1024 (e.g. 8080, 8443) or adjust sysctl.
-- **Don't** leave orphaned storage layers; clean up periodically with `podman system prune`.
+**Do**:
+
+- Run containers rootless (`--userns=keep-id`) to neutralize container breakout risks.
+- Manage production containers on Linux servers using Podman Quadlets (`.container` systemd files).
+- Use `podman generate kube` to prototype Kubernetes pod manifests locally.
+- Configure `registries.conf` with explicit, secure container registry search paths.
+
+**Don't**:
+
+- Run containers with `--privileged` unless strictly managing bare-metal kernel hardware.
+- Assume ports < 1024 are accessible rootless; use ports >= 1024 (e.g. 8080, 8443) or adjust sysctl.
+- Leave orphaned storage layers; clean up periodically with `podman system prune`.
 
 ## Troubleshooting
 

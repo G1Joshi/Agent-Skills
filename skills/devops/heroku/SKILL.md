@@ -5,7 +5,7 @@ description: Expert Heroku PaaS assistance covering Procfile, buildpacks, dynos,
 
 # Heroku
 
-Heroku remains the simplest way to deploy full-stack apps. The 2025 "Fir" generation runs on AWS Graviton (ARM) and integrates native AI capabilities.
+Heroku is a fully managed cloud Platform as a Service (PaaS) that enables developers to build, run, and scale applications without infrastructure management overhead.
 
 ## When to Use
 
@@ -26,7 +26,7 @@ heroku addons:create heroku-postgresql:standard-0
 
 ## Core Concepts
 
-#Declarative Process Definition with Procfile
+### Declarative Process Definition with Procfile
 
 Declaring web servers, queue workers, and database release migrations:
 
@@ -38,7 +38,7 @@ worker: celery -A myproject worker -l info --concurrency 2
 clock: python clock.py
 ```
 
-#Ephemeral Review Apps Configuration (app.json)
+### Ephemeral Review Apps Configuration (app.json)
 
 Automating branch preview environments:
 
@@ -60,7 +60,7 @@ Automating branch preview environments:
 }
 ```
 
-#Heroku CLI Operations
+### Heroku CLI Operations
 
 Scaling dynos, managing config, and running one-off processes:
 
@@ -93,15 +93,20 @@ release: npx prisma migrate deploy
 
 Scale dynos: `heroku ps:scale web=2 worker=1`
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use the `release:` phase in `Procfile` to run database migrations before routing traffic to new dynos.
-- **Do** configure `WEB_CONCURRENCY` to match dyno memory capacity and prevent R14 (Memory Quota Exceeded) errors.
-- **Do** bind to `$PORT` provided by Heroku; never hardcode HTTP port numbers in web applications.
-- **Do** use Heroku Review Apps in GitHub pull request workflows for stakeholder review.
-- **Don't** store uploaded user files on dyno local filesystems; dynos are ephemeral—use AWS S3 or Cloudflare R2.
-- **Don't** run long-running CPU tasks in web dynos; offload to background worker dynos.
-- **Don't** leave development add-ons on production apps; upgrade to production-tier Postgres with automated failover.
+**Do**:
+
+- Use the `release:` phase in `Procfile` to run database migrations before routing traffic to new dynos.
+- Configure `WEB_CONCURRENCY` to match dyno memory capacity and prevent R14 (Memory Quota Exceeded) errors.
+- Bind to `$PORT` provided by Heroku; never hardcode HTTP port numbers in web applications.
+- Use Heroku Review Apps in GitHub pull request workflows for stakeholder review.
+
+**Don't**:
+
+- Store uploaded user files on dyno local filesystems; dynos are ephemeral—use AWS S3 or Cloudflare R2.
+- Run long-running CPU tasks in web dynos; offload to background worker dynos.
+- Leave development add-ons on production apps; upgrade to production-tier Postgres with automated failover.
 
 ## Troubleshooting
 

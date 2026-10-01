@@ -33,7 +33,7 @@ end
 
 ## Core Concepts
 
-#Multi-Machine Vagrantfile with Ansible Provisioning
+### Multi-Machine Vagrantfile with Ansible Provisioning
 
 Declaring clustered VM topologies:
 
@@ -76,7 +76,7 @@ Vagrant.configure("2") do |config|
 end
 ```
 
-#Essential Vagrant CLI Commands
+### Essential Vagrant CLI Commands
 
 Managing VM lifecycle:
 
@@ -129,15 +129,20 @@ Vagrant.configure("2") do |config|
 end
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use official, verified boxes (e.g. `bento/*` or `generic/*`) to ensure clean base operating system states.
-- **Do** commit `Vagrantfile` to source control while adding `.vagrant/` to `.gitignore`.
-- **Do** use NFS or VirtioFS for synced folders to improve file system I/O performance on macOS and Linux.
-- **Do** test provisioning idempotency with `vagrant provision`.
-- **Don't** allocate more RAM than available on the host machine; check host resources before launching multi-VM setups.
-- **Don't** store credentials or SSH private keys inside synced shared folders.
-- **Don't** use Vagrant for production deployments; it is strictly intended for local development and testing.
+**Do**:
+
+- Use official, verified boxes (e.g. `bento/*` or `generic/*`) to ensure clean base operating system states.
+- Commit `Vagrantfile` to source control while adding `.vagrant/` to `.gitignore`.
+- Use NFS or VirtioFS for synced folders to improve file system I/O performance on macOS and Linux.
+- Test provisioning idempotency with `vagrant provision`.
+
+**Don't**:
+
+- Allocate more RAM than available on the host machine; check host resources before launching multi-VM setups.
+- Store credentials or SSH private keys inside synced shared folders.
+- Use Vagrant for production deployments; it is strictly intended for local development and testing.
 
 ## Troubleshooting
 

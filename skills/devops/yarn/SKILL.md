@@ -27,7 +27,7 @@ yarn add react
 
 ## Core Concepts
 
-#Modern Yarn Configuration (.yarnrc.yml)
+### Modern Yarn Configuration (.yarnrc.yml)
 
 Configuring node-modules linker or Plug'n'Play:
 
@@ -43,7 +43,7 @@ packageExtensions:
       react: "*"
 ```
 
-#Workspace Commands in Monorepos
+### Workspace Commands in Monorepos
 
 Executing commands across workspaces:
 
@@ -58,7 +58,7 @@ yarn workspaces foreach --since=main run test
 yarn workspace @my-org/web-app add swr
 ```
 
-#Upgrading Dependencies with Interactive CLI
+### Upgrading Dependencies with Interactive CLI
 
 Upgrading packages adhering to SemVer:
 
@@ -99,15 +99,20 @@ Root `package.json`:
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target modern Yarn (v4+) enabled through Corepack (`corepack enable yarn`).
-- **Do** use `yarn install --immutable` in CI/CD pipelines to prevent unintended lockfile updates.
-- **Do** leverage `yarn workspaces foreach` with `--since=main` to test only modified packages in monorepos.
-- **Do** use `packageExtensions` in `.yarnrc.yml` to cleanly resolve missing peer dependency warnings from older third-party packages.
-- **Don't** use legacy Yarn 1.x (Classic); migrate to modern Yarn v4+ for enhanced performance and security.
-- **Don't** edit `yarn.lock` manually; resolve conflicts via `yarn install`.
-- **Don't** mix npm or pnpm lockfiles within a Yarn repository.
+**Do**:
+
+- Target modern Yarn (v4+) enabled through Corepack (`corepack enable yarn`).
+- Use `yarn install --immutable` in CI/CD pipelines to prevent unintended lockfile updates.
+- Leverage `yarn workspaces foreach` with `--since=main` to test only modified packages in monorepos.
+- Use `packageExtensions` in `.yarnrc.yml` to cleanly resolve missing peer dependency warnings from older third-party packages.
+
+**Don't**:
+
+- Use legacy Yarn 1.x (Classic); migrate to modern Yarn v4+ for enhanced performance and security.
+- Edit `yarn.lock` manually; resolve conflicts via `yarn install`.
+- Mix npm or pnpm lockfiles within a Yarn repository.
 
 ## Troubleshooting
 

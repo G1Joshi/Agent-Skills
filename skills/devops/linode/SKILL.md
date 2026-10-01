@@ -5,7 +5,7 @@ description: Expert Akamai Linode cloud assistance covering Compute Instances, N
 
 # Linode (Akamai Connected Cloud)
 
-Now part of Akamai, Linode combines simple cloud computing with a massive edge network. 2025 focuses on **Distributed Compute** – running workloads closer to users.
+Akamai Connected Cloud (formerly Linode) provides developer-friendly cloud compute, object storage, and edge networking for deploying distributed, low-latency workloads.
 
 ## When to Use
 
@@ -31,7 +31,7 @@ linode-cli linodes create \
 
 ## Core Concepts
 
-#Infrastructure as Code with Terraform (Linode Provider)
+### Infrastructure as Code with Terraform (Linode Provider)
 
 Deploying a Linode instance with private networking:
 
@@ -85,7 +85,7 @@ resource "linode_firewall" "web_firewall" {
 }
 ```
 
-#Linode Kubernetes Engine (LKE) Provisioning via CLI
+### Linode Kubernetes Engine (LKE) Provisioning via CLI
 
 Creating an autoscaling Kubernetes cluster:
 
@@ -105,7 +105,7 @@ linode-cli lke cluster-create \
   --node_pools.autoscaler.max 8
 ```
 
-#NodeBalancer Configuration for High Availability
+### NodeBalancer Configuration for High Availability
 
 Distributing traffic across backend nodes:
 
@@ -139,15 +139,20 @@ linode-cli nodebalancers configs-create $NB_ID \
   --check_path "/health"
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** attach a Cloud Firewall to all Linode instances; drop all unsolicited inbound traffic by default.
-- **Do** enable `private_ip = true` and use Linode VPC for private inter-node communication.
-- **Do** leverage LKE (Linode Kubernetes Engine) for production containers; control planes are completely free.
-- **Do** store automated database and system backups using Linode Backup Service or Object Storage.
-- **Don't** expose SSH (port 22) publicly to `0.0.0.0/0`; restrict to known IP ranges or a bastion host.
-- **Don't** use root passwords for instances; always inject authorized SSH keys during provisioning.
-- **Don't** hardcode Linode API tokens in source code; supply via `LINODE_TOKEN` environment variable.
+**Do**:
+
+- Attach a Cloud Firewall to all Linode instances; drop all unsolicited inbound traffic by default.
+- Enable `private_ip = true` and use Linode VPC for private inter-node communication.
+- Leverage LKE (Linode Kubernetes Engine) for production containers; control planes are completely free.
+- Store automated database and system backups using Linode Backup Service or Object Storage.
+
+**Don't**:
+
+- Expose SSH (port 22) publicly to `0.0.0.0/0`; restrict to known IP ranges or a bastion host.
+- Use root passwords for instances; always inject authorized SSH keys during provisioning.
+- Hardcode Linode API tokens in source code; supply via `LINODE_TOKEN` environment variable.
 
 ## Troubleshooting
 

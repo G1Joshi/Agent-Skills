@@ -5,7 +5,7 @@ description: Expert Prometheus monitoring assistance covering PromQL, metric typ
 
 # Prometheus
 
-Prometheus is the cloud-native standard for metric collection. Prometheus 3.0 (2025) features a modern UI, Native Histograms, and direct OpenTelemetry (OTLP) ingestion.
+Prometheus is the CNCF graduated monitoring and alerting toolkit, featuring a multi-dimensional data model with time-series metrics, PromQL, and native OpenTelemetry ingestion.
 
 ## When to Use
 
@@ -29,7 +29,7 @@ scrape_configs:
 
 ## Core Concepts
 
-#Prometheus Scrape Configuration (prometheus.yml)
+### Prometheus Scrape Configuration (prometheus.yml)
 
 Configuring scrape jobs with relabeling:
 
@@ -62,7 +62,7 @@ scrape_configs:
         regex: "8080"
 ```
 
-#Production Alerting Rules (alert_rules.yml)
+### Production Alerting Rules (alert_rules.yml)
 
 Defining SLO-based alert thresholds:
 
@@ -85,7 +85,7 @@ groups:
           description: 'Service {{ $labels.service }} error rate is {{ $value | printf "%.2f" }}% (> 5% SLO threshold).'
 ```
 
-#Exposing Custom Metrics in Python
+### Exposing Custom Metrics in Python
 
 Instrumentation using official Prometheus Python client:
 
@@ -145,15 +145,20 @@ scrape_configs:
         target_label: __address__
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** adhere strictly to the Four Golden Signals (Latency, Traffic, Errors, Saturation) when building PromQL alert rules.
-- **Do** configure appropriate histogram buckets around your service SLO targets (e.g. 100ms, 200ms, 500ms).
-- **Do** use recording rules (`record: job:metric:rate5m`) for complex PromQL expressions queried by dashboards.
-- **Do** store long-term historical metrics using remote-write storage (Thanos, Cortex, or VictoriaMetrics).
-- **Don't** introduce high-cardinality label values (user IDs, email addresses, order IDs) into metric labels.
-- **Don't** set scrape intervals too low (< 5s) across large fleets; it overloads target scrapers and storage.
-- **Don't** alert on simple transient spikes; always use `for: 2m` or `for: 5m` to filter temporary noise.
+**Do**:
+
+- Adhere strictly to the Four Golden Signals (Latency, Traffic, Errors, Saturation) when building PromQL alert rules.
+- Configure appropriate histogram buckets around your service SLO targets (e.g. 100ms, 200ms, 500ms).
+- Use recording rules (`record: job:metric:rate5m`) for complex PromQL expressions queried by dashboards.
+- Store long-term historical metrics using remote-write storage (Thanos, Cortex, or VictoriaMetrics).
+
+**Don't**:
+
+- Introduce high-cardinality label values (user IDs, email addresses, order IDs) into metric labels.
+- Set scrape intervals too low (< 5s) across large fleets; it overloads target scrapers and storage.
+- Alert on simple transient spikes; always use `for: 2m` or `for: 5m` to filter temporary noise.
 
 ## Troubleshooting
 

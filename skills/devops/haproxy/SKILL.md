@@ -5,7 +5,7 @@ description: Expert HAProxy load balancer assistance covering Layer 4 / Layer 7 
 
 # HAProxy
 
-HAProxy is the standard for high-performance load balancing. HAProxy 3.0 (2025) adds **Syslog Load Balancing** and improved HTTP/3 QUIC support.
+HAProxy is a high-availability, high-performance TCP/HTTP load balancer and proxying solution, offering ultra-low latency traffic routing, SSL termination, and robust health checking.
 
 ## When to Use
 
@@ -29,7 +29,7 @@ backend web_servers
 
 ## Core Concepts
 
-#Production HTTP Load Balancer Configuration
+### Production HTTP Load Balancer Configuration
 
 Configuring frontend and backend pools with health checks:
 
@@ -75,7 +75,7 @@ backend web_cluster
     server web2 10.0.1.11:8080 check cookie web2 fall 3 rise 2
 ```
 
-#TCP Layer 4 Load Balancing (Database Proxy)
+### TCP Layer 4 Load Balancing (Database Proxy)
 
 Distributing MySQL or PostgreSQL connections across read replicas:
 
@@ -94,7 +94,7 @@ backend db_replicas
     server db-replica-2 10.0.2.21:5432 check
 ```
 
-#Statistics Dashboard Configuration
+### Statistics Dashboard Configuration
 
 Enabling real-time traffic monitoring interface:
 
@@ -133,15 +133,20 @@ backend web_servers
     server app02 10.0.0.11:8080 check cookie app02
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** test HAProxy configuration files (`haproxy -c -f /etc/haproxy/haproxy.cfg`) before reloading.
-- **Do** use `balance leastconn` for long-running connections (WebSockets, database pools) and `roundrobin` for short HTTP APIs.
-- **Do** configure `stick-table` to defend endpoints against brute-force attacks and volumetric DDoS.
-- **Do** configure `option httpchk` to verify that application backends are genuinely healthy before routing traffic.
-- **Don't** run HAProxy with single-threaded defaults on multi-core servers; configure `nbthread` or multi-threading.
-- **Don't** leave stats dashboards accessible without authentication or IP restrictions.
-- **Don't** set excessively low client/server timeouts that sever legitimate long-polling or file upload connections.
+**Do**:
+
+- Test HAProxy configuration files (`haproxy -c -f /etc/haproxy/haproxy.cfg`) before reloading.
+- Use `balance leastconn` for long-running connections (WebSockets, database pools) and `roundrobin` for short HTTP APIs.
+- Configure `stick-table` to defend endpoints against brute-force attacks and volumetric DDoS.
+- Configure `option httpchk` to verify that application backends are genuinely healthy before routing traffic.
+
+**Don't**:
+
+- Run HAProxy with single-threaded defaults on multi-core servers; configure `nbthread` or multi-threading.
+- Leave stats dashboards accessible without authentication or IP restrictions.
+- Set excessively low client/server timeouts that sever legitimate long-polling or file upload connections.
 
 ## Troubleshooting
 

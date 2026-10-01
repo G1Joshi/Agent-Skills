@@ -5,7 +5,7 @@ description: Expert Grafana assistance covering dashboards, PromQL/LogQL panels,
 
 # Grafana
 
-Grafana is the visualization layer for Observability. Grafana 11 (2025) introduces **Scenes** (dynamic dashboards) and deeper correlation between Metrics, Logs, and Traces.
+Grafana is an open-source analytics and interactive visualization web application, providing flexible dashboarding, Scenes composability, and unified correlation across metrics, logs, and distributed traces.
 
 ## When to Use
 
@@ -33,7 +33,7 @@ providers:
 
 ## Core Concepts
 
-#Prometheus Metrics Visualization with PromQL
+### Prometheus Metrics Visualization with PromQL
 
 Configuring time-series queries for dashboard panels:
 
@@ -48,7 +48,7 @@ histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by 
 sum(rate(container_cpu_usage_seconds_total{container!=""}[5m])) by (pod) * 100
 ```
 
-#Log Exploration with LogQL (Grafana Loki)
+### Log Exploration with LogQL (Grafana Loki)
 
 Filtering and parsing streaming application logs:
 
@@ -61,7 +61,7 @@ Filtering and parsing streaming application logs:
   | line_format "[{{.status}}] {{.error_message}} ({{.latency_ms}}ms)"
 ```
 
-#Declarative Dashboard as Code (JSON Model)
+### Declarative Dashboard as Code (JSON Model)
 
 Managing dashboard definitions in Git for automated provisioning:
 
@@ -109,15 +109,20 @@ sum(rate(node_cpu_seconds_total{mode!="idle", instance=~"$instance"}[5m]))
   by (instance) * 100
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** provision dashboards and datasources declaratively using Grafana Provisioning (`/etc/grafana/provisioning`).
-- **Do** use Dashboard Template Variables (`$service`, `$environment`) to create dynamic, reusable panels.
-- **Do** set standard units (`reqps`, `bytes`, `seconds`, `percent`) on panel field configs for human-readable axes.
-- **Do** correlate metrics, logs, and traces using Grafana Explore cross-linking (Data Links).
-- **Don't** write high-cardinality PromQL queries that query raw unaggregated metrics over long timeframes (e.g. 30 days).
-- **Don't** edit production dashboards directly in the UI without exporting and committing the JSON model to Git.
-- **Don't** configure un-muted alerts that spam communication channels; group alerts by symptom and severity.
+**Do**:
+
+- Provision dashboards and datasources declaratively using Grafana Provisioning (`/etc/grafana/provisioning`).
+- Use Dashboard Template Variables (`$service`, `$environment`) to create dynamic, reusable panels.
+- Set standard units (`reqps`, `bytes`, `seconds`, `percent`) on panel field configs for human-readable axes.
+- Correlate metrics, logs, and traces using Grafana Explore cross-linking (Data Links).
+
+**Don't**:
+
+- Write high-cardinality PromQL queries that query raw unaggregated metrics over long timeframes (e.g. 30 days).
+- Edit production dashboards directly in the UI without exporting and committing the JSON model to Git.
+- Configure un-muted alerts that spam communication channels; group alerts by symptom and severity.
 
 ## Troubleshooting
 

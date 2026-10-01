@@ -5,7 +5,7 @@ description: Expert Amazon Web Services (AWS) cloud assistance covering IAM, EC2
 
 # AWS
 
-Amazon Web Services (AWS) is the dominant cloud platform. In 2025, the focus is heavily on **Generative AI** (Bedrock, Q, Trainium chips) and **Serverless Data** (Aurora Limitless).
+Amazon Web Services (AWS) is a comprehensive cloud platform providing scalable compute, serverless architectures, managed databases, and enterprise AI infrastructure.
 
 ## When to Use
 
@@ -29,7 +29,7 @@ aws s3 sync ./dist s3://my-app-assets-bucket/ --delete
 
 ## Core Concepts
 
-#Serverless Architecture with AWS Lambda & SQS
+### Serverless Architecture with AWS Lambda & SQS
 
 Event-driven microservice processing incoming messages:
 
@@ -64,7 +64,7 @@ def handler(event, context):
     }
 ```
 
-#Least-Privilege IAM Policy
+### Least-Privilege IAM Policy
 
 Scoping permissions strictly to resource ARNs:
 
@@ -93,7 +93,7 @@ Scoping permissions strictly to resource ARNs:
 }
 ```
 
-#High-Availability VPC Network Architecture
+### High-Availability VPC Network Architecture
 
 Subnet layout for zero-trust network segregation:
 
@@ -134,15 +134,20 @@ Scoped IAM policy restricting actions to specific resources:
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** organize workloads into multi-account architectures using AWS Organizations and AWS Control Tower.
-- **Do** enforce least-privilege IAM policies without wildcard actions (`"Action": "*"`) or wildcard resources.
-- **Do** enable S3 Block Public Access and Default KMS Encryption across all storage buckets.
-- **Do** deploy databases and application containers into private subnets with egress via NAT Gateways.
-- **Don't** use AWS root account credentials for daily management or API tasks; lock with hardware MFA.
-- **Don't** leave CloudWatch log groups with indefinite retention; configure explicit retention policies (e.g. 30 days).
-- **Don't** hardcode AWS credentials; use IAM Roles for EC2/ECS/Lambda or OIDC for GitHub Actions.
+**Do**:
+
+- Organize workloads into multi-account architectures using AWS Organizations and AWS Control Tower.
+- Enforce least-privilege IAM policies without wildcard actions (`"Action": "*"`) or wildcard resources.
+- Enable S3 Block Public Access and Default KMS Encryption across all storage buckets.
+- Deploy databases and application containers into private subnets with egress via NAT Gateways.
+
+**Don't**:
+
+- Use AWS root account credentials for daily management or API tasks; lock with hardware MFA.
+- Leave CloudWatch log groups with indefinite retention; configure explicit retention policies (e.g. 30 days).
+- Hardcode AWS credentials; use IAM Roles for EC2/ECS/Lambda or OIDC for GitHub Actions.
 
 ## Troubleshooting
 

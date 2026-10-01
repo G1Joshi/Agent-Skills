@@ -5,7 +5,7 @@ description: Expert Homebrew package manager assistance covering formulae, casks
 
 # Homebrew
 
-Homebrew is the standard package manager for macOS. v4.2 (2025) is faster (JSON API) and supports declarative `Brewfile`.
+Homebrew is the premier package manager for macOS and Linux, simplifying the installation and declarative management (via Brewfiles) of developer tools and libraries.
 
 ## When to Use
 
@@ -26,7 +26,7 @@ brew install --cask visual-studio-code
 
 ## Core Concepts
 
-#Declarative Workstation Setup with Brewfile
+### Declarative Workstation Setup with Brewfile
 
 Specifying developer dependencies for automated bootstrapping:
 
@@ -64,7 +64,7 @@ brew bundle --file=./Brewfile
 brew bundle check
 ```
 
-#Authoring a Custom Formula in Ruby
+### Authoring a Custom Formula in Ruby
 
 Packaging a CLI tool for distribution via a custom tap:
 
@@ -90,7 +90,7 @@ class Mytool < Formula
 end
 ```
 
-#Managing Background Services with brew services
+### Managing Background Services with brew services
 
 Starting and monitoring local services:
 
@@ -129,15 +129,20 @@ cask "visual-studio-code"
 
 Execute setup: `brew bundle install`
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** maintain a `Brewfile` in dotfiles or team repos to make onboarding new engineers reproducible.
-- **Do** run `brew update` and `brew upgrade` regularly to receive security patches and updated formulae.
-- **Do** pin major versions of runtimes (`brew "node@22"`, `brew "postgresql@16"`) to avoid breaking updates.
-- **Do** run `brew doctor` if build links or dependency paths become corrupted.
-- **Don't** run `sudo brew ...`; Homebrew is explicitly designed to run as an unprivileged user.
-- **Don't** modify files directly inside `/opt/homebrew` or `/usr/local/Homebrew` manually.
-- **Don't** leave orphaned dependencies; clean up disk space periodically with `brew cleanup`.
+**Do**:
+
+- Maintain a `Brewfile` in dotfiles or team repos to make onboarding new engineers reproducible.
+- Run `brew update` and `brew upgrade` regularly to receive security patches and updated formulae.
+- Pin major versions of runtimes (`brew "node@22"`, `brew "postgresql@16"`) to avoid breaking updates.
+- Run `brew doctor` if build links or dependency paths become corrupted.
+
+**Don't**:
+
+- Run `sudo brew ...`; Homebrew is explicitly designed to run as an unprivileged user.
+- Modify files directly inside `/opt/homebrew` or `/usr/local/Homebrew` manually.
+- Leave orphaned dependencies; clean up disk space periodically with `brew cleanup`.
 
 ## Troubleshooting
 

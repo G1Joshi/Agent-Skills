@@ -5,7 +5,7 @@ description: Expert GitLab CI/CD assistance covering .gitlab-ci.yml, stages, art
 
 # GitLab CI/CD
 
-GitLab CI/CD is known for its robust pipeline definition (`.gitlab-ci.yml`) and Auto DevOps capabilities. In 2025, **CI Components** replace legacy templates for modular pipeline composition.
+GitLab CI/CD provides integrated pipeline orchestration directly within GitLab repositories, utilizing reusable CI Components and container-native runners for automated software delivery.
 
 ## When to Use
 
@@ -42,7 +42,7 @@ test-job:
 
 ## Core Concepts
 
-#Declarative Pipeline with Stages, Caching & Artifacts
+### Declarative Pipeline with Stages, Caching & Artifacts
 
 Clean, structured `.gitlab-ci.yml` pipeline:
 
@@ -104,7 +104,7 @@ build-container:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 ```
 
-#Monorepo Path Filtering with rules:changes
+### Monorepo Path Filtering with rules:changes
 
 Executing jobs only when relevant subdirectories are modified:
 
@@ -126,7 +126,7 @@ backend-job:
         - backend/**/*
 ```
 
-#Protected Environments & Manual Deployment Gates
+### Protected Environments & Manual Deployment Gates
 
 Requiring manual approval for production releases:
 
@@ -178,15 +178,20 @@ deploy_prod:
       when: manual
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use `rules:changes` in monorepos to avoid running redundant jobs when unrelated code is modified.
-- **Do** configure GitLab `reports:junit` and `reports:coverage_report` to view test insights in merge requests.
-- **Do** use GitLab Dependency Proxy to cache container images from Docker Hub, eliminating rate limit throttling.
-- **Do** mark production deploy jobs with `when: manual` and assign them to protected environments with approver policies.
-- **Don't** use deprecated `only`/`except` syntax; migrate to modern `rules:` directives.
-- **Don't** store plaintext passwords in `.gitlab-ci.yml`; use Masked and Protected CI/CD Variables.
-- **Don't** run Docker-in-Docker (`dind`) with privileged flags in shared environments; use Kaniko for rootless builds.
+**Do**:
+
+- Use `rules:changes` in monorepos to avoid running redundant jobs when unrelated code is modified.
+- Configure GitLab `reports:junit` and `reports:coverage_report` to view test insights in merge requests.
+- Use GitLab Dependency Proxy to cache container images from Docker Hub, eliminating rate limit throttling.
+- Mark production deploy jobs with `when: manual` and assign them to protected environments with approver policies.
+
+**Don't**:
+
+- Use deprecated `only`/`except` syntax; migrate to modern `rules:` directives.
+- Store plaintext passwords in `.gitlab-ci.yml`; use Masked and Protected CI/CD Variables.
+- Run Docker-in-Docker (`dind`) with privileged flags in shared environments; use Kaniko for rootless builds.
 
 ## Troubleshooting
 

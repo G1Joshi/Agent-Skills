@@ -5,7 +5,7 @@ description: Expert Jenkins automation server assistance covering declarative Je
 
 # Jenkins
 
-Jenkins is the grandfather of CI, but still widely used in enterprise. In 2025, it runs primarily as **Code** (Jenkinsfile) and often on Kubernetes.
+Jenkins is an extensible, open-source automation server supporting pipeline-as-code (Jenkinsfile), distributed agent execution on Kubernetes, and enterprise CI/CD workflows.
 
 ## When to Use
 
@@ -33,7 +33,7 @@ pipeline {
 
 ## Core Concepts
 
-#Declarative Jenkinsfile with Docker Agents & Parallel Stages
+### Declarative Jenkinsfile with Docker Agents & Parallel Stages
 
 Modern pipeline structure running in parallel stages:
 
@@ -100,7 +100,7 @@ pipeline {
 }
 ```
 
-#Kubernetes Dynamic Cloud Agents
+### Kubernetes Dynamic Cloud Agents
 
 Spawning ephemeral build pods dynamically in Kubernetes:
 
@@ -135,7 +135,7 @@ spec:
 }
 ```
 
-#Jenkins Configuration as Code (JCasC)
+### Jenkins Configuration as Code (JCasC)
 
 Managing Jenkins master controller configuration declaratively:
 
@@ -185,15 +185,20 @@ pipeline {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** always use Declarative Pipeline syntax (`pipeline {}`) rather than legacy Scripted Pipeline syntax.
-- **Do** run builds exclusively on ephemeral agents (Kubernetes Pods or Docker containers); set `numExecutors: 0` on the master controller.
-- **Do** store all secrets in Jenkins Credential Store and inject them using `withCredentials()`.
-- **Do** manage master controller configuration using Jenkins Configuration as Code (JCasC).
-- **Don't** install unverified third-party plugins; audit and minimize plugin counts to prevent security vulnerabilities.
-- **Don't** hardcode sensitive API tokens or passwords directly inside `Jenkinsfile`.
-- **Don't** run long-running builds directly on the Jenkins controller node.
+**Do**:
+
+- Always use Declarative Pipeline syntax (`pipeline {}`) rather than legacy Scripted Pipeline syntax.
+- Run builds exclusively on ephemeral agents (Kubernetes Pods or Docker containers); set `numExecutors: 0` on the master controller.
+- Store all secrets in Jenkins Credential Store and inject them using `withCredentials()`.
+- Manage master controller configuration using Jenkins Configuration as Code (JCasC).
+
+**Don't**:
+
+- Install unverified third-party plugins; audit and minimize plugin counts to prevent security vulnerabilities.
+- Hardcode sensitive API tokens or passwords directly inside `Jenkinsfile`.
+- Run long-running builds directly on the Jenkins controller node.
 
 ## Troubleshooting
 

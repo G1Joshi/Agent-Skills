@@ -5,7 +5,7 @@ description: Expert Microsoft Azure cloud assistance covering Entra ID, App Serv
 
 # Azure
 
-Azure is Microsoft's cloud platform, tightly integrated with the Enterprise ecosystem (Active Directory, Windows, Office 365). 2025 trends include **AI Copilots** everywhere and **Azure Arc** for hybrid management.
+Microsoft Azure is an enterprise cloud computing platform featuring managed container services, Azure Arc hybrid management, and unified identity governance.
 
 ## When to Use
 
@@ -30,7 +30,7 @@ az webapp create --name app-service-prod-1234 --resource-group rg-production --p
 
 ## Core Concepts
 
-#Azure Container Apps Declarative Deployment
+### Azure Container Apps Declarative Deployment
 
 Deploying scalable microservices with KEDA scaling:
 
@@ -69,7 +69,7 @@ properties:
               concurrentRequests: "100"
 ```
 
-#Managed Identities & Key Vault Integration
+### Managed Identities & Key Vault Integration
 
 Accessing secrets without code credentials using Azure SDK:
 
@@ -86,7 +86,7 @@ db_password = client.get_secret("database-master-password").value
 print("Retrieved secret securely via Managed Identity.")
 ```
 
-#Azure Private Endpoints & Virtual Networks
+### Azure Private Endpoints & Virtual Networks
 
 Securing database traffic from public internet exposure:
 
@@ -120,15 +120,20 @@ az role assignment create \
   --scope "/subscriptions/<sub-id>/resourceGroups/rg-production/providers/Microsoft.Storage/storageAccounts/mystorage"
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use Managed Identities (System-assigned or User-assigned) for service-to-service authentication instead of passwords.
-- **Do** store all certificates and connection strings in Azure Key Vault.
-- **Do** deploy resources inside Virtual Networks with Private Endpoints, disabling public network access on databases.
-- **Do** leverage Azure Container Apps (ACA) for microservices that do not require full Kubernetes cluster management overhead.
-- **Don't** store plain text secrets in App Settings or environment variables.
-- **Don't** assign broad `Contributor` or `Owner` roles at subscription scopes; scope RBAC to resource groups.
-- **Don't** leave diagnostic logging disabled; route Azure Monitor logs to Log Analytics Workspaces.
+**Do**:
+
+- Use Managed Identities (System-assigned or User-assigned) for service-to-service authentication instead of passwords.
+- Store all certificates and connection strings in Azure Key Vault.
+- Deploy resources inside Virtual Networks with Private Endpoints, disabling public network access on databases.
+- Leverage Azure Container Apps (ACA) for microservices that do not require full Kubernetes cluster management overhead.
+
+**Don't**:
+
+- Store plain text secrets in App Settings or environment variables.
+- Assign broad `Contributor` or `Owner` roles at subscription scopes; scope RBAC to resource groups.
+- Leave diagnostic logging disabled; route Azure Monitor logs to Log Analytics Workspaces.
 
 ## Troubleshooting
 

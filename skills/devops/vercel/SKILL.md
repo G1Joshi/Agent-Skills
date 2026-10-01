@@ -5,7 +5,7 @@ description: Expert Vercel platform assistance covering Next.js deployment, Edge
 
 # Vercel
 
-Vercel is the platform for the frontend cloud. In 2025, it has expanded beyond hosting to become a full AI and Storage platform (Vercel Blob/Postgres).
+Vercel is a frontend cloud platform providing automated CI/CD deployments, edge middleware, global content distribution, and serverless compute tailored for modern web frameworks.
 
 ## When to Use
 
@@ -28,7 +28,7 @@ vercel --prod
 
 ## Core Concepts
 
-#Edge Middleware Configuration (middleware.ts)
+### Edge Middleware Configuration (middleware.ts)
 
 Executing routing and authentication checks at the network edge:
 
@@ -60,7 +60,7 @@ export const config = {
 };
 ```
 
-#Declarative Vercel Configuration (vercel.json)
+### Declarative Vercel Configuration (vercel.json)
 
 Configuring custom headers, rewrites, and function memory:
 
@@ -87,7 +87,7 @@ Configuring custom headers, rewrites, and function memory:
 }
 ```
 
-#Vercel CLI Deployment Operations
+### Vercel CLI Deployment Operations
 
 Deploying and pulling remote environments:
 
@@ -132,15 +132,20 @@ export const config = {
 };
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** leverage Vercel's native Next.js 15 App Router optimizations (RSC, Server Actions, streaming).
-- **Do** pull environment variables securely using `vercel env pull` rather than manually copying secrets.
-- **Do** use Edge Middleware for lightweight tasks (redirects, header injection); offload heavy computation to Serverless Functions.
-- **Do** configure `maxDuration` in `vercel.json` if background operations require more than default serverless timeout.
-- **Don't** perform long-running background tasks inside Vercel Edge Middleware; it has strict CPU runtime limits.
-- **Don't** commit `.vercel` or `.env.local` directories to source control.
-- **Don't** bypass Vercel deployment preview gates for production merges.
+**Do**:
+
+- Leverage Vercel's native Next.js 15 App Router optimizations (RSC, Server Actions, streaming).
+- Pull environment variables securely using `vercel env pull` rather than manually copying secrets.
+- Use Edge Middleware for lightweight tasks (redirects, header injection); offload heavy computation to Serverless Functions.
+- Configure `maxDuration` in `vercel.json` if background operations require more than default serverless timeout.
+
+**Don't**:
+
+- Perform long-running background tasks inside Vercel Edge Middleware; it has strict CPU runtime limits.
+- Commit `.vercel` or `.env.local` directories to source control.
+- Bypass Vercel deployment preview gates for production merges.
 
 ## Troubleshooting
 

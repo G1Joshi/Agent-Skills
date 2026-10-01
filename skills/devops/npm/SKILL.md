@@ -5,7 +5,7 @@ description: Expert npm package manager assistance covering package.json, lockfi
 
 # npm
 
-npm is the default package manager for Node.js. v11 (2025) introduces strict publishing rules and `npx` caching improvements.
+npm is the default package manager for Node.js, providing dependency resolution, workspace management, security auditing, and publishing workflows for JavaScript ecosystems.
 
 ## When to Use
 
@@ -27,7 +27,7 @@ npm init -w packages/my-lib
 
 ## Core Concepts
 
-#Configuring npm Workspaces in Monorepos
+### Configuring npm Workspaces in Monorepos
 
 Declaring multi-package structures in root `package.json`:
 
@@ -47,7 +47,7 @@ Declaring multi-package structures in root `package.json`:
 }
 ```
 
-#Clean Installations & Deterministic Lockfiles
+### Clean Installations & Deterministic Lockfiles
 
 Installing dependencies in continuous integration:
 
@@ -62,7 +62,7 @@ npm audit --audit-level=high
 npm run test --workspace=packages/core-utils
 ```
 
-#Publishing Packages with Cryptographic Provenance
+### Publishing Packages with Cryptographic Provenance
 
 Publishing to the npm registry with supply-chain verification:
 
@@ -92,15 +92,20 @@ Use native npm workspaces in root `package.json`:
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** always use `npm ci` in CI/CD pipelines instead of `npm install` to enforce exact lockfile dependencies.
-- **Do** publish public packages with `--provenance` to establish cryptographic build transparency.
-- **Do** use `overrides` in root `package.json` to resolve security vulnerabilities in deep transitive dependencies.
-- **Do** commit `package-lock.json` to version control in all projects.
-- **Don't** use `npm install --force` or `--legacy-peer-deps` in production builds; resolve peer version conflicts cleanly.
-- **Don't** publish packages containing sensitive files; maintain an explicit `.npmignore` or `"files"` whitelist.
-- **Don't** execute untrusted scripts during install without verifying packages (`npm install --ignore-scripts`).
+**Do**:
+
+- Always use `npm ci` in CI/CD pipelines instead of `npm install` to enforce exact lockfile dependencies.
+- Publish public packages with `--provenance` to establish cryptographic build transparency.
+- Use `overrides` in root `package.json` to resolve security vulnerabilities in deep transitive dependencies.
+- Commit `package-lock.json` to version control in all projects.
+
+**Don't**:
+
+- Use `npm install --force` or `--legacy-peer-deps` in production builds; resolve peer version conflicts cleanly.
+- Publish packages containing sensitive files; maintain an explicit `.npmignore` or `"files"` whitelist.
+- Execute untrusted scripts during install without verifying packages (`npm install --ignore-scripts`).
 
 ## Troubleshooting
 

@@ -5,7 +5,7 @@ description: Expert HashiCorp Terraform assistance covering HCL, providers, modu
 
 # Terraform
 
-Terraform is the world's most popular Infrastructure as Code (IaC) tool. It uses HCL to provision resources on any cloud. 2025 introduces **Terraform Stacks** for easier component management.
+HashiCorp Terraform is an Infrastructure as Code (IaC) engine allowing declarative provisioning and lifecycle management of cloud resources across multi-cloud environments using HCL.
 
 ## When to Use
 
@@ -32,7 +32,7 @@ resource "aws_s3_bucket" "b" {
 
 ## Core Concepts
 
-#Modular Architecture with Remote State & Locking
+### Modular Architecture with Remote State & Locking
 
 Configuring S3 remote backend with DynamoDB state locking:
 
@@ -68,7 +68,7 @@ provider "aws" {
 }
 ```
 
-#Reusable VPC Module with Inputs & Outputs
+### Reusable VPC Module with Inputs & Outputs
 
 Encapsulating network resources:
 
@@ -102,7 +102,7 @@ output "vpc_id" {
 }
 ```
 
-#Terraform CLI Workflow
+### Terraform CLI Workflow
 
 Planning and applying changes safely:
 
@@ -149,15 +149,20 @@ terraform {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** always store Terraform state in a remote backend (S3/GCS) with encryption and state locking (DynamoDB).
-- **Do** always generate an execution plan (`terraform plan -out=tfplan`) and apply the saved plan file in CI.
-- **Do** use `default_tags` at the provider level to ensure consistent tagging across all cloud resources.
-- **Do** isolate environments using separate state files or directories (`environments/prod`, `environments/stage`), not workspaces.
-- **Don't** commit `.tfstate` files or files containing secrets to version control.
-- **Don't** use `terraform apply --auto-approve` in production without review and approval gates.
-- **Don't** modify cloud resources manually via web consoles; out-of-band changes cause state drift.
+**Do**:
+
+- Always store Terraform state in a remote backend (S3/GCS) with encryption and state locking (DynamoDB).
+- Always generate an execution plan (`terraform plan -out=tfplan`) and apply the saved plan file in CI.
+- Use `default_tags` at the provider level to ensure consistent tagging across all cloud resources.
+- Isolate environments using separate state files or directories (`environments/prod`, `environments/stage`), not workspaces.
+
+**Don't**:
+
+- Commit `.tfstate` files or files containing secrets to version control.
+- Use `terraform apply --auto-approve` in production without review and approval gates.
+- Modify cloud resources manually via web consoles; out-of-band changes cause state drift.
 
 ## Troubleshooting
 

@@ -28,7 +28,7 @@ docker run -d --restart=unless-stopped \
 
 ## Core Concepts
 
-#Fleet GitOps Multi-Cluster Deployment (fleet.yaml)
+### Fleet GitOps Multi-Cluster Deployment (fleet.yaml)
 
 Distributing workloads to targeted clusters based on labels:
 
@@ -65,7 +65,7 @@ targetCustomizations:
           host: payment.staging.example.com
 ```
 
-#RKE2 Secure Cluster Node Provisioning
+### RKE2 Secure Cluster Node Provisioning
 
 Configuring hardened Kubernetes control-plane node:
 
@@ -79,7 +79,7 @@ cni: "cilium" # Modern eBPF network plugin
 profile: "cis-1.23" # Enforce CIS benchmark profile
 ```
 
-#Rancher CLI Operations
+### Rancher CLI Operations
 
 Switching cluster contexts and managing projects:
 
@@ -116,15 +116,20 @@ targets:
         env: prod
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** deploy RKE2 (Rancher Government / hardened Kubernetes) for enterprise production environments.
-- **Do** use Fleet GitOps to manage multi-cluster deployments centrally from version-controlled Git repos.
-- **Do** enforce unified RBAC by integrating Rancher with enterprise identity providers (SAML, Okta, Azure AD).
-- **Do** run scheduled Rancher CIS benchmark scans to verify cluster compliance.
-- **Don't** run production workloads directly on the Rancher management controller cluster; manage downstream clusters.
-- **Don't** grant global `Administrator` privileges; scope permissions using Rancher Projects and Roles.
-- **Don't** bypass network policies between multi-tenant projects sharing the same physical cluster.
+**Do**:
+
+- Deploy RKE2 (Rancher Government / hardened Kubernetes) for enterprise production environments.
+- Use Fleet GitOps to manage multi-cluster deployments centrally from version-controlled Git repos.
+- Enforce unified RBAC by integrating Rancher with enterprise identity providers (SAML, Okta, Azure AD).
+- Run scheduled Rancher CIS benchmark scans to verify cluster compliance.
+
+**Don't**:
+
+- Run production workloads directly on the Rancher management controller cluster; manage downstream clusters.
+- Grant global `Administrator` privileges; scope permissions using Rancher Projects and Roles.
+- Bypass network policies between multi-tenant projects sharing the same physical cluster.
 
 ## Troubleshooting
 

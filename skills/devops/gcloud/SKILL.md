@@ -29,7 +29,7 @@ gcloud run deploy my-service --source .
 
 ## Core Concepts
 
-#Advanced Filtering and Formatting with --filter & --format
+### Advanced Filtering and Formatting with --filter & --format
 
 Extracting precise JSON/table projections from GCP:
 
@@ -44,7 +44,7 @@ PROJECT_NUMBER=$(gcloud projects describe my-prod-project \
   --format="value(projectNumber)")
 ```
 
-#One-Command Serverless Deployment with Cloud Run
+### One-Command Serverless Deployment with Cloud Run
 
 Building from source and deploying containerized apps:
 
@@ -62,7 +62,7 @@ gcloud run deploy customer-api \
   --set-env-vars "NODE_ENV=production"
 ```
 
-#Workload Identity Federation for CI/CD
+### Workload Identity Federation for CI/CD
 
 Configuring GitHub Actions or GitLab to authenticate without JSON service account keys:
 
@@ -98,15 +98,20 @@ gcloud run deploy api-service \
   --platform managed
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** authenticate CI/CD pipelines using Workload Identity Federation instead of downloading exported JSON service account keys.
-- **Do** use server-side `--filter` parameters to reduce payload size when querying large fleets of resources.
-- **Do** use `--format="value(field)"` when capturing output into shell variables.
-- **Do** manage multiple GCP accounts and projects cleanly using `gcloud config configurations`.
-- **Don't** download and store long-lived service account key files (`.json`); they are a major source of credential leaks.
-- **Don't** deploy Cloud Run services with `--allow-unauthenticated` for internal-only microservices.
-- **Don't** hardcode project IDs in scripts; use `gcloud config get-value project`.
+**Do**:
+
+- Authenticate CI/CD pipelines using Workload Identity Federation instead of downloading exported JSON service account keys.
+- Use server-side `--filter` parameters to reduce payload size when querying large fleets of resources.
+- Use `--format="value(field)"` when capturing output into shell variables.
+- Manage multiple GCP accounts and projects cleanly using `gcloud config configurations`.
+
+**Don't**:
+
+- Download and store long-lived service account key files (`.json`); they are a major source of credential leaks.
+- Deploy Cloud Run services with `--allow-unauthenticated` for internal-only microservices.
+- Hardcode project IDs in scripts; use `gcloud config get-value project`.
 
 ## Troubleshooting
 

@@ -5,7 +5,7 @@ description: Expert Apache HTTP Server assistance covering virtual hosts, mod_re
 
 # Apache HTTP Server (httpd)
 
-Apache is a robust, modular web server. While Nginx leads in raw performance, Apache leads in **flexibility** via `.htaccess`. v2.4 remains the stable standard in 2025.
+Apache HTTP Server is a battle-tested, modular web server offering extensive configuration flexibility via `.htaccess`, dynamic module loading, and reliable reverse-proxy capabilities.
 
 ## When to Use
 
@@ -35,7 +35,7 @@ Apache is a robust, modular web server. While Nginx leads in raw performance, Ap
 
 ## Core Concepts
 
-#VirtualHost Configuration with TLS and HTTP/2
+### VirtualHost Configuration with TLS and HTTP/2
 
 Production VirtualHost configuration with modern TLS parameters:
 
@@ -66,7 +66,7 @@ Production VirtualHost configuration with modern TLS parameters:
 </VirtualHost>
 ```
 
-#Reverse Proxy with mod_proxy & Load Balancing
+### Reverse Proxy with mod_proxy & Load Balancing
 
 Forwarding traffic to backend microservices with health checks:
 
@@ -85,7 +85,7 @@ Forwarding traffic to backend microservices with health checks:
 </Location>
 ```
 
-#URL Rewriting with mod_rewrite
+### URL Rewriting with mod_rewrite
 
 Handling Single Page Application routing:
 
@@ -128,15 +128,20 @@ Enable `proxy` and `proxy_wstunnel` modules:
 </VirtualHost>
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** disable `AllowOverride All` in production to prevent performance hits from filesystem `.htaccess` lookups.
-- **Do** enable `Protocols h2 http/1.1` to take advantage of HTTP/2 multiplexing.
-- **Do** hide server signatures by setting `ServerTokens Prod` and `ServerSignature Off`.
-- **Do** test configuration syntax with `apachectl configtest` before reloading the service.
-- **Don't** use the prefork MPM for high-concurrency modern workloads; use the `event` MPM (`mpm_event`).
-- **Don't** leave directory listings enabled (`Options +Indexes`); always use `Options -Indexes`.
-- **Don't** run Apache as root; ensure worker processes run under dedicated unprivileged users (`www-data`).
+**Do**:
+
+- Disable `AllowOverride All` in production to prevent performance hits from filesystem `.htaccess` lookups.
+- Enable `Protocols h2 http/1.1` to take advantage of HTTP/2 multiplexing.
+- Hide server signatures by setting `ServerTokens Prod` and `ServerSignature Off`.
+- Test configuration syntax with `apachectl configtest` before reloading the service.
+
+**Don't**:
+
+- Use the prefork MPM for high-concurrency modern workloads; use the `event` MPM (`mpm_event`).
+- Leave directory listings enabled (`Options +Indexes`); always use `Options -Indexes`.
+- Run Apache as root; ensure worker processes run under dedicated unprivileged users (`www-data`).
 
 ## Troubleshooting
 

@@ -5,7 +5,7 @@ description: Expert Datadog monitoring assistance covering APM tracing, custom m
 
 # Datadog
 
-Datadog is a leading SaaS observability platform. In 2025, it focuses on **AI Observability** (monitoring LLMs) and automated remediation with **Watchdog**.
+Datadog is a unified SaaS observability and security platform providing full-stack APM tracing, infrastructure monitoring, log aggregation, and real-time anomaly detection.
 
 ## When to Use
 
@@ -16,14 +16,14 @@ Datadog is a leading SaaS observability platform. In 2025, it focuses on **AI Ob
 
 ## Quick Start
 
-#1. Install Datadog Agent (Linux/macOS)
+### 1. Install Datadog Agent (Linux/macOS)
 
 ```bash
 DD_API_KEY="<YOUR_DATADOG_API_KEY>" DD_SITE="datadoghq.com" \
   bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
 ```
 
-#2. Auto-Instrument Node.js Application
+### 2. Auto-Instrument Node.js Application
 
 ```bash
 npm install dd-trace --save
@@ -42,7 +42,7 @@ tracer.init({
 
 ## Core Concepts
 
-#Auto-Instrumenting Applications with dd-trace
+### Auto-Instrumenting Applications with dd-trace
 
 Adding distributed tracing to a Node.js microservice:
 
@@ -61,7 +61,7 @@ tracer.init({
 export default tracer;
 ```
 
-#Custom Business Metrics & StatsD
+### Custom Business Metrics & StatsD
 
 Submitting custom business KPIs with high performance over UDP:
 
@@ -84,7 +84,7 @@ statsd.histogram(
 )
 ```
 
-#Correlating Logs with Distributed Traces
+### Correlating Logs with Distributed Traces
 
 Formatting structured logs with active Datadog trace context:
 
@@ -133,15 +133,20 @@ async function processOrder(orderId) {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** enforce Unified Service Tagging across all systems: `env`, `service`, and `version` tags must match everywhere.
-- **Do** enable `logInjection: true` in APM tracers to link logs and traces together automatically in the UI.
-- **Do** use DogStatsD over local UDP to submit high-frequency metrics without blocking application request threads.
-- **Do** configure log sampling and exclusion filters in `datadog.yaml` to control ingestion costs.
-- **Don't** initialize APM tracers after importing HTTP or database modules; tracer must load first to patch libraries.
-- **Don't** emit high-cardinality tags (e.g. user IDs, order UUIDs, timestamps) as custom metric tag dimensions; use logs/spans.
-- **Don't** log sensitive PII or credentials; configure Datadog log scrub rules (`log_processing_rules`).
+**Do**:
+
+- Enforce Unified Service Tagging across all systems: `env`, `service`, and `version` tags must match everywhere.
+- Enable `logInjection: true` in APM tracers to link logs and traces together automatically in the UI.
+- Use DogStatsD over local UDP to submit high-frequency metrics without blocking application request threads.
+- Configure log sampling and exclusion filters in `datadog.yaml` to control ingestion costs.
+
+**Don't**:
+
+- Initialize APM tracers after importing HTTP or database modules; tracer must load first to patch libraries.
+- Emit high-cardinality tags (e.g. user IDs, order UUIDs, timestamps) as custom metric tag dimensions; use logs/spans.
+- Log sensitive PII or credentials; configure Datadog log scrub rules (`log_processing_rules`).
 
 ## Troubleshooting
 

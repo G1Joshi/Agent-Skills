@@ -5,7 +5,7 @@ description: Expert Helm Kubernetes package manager assistance covering charts, 
 
 # Helm
 
-Helm helps you manage Kubernetes applications via Charts (packages of pre-configured K8s resources). Helm v4 (2025) improves OCI integration and enables server-side apply.
+Helm is the package manager for Kubernetes, enabling declarative application packaging, versioned chart releases, OCI registry distribution, and automated rollbacks.
 
 ## When to Use
 
@@ -34,7 +34,7 @@ image:
 
 ## Core Concepts
 
-#Parameterized Deployment Template
+### Parameterized Deployment Template
 
 Templating Kubernetes resources with Helm helpers:
 
@@ -66,7 +66,7 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
 ```
 
-#Values Schema Validation (values.schema.json)
+### Values Schema Validation (values.schema.json)
 
 Enforcing strict type checking on user-provided values:
 
@@ -91,7 +91,7 @@ Enforcing strict type checking on user-provided values:
 }
 ```
 
-#Helm CLI Deployment & Rollback Commands
+### Helm CLI Deployment & Rollback Commands
 
 Deploying, linting, and managing releases:
 
@@ -146,15 +146,20 @@ spec:
             - containerPort: {{ .Values.service.port | default 8080 }}
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** always use `--atomic` and `--timeout` during `helm upgrade` to ensure automatic rollback on deployment failure.
-- **Do** author a `values.schema.json` to catch configuration errors before reaching the Kubernetes API server.
-- **Do** define helper templates in `_helpers.tpl` for standard label generation and naming conventions.
-- **Do** store Helm charts in OCI-compliant container registries (GHCR, ECR, Artifact Registry) via `helm push`.
-- **Don't** hardcode sensitive passwords in `values.yaml`; inject secrets via external secret managers.
-- **Don't** use `helm template` and `kubectl apply` without validating that CRDs and hooks are handled appropriately.
-- **Don't** deploy charts without setting explicit resource requests and limits in default values.
+**Do**:
+
+- Always use `--atomic` and `--timeout` during `helm upgrade` to ensure automatic rollback on deployment failure.
+- Author a `values.schema.json` to catch configuration errors before reaching the Kubernetes API server.
+- Define helper templates in `_helpers.tpl` for standard label generation and naming conventions.
+- Store Helm charts in OCI-compliant container registries (GHCR, ECR, Artifact Registry) via `helm push`.
+
+**Don't**:
+
+- Hardcode sensitive passwords in `values.yaml`; inject secrets via external secret managers.
+- Use `helm template` and `kubectl apply` without validating that CRDs and hooks are handled appropriately.
+- Deploy charts without setting explicit resource requests and limits in default values.
 
 ## Troubleshooting
 

@@ -5,7 +5,7 @@ description: Expert Istio service mesh assistance covering VirtualServices, Dest
 
 # Istio
 
-Istio is a Service Mesh. It adds observability, security (mTLS), and traffic control to microservices. 2025 sees the rise of **Ambient Mesh**, removing the heavy sidecar requirement.
+Istio is an open-source service mesh providing transparent traffic management, zero-trust security with mutual TLS, dynamic telemetry, and sidecarless Ambient Mesh architectures.
 
 ## When to Use
 
@@ -38,7 +38,7 @@ spec:
 
 ## Core Concepts
 
-#Traffic Shifting with VirtualService & DestinationRule
+### Traffic Shifting with VirtualService & DestinationRule
 
 Implementing a 90/10 Canary release rollout:
 
@@ -88,7 +88,7 @@ spec:
         retryOn: 5xx,connect-failure
 ```
 
-#Strict Mutual TLS (mTLS) PeerAuthentication
+### Strict Mutual TLS (mTLS) PeerAuthentication
 
 Enforcing encryption for all inter-service pod communication:
 
@@ -103,7 +103,7 @@ spec:
     mode: STRICT # Rejects all non-mTLS plain-text connections
 ```
 
-#Fault Injection for Resiliency Verification
+### Fault Injection for Resiliency Verification
 
 Testing application tolerance against downstream latencies:
 
@@ -155,15 +155,20 @@ spec:
       maxEjectionPercent: 50
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target Istio Ambient Mesh mode where available to eliminate sidecar container resource overhead.
-- **Do** configure `mode: STRICT` in `PeerAuthentication` to guarantee zero-trust mutual TLS encryption.
-- **Do** define explicit `timeout` and `retries` policies on all `VirtualService` routes to prevent cascading failures.
-- **Do** export metrics via the Istio Prometheus exporter for visualization in Kiali and Grafana.
-- **Don't** leave Egress open to wildcard internet access in sensitive environments; enforce strict `ServiceEntry` policies.
-- **Don't** mix multiple conflicting `VirtualService` rules targeting the same host.
-- **Don't** deploy sidecars into Kubernetes jobs or short-lived batch pods without proper termination handling.
+**Do**:
+
+- Target Istio Ambient Mesh mode where available to eliminate sidecar container resource overhead.
+- Configure `mode: STRICT` in `PeerAuthentication` to guarantee zero-trust mutual TLS encryption.
+- Define explicit `timeout` and `retries` policies on all `VirtualService` routes to prevent cascading failures.
+- Export metrics via the Istio Prometheus exporter for visualization in Kiali and Grafana.
+
+**Don't**:
+
+- Leave Egress open to wildcard internet access in sensitive environments; enforce strict `ServiceEntry` policies.
+- Mix multiple conflicting `VirtualService` rules targeting the same host.
+- Deploy sidecars into Kubernetes jobs or short-lived batch pods without proper termination handling.
 
 ## Troubleshooting
 

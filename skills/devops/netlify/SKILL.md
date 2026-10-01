@@ -5,7 +5,7 @@ description: Expert Netlify assistance covering continuous deployments, Netlify 
 
 # Netlify
 
-Netlify pioneered the Jamstack. In 2025, it focuses on "Platform Primitives" – giving frameworks low-level control over caching, image optimization, and routing.
+Netlify is an essential platform for modern web architectures, providing automated git-based deployments, edge compute, serverless functions, and unified frontend caching primitives.
 
 ## When to Use
 
@@ -28,7 +28,7 @@ netlify deploy --prod
 
 ## Core Concepts
 
-#Declarative Configuration with netlify.toml
+### Declarative Configuration with netlify.toml
 
 Defining build commands, headers, and SPA redirects:
 
@@ -64,7 +64,7 @@ Defining build commands, headers, and SPA redirects:
   force = true
 ```
 
-#Netlify Edge Functions (Deno Runtime)
+### Netlify Edge Functions (Deno Runtime)
 
 Running geolocation-based transforms directly at the edge:
 
@@ -94,7 +94,7 @@ export const config = {
 };
 ```
 
-#Automated Netlify Forms
+### Automated Netlify Forms
 
 Collecting form submissions without writing backend endpoints:
 
@@ -142,15 +142,20 @@ Define routing and headers in `netlify.toml`:
     Referrer-Policy = "strict-origin-when-cross-origin"
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** store all routing, redirects, headers, and build commands in `netlify.toml` for version-controlled reproducibility.
-- **Do** use `netlify-honeypot` on HTML forms to prevent automated spam bot submissions.
-- **Do** use Netlify Edge Functions for auth checks, localized redirects, and A/B testing at the CDN layer.
-- **Do** test builds and serverless functions locally using the Netlify CLI (`netlify dev`).
-- **Don't** commit `.env` files containing production secrets; configure environment variables in Netlify UI.
-- **Don't** use client-side redirects when Netlify edge redirects (`[[redirects]]`) execute significantly faster.
-- **Don't** store large persistent media assets in Git; link to external storage like Cloudinary or S3.
+**Do**:
+
+- Store all routing, redirects, headers, and build commands in `netlify.toml` for version-controlled reproducibility.
+- Use `netlify-honeypot` on HTML forms to prevent automated spam bot submissions.
+- Use Netlify Edge Functions for auth checks, localized redirects, and A/B testing at the CDN layer.
+- Test builds and serverless functions locally using the Netlify CLI (`netlify dev`).
+
+**Don't**:
+
+- Commit `.env` files containing production secrets; configure environment variables in Netlify UI.
+- Use client-side redirects when Netlify edge redirects (`[[redirects]]`) execute significantly faster.
+- Store large persistent media assets in Git; link to external storage like Cloudinary or S3.
 
 ## Troubleshooting
 

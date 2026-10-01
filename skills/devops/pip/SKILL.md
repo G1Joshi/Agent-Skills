@@ -5,7 +5,7 @@ description: Expert Python pip package manager assistance covering requirements.
 
 # pip
 
-pip is the standard package manager for Python. v24+ (2025) focuses on performance and standard compliance (PEP 668).
+pip is the standard package installer for Python, managing dependencies from PyPI while adhering to modern packaging standards and isolated environment constraints.
 
 ## When to Use
 
@@ -26,7 +26,7 @@ pip freeze > requirements.txt
 
 ## Core Concepts
 
-#Deterministic Installation with Constraints Files
+### Deterministic Installation with Constraints Files
 
 Separating direct top-level requirements from strictly pinned transitive constraints:
 
@@ -51,7 +51,7 @@ pip install --no-deps --require-hashes -r constraints.txt
 pip install --no-cache-dir -r requirements.txt -c constraints.txt
 ```
 
-#Editable Development Installation with pyproject.toml
+### Editable Development Installation with pyproject.toml
 
 Installing local development libraries into virtual environments:
 
@@ -60,7 +60,7 @@ Installing local development libraries into virtual environments:
 pip install -e .[dev,test]
 ```
 
-#Auditing Installed Packages for Vulnerabilities
+### Auditing Installed Packages for Vulnerabilities
 
 Checking dependencies against known security advisories:
 
@@ -92,15 +92,20 @@ pip-compile --generate-hashes requirements.in -o requirements.txt
 pip-sync requirements.txt
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** always install packages into an isolated virtual environment (`python -m venv .venv`), never into the global system Python.
-- **Do** use `pip install --no-cache-dir` in Dockerfiles to minimize container image sizes.
-- **Do** enforce `--require-hashes` in production deployments to prevent supply-chain package tampering.
-- **Do** use `pip-audit` in CI to detect vulnerable dependencies before merging pull requests.
-- **Don't** run `sudo pip install`; modifying the system Python environment can break OS packages.
-- **Don't** maintain unpinned `requirements.txt` in production; use `pip-compile` (pip-tools) to generate locked files.
-- **Don't** use legacy `setup.py install`; use `pip install .` adhering to modern `pyproject.toml` standards.
+**Do**:
+
+- Always install packages into an isolated virtual environment (`python -m venv .venv`), never into the global system Python.
+- Use `pip install --no-cache-dir` in Dockerfiles to minimize container image sizes.
+- Enforce `--require-hashes` in production deployments to prevent supply-chain package tampering.
+- Use `pip-audit` in CI to detect vulnerable dependencies before merging pull requests.
+
+**Don't**:
+
+- Run `sudo pip install`; modifying the system Python environment can break OS packages.
+- Maintain unpinned `requirements.txt` in production; use `pip-compile` (pip-tools) to generate locked files.
+- Use legacy `setup.py install`; use `pip install .` adhering to modern `pyproject.toml` standards.
 
 ## Troubleshooting
 

@@ -5,7 +5,7 @@ description: Expert CircleCI assistance covering config.yml, orbs, docker execut
 
 # CircleCI
 
-CircleCI is a cloud-native CI/CD platform focused on speed and parallelism. In 2025, **Dynamic Config** and **Orbs** are the key drivers of efficiency.
+CircleCI is a continuous integration and delivery platform emphasizing pipeline parallelism, reusable configuration Orbs, and deterministic build environments.
 
 ## When to Use
 
@@ -38,7 +38,7 @@ workflows:
 
 ## Core Concepts
 
-#Multi-Job Workflow with Caching & Docker Executor
+### Multi-Job Workflow with Caching & Docker Executor
 
 Fast build and test pipeline with dependency caching:
 
@@ -94,7 +94,7 @@ workflows:
               only: main
 ```
 
-#Test Splitting by Timing for Concurrent Runners
+### Test Splitting by Timing for Concurrent Runners
 
 Distributing tests across parallel containers based on historical execution duration:
 
@@ -115,7 +115,7 @@ jobs:
           path: test-results
 ```
 
-#OIDC Authentication with Cloud Providers
+### OIDC Authentication with Cloud Providers
 
 Authenticating to AWS/GCP without permanent secrets:
 
@@ -167,15 +167,20 @@ workflows:
       - build_and_test
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** leverage CircleCI test splitting (`circleci tests split --split-by=timings`) to minimize CI pipeline wall-clock time.
-- **Do** use `cimg/*` official convenience images optimized for caching and performance.
-- **Do** authenticate to cloud platforms (AWS, GCP, Azure) via OIDC tokens instead of static credentials.
-- **Do** store test results with `store_test_results` to view flaky test analytics and trends.
-- **Don't** use resource classes larger than needed (`xlarge`); right-size containers to optimize credits.
-- **Don't** store unencrypted credentials in repository config files; use Project Environment Variables or Contexts.
-- **Don't** re-run entire workflows on minor test failures; use 'Rerun failed tests' functionality.
+**Do**:
+
+- Leverage CircleCI test splitting (`circleci tests split --split-by=timings`) to minimize CI pipeline wall-clock time.
+- Use `cimg/*` official convenience images optimized for caching and performance.
+- Authenticate to cloud platforms (AWS, GCP, Azure) via OIDC tokens instead of static credentials.
+- Store test results with `store_test_results` to view flaky test analytics and trends.
+
+**Don't**:
+
+- Use resource classes larger than needed (`xlarge`); right-size containers to optimize credits.
+- Store unencrypted credentials in repository config files; use Project Environment Variables or Contexts.
+- Re-run entire workflows on minor test failures; use 'Rerun failed tests' functionality.
 
 ## Troubleshooting
 

@@ -5,7 +5,7 @@ description: Expert Google Cloud Platform (GCP) assistance covering Cloud Run, G
 
 # Google Cloud Platform (GCP)
 
-GCP is known for its data analytics (BigQuery) and being the home of Kubernetes. 2025 highlights **Vertex AI** for rapid model deployment and **Cloud Run** for serverless everywhere.
+Google Cloud Platform (GCP) provides scalable cloud infrastructure, featuring managed container runtimes (Cloud Run, GKE), BigQuery analytics, and Vertex AI foundation model tooling.
 
 ## When to Use
 
@@ -27,7 +27,7 @@ gcloud run deploy web-service \
 
 ## Core Concepts
 
-#Cloud Run Container Service Architecture
+### Cloud Run Container Service Architecture
 
 Deploying containerized microservices that scale to zero and scale up dynamically:
 
@@ -63,7 +63,7 @@ spec:
                   key: username
 ```
 
-#Pub/Sub Event Streaming with Python
+### Pub/Sub Event Streaming with Python
 
 Publishing and subscribing to real-time events with high throughput:
 
@@ -83,7 +83,7 @@ message_id = future.result()
 print(f"Published message ID: {message_id}")
 ```
 
-#Zero-Trust VPC Service Controls & IAM
+### Zero-Trust VPC Service Controls & IAM
 
 Restricting access to GCP APIs within secure service perimeters:
 
@@ -119,15 +119,20 @@ gcloud pubsub subscriptions create order-events-sub \
   --push-auth-service-account invoice-invoker@my-project.iam.gserviceaccount.com
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** deploy serverless workloads to Cloud Run for automated scale-to-zero and high concurrency per container.
-- **Do** protect applications with Google Cloud Armor security policies to neutralize DDoS and OWASP Top 10 exploits.
-- **Do** configure VPC Service Controls to prevent data exfiltration from BigQuery and Cloud Storage.
-- **Do** enable Secret Manager integration directly into Cloud Run and GKE pods rather than passing raw env strings.
-- **Don't** use standard service account keys; use Workload Identity for GKE pods and Cloud Run services.
-- **Don't** assign `roles/editor` or `roles/owner` to service accounts; adhere strictly to least-privilege IAM roles.
-- **Don't** expose BigQuery datasets publicly without explicit authorized views.
+**Do**:
+
+- Deploy serverless workloads to Cloud Run for automated scale-to-zero and high concurrency per container.
+- Protect applications with Google Cloud Armor security policies to neutralize DDoS and OWASP Top 10 exploits.
+- Configure VPC Service Controls to prevent data exfiltration from BigQuery and Cloud Storage.
+- Enable Secret Manager integration directly into Cloud Run and GKE pods rather than passing raw env strings.
+
+**Don't**:
+
+- Use standard service account keys; use Workload Identity for GKE pods and Cloud Run services.
+- Assign `roles/editor` or `roles/owner` to service accounts; adhere strictly to least-privilege IAM roles.
+- Expose BigQuery datasets publicly without explicit authorized views.
 
 ## Troubleshooting
 

@@ -24,7 +24,7 @@ railway up
 
 ## Core Concepts
 
-#Declarative Service Configuration (railway.json)
+### Declarative Service Configuration (railway.json)
 
 Defining build commands, health checks, and restart policies:
 
@@ -45,7 +45,7 @@ Defining build commands, health checks, and restart policies:
 }
 ```
 
-#Private Networking Across Microservices
+### Private Networking Across Microservices
 
 Connecting internal services securely using Railway private domains:
 
@@ -60,7 +60,7 @@ const redisUrl =
   "redis://default:secret@redis.railway.internal:6379";
 ```
 
-#Railway CLI Workflow
+### Railway CLI Workflow
 
 Managing environments and deploying from terminal:
 
@@ -98,21 +98,26 @@ cmds = ["npm run build"]
 cmd = "npm start"
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use Railway Private Networking (`*.railway.internal`) for service-to-service communication.
-- **Do** define an explicit `healthcheckPath` in `railway.json` to enable zero-downtime rolling deployments.
-- **Do** enable PR environments to test database migrations and frontend changes in isolated stacks.
-- **Do** utilize Nixpacks for automatic dependency and runtime version detection.
-- **Don't** expose databases publicly when microservices reside within the same Railway project.
-- **Don't** commit `.env` files; use Railway's encrypted environment variables dashboard or CLI.
-- **Don't** store persistent file uploads on the service container filesystem; use S3, R2, or Railway Volume mounts.
+**Do**:
+
+- Use Railway Private Networking (`*.railway.internal`) for service-to-service communication.
+- Define an explicit `healthcheckPath` in `railway.json` to enable zero-downtime rolling deployments.
+- Enable PR environments to test database migrations and frontend changes in isolated stacks.
+- Utilize Nixpacks for automatic dependency and runtime version detection.
+
+**Don't**:
+
+- Expose databases publicly when microservices reside within the same Railway project.
+- Commit `.env` files; use Railway's encrypted environment variables dashboard or CLI.
+- Store persistent file uploads on the service container filesystem; use S3, R2, or Railway Volume mounts.
 
 ## Troubleshooting
 
 | Error                                            | Cause                                                                               | Solution                                                                            |
 | :----------------------------------------------- | :---------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------- |
-| `Deploy failed: Process did not listen on $PORT` | Web service hardcoding port instead of dynamic Railway `$PORT`.                     | Bind web server to dynamic port: `process.env.PORT                                  |     | 3000`. |
+| `Deploy failed: Process did not listen on $PORT` | Web service hardcoding port instead of dynamic Railway `$PORT`.                     | Bind web server to dynamic port: `process.env.PORT \|\| 3000`.                      |
 | `Database connection timeout in production`      | Service connecting using public database proxy URL inside the same Railway project. | Use private internal DNS host provided by Railway for zero latency and free egress. |
 | `Railway CLI: Unauthorized`                      | Project token or user token missing.                                                | Run `railway login` or export `RAILWAY_TOKEN`.                                      |
 

@@ -5,7 +5,7 @@ description: Expert HashiCorp Consul assistance covering service discovery, heal
 
 # Consul
 
-HashiCorp Consul is a multi-cloud service networking platform. It handles Service Discovery, Mesh, and Key/Value storage. 2025 v1.18 focuses on Enterprise reliability.
+HashiCorp Consul is a service networking solution providing service discovery, secure service mesh with mutual TLS, dynamic traffic routing, and distributed key-value storage.
 
 ## When to Use
 
@@ -41,7 +41,7 @@ consul reload
 
 ## Core Concepts
 
-#Declarative Service Registration with Health Checks
+### Declarative Service Registration with Health Checks
 
 Registering a service with Consul agent:
 
@@ -76,7 +76,7 @@ service {
 }
 ```
 
-#Service Discovery via DNS & HTTP API
+### Service Discovery via DNS & HTTP API
 
 Querying healthy service instances dynamically:
 
@@ -88,7 +88,7 @@ dig @127.0.0.1 -p 8600 payment-api.service.consul SRV
 curl -s http://127.0.0.1:8500/v1/health/service/payment-api?passing=true | jq .
 ```
 
-#Consul KV Configuration & Watchers with Consul-Template
+### Consul KV Configuration & Watchers with Consul-Template
 
 Dynamic template rendering when configuration keys change:
 
@@ -128,15 +128,20 @@ upstream app_servers {
 
 Run daemon: `consul-template -template "nginx.ctmpl:/etc/nginx/conf.d/upstream.conf:systemctl reload nginx"`
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** configure `deregister_critical_service_after` to automatically prune dead service nodes from discovery.
-- **Do** use Consul Service Mesh with Connect to automate mutual TLS (mTLS) zero-trust encryption between pods/VMs.
-- **Do** deploy Consul server nodes in odd numbers (3 or 5) across distinct availability zones to maintain Raft consensus.
-- **Do** enable gossip encryption and TLS for all agent-to-server and agent-to-agent communications.
-- **Don't** use Consul KV as a high-throughput primary application database; it is designed for configuration and coordination.
-- **Don't** run production Consul servers as single nodes without a quorum.
-- **Don't** expose Consul HTTP API (8500) publicly without ACL tokens and TLS.
+**Do**:
+
+- Configure `deregister_critical_service_after` to automatically prune dead service nodes from discovery.
+- Use Consul Service Mesh with Connect to automate mutual TLS (mTLS) zero-trust encryption between pods/VMs.
+- Deploy Consul server nodes in odd numbers (3 or 5) across distinct availability zones to maintain Raft consensus.
+- Enable gossip encryption and TLS for all agent-to-server and agent-to-agent communications.
+
+**Don't**:
+
+- Use Consul KV as a high-throughput primary application database; it is designed for configuration and coordination.
+- Run production Consul servers as single nodes without a quorum.
+- Expose Consul HTTP API (8500) publicly without ACL tokens and TLS.
 
 ## Troubleshooting
 
