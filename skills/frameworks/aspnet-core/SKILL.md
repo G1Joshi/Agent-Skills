@@ -27,7 +27,7 @@ app.Run();
 
 ## Core Concepts
 
-#Minimal APIs with Typed Results & OpenAPI
+### Minimal APIs with Typed Results & OpenAPI
 
 Lightweight, high-performance endpoint mapping with zero controller ceremony:
 
@@ -57,7 +57,7 @@ app.MapGet("/api/orders/{id:guid}", async (Guid id, IOrderRepository repo) =>
 app.Run();
 ```
 
-#Dependency Injection, Options Pattern & Configuration
+### Dependency Injection, Options Pattern & Configuration
 
 Strongly typed configuration with validation:
 
@@ -82,7 +82,7 @@ public class OrderService(IOptions<DatabaseOptions> options, ILogger<OrderServic
 }
 ```
 
-#Global Error Handling Middleware & Problem Details
+### Global Error Handling Middleware & Problem Details
 
 Standardized RFC 7807 error responses:
 
@@ -137,15 +137,20 @@ users.MapPost("/", async (CreateUserDto dto, AppDbContext db) => {
 app.Run();
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use Minimal APIs for microservices to maximize throughput and minimize cold-start latency.
-- **Do** return `IResult` / `TypedResults` from endpoints for compile-time response verification.
-- **Do** use `IHttpClientFactory` with Polly resilience pipelines for external HTTP calls.
-- **Do** enable AOT (Ahead-of-Time) compilation (`PublishAot=true`) for microservices to slash memory footprint.
-- **Don't** call `.Result` or `.Wait()` on async Tasks; always use `await` to prevent thread pool starvation.
-- **Don't** register transient services in singletons without scoping via `IServiceScopeFactory`.
-- **Don't** log sensitive credentials or PII; configure logging sanitization filters.
+**Do**:
+
+- Use Minimal APIs for microservices to maximize throughput and minimize cold-start latency.
+- Return `IResult` / `TypedResults` from endpoints for compile-time response verification.
+- Use `IHttpClientFactory` with Polly resilience pipelines for external HTTP calls.
+- Enable AOT (Ahead-of-Time) compilation (`PublishAot=true`) for microservices to slash memory footprint.
+
+**Don't**:
+
+- Call `.Result` or `.Wait()` on async Tasks; always use `await` to prevent thread pool starvation.
+- Register transient services in singletons without scoping via `IServiceScopeFactory`.
+- Log sensitive credentials or PII; configure logging sanitization filters.
 
 ## Troubleshooting
 

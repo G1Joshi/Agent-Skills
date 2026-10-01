@@ -5,7 +5,7 @@ description: Expert Prisma ORM assistance covering Prisma schema, migrations, ty
 
 # Prisma
 
-Prisma 6 (2025) adds multi-schema support and **Edge support** (Cloudflare Workers) via driver adapters. It is known for its type-safe client.
+Prisma is a next-generation Node.js and TypeScript ORM featuring declarative schema modeling, automated type-safe database queries, and robust migration tooling.
 
 ## When to Use
 
@@ -51,7 +51,7 @@ const users = await prisma.user.findMany({ include: { posts: true } });
 
 ## Core Concepts
 
-#Declarative Schema Definition with Relations
+### Declarative Schema Definition with Relations
 
 Defining entities, indexes, and referential constraints:
 
@@ -85,7 +85,7 @@ model Post {
 }
 ```
 
-#Type-Safe CRUD & Nested Relational Queries
+### Type-Safe CRUD & Nested Relational Queries
 
 Reading and writing related data in single operations:
 
@@ -112,7 +112,7 @@ async function createUserWithPost() {
 }
 ```
 
-#Interactive Transactions with $transaction
+### Interactive Transactions with $transaction
 
 Executing multi-step operations with ACID guarantees:
 
@@ -171,15 +171,20 @@ const result = await prisma.$transaction(async (tx) => {
 });
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** instantiate a single `PrismaClient` instance globally in development to prevent connection pool exhaustion.
-- **Do** use `select` clauses in queries to fetch only necessary columns instead of full rows.
-- **Do** run `prisma migrate deploy` in CI/CD production deployment pipelines.
-- **Do** leverage interactive transactions (`prisma.$transaction(async (tx) => ...)`) for ACID workflows.
-- **Don't** create new `PrismaClient()` instances inside serverless request handler functions.
-- **Don't** run `prisma db push` in production; use `prisma migrate` to preserve migration history.
-- **Don't** use `$queryRawUnsafe` with concatenated user strings; use parameterized `$queryRaw`.
+**Do**:
+
+- Instantiate a single `PrismaClient` instance globally in development to prevent connection pool exhaustion.
+- Use `select` clauses in queries to fetch only necessary columns instead of full rows.
+- Run `prisma migrate deploy` in CI/CD production deployment pipelines.
+- Leverage interactive transactions (`prisma.$transaction(async (tx) => ...)`) for ACID workflows.
+
+**Don't**:
+
+- Create new `PrismaClient()` instances inside serverless request handler functions.
+- Run `prisma db push` in production; use `prisma migrate` to preserve migration history.
+- Use `$queryRawUnsafe` with concatenated user strings; use parameterized `$queryRaw`.
 
 ## Troubleshooting
 

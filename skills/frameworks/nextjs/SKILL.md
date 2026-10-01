@@ -5,7 +5,7 @@ description: Expert Next.js assistance covering App Router, Server Components (R
 
 # Next.js
 
-Next.js is the leading full-stack framework for React. Next.js 15 (2025) stabilizes the App Router and Server Actions, making it a robust platform for modern web apps.
+Next.js is a full-stack React framework featuring App Router architecture, React Server Components (RSC), Server Actions, and hybrid static/dynamic streaming.
 
 ## When to Use
 
@@ -88,18 +88,18 @@ export function CommentForm() {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Fetch in Server Components**: Fetch data directly in your content (async components). No `useEffect`.
-- **Use `revalidatePath`**: Revalidate cache on-demand after mutations (Server Actions).
-- **Partial Prerendering (PPR)**: (Experimental in '24, Stable in '25) Mix static shell with dynamic holes.
+- Fetch in Server Components: Fetch data directly in your content (async components). No `useEffect`.
+- Use `revalidatePath`: Revalidate cache on-demand after mutations (Server Actions).
+- Partial Prerendering (PPR): (Experimental in '24, Stable in '25) Mix static shell with dynamic holes.
 
 **Don't**:
 
-- **Don't leak secrets**: Ensure `'use server'` files don't export sensitive data.
-- **Don't `use client` everything**: Only put `'use client'` at the leaves of your tree (buttons, inputs). Keep high-level layouts as Server Components.
+- Leak secrets: Ensure `'use server'` files don't export sensitive data.
+- `use client` everything: Only put `'use client'` at the leaves of your tree (buttons, inputs). Keep high-level layouts as Server Components.
 
 ## Troubleshooting
 

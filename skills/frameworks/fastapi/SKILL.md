@@ -33,7 +33,7 @@ async def create_item(item: Item):
 
 ## Core Concepts
 
-#Async Route Handlers & Pydantic v2 Models
+### Async Route Handlers & Pydantic v2 Models
 
 Strict payload parsing and serialization:
 
@@ -65,7 +65,7 @@ async def create_product(product: ProductCreate):
     }
 ```
 
-#Dependency Injection System with Depends
+### Dependency Injection System with Depends
 
 Reusing database sessions, authentication, and service clients:
 
@@ -85,7 +85,7 @@ async def get_metrics(api_key: str = Depends(verify_api_key)):
     return {"status": "authorized", "system_load": 0.42}
 ```
 
-#Lifespan Events & Async Resource Management
+### Lifespan Events & Async Resource Management
 
 Initializing ML models, database connection pools, and Redis caches:
 
@@ -135,15 +135,20 @@ def read_item(item_id: int, db: Session = Depends(get_db)):
     return db_item
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** migrate to FastAPI lifespan handlers (`@asynccontextmanager`) instead of deprecated `@app.on_event("startup")`.
-- **Do** leverage Pydantic v2 for up to 5x-10x faster schema serialization and parsing.
-- **Do** define synchronous `def` (instead of `async def`) for blocking operations so FastAPI executes them in the worker threadpool.
-- **Do** structure routes with `APIRouter` to maintain clean domain separation.
-- **Don't** perform blocking CPU or I/O calls directly inside `async def` handlers; use `asyncio.to_thread`.
-- **Don't** return raw database entities; map them through Pydantic `response_model` schemas.
-- **Don't** hardcode CORS origins to `["*"]` when authentication credentials are allowed.
+**Do**:
+
+- Migrate to FastAPI lifespan handlers (`@asynccontextmanager`) instead of deprecated `@app.on_event("startup")`.
+- Leverage Pydantic v2 for up to 5x-10x faster schema serialization and parsing.
+- Define synchronous `def` (instead of `async def`) for blocking operations so FastAPI executes them in the worker threadpool.
+- Structure routes with `APIRouter` to maintain clean domain separation.
+
+**Don't**:
+
+- Perform blocking CPU or I/O calls directly inside `async def` handlers; use `asyncio.to_thread`.
+- Return raw database entities; map them through Pydantic `response_model` schemas.
+- Hardcode CORS origins to `["*"]` when authentication credentials are allowed.
 
 ## Troubleshooting
 

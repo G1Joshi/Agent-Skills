@@ -5,7 +5,7 @@ description: Expert Blazor assistance covering WebAssembly, Server-Side Blazor, 
 
 # Blazor
 
-Blazor allows writing web UIs in **C#** instead of JavaScript. .NET 9 (2024/2025) brings unified rendering modes (Server, WebAssembly, Auto).
+Blazor enables full-stack web UI development using C# and .NET, offering flexible rendering architectures including Blazor Server, Blazor WebAssembly, and hybrid static server streaming.
 
 ## When to Use
 
@@ -40,7 +40,7 @@ Blazor allows writing web UIs in **C#** instead of JavaScript. .NET 9 (2024/2025
 
 ## Core Concepts
 
-#Render Modes & Reactive Parameters
+### Render Modes & Reactive Parameters
 
 Declaring component interactivity per page or component:
 
@@ -68,7 +68,7 @@ Declaring component interactivity per page or component:
 }
 ```
 
-#Two-Way Binding & EventCallback
+### Two-Way Binding & EventCallback
 
 Passing events and state between parent and child components:
 
@@ -93,7 +93,7 @@ Passing events and state between parent and child components:
 }
 ```
 
-#Dependency Injection & Cascading Authentication State
+### Dependency Injection & Cascading Authentication State
 
 Accessing user security context in Blazor components:
 
@@ -146,15 +146,20 @@ Use `@bind-Value` and EventCallback conventions:
 <!-- ParentComponent.razor: <ChildComponent @bind-Value="searchTerm" /> -->
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target the .NET 8/9 Blazor Web App unified project template with auto render modes (`InteractiveAuto`).
-- **Do** implement `IDisposable` or `IAsyncDisposable` on components subscribing to C# events to avoid memory leaks.
-- **Do** use `Virtualize<TItem>` for rendering large lists to render only elements within the viewport.
-- **Do** keep state centralized in injected scoped services rather than sprawling across UI components.
-- **Don't** use synchronous blocking I/O calls (`.Result`) in component methods; use `async/await`.
-- **Don't** pass large binary data over Blazor Server SignalR circuits; use dedicated streaming API endpoints.
-- **Don't** trigger unnecessary `StateHasChanged()` calls if standard event callbacks already trigger re-rendering.
+**Do**:
+
+- Target the .NET 8/9 Blazor Web App unified project template with auto render modes (`InteractiveAuto`).
+- Implement `IDisposable` or `IAsyncDisposable` on components subscribing to C# events to avoid memory leaks.
+- Use `Virtualize<TItem>` for rendering large lists to render only elements within the viewport.
+- Keep state centralized in injected scoped services rather than sprawling across UI components.
+
+**Don't**:
+
+- Use synchronous blocking I/O calls (`.Result`) in component methods; use `async/await`.
+- Pass large binary data over Blazor Server SignalR circuits; use dedicated streaming API endpoints.
+- Trigger unnecessary `StateHasChanged()` calls if standard event callbacks already trigger re-rendering.
 
 ## Troubleshooting
 

@@ -45,7 +45,7 @@ func main() {
 
 ## Core Concepts
 
-#Handler Registration & Parameter Extraction
+### Handler Registration & Parameter Extraction
 
 Clean route grouping with context parameter extraction:
 
@@ -85,7 +85,7 @@ func main() {
 }
 ```
 
-#Request Payload Binding & Validation
+### Request Payload Binding & Validation
 
 Validating incoming JSON payloads with go-playground validator:
 
@@ -123,7 +123,7 @@ func createUser(c echo.Context) error {
 }
 ```
 
-#Centralized Custom HTTP Error Handler
+### Centralized Custom HTTP Error Handler
 
 Uniform error responses conforming to RFC 7807:
 
@@ -171,15 +171,20 @@ func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 // In handler: userId := c.Get("userId").(int)
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** attach `middleware.Recover()` at the root router to prevent unhandled panics from crashing the HTTP server.
-- **Do** use `echo.Context.Request().Context()` to propagate cancellation and deadlines to database operations.
-- **Do** configure timeouts (`ReadTimeout`, `WriteTimeout`, `IdleTimeout`) on the underlying `http.Server`.
-- **Do** implement a custom validator and assign it to `e.Validator`.
-- **Don't** store request-scoped data in global variables; store them in `c.Set(key, value)`.
-- **Don't** use standard `log.Print` in handlers; use `c.Logger()` or structured `slog`.
-- **Don't** write to `c.Response().Writer` after returning an error from a handler.
+**Do**:
+
+- Attach `middleware.Recover()` at the root router to prevent unhandled panics from crashing the HTTP server.
+- Use `echo.Context.Request().Context()` to propagate cancellation and deadlines to database operations.
+- Configure timeouts (`ReadTimeout`, `WriteTimeout`, `IdleTimeout`) on the underlying `http.Server`.
+- Implement a custom validator and assign it to `e.Validator`.
+
+**Don't**:
+
+- Store request-scoped data in global variables; store them in `c.Set(key, value)`.
+- Use standard `log.Print` in handlers; use `c.Logger()` or structured `slog`.
+- Write to `c.Response().Writer` after returning an error from a handler.
 
 ## Troubleshooting
 

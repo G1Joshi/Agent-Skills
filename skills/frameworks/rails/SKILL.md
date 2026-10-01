@@ -5,7 +5,7 @@ description: Expert Ruby on Rails assistance covering ActiveRecord, MVC architec
 
 # Ruby on Rails
 
-Rails is a web application framework that includes everything needed to create web applications. Rails 8 (2025) simplifies deployment (Kamal) and reduces dependencies (Solid Cache/Queue).
+Ruby on Rails is a full-stack web application framework emphasizing convention over configuration, featuring Active Record ORM, integrated asset bundling, and streamlined deployment tooling.
 
 ## When to Use
 
@@ -27,7 +27,7 @@ end
 
 ## Core Concepts
 
-#Active Record Models with Scopes & Validations
+### Active Record Models with Scopes & Validations
 
 Defining business logic and relational constraints:
 
@@ -52,7 +52,7 @@ class Order < ApplicationRecord
 end
 ```
 
-#Hotwire & Turbo Streams for Real-Time Updates
+### Hotwire & Turbo Streams for Real-Time Updates
 
 Server-rendered partials pushed over WebSockets or response streams:
 
@@ -76,7 +76,7 @@ class MessagesController < ApplicationController
 end
 ```
 
-#Background Processing with Active Job
+### Background Processing with Active Job
 
 Asynchronous queue job execution:
 
@@ -112,15 +112,20 @@ class Message < ApplicationRecord
 end
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target Rails 7.2 / 8 with Propshaft asset pipeline and built-in Solid Queue / Solid Cache.
-- **Do** always use strong parameters (`params.require(:order).permit(...)`) in controllers.
-- **Do** use `includes` or `strict_loading` to prevent N+1 query performance degradation.
-- **Do** encapsulate complex multi-model business logic inside Plain Old Ruby Object (PORO) service objects.
-- **Don't** put business logic or complex database queries inside view templates or controllers.
-- **Don't** run long-running tasks synchronously inside HTTP controller actions; offload to Active Job.
-- **Don't** skip database indexes on foreign keys; declare them explicitly in migrations.
+**Do**:
+
+- Target Rails 7.2 / 8 with Propshaft asset pipeline and built-in Solid Queue / Solid Cache.
+- Always use strong parameters (`params.require(:order).permit(...)`) in controllers.
+- Use `includes` or `strict_loading` to prevent N+1 query performance degradation.
+- Encapsulate complex multi-model business logic inside Plain Old Ruby Object (PORO) service objects.
+
+**Don't**:
+
+- Put business logic or complex database queries inside view templates or controllers.
+- Run long-running tasks synchronously inside HTTP controller actions; offload to Active Job.
+- Skip database indexes on foreign keys; declare them explicitly in migrations.
 
 ## Troubleshooting
 

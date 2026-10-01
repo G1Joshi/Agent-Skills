@@ -5,7 +5,7 @@ description: Expert Gin Go web framework assistance covering fast HTTP routing, 
 
 # Gin
 
-Gin is the most popular Go web framework, known for its **martini-like API** and performance (httprouter). v1.10 (2025) adds structured logging and better binding.
+Gin is a high-performance HTTP web framework written in Go, featuring a fast radix-tree router, composable middleware chains, and structured request validation.
 
 ## When to Use
 
@@ -37,7 +37,7 @@ func main() {
 
 ## Core Concepts
 
-#Radix Tree Routing & Parameter Binding
+### Radix Tree Routing & Parameter Binding
 
 Fast route matching with typed model binding:
 
@@ -79,7 +79,7 @@ func main() {
 }
 ```
 
-#Custom Middleware Pipeline
+### Custom Middleware Pipeline
 
 Intercepting requests and calculating execution latency:
 
@@ -104,7 +104,7 @@ func LatencyTracker() gin.HandlerFunc {
 }
 ```
 
-#Structured Validation Error Responses
+### Structured Validation Error Responses
 
 Converting Go validator errors into actionable API responses:
 
@@ -156,15 +156,20 @@ func CreateOrderHandler(c *gin.Context) {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use `gin.SetMode(gin.ReleaseMode)` in production environments to disable debug logging and increase throughput.
-- **Do** use `c.ShouldBindJSON` instead of `c.BindJSON` to retain explicit control over HTTP status error codes.
-- **Do** use `c.Copy()` if passing the Gin context to concurrent background goroutines.
-- **Do** attach `gin.Recovery()` to avoid server crashes from uncaught panics.
-- **Don't** use `gin.Default()` in production if you want customized, structured logging (`gin.New()` + custom logger).
-- **Don't** read `c.Request.Body` multiple times without buffering; reading drains the request stream.
-- **Don't** write to `c.Writer` after returning an error.
+**Do**:
+
+- Use `gin.SetMode(gin.ReleaseMode)` in production environments to disable debug logging and increase throughput.
+- Use `c.ShouldBindJSON` instead of `c.BindJSON` to retain explicit control over HTTP status error codes.
+- Use `c.Copy()` if passing the Gin context to concurrent background goroutines.
+- Attach `gin.Recovery()` to avoid server crashes from uncaught panics.
+
+**Don't**:
+
+- Use `gin.Default()` in production if you want customized, structured logging (`gin.New()` + custom logger).
+- Read `c.Request.Body` multiple times without buffering; reading drains the request stream.
+- Write to `c.Writer` after returning an error.
 
 ## Troubleshooting
 

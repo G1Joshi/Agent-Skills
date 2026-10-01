@@ -98,7 +98,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 ## Common Patterns
 
-### Exception Handling
+### Centralized Global Exception Handling
+
+**Problem**: Unhandled exceptions leaking internal stack traces and creating inconsistent HTTP error responses.
+
+**Solution**:
 
 ```java
 @RestControllerAdvice
@@ -122,7 +126,7 @@ public class GlobalExceptionHandler {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
@@ -140,7 +144,7 @@ public class GlobalExceptionHandler {
 
 ## Troubleshooting
 
-| Issue               | Cause                | Solution                       |
+| Error               | Cause                | Solution                       |
 | ------------------- | -------------------- | ------------------------------ |
 | Bean not found      | Missing @Component   | Add stereotype annotation      |
 | Circular dependency | Constructor circular | Use setter or @Lazy            |

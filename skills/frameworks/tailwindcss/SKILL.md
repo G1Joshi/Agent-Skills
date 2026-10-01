@@ -5,7 +5,7 @@ description: Expert Tailwind CSS assistance covering utility classes, responsive
 
 # Tailwind CSS
 
-Tailwind v4 (2024/2025) introduces the **Oxide Engine**: a Rust-based, unified toolchain that is 10x faster and requires no configuration (`tailwind.config.js` is optional).
+Tailwind CSS is an efficient, utility-first CSS framework providing direct composition of modern responsive layouts with lightning-fast compilation.
 
 ## When to Use
 
@@ -42,7 +42,7 @@ Tailwind v4 (2024/2025) introduces the **Oxide Engine**: a Rust-based, unified t
 
 ## Core Concepts
 
-#Tailwind CSS v4 CSS-First Configuration
+### Tailwind CSS v4 CSS-First Configuration
 
 Configuring design tokens directly in native CSS with `@theme`:
 
@@ -58,7 +58,7 @@ Configuring design tokens directly in native CSS with `@theme`:
 }
 ```
 
-#Responsive, Accessible Card Layout
+### Responsive, Accessible Card Layout
 
 Combining flexbox, grid, hover states, and dark mode variants:
 
@@ -92,7 +92,7 @@ Combining flexbox, grid, hover states, and dark mode variants:
 </div>
 ```
 
-#Container Queries & Modern Micro-Animations
+### Container Queries & Modern Micro-Animations
 
 Adapting component appearance to container dimensions:
 
@@ -128,15 +128,20 @@ export function cn(...inputs: ClassValue[]) {
 // cn("px-4 py-2 bg-blue-500", isPrimary && "bg-indigo-600", className);
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target Tailwind CSS v4 with native CSS `@theme` variables for lightning-fast compilation.
-- **Do** use `clsx` and `tailwind-merge` (`cn()`) when dynamically constructing conditional class strings.
-- **Do** design mobile-first: use unprefixed utilities for mobile, and override with `md:`, `lg:` prefixes.
-- **Do** leverage container queries (`@container`) for modular UI components embedded in arbitrary layouts.
-- **Don't** write arbitrary values (`w-[347px]`) when standardized design scale values exist.
-- **Don't** overuse `@apply` in CSS files; it re-introduces CSS naming overhead and defeats utility advantages.
-- **Don't** concatenate partial dynamic classes (e.g. `text-${color}-500`); always use complete string literals.
+**Do**:
+
+- Target Tailwind CSS v4 with native CSS `@theme` variables for lightning-fast compilation.
+- Use `clsx` and `tailwind-merge` (`cn()`) when dynamically constructing conditional class strings.
+- Design mobile-first: use unprefixed utilities for mobile, and override with `md:`, `lg:` prefixes.
+- Leverage container queries (`@container`) for modular UI components embedded in arbitrary layouts.
+
+**Don't**:
+
+- Write arbitrary values (`w-[347px]`) when standardized design scale values exist.
+- Overuse `@apply` in CSS files; it re-introduces CSS naming overhead and defeats utility advantages.
+- Concatenate partial dynamic classes (e.g. `text-${color}-500`); always use complete string literals.
 
 ## Troubleshooting
 

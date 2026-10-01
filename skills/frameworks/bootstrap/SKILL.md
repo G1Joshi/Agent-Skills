@@ -46,7 +46,7 @@ Bootstrap 5 dropped jQuery and embraced modern CSS (Grid, Flexbox, Variables). I
 
 ## Core Concepts
 
-#Responsive 12-Column Grid & Flexbox Utilities
+### Responsive 12-Column Grid & Flexbox Utilities
 
 Mobile-first layout containers adapting to viewports:
 
@@ -79,7 +79,7 @@ Mobile-first layout containers adapting to viewports:
 </div>
 ```
 
-#Customizing Design Tokens with Sass
+### Customizing Design Tokens with Sass
 
 Overriding variables before compiling Bootstrap:
 
@@ -96,7 +96,7 @@ $enable-shadows: true;
 @import "bootstrap/scss/bootstrap";
 ```
 
-#Vanilla JavaScript Component Initialization
+### Vanilla JavaScript Component Initialization
 
 Programmatic control of interactive modals and toasts:
 
@@ -152,15 +152,20 @@ Use the standard Bootstrap 5 navbar structure:
 </nav>
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** compile Bootstrap from source Sass to strip unused components and reduce CSS bundle size.
-- **Do** import individual JavaScript component modules (`import Modal from 'bootstrap/js/dist/modal'`) instead of full bundles.
-- **Do** utilize Bootstrap CSS variables (`var(--bs-primary)`) for runtime theme switching and dark mode.
-- **Do** ensure proper ARIA attributes (`aria-expanded`, `aria-label`) on all interactive buttons and modals.
-- **Don't** use `!important` to override Bootstrap styles; use Sass variables or CSS specificity.
-- **Don't** include jQuery with Bootstrap 5+; all plugins use native vanilla DOM APIs.
-- **Don't** hardcode pixel widths; use Bootstrap utility classes (`w-100`, `max-w-100`) and the responsive grid.
+**Do**:
+
+- Compile Bootstrap from source Sass to strip unused components and reduce CSS bundle size.
+- Import individual JavaScript component modules (`import Modal from 'bootstrap/js/dist/modal'`) instead of full bundles.
+- Utilize Bootstrap CSS variables (`var(--bs-primary)`) for runtime theme switching and dark mode.
+- Ensure proper ARIA attributes (`aria-expanded`, `aria-label`) on all interactive buttons and modals.
+
+**Don't**:
+
+- Use `!important` to override Bootstrap styles; use Sass variables or CSS specificity.
+- Include jQuery with Bootstrap 5+; all plugins use native vanilla DOM APIs.
+- Hardcode pixel widths; use Bootstrap utility classes (`w-100`, `max-w-100`) and the responsive grid.
 
 ## Troubleshooting
 

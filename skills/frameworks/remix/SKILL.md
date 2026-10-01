@@ -5,7 +5,7 @@ description: Expert Remix (React Router v7) assistance covering Loaders, Actions
 
 # Remix
 
-Remix is a full-stack web framework that focuses on web standards (Fetch API, Forms). In 2025, it has largely converged with **React Router 7**, offering a "Vite-native" experience.
+Remix is a full-stack web framework built on web standards (Fetch API, Request/Response), providing nested routing, resilient form mutations, and seamless Vite integration.
 
 ## When to Use
 
@@ -45,7 +45,7 @@ export default function Tasks() {
 
 ## Core Concepts
 
-#Nested Routing & Parallel Loader Data Loading
+### Nested Routing & Parallel Loader Data Loading
 
 Fetching server-side data per route segment in parallel:
 
@@ -78,7 +78,7 @@ export default function UserDetailRoute() {
 }
 ```
 
-#Route Actions & HTML Form Submission
+### Route Actions & HTML Form Submission
 
 Standard HTTP POST handling with automatic revalidation:
 
@@ -112,7 +112,7 @@ export default function EditUserRoute() {
 }
 ```
 
-#Granular ErrorBoundaries per Route Segment
+### Granular ErrorBoundaries per Route Segment
 
 Isolating errors without crashing the entire page hierarchy:
 
@@ -185,15 +185,20 @@ export default function TodosPage() {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** leverage Remix / React Router v7 unified framework features for universal full-stack execution.
-- **Do** build mutations with native `<Form>` components to guarantee progressive enhancement.
-- **Do** co-locate `loader`, `action`, and component in the same route file for atomic cohesion.
-- **Do** use `useFetcher` for mutations that do not require full page navigation (e.g. upvotes, inline toggles).
-- **Don't** manage client cache state manually; Remix automatically revalidates loader data after actions.
-- **Don't** return huge, unneeded relational payloads from loaders; return lean, serialized data.
-- **Don't** use client-side `useEffect` for data fetching when `loader` functions exist.
+**Do**:
+
+- Leverage Remix / React Router v7 unified framework features for universal full-stack execution.
+- Build mutations with native `<Form>` components to guarantee progressive enhancement.
+- Co-locate `loader`, `action`, and component in the same route file for atomic cohesion.
+- Use `useFetcher` for mutations that do not require full page navigation (e.g. upvotes, inline toggles).
+
+**Don't**:
+
+- Manage client cache state manually; Remix automatically revalidates loader data after actions.
+- Return huge, unneeded relational payloads from loaders; return lean, serialized data.
+- Use client-side `useEffect` for data fetching when `loader` functions exist.
 
 ## Troubleshooting
 

@@ -5,7 +5,7 @@ description: Expert jQuery assistance covering DOM manipulation, AJAX, event del
 
 # jQuery
 
-jQuery v4.0 (2025) is a cleanup release, removing IE support and shrinking the file size. While not for new apps, it remains vital for legacy maintenance and WordPress.
+jQuery is a fast, small, and feature-rich JavaScript library that simplifies HTML DOM traversal, event handling, animation, and Ajax interactions for legacy web architectures.
 
 ## When to Use
 
@@ -39,7 +39,7 @@ jQuery v4.0 (2025) is a cleanup release, removing IE support and shrinking the f
 
 ## Core Concepts
 
-#DOM Traversal & Event Delegation
+### DOM Traversal & Event Delegation
 
 Handling events dynamically for current and future DOM nodes:
 
@@ -69,7 +69,7 @@ $(document).ready(function () {
 });
 ```
 
-#AJAX Requests with Promises
+### AJAX Requests with Promises
 
 Modern asynchronous requests using jQuery Deferred:
 
@@ -88,7 +88,7 @@ function fetchUserData(userId) {
 }
 ```
 
-#Writing a Custom jQuery Plugin
+### Writing a Custom jQuery Plugin
 
 Encapsulating reusable UI behavior following standard plugin conventions:
 
@@ -141,15 +141,20 @@ $("#items-container").on("click", ".delete-btn", function (e) {
 });
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** always use event delegation (`$(parent).on('event', '.child', fn)`) for dynamically added DOM elements.
-- **Do** cache jQuery selector lookups (`const $list = $('#list');`) rather than re-querying the DOM in loops.
-- **Do** target jQuery 3.7+ or higher to ensure security patches and modern browser compatibility.
-- **Do** migrate simple DOM tasks to native Vanilla JavaScript (`querySelector`, `fetch`, `classList`) where practical.
-- **Don't** load full jQuery in greenfield projects if native browser APIs or modern micro-libraries suffice.
-- **Don't** use synchronous AJAX (`async: false`); it freezes the browser UI thread.
-- **Don't** inject untrusted user strings with `.html()`; use `.text()` to prevent XSS attacks.
+**Do**:
+
+- Always use event delegation (`$(parent).on('event', '.child', fn)`) for dynamically added DOM elements.
+- Cache jQuery selector lookups (`const $list = $('#list');`) rather than re-querying the DOM in loops.
+- Target jQuery 3.7+ or higher to ensure security patches and modern browser compatibility.
+- Migrate simple DOM tasks to native Vanilla JavaScript (`querySelector`, `fetch`, `classList`) where practical.
+
+**Don't**:
+
+- Load full jQuery in greenfield projects if native browser APIs or modern micro-libraries suffice.
+- Use synchronous AJAX (`async: false`); it freezes the browser UI thread.
+- Inject untrusted user strings with `.html()`; use `.text()` to prevent XSS attacks.
 
 ## Troubleshooting
 

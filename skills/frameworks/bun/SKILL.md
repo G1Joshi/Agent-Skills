@@ -34,7 +34,7 @@ console.log(`Listening on http://localhost:${server.port}`);
 
 ## Core Concepts
 
-#High-Throughput HTTP Server with Bun.serve()
+### High-Throughput HTTP Server with Bun.serve()
 
 Native HTTP/1.1 and HTTP/2 web server with WebSockets:
 
@@ -72,7 +72,7 @@ const server = Bun.serve({
 console.log(`Bun server running at http://localhost:${server.port}`);
 ```
 
-#Native SQLite with bun:sqlite
+### Native SQLite with bun:sqlite
 
 High-speed zero-dependency embedded database:
 
@@ -99,7 +99,7 @@ const user = query.get({ $email: "alice@example.com" });
 console.log("Found user:", user);
 ```
 
-#Fast Test Runner with bun:test
+### Fast Test Runner with bun:test
 
 Jest-compatible testing without compilation overhead:
 
@@ -145,15 +145,20 @@ const results = db.query("SELECT * FROM metrics LIMIT 5").all();
 console.log(results);
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use `bun run` and `bunx` to avoid npm script execution overhead.
-- **Do** leverage `Bun.file()` for high-performance zero-copy file streaming.
-- **Do** run TypeScript files directly (`bun run index.ts`) without requiring `tsc` or `ts-node`.
-- **Do** check Node.js API compatibility flags when porting legacy native C++ addons (`node-gyp`).
-- **Don't** use `npm install` in Bun projects; stick to `bun install` to preserve `bun.lock`.
-- **Don't** use external SQLite packages like `better-sqlite3`; use native `bun:sqlite`.
-- **Don't** spawn child processes for simple shell tasks; use `Bun.$` shell scripting.
+**Do**:
+
+- Use `bun run` and `bunx` to avoid npm script execution overhead.
+- Leverage `Bun.file()` for high-performance zero-copy file streaming.
+- Run TypeScript files directly (`bun run index.ts`) without requiring `tsc` or `ts-node`.
+- Check Node.js API compatibility flags when porting legacy native C++ addons (`node-gyp`).
+
+**Don't**:
+
+- Use `npm install` in Bun projects; stick to `bun install` to preserve `bun.lock`.
+- Use external SQLite packages like `better-sqlite3`; use native `bun:sqlite`.
+- Spawn child processes for simple shell tasks; use `Bun.$` shell scripting.
 
 ## Troubleshooting
 

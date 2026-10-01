@@ -5,7 +5,7 @@ description: Expert Axum web framework assistance covering routing, extractors, 
 
 # Axum
 
-Axum is the most popular web framework in the Rust ecosystem (tokio). v0.7 (2024/2025) is built on **Hyper 1.0** and standardizes the service trait.
+Axum is an ergonomic, modular web application framework built on Tokio, Tower, and Hyper for high-throughput, type-safe asynchronous Rust services.
 
 ## When to Use
 
@@ -41,7 +41,7 @@ async fn main() {
 
 ## Core Concepts
 
-#Type-Safe State & Modular Routers
+### Type-Safe State & Modular Routers
 
 Sharing dependency-injected state across route modules:
 
@@ -93,7 +93,7 @@ async fn main() {
 }
 ```
 
-#Tower Middleware & Tracing Layers
+### Tower Middleware & Tracing Layers
 
 Adding structured logging, timeouts, and CORS layers:
 
@@ -119,7 +119,7 @@ fn configure_middleware(app: Router) -> Router {
 }
 ```
 
-#Custom Extractor with Error Rejections
+### Custom Extractor with Error Rejections
 
 Validating custom headers or authentication tokens:
 
@@ -183,15 +183,20 @@ fn create_app() -> Router {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use `axum::serve` and `tokio::net::TcpListener` for modern Axum 0.7+ applications.
-- **Do** place `State` extractors as the last extractor argument in handler signatures.
-- **Do** use `Router::with_state` to ensure compiler verification of matching state types across nested subrouters.
-- **Do** implement `IntoResponse` for domain error enums to decouple error formatting from route handlers.
-- **Don't** block async worker threads; offload blocking operations with `tokio::task::spawn_blocking`.
-- **Don't** expose internal database error details directly in HTTP error responses.
-- **Don't** create separate Tokio runtimes inside handlers; utilize the existing ambient runtime.
+**Do**:
+
+- Use `axum::serve` and `tokio::net::TcpListener` for modern Axum 0.7+ applications.
+- Place `State` extractors as the last extractor argument in handler signatures.
+- Use `Router::with_state` to ensure compiler verification of matching state types across nested subrouters.
+- Implement `IntoResponse` for domain error enums to decouple error formatting from route handlers.
+
+**Don't**:
+
+- Block async worker threads; offload blocking operations with `tokio::task::spawn_blocking`.
+- Expose internal database error details directly in HTTP error responses.
+- Create separate Tokio runtimes inside handlers; utilize the existing ambient runtime.
 
 ## Troubleshooting
 

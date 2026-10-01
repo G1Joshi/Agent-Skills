@@ -39,7 +39,7 @@ app.whenReady().then(createWindow);
 
 ## Core Concepts
 
-#Secure Main and Renderer Architecture with Context Isolation
+### Secure Main and Renderer Architecture with Context Isolation
 
 Enforcing security boundaries via preload scripts:
 
@@ -70,7 +70,7 @@ ipcMain.handle("read-app-version", async () => {
 app.whenReady().then(createWindow);
 ```
 
-#Preload Script & ContextBridge
+### Preload Script & ContextBridge
 
 Exposing safe, audited IPC channels to renderer window:
 
@@ -86,7 +86,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
 });
 ```
 
-#Renderer Process Invocation
+### Renderer Process Invocation
 
 Calling native desktop capabilities from client frontend:
 
@@ -132,15 +132,20 @@ contextBridge.exposeInMainWorld("electronAPI", {
 // main.js: ipcMain.handle("dialog:openFile", async () => { ... });
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** always set `contextIsolation: true` and `nodeIntegration: false` in `webPreferences`.
-- **Do** enforce Content Security Policy (CSP) headers in all loaded HTML files to prevent XSS execution.
-- **Do** use `ipcMain.handle()` and `ipcRenderer.invoke()` for asynchronous request-response IPC.
-- **Do** validate and sanitize all IPC arguments received from renderer processes.
-- **Don't** enable `webSecurity: false` or disable certificate validation.
-- **Don't** expose entire Node.js modules (e.g. `fs`, `child_process`) through `contextBridge`.
-- **Don't** block the Main process event loop with heavy computation; delegate work to utility processes.
+**Do**:
+
+- Always set `contextIsolation: true` and `nodeIntegration: false` in `webPreferences`.
+- Enforce Content Security Policy (CSP) headers in all loaded HTML files to prevent XSS execution.
+- Use `ipcMain.handle()` and `ipcRenderer.invoke()` for asynchronous request-response IPC.
+- Validate and sanitize all IPC arguments received from renderer processes.
+
+**Don't**:
+
+- Enable `webSecurity: false` or disable certificate validation.
+- Expose entire Node.js modules (e.g. `fs`, `child_process`) through `contextBridge`.
+- Block the Main process event loop with heavy computation; delegate work to utility processes.
 
 ## Troubleshooting
 

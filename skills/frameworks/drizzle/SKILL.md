@@ -5,7 +5,7 @@ description: Expert Drizzle ORM assistance covering type-safe schema declaration
 
 # Drizzle ORM
 
-Drizzle is the lightweight challenger to Prisma. v0.30+ (2025) focuses on **SQL-like** syntax, zero dependencies at runtime, and extreme cold-start performance.
+Drizzle ORM is a lightweight, type-safe TypeScript ORM that mirrors SQL syntax directly, featuring zero runtime overhead, instant cold starts, and seamless edge-runtime support.
 
 ## When to Use
 
@@ -37,7 +37,7 @@ const allUsers = await db.select().from(users);
 
 ## Core Concepts
 
-#Declarative Schema Definition with Relationships
+### Declarative Schema Definition with Relationships
 
 Type-safe table schemas and foreign key relations:
 
@@ -80,7 +80,7 @@ export const postsRelations = relations(posts, ({ one }) => ({
 }));
 ```
 
-#Relational Queries & SQL-Like Filtering
+### Relational Queries & SQL-Like Filtering
 
 Intuitive query API combining SQL syntax with relational loading:
 
@@ -114,7 +114,7 @@ async function updatePostStatus(postId: number, isPublished: boolean) {
 }
 ```
 
-#Drizzle Kit Migrations & Introspection
+### Drizzle Kit Migrations & Introspection
 
 Declarative migration generation and application:
 
@@ -157,15 +157,20 @@ const userWithPosts = await db.query.users.findFirst({
 });
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** split schemas into modular domain files and export them through a centralized `schema.ts`.
-- **Do** use `db.query` for nested relational reads and standard SQL query builder for mutations and bulk operations.
-- **Do** run `drizzle-kit check` and `drizzle-kit generate` in CI to detect schema discrepancies before deployment.
-- **Do** specify `onDelete` cascades explicitly on all foreign key constraints.
-- **Don't** perform multiple round-trips for insert-then-read; use `.returning()` to fetch modified rows immediately.
-- **Don't** instantiate multiple database client connections in serverless edge handlers; reuse client instances.
-- **Don't** mix multiple SQL dialects in a single schema definition.
+**Do**:
+
+- Split schemas into modular domain files and export them through a centralized `schema.ts`.
+- Use `db.query` for nested relational reads and standard SQL query builder for mutations and bulk operations.
+- Run `drizzle-kit check` and `drizzle-kit generate` in CI to detect schema discrepancies before deployment.
+- Specify `onDelete` cascades explicitly on all foreign key constraints.
+
+**Don't**:
+
+- Perform multiple round-trips for insert-then-read; use `.returning()` to fetch modified rows immediately.
+- Instantiate multiple database client connections in serverless edge handlers; reuse client instances.
+- Mix multiple SQL dialects in a single schema definition.
 
 ## Troubleshooting
 

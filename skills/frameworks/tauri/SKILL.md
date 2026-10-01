@@ -39,7 +39,7 @@ const greeting = await invoke("greet", { name: "World" });
 
 ## Core Concepts
 
-#Rust Command Handlers with #[tauri::command]
+### Rust Command Handlers with #[tauri::command]
 
 Exposing high-performance native Rust functions to the webview:
 
@@ -69,7 +69,7 @@ pub fn run() {
 }
 ```
 
-#Invoking Rust Commands from Frontend
+### Invoking Rust Commands from Frontend
 
 Type-safe frontend IPC invocation:
 
@@ -94,7 +94,7 @@ export async function fetchSystemMetrics(): Promise<SystemStats> {
 }
 ```
 
-#Tauri v2 Permissions & Capabilities System
+### Tauri v2 Permissions & Capabilities System
 
 Configuring granular security rules for plugins and commands:
 
@@ -148,15 +148,20 @@ async fn authenticate(req: LoginRequest) -> Result<UserSession, String> {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target Tauri v2 with explicit capability and permission manifests for least privilege access.
-- **Do** handle heavy computation and filesystem operations in Rust, keeping the webview UI smooth and responsive.
-- **Do** configure code signing and automated updates using Tauri's built-in updater plugin.
-- **Do** use `@tauri-apps/api/core` for modern Tauri v2 frontend bindings.
-- **Don't** pass large binary files across the IPC bridge as base64 strings; use custom protocol streaming.
-- **Don't** grant wildcard permissions (`fs:allow-all`) in capability files.
-- **Don't** block the main Tauri thread; use async Rust commands for I/O operations.
+**Do**:
+
+- Target Tauri v2 with explicit capability and permission manifests for least privilege access.
+- Handle heavy computation and filesystem operations in Rust, keeping the webview UI smooth and responsive.
+- Configure code signing and automated updates using Tauri's built-in updater plugin.
+- Use `@tauri-apps/api/core` for modern Tauri v2 frontend bindings.
+
+**Don't**:
+
+- Pass large binary files across the IPC bridge as base64 strings; use custom protocol streaming.
+- Grant wildcard permissions (`fs:allow-all`) in capability files.
+- Block the main Tauri thread; use async Rust commands for I/O operations.
 
 ## Troubleshooting
 

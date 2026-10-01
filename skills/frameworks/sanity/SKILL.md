@@ -38,7 +38,7 @@ export const postType = defineType({
 
 ## Core Concepts
 
-#Declarative Schema-as-Code
+### Declarative Schema-as-Code
 
 Defining content types, fields, and validation rules:
 
@@ -80,7 +80,7 @@ export const postType = defineType({
 });
 ```
 
-#Type-Safe GROQ Queries with Sanity TypeGen
+### Type-Safe GROQ Queries with Sanity TypeGen
 
 Querying structured content with filter and projection:
 
@@ -106,7 +106,7 @@ export const POSTS_QUERY = groq`
 `;
 ```
 
-#Portable Text Rendering in React
+### Portable Text Rendering in React
 
 Rendering structured block content with custom components:
 
@@ -176,15 +176,20 @@ const query = `*[_type == "post" && defined(slug.current)] | order(publishedAt d
 const posts = await client.fetch(query);
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use Sanity TypeGen (`sanity typegen generate`) to generate TypeScript types from GROQ queries automatically.
-- **Do** configure fine-grained webhook listeners for On-Demand Revalidation in Next.js / Nuxt / Remix.
-- **Do** pin the `apiVersion` parameter (`'2026-01-01'`) to prevent breaking changes.
-- **Do** use Portable Text for rich editorial content rather than raw HTML or Markdown.
-- **Don't** use `*[]` without type constraints in GROQ; always specify `_type == "..."` for indexing.
-- **Don't** expose write tokens (`SANITY_API_WRITE_TOKEN`) to client-side bundles.
-- **Don't** query entire document trees without projections; project only the fields required by the UI.
+**Do**:
+
+- Use Sanity TypeGen (`sanity typegen generate`) to generate TypeScript types from GROQ queries automatically.
+- Configure fine-grained webhook listeners for On-Demand Revalidation in Next.js / Nuxt / Remix.
+- Pin the `apiVersion` parameter (`'2026-01-01'`) to prevent breaking changes.
+- Use Portable Text for rich editorial content rather than raw HTML or Markdown.
+
+**Don't**:
+
+- Use `*[]` without type constraints in GROQ; always specify `_type == "..."` for indexing.
+- Expose write tokens (`SANITY_API_WRITE_TOKEN`) to client-side bundles.
+- Query entire document trees without projections; project only the fields required by the UI.
 
 ## Troubleshooting
 

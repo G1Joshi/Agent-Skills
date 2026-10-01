@@ -5,7 +5,7 @@ description: Expert Node.js assistance covering asynchronous event loop, streams
 
 # Node.js
 
-Node.js is a cross-platform JavaScript runtime environment. Node.js 22 (LTS 2025) brings native TypeScript support (experimental), a built-in Test Runner, and a native WebSocket client.
+Node.js is a cross-platform asynchronous event-driven JavaScript runtime, featuring a built-in Test Runner, native WebSocket client, and modern ESM module execution.
 
 ## When to Use
 
@@ -31,7 +31,7 @@ ws.onopen = () => console.log("Connected");
 
 ## Core Concepts
 
-#Modern Native HTTP Server & Fetch
+### Modern Native HTTP Server & Fetch
 
 Zero-dependency HTTP server utilizing Node.js modern standard APIs:
 
@@ -56,7 +56,7 @@ server.listen(3000, () => {
 });
 ```
 
-#Stream Pipelines with node:stream/promises
+### Stream Pipelines with node:stream/promises
 
 Safe, backpressure-managed file and network streaming:
 
@@ -79,7 +79,7 @@ async function compressFile(sourcePath, destPath) {
 }
 ```
 
-#Native Test Runner with node:test
+### Native Test Runner with node:test
 
 Fast, zero-dependency testing built directly into the runtime:
 
@@ -124,15 +124,20 @@ async function compressLogFile(inputPath, outputPath) {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** target Node.js 22 LTS or newer with native fetch, web streams, and native test runner.
-- **Do** use the `node:` protocol prefix (`import fs from 'node:fs'`) for all built-in modules.
-- **Do** use `node:stream/promises` and `pipeline` to handle stream backpressure and error propagation.
-- **Do** handle uncaught exceptions (`process.on('uncaughtException')`) and trigger graceful shutdown.
-- **Don't** block the single-threaded Event Loop with heavy synchronous calls (`fs.readFileSync`, long regex).
-- **Don't** use CommonJS (`require()`) in greenfield applications; adopt ECMAScript Modules (`"type": "module"`).
-- **Don't** ignore unhandled promise rejections; configure `--unhandled-rejections=strict`.
+**Do**:
+
+- Target Node.js 22 LTS or newer with native fetch, web streams, and native test runner.
+- Use the `node:` protocol prefix (`import fs from 'node:fs'`) for all built-in modules.
+- Use `node:stream/promises` and `pipeline` to handle stream backpressure and error propagation.
+- Handle uncaught exceptions (`process.on('uncaughtException')`) and trigger graceful shutdown.
+
+**Don't**:
+
+- Block the single-threaded Event Loop with heavy synchronous calls (`fs.readFileSync`, long regex).
+- Use CommonJS (`require()`) in greenfield applications; adopt ECMAScript Modules (`"type": "module"`).
+- Ignore unhandled promise rejections; configure `--unhandled-rejections=strict`.
 
 ## Troubleshooting
 

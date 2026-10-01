@@ -5,7 +5,7 @@ description: Expert NestJS assistance covering modular architecture, dependency 
 
 # NestJS
 
-NestJS is a structured, opinionated framework for Node.js, heavily inspired by Angular. NestJS 10 (2025) focuses on performance with SWC integration and refined standalone modules.
+NestJS is a progressive Node.js framework for building scalable enterprise server-side applications using TypeScript, dependency injection, and modular architecture.
 
 ## When to Use
 
@@ -31,7 +31,7 @@ export class CatsController {
 
 ## Core Concepts
 
-#Modular Architecture & Dependency Injection
+### Modular Architecture & Dependency Injection
 
 Structuring modules, controllers, and injectable services:
 
@@ -71,7 +71,7 @@ export class UsersController {
 }
 ```
 
-#Request Validation with Pipes & Class-Validator
+### Request Validation with Pipes & Class-Validator
 
 Validating incoming JSON payloads before controller execution:
 
@@ -107,7 +107,7 @@ async function bootstrap() {
 bootstrap();
 ```
 
-#Execution Guards & Role-Based Access Control (RBAC)
+### Execution Guards & Role-Based Access Control (RBAC)
 
 Protecting endpoints with custom authentication guards:
 
@@ -167,15 +167,20 @@ export class RolesGuard implements CanActivate {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** enable `whitelist: true` and `forbidNonWhitelisted: true` in global `ValidationPipe` to prevent mass-assignment attacks.
-- **Do** split applications into discrete domain modules (`UserModule`, `OrderModule`, `AuthModule`) with explicit exports.
-- **Do** use Fastify adapter (`@nestjs/platform-fastify`) for performance-sensitive microservices.
-- **Do** handle configuration with `@nestjs/config` and validate environment variables with Joi or Zod.
-- **Don't** put business logic inside controllers; keep controllers strictly focused on request handling.
-- **Don't** use circular dependencies between modules; use `forwardRef()` only as an absolute last resort.
-- **Don't** catch exceptions silently without rethrowing or logging through Nest's `Logger` service.
+**Do**:
+
+- Enable `whitelist: true` and `forbidNonWhitelisted: true` in global `ValidationPipe` to prevent mass-assignment attacks.
+- Split applications into discrete domain modules (`UserModule`, `OrderModule`, `AuthModule`) with explicit exports.
+- Use Fastify adapter (`@nestjs/platform-fastify`) for performance-sensitive microservices.
+- Handle configuration with `@nestjs/config` and validate environment variables with Joi or Zod.
+
+**Don't**:
+
+- Put business logic inside controllers; keep controllers strictly focused on request handling.
+- Use circular dependencies between modules; use `forwardRef()` only as an absolute last resort.
+- Catch exceptions silently without rethrowing or logging through Nest's `Logger` service.
 
 ## Troubleshooting
 

@@ -32,7 +32,7 @@ export default app;
 
 ## Core Concepts
 
-#Multi-Runtime API with RegExpRouter
+### Multi-Runtime API with RegExpRouter
 
 Lightweight REST API with path parameter extraction:
 
@@ -61,7 +61,7 @@ app.get("/api/users/:id", (c) => {
 export default app;
 ```
 
-#Type-Safe Request Validation with Zod Validator
+### Type-Safe Request Validation with Zod Validator
 
 Validating request bodies, headers, and query strings:
 
@@ -85,7 +85,7 @@ app.post("/api/users", zValidator("json", userSchema), (c) => {
 });
 ```
 
-#Hono RPC: Type-Safe Client Sharing
+### Hono RPC: Type-Safe Client Sharing
 
 Exporting API routes for direct consumption in frontend clients:
 
@@ -133,15 +133,20 @@ const res = await client.api.user[":id"].$get({ param: { id: "123" } });
 const data = await res.json(); // Strictly typed { id: string, name: string }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** leverage Hono RPC (`hc<AppType>`) to achieve end-to-end type safety between backend and frontend without tRPC overhead.
-- **Do** use `@hono/zod-validator` or `@hono/valibot-validator` to enforce strict validation at edges.
-- **Do** target Web Standards so the same application code deploys to Cloudflare Workers, Bun, and Node.js without modification.
-- **Do** chain router routes (`new Hono().get().post()`) to preserve full RPC type inference.
-- **Don't** use Node-specific globals (`process.env`) without polyfills if targeting edge runtimes; use `c.env`.
-- **Don't** instantiate heavy global state that assumes persistent memory across serverless edge invocations.
-- **Don't** omit error boundary handlers (`app.onError`) in production apps.
+**Do**:
+
+- Leverage Hono RPC (`hc<AppType>`) to achieve end-to-end type safety between backend and frontend without tRPC overhead.
+- Use `@hono/zod-validator` or `@hono/valibot-validator` to enforce strict validation at edges.
+- Target Web Standards so the same application code deploys to Cloudflare Workers, Bun, and Node.js without modification.
+- Chain router routes (`new Hono().get().post()`) to preserve full RPC type inference.
+
+**Don't**:
+
+- Use Node-specific globals (`process.env`) without polyfills if targeting edge runtimes; use `c.env`.
+- Instantiate heavy global state that assumes persistent memory across serverless edge invocations.
+- Omit error boundary handlers (`app.onError`) in production apps.
 
 ## Troubleshooting
 

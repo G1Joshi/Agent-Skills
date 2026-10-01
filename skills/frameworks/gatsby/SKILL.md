@@ -37,7 +37,7 @@ export function Head() {
 
 ## Core Concepts
 
-#GraphQL Data Layer & Static Query
+### GraphQL Data Layer & Static Query
 
 Querying build-time metadata and CMS content:
 
@@ -76,7 +76,7 @@ export default function IndexPage({ data }: PageProps) {
 }
 ```
 
-#Dynamic Page Creation with gatsby-node.ts
+### Dynamic Page Creation with gatsby-node.ts
 
 Programmatically generating pages from GraphQL queries at build time:
 
@@ -115,7 +115,7 @@ export const createPages: GatsbyNode["createPages"] = async ({
 };
 ```
 
-#High-Performance Images with Gatsby Image Plugin
+### High-Performance Images with Gatsby Image Plugin
 
 Automated responsive image optimization:
 
@@ -183,15 +183,20 @@ export const query = graphql`
 `;
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use TypeScript (`gatsby-config.ts`, `gatsby-node.ts`) for compile-time configuration validation.
-- **Do** use `StaticImage` and `GatsbyImage` to eliminate layout shifts (CLS) and automate responsive sizes.
-- **Do** leverage Deferred Static Generation (DSG) for infrequently accessed archive pages to speed up builds.
-- **Do** configure `gatsby-plugin-manifest` and `gatsby-plugin-offline` for PWA capabilities.
-- **Don't** use standard `<img>` tags for local assets; always use the Gatsby image pipeline.
-- **Don't** execute client-side API requests for data that can be queried at build time via GraphQL.
-- **Don't** query full body content inside list queries; query only excerpt and frontmatter fields.
+**Do**:
+
+- Use TypeScript (`gatsby-config.ts`, `gatsby-node.ts`) for compile-time configuration validation.
+- Use `StaticImage` and `GatsbyImage` to eliminate layout shifts (CLS) and automate responsive sizes.
+- Leverage Deferred Static Generation (DSG) for infrequently accessed archive pages to speed up builds.
+- Configure `gatsby-plugin-manifest` and `gatsby-plugin-offline` for PWA capabilities.
+
+**Don't**:
+
+- Use standard `<img>` tags for local assets; always use the Gatsby image pipeline.
+- Execute client-side API requests for data that can be queried at build time via GraphQL.
+- Query full body content inside list queries; query only excerpt and frontmatter fields.
 
 ## Troubleshooting
 
