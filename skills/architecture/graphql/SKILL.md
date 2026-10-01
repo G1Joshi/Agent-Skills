@@ -44,7 +44,7 @@ query {
 
 ## Core Concepts
 
-#Strongly-Typed Schema Definition (SDL)
+### Strongly-Typed Schema Definition (SDL)
 
 Defines types, relationships, queries, and mutations strictly:
 
@@ -71,7 +71,7 @@ type Task {
 }
 ```
 
-#Resolvers & Hierarchical Execution
+### Resolvers & Hierarchical Execution
 
 Each field on a type maps to an independent resolver function:
 
@@ -89,7 +89,7 @@ export const resolvers = {
 };
 ```
 
-#DataLoader Request Batching & Deduplication
+### DataLoader Request Batching & Deduplication
 
 Batches individual resolver database lookups into a single SQL `IN` query to prevent N+1 query storms:
 
@@ -109,7 +109,8 @@ export function createUserDataLoader(db: Database) {
 
 ## Common Patterns
 
-#DataLoader N+1 Query Prevention
+### DataLoader N+1 Query Prevention
+
 **Problem**: Nested resolvers trigger separate SQL queries for each child record (N+1 database reads).  
 **Solution**: Batch and cache database reads using DataLoader.
 
@@ -134,20 +135,20 @@ export const resolvers = {
 };
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Always Use DataLoader for Relational Fields**: Never allow nested child resolvers to execute raw database queries in a loop.
-- **Implement Query Complexity Limits**: Use libraries like `graphql-query-complexity` to reject nested query abuse before execution.
-- **Paginate List Fields with Cursors**: Follow the Relay Connection specification (`edges`, `node`, `pageInfo`) for robust infinite scroll.
-- **Persist Queries in Production**: Use Persisted Queries (hashes) to prevent arbitrary unbounded query submission from untrusted clients.
+- Always Use DataLoader for Relational Fields: Never allow nested child resolvers to execute raw database queries in a loop.
+- Implement Query Complexity Limits: Use libraries like `graphql-query-complexity` to reject nested query abuse before execution.
+- Paginate List Fields with Cursors: Follow the Relay Connection specification (`edges`, `node`, `pageInfo`) for robust infinite scroll.
+- Persist Queries in Production: Use Persisted Queries (hashes) to prevent arbitrary unbounded query submission from untrusted clients.
 
 **Don't**:
 
-- **Don't expose internal database schemas directly as GraphQL types**: Design domain schemas optimized for frontend views.
-- **Don't return generic HTTP 500 errors for business failures**: Return structured validation errors inside GraphQL response payloads.
-- **Don't ignore HTTP caching**: GraphQL POST requests bypass browser caches; use CDN Edge caching with Cache-Control headers.
+- Expose internal database schemas directly as GraphQL types: Design domain schemas optimized for frontend views.
+- Return generic HTTP 500 errors for business failures: Return structured validation errors inside GraphQL response payloads.
+- Ignore HTTP caching: GraphQL POST requests bypass browser caches; use CDN Edge caching with Cache-Control headers.
 
 ## Troubleshooting
 

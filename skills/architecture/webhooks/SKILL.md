@@ -46,7 +46,7 @@ app.post(
 
 ## Core Concepts
 
-#Cryptographic Signature Verification (HMAC-SHA256)
+### Cryptographic Signature Verification (HMAC-SHA256)
 
 Validates that webhook payloads originate from authentic senders and were not tampered with in transit:
 
@@ -71,7 +71,7 @@ export function verifyWebhookSignature(
 }
 ```
 
-#Instant 200 OK Acknowledgment with Ingestion Queues
+### Instant 200 OK Acknowledgment with Ingestion Queues
 
 Acknowledge incoming webhooks immediately (< 500ms) and offload heavy processing to background queues:
 
@@ -97,11 +97,11 @@ app.post(
 );
 ```
 
-#Exponential Backoff Retry Strategy
+### Exponential Backoff Retry Strategy
 
 Senders automatically retry failed delivery attempts with exponential delay:
 
-```
+```text
 Attempt 1: Immediately
 Attempt 2: 15 seconds later
 Attempt 3: 1 minute later
@@ -138,20 +138,20 @@ export async function handleWebhook(req: Request, res: Response) {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Verify Signatures Using Raw Unparsed Request Bodies**: Never verify HMAC signatures on parsed JSON objects; whitespace discrepancies break hashes.
-- **Implement Idempotency Handling**: Record incoming webhook event IDs in Redis or database unique indexes to discard duplicates.
-- **Respond with 200 OK Immediately**: Queue the event for background processing; third parties time out after 5-10 seconds.
-- **Expose Webhook Delivery Logs**: Provide dashboard interfaces where customers can view delivery status, response codes, and manual retries.
+- Verify Signatures Using Raw Unparsed Request Bodies: Never verify HMAC signatures on parsed JSON objects; whitespace discrepancies break hashes.
+- Implement Idempotency Handling: Record incoming webhook event IDs in Redis or database unique indexes to discard duplicates.
+- Respond with 200 OK Immediately: Queue the event for background processing; third parties time out after 5-10 seconds.
+- Expose Webhook Delivery Logs: Provide dashboard interfaces where customers can view delivery status, response codes, and manual retries.
 
 **Don't**:
 
-- **Don't perform heavy business logic in the HTTP handler**: Long processing times cause webhook timeouts and unnecessary retries.
-- **Don't accept webhooks over insecure HTTP**: Enforce TLS (HTTPS) on all webhook ingestion endpoints.
-- **Don't trust unverified webhook headers**: Always use cryptographic signatures rather than relying on IP whitelists alone.
+- Perform heavy business logic in the HTTP handler: Long processing times cause webhook timeouts and unnecessary retries.
+- Accept webhooks over insecure HTTP: Enforce TLS (HTTPS) on all webhook ingestion endpoints.
+- Trust unverified webhook headers: Always use cryptographic signatures rather than relying on IP whitelists alone.
 
 ## Troubleshooting
 

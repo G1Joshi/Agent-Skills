@@ -57,18 +57,18 @@ class OrderAggregate {
 
 ## Core Concepts
 
-#Immutable Event Stream Architecture
+### Immutable Event Stream Architecture
 
 State is derived purely by folding historical events sequentially over an initial empty state:
 
-```
+```text
 Stream: Account-42
 Event 1: AccountOpened(initialDeposit: 100)  -> Balance = 100
 Event 2: MoneyDeposited(amount: 50)          -> Balance = 150
 Event 3: MoneyWithdrawn(amount: 30)          -> Balance = 120 (Current State)
 ```
 
-#State Reconstruction via Aggregate Replay
+### State Reconstruction via Aggregate Replay
 
 ```typescript
 // domain/aggregates/account.ts
@@ -99,7 +99,7 @@ export class Account {
 }
 ```
 
-#Snapshotting for High-Volume Streams
+### Snapshotting for High-Volume Streams
 
 Stores periodic state checkpoints to prevent replaying millions of events on every read:
 
@@ -148,20 +148,20 @@ class AccountAggregate {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Treat Events as Immutable Facts**: Never edit, mutate, or delete events; record compensating events (e.g. `PaymentReversed`) to fix mistakes.
-- **Snapshot Long-Lived Streams**: Create snapshots every 100-500 events to keep hydration latency under 10ms.
-- **Enforce Optimistic Concurrency Control**: Pass expected stream version on append; reject write if version has changed.
-- **Pair with CQRS**: Separate read query views from the event store to provide fast query responses.
+- Treat Events as Immutable Facts: Never edit, mutate, or delete events; record compensating events (e.g. `PaymentReversed`) to fix mistakes.
+- Snapshot Long-Lived Streams: Create snapshots every 100-500 events to keep hydration latency under 10ms.
+- Enforce Optimistic Concurrency Control: Pass expected stream version on append; reject write if version has changed.
+- Pair with CQRS: Separate read query views from the event store to provide fast query responses.
 
 **Don't**:
 
-- **Don't change past event structures**: Maintain backwards compatibility when updating schemas; use upcasters for migration.
-- **Don't put PII in unencrypted event streams**: If subject to GDPR Right to be Forgotten, use Crypto-Shredding (encrypt PII with disposable keys).
-- **Don't use Event Sourcing for everything**: Simple CRUD entities without audit requirements incur massive complexity under Event Sourcing.
+- Change past event structures: Maintain backwards compatibility when updating schemas; use upcasters for migration.
+- Put PII in unencrypted event streams: If subject to GDPR Right to be Forgotten, use Crypto-Shredding (encrypt PII with disposable keys).
+- Use Event Sourcing for everything: Simple CRUD entities without audit requirements incur massive complexity under Event Sourcing.
 
 ## Troubleshooting
 

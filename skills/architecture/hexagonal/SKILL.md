@@ -52,16 +52,16 @@ func (r *PostgresRepo) Save(u User) error { ... }
 
 ## Core Concepts
 
-#Ports and Adapters Topology
+### Ports and Adapters Topology
 
 The application core sits at the center; Driving Ports receive input from the outside world; Driven Ports communicate with infrastructure:
 
-```
+```text
 [ HTTP Controller ] ──(Driving Port)──→ [ APPLICATION CORE ] ──(Driven Port)──→ [ Postgres Adapter ]
 [ CLI Command ]     ──(Driving Port)──→ [ APPLICATION CORE ] ──(Driven Port)──→ [ Mock DB Adapter ]
 ```
 
-#Driving Port & Primary Adapter
+### Driving Port & Primary Adapter
 
 The driving port defines what the application can do:
 
@@ -89,7 +89,7 @@ export class UserController {
 }
 ```
 
-#Driven Port & Secondary Adapter
+### Driven Port & Secondary Adapter
 
 The driven port defines external capabilities needed by the core:
 
@@ -113,7 +113,8 @@ export class ResendEmailAdapter implements NotificationPort {
 
 ## Common Patterns
 
-#Mock Adapter for Unit Testing Ports
+### Mock Adapter for Unit Testing Ports
+
 **Problem**: Testing business core without spinning up actual databases or message brokers.  
 **Solution**: Implement an in-memory stub that satisfies the driven port interface.
 
@@ -136,20 +137,20 @@ const repo = new InMemoryOrderRepository();
 const service = new OrderService(repo);
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Define Ports as Interfaces Inside Core**: Ensure driven ports are authored by the business domain team, not infrastructure engineers.
-- **Create In-Memory Adapters for Fast Testing**: Implement mock adapters for all driven ports to enable sub-second test suite runs.
-- **Keep Domain Core Pure**: Disallow any external library imports in the domain core (except language utilities).
-- **Use Dependency Injection**: Bind ports to concrete adapters at application bootstrap time.
+- Define Ports as Interfaces Inside Core: Ensure driven ports are authored by the business domain team, not infrastructure engineers.
+- Create In-Memory Adapters for Fast Testing: Implement mock adapters for all driven ports to enable sub-second test suite runs.
+- Keep Domain Core Pure: Disallow any external library imports in the domain core (except language utilities).
+- Use Dependency Injection: Bind ports to concrete adapters at application bootstrap time.
 
 **Don't**:
 
-- **Don't let infrastructure types enter the domain**: Map incoming database models and HTTP requests to domain types inside adapters.
-- **Don't bypass the ports**: Never allow driving adapters (controllers) to communicate directly with driven adapters (databases).
-- **Don't over-engineer simple utility services**: For simple scripts or read-only tools, Hexagonal Architecture adds unnecessary complexity.
+- Let infrastructure types enter the domain: Map incoming database models and HTTP requests to domain types inside adapters.
+- Bypass the ports: Never allow driving adapters (controllers) to communicate directly with driven adapters (databases).
+- Over-engineer simple utility services: For simple scripts or read-only tools, Hexagonal Architecture adds unnecessary complexity.
 
 ## Troubleshooting
 

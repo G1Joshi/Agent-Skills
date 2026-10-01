@@ -53,11 +53,11 @@ class SqlUserRepository implements UserRepository {
 
 ## Core Concepts
 
-#Dependency Inversion Principle (The Dependency Rule)
+### Dependency Inversion Principle (The Dependency Rule)
 
 Source code dependencies must point inward only. Inner circles (Entities, Use Cases) know nothing about outer circles (Web, DB, CLI):
 
-```
+```text
        [ Frameworks & Drivers (DB, Web, Devices) ]
                          ↓
              [ Interface Adapters (Controllers, Gateways) ]
@@ -67,7 +67,7 @@ Source code dependencies must point inward only. Inner circles (Entities, Use Ca
                      [ Enterprise Business Rules (Entities) ]
 ```
 
-#Domain Entities (Pure Business Objects)
+### Domain Entities (Pure Business Objects)
 
 Encapsulates core business data and invariants without external annotations or framework decorators:
 
@@ -97,7 +97,7 @@ export class Subscription {
 }
 ```
 
-#Use Case Interactors & Boundary Ports
+### Use Case Interactors & Boundary Ports
 
 Coordinates the flow of data to and from entities, defining input/output boundary interfaces:
 
@@ -122,7 +122,8 @@ export class RenewSubscriptionUseCase {
 
 ## Common Patterns
 
-#Inverted Repository Dependency (Domain -> Infrastructure)
+### Inverted Repository Dependency (Domain -> Infrastructure)
+
 **Problem**: Business logic becomes tightly coupled to SQL ORM models and database drivers.  
 **Solution**: Declare repository interfaces inside domain layer; implement them in infrastructure layer.
 
@@ -158,20 +159,20 @@ export class DrizzleUserRepository implements UserRepositoryPort {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Keep Domain Entities Free of Framework Imports**: Never import `@Entity`, `drizzle-orm`, or HTTP request classes in the domain layer.
-- **Define Ports as Interfaces in the Domain**: Let the domain dictate its persistence requirements; implement adapters in the infrastructure layer.
-- **Test Use Cases with In-Memory Mocks**: Execute thousands of unit tests in milliseconds using plain in-memory array/map repository stubs.
-- **Use DTOs across Boundaries**: Map between HTTP JSON payloads and domain entities using validation schemas (Zod/Valibot).
+- Keep Domain Entities Free of Framework Imports: Never import `@Entity`, `drizzle-orm`, or HTTP request classes in the domain layer.
+- Define Ports as Interfaces in the Domain: Let the domain dictate its persistence requirements; implement adapters in the infrastructure layer.
+- Test Use Cases with In-Memory Mocks: Execute thousands of unit tests in milliseconds using plain in-memory array/map repository stubs.
+- Use DTOs across Boundaries: Map between HTTP JSON payloads and domain entities using validation schemas (Zod/Valibot).
 
 **Don't**:
 
-- **Don't return database ORM entities to API controllers**: Prevent database schema changes from leaking into external API contracts.
-- **Don't create anemic domain models**: Do not use entities as dumb data bags with getters/setters; encapsulate operations and invariants inside methods.
-- **Don't over-engineer simple CRUD apps**: Clean Architecture carries cognitive and boilerplate overhead; avoid using it for trivial prototypes.
+- Return database ORM entities to API controllers: Prevent database schema changes from leaking into external API contracts.
+- Create anemic domain models: Do not use entities as dumb data bags with getters/setters; encapsulate operations and invariants inside methods.
+- Over-engineer simple CRUD apps: Clean Architecture carries cognitive and boilerplate overhead; avoid using it for trivial prototypes.
 
 ## Troubleshooting
 

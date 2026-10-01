@@ -5,7 +5,7 @@ description: Expert Twelve-Factor App methodology assistance covering declarativ
 
 # Twelve-Factor App
 
-The Twelve-Factor App methodology is a set of best practices for building software-as-a-service apps. In 2025, it remains the gold standard for Cloud Native microservices and containerized applications.
+The Twelve-Factor App methodology provides architectural guidelines for building portable, resilient software-as-a-service applications optimized for modern cloud platforms and container runtimes.
 
 ## When to Use
 
@@ -40,7 +40,7 @@ CMD ["node", "dist/main.js"]
 
 ## Core Concepts
 
-#Declarative Dependencies & Port Binding
+### Declarative Dependencies & Port Binding
 
 Dependencies are strictly pinned; applications self-host their web servers and bind directly to assigned ports:
 
@@ -60,7 +60,7 @@ const port = process.env.PORT || 8080;
 app.listen(port, () => console.log(`Server bound to port ${port}`));
 ```
 
-#Config Stored in the Environment
+### Config Stored in the Environment
 
 Strict separation of code and config; credentials, hostnames, and secrets are injected via environment variables:
 
@@ -78,7 +78,7 @@ const EnvSchema = z.object({
 export const config = EnvSchema.parse(process.env);
 ```
 
-#Disposability & Graceful Shutdown
+### Disposability & Graceful Shutdown
 
 Processes must start fast and shut down gracefully upon receiving termination signals:
 
@@ -129,20 +129,20 @@ process.on("SIGTERM", () => shutdown("SIGTERM"));
 process.on("SIGINT", () => shutdown("SIGINT"));
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Treat Logs as Event Streams**: Write JSON logs directly to `stdout` / `stderr`; let vector collectors (FluentBit, Promtail) ship them.
-- **Execute One-Off Admin Tasks in the Same Environment**: Run database migrations via one-off container jobs matching release image hashes.
-- **Keep Development and Production Parity**: Use Docker Compose locally to run the exact database and cache engines used in production.
-- **Keep Processes Stateless**: Store persistent data in external backing services (PostgreSQL, S3, Redis).
+- Treat Logs as Event Streams: Write JSON logs directly to `stdout` / `stderr`; let vector collectors (FluentBit, Promtail) ship them.
+- Execute One-Off Admin Tasks in the Same Environment: Run database migrations via one-off container jobs matching release image hashes.
+- Keep Development and Production Parity: Use Docker Compose locally to run the exact database and cache engines used in production.
+- Keep Processes Stateless: Store persistent data in external backing services (PostgreSQL, S3, Redis).
 
 **Don't**:
 
-- **Don't hardcode configuration or secrets in source code**: Keep all credentials out of Git repositories.
-- **Don't rely on sticky sessions**: Session state must live in distributed caches (Redis) to allow effortless horizontal scaling.
-- **Don't log to local files inside containers**: Container filesystems are ephemeral and destroyed upon pod restart.
+- Hardcode configuration or secrets in source code: Keep all credentials out of Git repositories.
+- Rely on sticky sessions: Session state must live in distributed caches (Redis) to allow effortless horizontal scaling.
+- Log to local files inside containers: Container filesystems are ephemeral and destroyed upon pod restart.
 
 ## Troubleshooting
 

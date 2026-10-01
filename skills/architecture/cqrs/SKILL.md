@@ -39,18 +39,18 @@ class OrderSummaryProjector {
 
 ## Core Concepts
 
-#Separation of Command and Query Models
+### Separation of Command and Query Models
 
 Commands represent intent to mutate state (void return or ID); Queries request data without side effects:
 
-```
+```text
 Client
   ├── Command: POST /orders (CreateOrderCommand) ──→ Command Handler ──→ Write DB (Postgres)
   │                                                                           │ (CDC / Events)
   └── Query:   GET /orders/summary (OrderSummary) ←── Read Handler   ←── Read DB (Elastic/Redis)
 ```
 
-#Command Handlers with Explicit Domain Mutex
+### Command Handlers with Explicit Domain Mutex
 
 Validates permissions and business invariants before committing writes:
 
@@ -74,7 +74,7 @@ export class CancelOrderCommandHandler {
 }
 ```
 
-#Materialized Read Projections
+### Materialized Read Projections
 
 Updates optimized denormalized read views in response to domain events:
 
@@ -121,20 +121,20 @@ class OrderReadModelProjector {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Make Queries Completely Side-Effect Free**: Ensure queries never mutate database state or trigger transactional locks.
-- **Embrace Eventual Consistency**: Design client user experiences to anticipate small projection delays (optimistic UI updates).
-- **Optimize Read Models for the UI**: Structure read tables/documents to match the exact view model needed by frontend clients.
-- **Use Dedicated Read Replicas**: Direct query handlers to read replicas or fast key-value caches to protect the write primary.
+- Make Queries Completely Side-Effect Free: Ensure queries never mutate database state or trigger transactional locks.
+- Embrace Eventual Consistency: Design client user experiences to anticipate small projection delays (optimistic UI updates).
+- Optimize Read Models for the UI: Structure read tables/documents to match the exact view model needed by frontend clients.
+- Use Dedicated Read Replicas: Direct query handlers to read replicas or fast key-value caches to protect the write primary.
 
 **Don't**:
 
-- **Don't apply CQRS globally to an entire system**: Apply CQRS only to bounded contexts with complex requirements; simple CRUD benefits from standard MVC.
-- **Don't share entities between Command and Query pipelines**: Keep query handlers completely independent of domain aggregate classes.
-- **Don't let read projections write back to the write store**: Keep the data pipeline unidirectional.
+- Apply CQRS globally to an entire system: Apply CQRS only to bounded contexts with complex requirements; simple CRUD benefits from standard MVC.
+- Share entities between Command and Query pipelines: Keep query handlers completely independent of domain aggregate classes.
+- Let read projections write back to the write store: Keep the data pipeline unidirectional.
 
 ## Troubleshooting
 
