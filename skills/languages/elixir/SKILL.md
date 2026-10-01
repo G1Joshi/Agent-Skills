@@ -29,7 +29,7 @@ end
 
 ## Core Concepts
 
-#Lightweight Actor Processes & Message Passing
+### Lightweight Actor Processes & Message Passing
 
 Processes on the BEAM are isolated, consume only ~2KB of memory, and communicate exclusively via asynchronous message passing:
 
@@ -51,7 +51,7 @@ after
 end
 ```
 
-#Pattern Matching & Pipe Operator (`|>`)
+### Pattern Matching & Pipe Operator (`|>`)
 
 Pipelines data transformations through readable function compositions:
 
@@ -65,7 +65,7 @@ def process_order(payload) do
 end
 ```
 
-#Supervision Trees & Fault Tolerance
+### Supervision Trees & Fault Tolerance
 
 Supervisors monitor worker processes and restart them automatically when unhandled exceptions occur:
 
@@ -127,20 +127,20 @@ defmodule CounterServer do
 end
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Embrace Phoenix LiveView**: Build rich real-time SPAs using server-rendered LiveView; eliminate client API maintenance.
-- **Let It Crash**: Do not defensively catch every exception; let crashed processes be cleanly restarted by supervisors.
-- **Use Ecto Changesets for Data Validation**: Validate incoming parameters and domain constraints using composable changesets.
-- **Structure Concurrency with GenServer & Task**: Use standard OTP behaviors (`GenServer`, `Task`, `Agent`) rather than raw `spawn`.
+- Embrace Phoenix LiveView: Build rich real-time SPAs using server-rendered LiveView; eliminate client API maintenance.
+- Let It Crash: Do not defensively catch every exception; let crashed processes be cleanly restarted by supervisors.
+- Use Ecto Changesets for Data Validation: Validate incoming parameters and domain constraints using composable changesets.
+- Structure Concurrency with GenServer & Task: Use standard OTP behaviors (`GenServer`, `Task`, `Agent`) rather than raw `spawn`.
 
 **Don't**:
 
-- **Don't use GenServers as simple data storage**: Storing large volumes of data in GenServer state creates performance bottlenecks; use ETS.
-- **Don't perform blocking work inside GenServer `handle_call`**: Delegate slow tasks to separate `Task.async` workers.
-- **Don't mutate state across processes**: State is strictly immutable; communicate via messages and return new state.
+- Use GenServers as simple data storage: Storing large volumes of data in GenServer state creates performance bottlenecks; use ETS.
+- Perform blocking work inside GenServer `handle_call`: Delegate slow tasks to separate `Task.async` workers.
+- Mutate state across processes: State is strictly immutable; communicate via messages and return new state.
 
 ## Troubleshooting
 

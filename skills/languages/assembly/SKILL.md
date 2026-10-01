@@ -38,7 +38,7 @@ _start:
 
 ## Core Concepts
 
-#CPU Registers & Memory Addressing Modes (x86-64 / ARM64)
+### CPU Registers & Memory Addressing Modes (x86-64 / ARM64)
 
 Registers hold immediate state for execution; addressing modes compute memory operands:
 
@@ -49,7 +49,7 @@ mov rbx, [rsp + 16]             ; Base + displacement
 mov rcx, [rdi + rsi * 8 + 32]   ; Base + index * scale + displacement
 ```
 
-#The System V AMD64 Calling Convention
+### The System V AMD64 Calling Convention
 
 Governs how functions receive parameters and return values in Linux and macOS:
 
@@ -71,7 +71,7 @@ mov rdx, 14         ; count (bytes)
 syscall             ; invoke kernel
 ```
 
-#SIMD Vectorization (AVX-512 / AVX2)
+### SIMD Vectorization (AVX-512 / AVX2)
 
 Processes multiple data elements simultaneously across 256-bit or 512-bit vector registers:
 
@@ -113,20 +113,20 @@ section .data
 msg db "Hello, Assembly", 10
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Preserve Callee-Saved Registers**: Always preserve `rbx`, `rsp`, `rbp`, `r12`-`r15` across function boundaries.
-- **Maintain 16-Byte Stack Alignment**: Ensure `rsp` is 16-byte aligned before issuing `call` instructions to avoid segmentation faults in libc.
-- **Use Inline Assembly Sparingly in C/Rust**: Rely on compiler intrinsic headers (`<immintrin.h>`) whenever possible instead of raw inline assembly.
-- **Comment Every Assembly Routine Thoroughly**: Document input register assumptions, output registers, and modified flags.
+- Preserve Callee-Saved Registers: Always preserve `rbx`, `rsp`, `rbp`, `r12`-`r15` across function boundaries.
+- Maintain 16-Byte Stack Alignment: Ensure `rsp` is 16-byte aligned before issuing `call` instructions to avoid segmentation faults in libc.
+- Use Inline Assembly Sparingly in C/Rust: Rely on compiler intrinsic headers (`<immintrin.h>`) whenever possible instead of raw inline assembly.
+- Comment Every Assembly Routine Thoroughly: Document input register assumptions, output registers, and modified flags.
 
 **Don't**:
 
-- **Don't rewrite algorithms in assembly without profiling**: Modern LLVM/GCC compilers generate near-optimal machine code for standard loops.
-- **Don't ignore processor architecture differences**: x86-64 CISC code is incompatible with ARM64 RISC instruction sets.
-- **Don't bypass platform calling conventions**: Mixing calling conventions causes silent stack corruption and elusive crashes.
+- Rewrite algorithms in assembly without profiling: Modern LLVM/GCC compilers generate near-optimal machine code for standard loops.
+- Ignore processor architecture differences: x86-64 CISC code is incompatible with ARM64 RISC instruction sets.
+- Bypass platform calling conventions: Mixing calling conventions causes silent stack corruption and elusive crashes.
 
 ## Troubleshooting
 

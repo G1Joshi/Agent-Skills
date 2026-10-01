@@ -5,7 +5,7 @@ description: Expert Julia assistance covering numerical computing, multiple disp
 
 # Julia
 
-Julia looks like Python but runs like C. v1.11 (2025) introduces a specialized **Memory type** and faster array operations. It is widely used in scientific computing.
+Julia is a high-performance dynamic programming language designed for scientific computing, data analysis, and numerical algorithms with speed approaching C.
 
 ## When to Use
 
@@ -29,7 +29,7 @@ println("Mean Squared Error: ", compute_loss(y_true, y_pred))
 
 ## Core Concepts
 
-#Multiple Dispatch Paradigm
+### Multiple Dispatch Paradigm
 
 Functions choose execution methods based on the runtime types of all arguments, not just the first receiver:
 
@@ -47,7 +47,7 @@ println("Circle Area: ", area(Circle(5.0)))
 println("Rectangle Area: ", area(Rectangle(4.0, 6.0)))
 ```
 
-#JIT Compilation (LLVM) & Type Specialization
+### JIT Compilation (LLVM) & Type Specialization
 
 The Julia compiler specializes machine code for the exact types encountered at runtime:
 
@@ -65,7 +65,7 @@ end
 # Compiles to optimized SIMD machine code upon first execution!
 ```
 
-#Composable Package Ecosystem (Broadcast & Metaprogramming)
+### Composable Package Ecosystem (Broadcast & Metaprogramming)
 
 The dot syntax (`.`) vectorizes any function over arrays automatically:
 
@@ -96,20 +96,20 @@ function sum_positive(arr::Vector{Float64})::Float64
 end
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Write Type-Stable Functions**: Ensure functions return values of predictable types regardless of input branch values to maintain LLVM speed.
-- **Inspect Code Performance with `@benchmark` and `@code_warntype`**: Use BenchmarkTools.jl and `@code_warntype` to detect type instabilities.
-- **Pre-Allocate Memory for Inner Loops**: Avoid reallocating arrays inside tight numerical loops; mutate in place using `.!` syntax.
-- **Leverage Built-In Multithreading**: Run with `julia --threads auto` and parallelize loops using `Threads.@threads for ...`.
+- Write Type-Stable Functions: Ensure functions return values of predictable types regardless of input branch values to maintain LLVM speed.
+- Inspect Code Performance with `@benchmark` and `@code_warntype`: Use BenchmarkTools.jl and `@code_warntype` to detect type instabilities.
+- Pre-Allocate Memory for Inner Loops: Avoid reallocating arrays inside tight numerical loops; mutate in place using `.!` syntax.
+- Leverage Built-In Multithreading: Run with `julia --threads auto` and parallelize loops using `Threads.@threads for ...`.
 
 **Don't**:
 
-- **Don't use untyped global variables in performance-critical code**: Untyped globals prevent compiler optimization; declare them with `const`.
-- **Don't create abstract type fields in structs**: Specify concrete type parameters (`struct Container{T} data::T end`) to avoid boxing.
-- **Don't benchmark functions with global inputs**: Always benchmark inside functions or interpolate globals (`@btime my_func($global_val)`).
+- Use untyped global variables in performance-critical code: Untyped globals prevent compiler optimization; declare them with `const`.
+- Create abstract type fields in structs: Specify concrete type parameters (`struct Container{T} data::T end`) to avoid boxing.
+- Benchmark functions with global inputs: Always benchmark inside functions or interpolate globals (`@btime my_func($global_val)`).
 
 ## Troubleshooting
 

@@ -5,7 +5,7 @@ description: Expert F# functional programming assistance covering pattern matchi
 
 # F#
 
-F# is the functional sibling of C# on .NET. v9.0 (2025) brings **Nullable Reference Types** integration and better performance for list comprehensions.
+F# is a functional-first, cross-platform programming language on .NET, combining strong static typing, pattern matching, lightweight syntax, and seamless C# interoperability.
 
 ## When to Use
 
@@ -30,7 +30,7 @@ printfn "%s" (describePerson alice)
 
 ## Core Concepts
 
-#Discriminated Unions & Pattern Matching
+### Discriminated Unions & Pattern Matching
 
 Makes illegal business states unrepresentable through closed algebraic data types:
 
@@ -47,7 +47,7 @@ let processPayment method amount =
     | Crypto wallet      -> printfn "Broadcasting crypto payment to %s" wallet
 ```
 
-#Type Providers (Compile-Time Schema Generation)
+### Type Providers (Compile-Time Schema Generation)
 
 Generates strongly-typed types directly from external JSON, CSV, or SQL sources at compile-time:
 
@@ -61,7 +61,7 @@ let parseUser jsonString =
     printfn "User Name: %s, Email: %s" user.Name user.Email
 ```
 
-#Functional Pipelines & Partial Application
+### Functional Pipelines & Partial Application
 
 Composes functions using forward pipe (`|>`) and composition (`>>`) operators:
 
@@ -96,20 +96,20 @@ let processPayment method amount =
     | Crypto wallet -> sprintf "Requesting crypto transfer to %s" wallet
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Make Illegal States Unrepresentable**: Model business domains using Discriminated Unions and Records rather than primitive types.
-- **Use the Result Type for Error Handling**: Chain validation steps using `Result.bind` instead of throwing untyped exceptions.
-- **Leverage F# Interactive (FSI)**: Rapidly prototype algorithms in `.fsx` script files before adding to production projects.
-- **Interoperate with C# and .NET Cleanly**: Consume NuGet packages and ASP.NET Core libraries natively.
+- Make Illegal States Unrepresentable: Model business domains using Discriminated Unions and Records rather than primitive types.
+- Use the Result Type for Error Handling: Chain validation steps using `Result.bind` instead of throwing untyped exceptions.
+- Leverage F# Interactive (FSI): Rapidly prototype algorithms in `.fsx` script files before adding to production projects.
+- Interoperate with C# and .NET Cleanly: Consume NuGet packages and ASP.NET Core libraries natively.
 
 **Don't**:
 
-- **Don't use mutable variables (`mutable`) unnecessarily**: Favor immutable values and recursive or folded loops.
-- **Don't use `null`**: F# values cannot be null by default; use `Option<'T>` to represent optional data.
-- **Don't write heavy class hierarchies**: Prefer composition of records, functions, and modules over deep inheritance.
+- Use mutable variables (`mutable`) unnecessarily: Favor immutable values and recursive or folded loops.
+- Use `null`: F# values cannot be null by default; use `Option<'T>` to represent optional data.
+- Write heavy class hierarchies: Prefer composition of records, functions, and modules over deep inheritance.
 
 ## Troubleshooting
 

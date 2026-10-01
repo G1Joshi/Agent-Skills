@@ -31,7 +31,7 @@ End Module
 
 ## Core Concepts
 
-#Modern Asynchronous I/O with Async/Await
+### Modern Asynchronous I/O with Async/Await
 
 Non-blocking operations using .NET Task-based Asynchronous Pattern (TAP):
 
@@ -59,7 +59,7 @@ Public Class ApiService
 End Class
 ```
 
-#Expressive LINQ Queries & In-Memory Transformations
+### Expressive LINQ Queries & In-Memory Transformations
 
 Declarative data filtering, grouping, and projection:
 
@@ -92,7 +92,7 @@ Public Module OrderAnalytics
 End Module
 ```
 
-#Event Handling & Custom Delegates
+### Event Handling & Custom Delegates
 
 Clean event publication and subscription using the .NET event model:
 
@@ -145,15 +145,20 @@ Public Class CustomerService
 End Class
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** set `Option Strict On` and `Option Explicit On` at the top of every file or project-wide to eliminate runtime type coercion bugs.
-- **Do** target modern `.NET 8` or `.NET 9` LTS rather than legacy .NET Framework 4.x for performance, security, and cross-platform runtime execution.
-- **Do** use `Using ... End Using` statements on all types implementing `IDisposable` to ensure deterministic resource cleanup.
-- **Do** use `Async` and `Await` for I/O operations rather than synchronous `.Result` or `.Wait()`.
-- **Don't** use legacy Microsoft.VisualBasic runtime helpers (e.g. `Len()`, `Left()`, `MsgBox()`); use standard .NET BCL equivalents.
-- **Don't** use untyped `Object` variables; use strongly typed generic collections (`List(Of T)`, `Dictionary(Of TKey, TValue)`).
-- **Don't** leave exception catch blocks empty; log errors or rethrow with `Throw` preserving the stack trace.
+**Do**:
+
+- Set `Option Strict On` and `Option Explicit On` at the top of every file or project-wide to eliminate runtime type coercion bugs.
+- Target modern `.NET 8` or `.NET 9` LTS rather than legacy .NET Framework 4.x for performance, security, and cross-platform runtime execution.
+- Use `Using ... End Using` statements on all types implementing `IDisposable` to ensure deterministic resource cleanup.
+- Use `Async` and `Await` for I/O operations rather than synchronous `.Result` or `.Wait()`.
+
+**Don't**:
+
+- Use legacy Microsoft.VisualBasic runtime helpers (e.g. `Len()`, `Left()`, `MsgBox()`); use standard .NET BCL equivalents.
+- Use untyped `Object` variables; use strongly typed generic collections (`List(Of T)`, `Dictionary(Of TKey, TValue)`).
+- Leave exception catch blocks empty; log errors or rethrow with `Throw` preserving the stack trace.
 
 ## Troubleshooting
 

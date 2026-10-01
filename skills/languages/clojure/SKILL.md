@@ -27,7 +27,7 @@ A Lisp hosted on the JVM (and JS via ClojureScript) with a focus on immutability
 
 ## Core Concepts
 
-#Persistent Immutable Data Structures
+### Persistent Immutable Data Structures
 
 Clojure vectors, maps, and sets use structural sharing to provide immutable snapshots with O(log32 N) performance:
 
@@ -40,7 +40,7 @@ Clojure vectors, maps, and sets use structural sharing to provide immutable snap
 ;; {:id 415 :name "Jane" :roles #{:member}}
 ```
 
-#Concurrency Primitives (Atoms & Software Transactional Memory)
+### Concurrency Primitives (Atoms & Software Transactional Memory)
 
 Manages shared state transitions safely without manual lock synchronization:
 
@@ -53,7 +53,7 @@ Manages shared state transitions safely without manual lock synchronization:
 (println "Current requests:" @request-count)
 ```
 
-#Threading Macros (`->` and `->>`)
+### Threading Macros (`->` and `->>`)
 
 Pipelines data transformations cleanly without deeply nested function calls:
 
@@ -88,20 +88,20 @@ Use `->>` (thread-last) macro for sequential transformations:
 ;; => 80
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Embrace REPL-Driven Development**: Connect your editor (Calva, CIDER) to a running nREPL and test functions interactively.
-- **Validate Data with Malli or Clojure Spec**: Define explicit schemas for function inputs and API boundaries.
-- **Use Destructuring Comprehensively**: Unpack nested maps and vectors cleanly in function argument vectors.
-- **Leverage Java Interop Directly**: Invoke Java classes (`(java.time.Instant/now)`) directly without wrapper overhead.
+- Embrace REPL-Driven Development: Connect your editor (Calva, CIDER) to a running nREPL and test functions interactively.
+- Validate Data with Malli or Clojure Spec: Define explicit schemas for function inputs and API boundaries.
+- Use Destructuring Comprehensively: Unpack nested maps and vectors cleanly in function argument vectors.
+- Leverage Java Interop Directly: Invoke Java classes (`(java.time.Instant/now)`) directly without wrapper overhead.
 
 **Don't**:
 
-- **Don't fight immutability**: Do not introduce mutable Java arrays or global variables where immutable maps suffice.
-- **Don't hold references to lazy sequences**: Realizing unbounded lazy sequences while retaining their head exhausts JVM heap memory.
-- **Don't create deep monolithic namespaces**: Break namespaces into cohesive, focused modules.
+- Fight immutability: Do not introduce mutable Java arrays or global variables where immutable maps suffice.
+- Hold references to lazy sequences: Realizing unbounded lazy sequences while retaining their head exhausts JVM heap memory.
+- Create deep monolithic namespaces: Break namespaces into cohesive, focused modules.
 
 ## Troubleshooting
 

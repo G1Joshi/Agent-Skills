@@ -28,7 +28,7 @@ object Hello extends App {
 
 ## Core Concepts
 
-#Scala 3 Contextual Abstractions: Given & Using
+### Scala 3 Contextual Abstractions: Given & Using
 
 Type classes and dependency injection unified cleanly without implicit conversions:
 
@@ -53,7 +53,7 @@ extension [T](value: T)(using encoder: JsonEncoder[T])
   def asJson: String = encoder.encode(value)
 ```
 
-#Algebraic Data Types & Exhaustive Pattern Matching
+### Algebraic Data Types & Exhaustive Pattern Matching
 
 Modeling domain states with Scala 3 sealed traits and enums:
 
@@ -74,7 +74,7 @@ def evaluatePayment(status: PaymentStatus): String = status match
     s"Permanent failure: $reason. Contacting customer."
 ```
 
-#Asynchronous Effect Management with Cats Effect
+### Asynchronous Effect Management with Cats Effect
 
 Pure functional concurrency with resource safety and fiber cancellation:
 
@@ -120,15 +120,20 @@ def describe(status: TransactionStatus): String = status match
   case TransactionStatus.Rejected(reason) => s"Declined: $reason"
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** embrace Scala 3 syntax: use `enum`, `given`/`using`, and top-level definitions instead of Scala 2 package objects.
-- **Do** use `opaque type` aliases for type-safe domain identifiers (e.g. `UserId`, `OrderId`) without heap allocation overhead.
-- **Do** structure async applications around functional effect systems (`Cats Effect 3` or `ZIO 2`) rather than raw `scala.concurrent.Future`.
-- **Do** enable compiler strictness (`-Xfatal-warnings`, `-Wunused:all`) to maintain clean codebases.
-- **Don't** use `var` or mutable collections in domain logic; use immutable collections and `case class .copy()`.
-- **Don't** catch raw `Throwable` without re-throwing non-fatal exceptions; use `scala.util.control.NonFatal`.
-- **Don't** use `Option.get` or `Try.get`; use `getOrElse`, pattern matching, or for-comprehensions.
+**Do**:
+
+- Embrace Scala 3 syntax: use `enum`, `given`/`using`, and top-level definitions instead of Scala 2 package objects.
+- Use `opaque type` aliases for type-safe domain identifiers (e.g. `UserId`, `OrderId`) without heap allocation overhead.
+- Structure async applications around functional effect systems (`Cats Effect 3` or `ZIO 2`) rather than raw `scala.concurrent.Future`.
+- Enable compiler strictness (`-Xfatal-warnings`, `-Wunused:all`) to maintain clean codebases.
+
+**Don't**:
+
+- Use `var` or mutable collections in domain logic; use immutable collections and `case class .copy()`.
+- Catch raw `Throwable` without re-throwing non-fatal exceptions; use `scala.util.control.NonFatal`.
+- Use `Option.get` or `Try.get`; use `getOrElse`, pattern matching, or for-comprehensions.
 
 ## Troubleshooting
 

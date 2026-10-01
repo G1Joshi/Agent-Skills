@@ -33,7 +33,7 @@ SELECT * FROM users WHERE name = 'Alice';
 
 ## Core Concepts
 
-#Advanced Window Functions & Analytical Partitioning
+### Advanced Window Functions & Analytical Partitioning
 
 Computing running totals, rankings, and lead/lag intervals across result partitions:
 
@@ -63,7 +63,7 @@ FROM orders
 WHERE order_date >= '2026-01-01';
 ```
 
-#Hierarchical Tree Traversal with Recursive Common Table Expressions (CTEs)
+### Hierarchical Tree Traversal with Recursive Common Table Expressions (CTEs)
 
 Traversing nested organizational charts or bill-of-materials structures:
 
@@ -96,7 +96,7 @@ WITH RECURSIVE org_tree AS (
 SELECT * FROM org_tree ORDER BY hierarchy_path;
 ```
 
-#JSONB Semi-Structured Operations & GIN Indexing
+### JSONB Semi-Structured Operations & GIN Indexing
 
 Querying nested payloads with indexed containment queries:
 
@@ -143,15 +143,20 @@ SELECT
 FROM orders;
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** always use parameterized queries and prepared statements in application code to completely neutralize SQL injection attacks.
-- **Do** inspect query execution plans (`EXPLAIN (ANALYZE, BUFFERS)`) to verify index usage and eliminate sequential table scans.
-- **Do** enforce referential integrity using foreign keys with appropriate `ON DELETE RESTRICT` or `ON DELETE CASCADE` rules.
-- **Do** use appropriate column types: `TIMESTAMPTZ` for timestamps, `NUMERIC`/`DECIMAL` for financial currency, not floating point.
-- **Don't** use `SELECT *` in production application queries; explicitly declare only needed columns to reduce network overhead.
-- **Don't** perform calculations or wrap indexed columns in non-sargable functions in `WHERE` clauses (e.g. `WHERE DATE(created_at) = '2026-01-01'`).
-- **Don't** run long-running batch migrations or table locks without timeouts (`SET statement_timeout = '5s'`).
+**Do**:
+
+- Always use parameterized queries and prepared statements in application code to completely neutralize SQL injection attacks.
+- Inspect query execution plans (`EXPLAIN (ANALYZE, BUFFERS)`) to verify index usage and eliminate sequential table scans.
+- Enforce referential integrity using foreign keys with appropriate `ON DELETE RESTRICT` or `ON DELETE CASCADE` rules.
+- Use appropriate column types: `TIMESTAMPTZ` for timestamps, `NUMERIC`/`DECIMAL` for financial currency, not floating point.
+
+**Don't**:
+
+- Use `SELECT *` in production application queries; explicitly declare only needed columns to reduce network overhead.
+- Perform calculations or wrap indexed columns in non-sargable functions in `WHERE` clauses (e.g. `WHERE DATE(created_at) = '2026-01-01'`).
+- Run long-running batch migrations or table locks without timeouts (`SET statement_timeout = '5s'`).
 
 ## Troubleshooting
 

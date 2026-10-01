@@ -32,7 +32,7 @@ async function fetchData(url) {
 
 ## Core Concepts
 
-#Event Loop & Microtask Concurrency
+### Event Loop & Microtask Concurrency
 
 JavaScript is single-threaded; asynchronous operations queue callbacks across Macrotasks and Microtasks:
 
@@ -47,7 +47,7 @@ console.log("2: Synchronous end");
 // Output Order: 1 -> 2 -> 3 -> 4
 ```
 
-#Modern ECMAScript (ES2024+) Features
+### Modern ECMAScript (ES2024+) Features
 
 Leverages modern language primitives for concise, safe data handling:
 
@@ -70,7 +70,7 @@ if (Object.hasOwn(original, "user")) {
 }
 ```
 
-#Async / Await with Concurrent `Promise.allSettled`
+### Async / Await with Concurrent `Promise.allSettled`
 
 Handles batch asynchronous requests safely without failing fast on single errors:
 
@@ -131,6 +131,10 @@ async function fetchWithTimeout(url, ms = 5000) {
 
 ### Modules
 
+**Problem**: Structuring modular, reusable code without polluting global namespace scope.
+
+**Solution**:
+
 ```javascript
 // Named exports (preferred)
 export const API_URL = "https://api.example.com";
@@ -149,20 +153,20 @@ export * from "./utils.js";
 const module = await import(`./features/${feature}.js`);
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Always Use Strict Equality (`===`)**: Avoid implicit type coercion bugs by using `===` and `!==`.
-- **Use `const` by Default and `let` for Reassignment**: Never use legacy function-scoped `var`.
-- **Adopt Native ESM Modules**: Use `import` and `export` statements; deprecate CommonJS `require()` in modern projects.
-- **Handle Rejected Promises with `try...catch`**: Always wrap `await` calls in error handling blocks to avoid unhandled rejection crashes.
+- Always Use Strict Equality (`===`): Avoid implicit type coercion bugs by using `===` and `!==`.
+- Use `const` by Default and `let` for Reassignment: Never use legacy function-scoped `var`.
+- Adopt Native ESM Modules: Use `import` and `export` statements; deprecate CommonJS `require()` in modern projects.
+- Handle Rejected Promises with `try...catch`: Always wrap `await` calls in error handling blocks to avoid unhandled rejection crashes.
 
 **Don't**:
 
-- **Don't block the Event Loop**: Never execute heavy synchronous loops or CPU-intensive math on the main thread; offload to Web Workers.
-- **Don't pollute global prototypes**: Never modify `Array.prototype` or `Object.prototype`.
-- **Don't use `eval()` or `new Function()`**: Dynamic code evaluation opens critical remote code execution (RCE) vectors.
+- Block the Event Loop: Never execute heavy synchronous loops or CPU-intensive math on the main thread; offload to Web Workers.
+- Pollute global prototypes: Never modify `Array.prototype` or `Object.prototype`.
+- Use `eval()` or `new Function()`: Dynamic code evaluation opens critical remote code execution (RCE) vectors.
 
 ## Troubleshooting
 

@@ -30,7 +30,7 @@ def process_items(
 
 ## Core Concepts
 
-#Strict Type Hints & Runtime Validation (Pydantic / Mypy)
+### Strict Type Hints & Runtime Validation (Pydantic / Mypy)
 
 Modern Python (3.11/3.12+) features comprehensive type annotations and structural models:
 
@@ -49,7 +49,7 @@ user = UserProfile(id="usr_415", email="alice@example.com", age=28)
 print(user.model_dump_json())
 ```
 
-#Asynchronous Event Loop & Asyncio Task Groups
+### Asynchronous Event Loop & Asyncio Task Groups
 
 Concurrent asynchronous I/O with modern exception handling:
 
@@ -73,7 +73,7 @@ async def main():
 asyncio.run(main())
 ```
 
-#Modern Dependency Management with `uv` / `poetry`
+### Modern Dependency Management with `uv` / `poetry`
 
 Replaces slow legacy pip and virtualenv workflows with lightning-fast Rust-based tooling:
 
@@ -85,7 +85,11 @@ uv pip install -r requirements.txt
 
 ## Common Patterns
 
-### Async Patterns
+### Structured Concurrency with Asyncio TaskGroups
+
+**Problem**: Concurrent asynchronous operations risking dangling unhandled tasks or memory leaks on exceptions.
+
+**Solution**:
 
 ```python
 import asyncio
@@ -106,6 +110,10 @@ async def process_batch(items: list[Item]) -> list[Result]:
 
 ### Context Managers
 
+**Problem**: Safely managing acquisition and release of external resources (locks, files, sockets) in the face of unhandled exceptions.
+
+**Solution**:
+
 ```python
 from contextlib import contextmanager, asynccontextmanager
 
@@ -118,20 +126,20 @@ def managed_resource() -> Iterator[Resource]:
         resource.cleanup()
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Adopt `uv` for Package Management**: Use `uv` (10-100x faster than pip) for virtual environments and dependency resolution.
-- **Lint and Format with Ruff**: Replace Flake8, Black, and isort with the blazing-fast Rust-based `ruff` linter/formatter.
-- **Enforce Strict Static Typing with Mypy or Pyright**: Catch type errors and missing attributes in CI before production.
-- **Use Context Managers for Resources**: Always manage files, sockets, and locks using `with` and `async with` statements.
+- Adopt `uv` for Package Management: Use `uv` (10-100x faster than pip) for virtual environments and dependency resolution.
+- Lint and Format with Ruff: Replace Flake8, Black, and isort with the blazing-fast Rust-based `ruff` linter/formatter.
+- Enforce Strict Static Typing with Mypy or Pyright: Catch type errors and missing attributes in CI before production.
+- Use Context Managers for Resources: Always manage files, sockets, and locks using `with` and `async with` statements.
 
 **Don't**:
 
-- **Don't use mutable default arguments in functions**: Avoid `def append_to(item, target=[])`; use `target: list | None = None`.
-- **Don't catch generic `except Exception:` blindly**: Catch specific exception classes to avoid masking unexpected programming errors.
-- **Don't install global packages directly**: Always isolate project dependencies in dedicated virtual environments (`.venv`).
+- Use mutable default arguments in functions: Avoid `def append_to(item, target=[])`; use `target: list | None = None`.
+- Catch generic `except Exception:` blindly: Catch specific exception classes to avoid masking unexpected programming errors.
+- Install global packages directly: Always isolate project dependencies in dedicated virtual environments (`.venv`).
 
 ## Troubleshooting
 

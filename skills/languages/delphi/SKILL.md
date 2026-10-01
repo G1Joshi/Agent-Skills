@@ -34,7 +34,7 @@ end.
 
 ## Core Concepts
 
-#Object Pascal Strong Typing & Class Architecture
+### Object Pascal Strong Typing & Class Architecture
 
 Clean, readable object-oriented architecture with explicit interfaces:
 
@@ -65,12 +65,12 @@ end;
 end.
 ```
 
-#Visual Component Library (VCL) & FireMonkey (FMX)
+### Visual Component Library (VCL) & FireMonkey (FMX)
 
 - **VCL**: Native Windows-only components wrapping direct Win32/Win64 APIs.
 - **FireMonkey (FMX)**: Cross-platform GPU-accelerated UI framework targeting Windows, macOS, iOS, and Android.
 
-#FireDAC Unified Database Connectivity
+### FireDAC Unified Database Connectivity
 
 High-performance data access layer:
 
@@ -116,20 +116,20 @@ begin
 end;
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Always Wrap Object Allocations in `try...finally`**: Guarantee that `.Free` executes to prevent memory leaks in non-ARC Windows runtimes.
-- **Use FireDAC for All Database Operations**: Standardize on FireDAC; deprecate legacy BDE and dbExpress components.
-- **Target 64-Bit Windows (Win64)**: Ensure new applications compile for 64-bit to utilize modern memory spaces and system libraries.
-- **Use Parameterized Queries**: Always use `ParamByName()` to prevent SQL injection vulnerabilities.
+- Always Wrap Object Allocations in `try...finally`: Guarantee that `.Free` executes to prevent memory leaks in non-ARC Windows runtimes.
+- Use FireDAC for All Database Operations: Standardize on FireDAC; deprecate legacy BDE and dbExpress components.
+- Target 64-Bit Windows (Win64): Ensure new applications compile for 64-bit to utilize modern memory spaces and system libraries.
+- Use Parameterized Queries: Always use `ParamByName()` to prevent SQL injection vulnerabilities.
 
 **Don't**:
 
-- **Don't ignore compiler hints and warnings**: Treat Delphi compiler warnings with priority; they frequently identify uninitialized variables.
-- **Don't use global variables in units**: Keep state encapsulated inside classes and records.
-- **Don't block the UI thread with long database queries**: Execute heavy queries asynchronously using `TTask.Run` from the Parallel Programming Library.
+- Ignore compiler hints and warnings: Treat Delphi compiler warnings with priority; they frequently identify uninitialized variables.
+- Use global variables in units: Keep state encapsulated inside classes and records.
+- Block the UI thread with long database queries: Execute heavy queries asynchronously using `TTask.Run` from the Parallel Programming Library.
 
 ## Troubleshooting
 

@@ -5,7 +5,7 @@ description: Expert Solidity smart contract assistance covering EVM, OpenZeppeli
 
 # Solidity
 
-Solidity is the primary language for the **Ethereum Virtual Machine (EVM)**. v0.8.28 (2025) focuses on transient storage (`tstore`) and gas optimization via IR.
+Solidity is an object-oriented, high-level language for implementing smart contracts on the Ethereum Virtual Machine (EVM), featuring strict typing and gas-optimized storage patterns.
 
 ## When to Use
 
@@ -37,7 +37,7 @@ contract SimpleStorage {
 
 ## Core Concepts
 
-#Secure ERC-20 Vault with OpenZeppelin & Custom Errors
+### Secure ERC-20 Vault with OpenZeppelin & Custom Errors
 
 Gas-optimized token vault with reentrancy protection and custom error revert reasons:
 
@@ -83,7 +83,7 @@ contract TokenVault is ReentrancyGuard, Ownable2Step {
 }
 ```
 
-#Storage, Memory & Calldata Gas Layout
+### Storage, Memory & Calldata Gas Layout
 
 Understanding the EVM data locations to minimize transaction execution costs:
 
@@ -112,7 +112,7 @@ contract StorageLayout {
 }
 ```
 
-#Checks-Effects-Interactions & Upgradeability (UUPS)
+### Checks-Effects-Interactions & Upgradeability (UUPS)
 
 Preventing reentrancy vulnerabilities and managing proxy upgrades:
 
@@ -171,15 +171,20 @@ contract Vault {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** use Solidity `^0.8.24` or higher with native arithmetic overflow protection and custom errors (`error MyError()`) instead of string `require` messages.
-- **Do** always adhere to the Checks-Effects-Interactions (CEI) pattern and apply `ReentrancyGuard` to all state-changing transfer functions.
-- **Do** test smart contracts rigorously with Foundry (`forge test`, fuzzing, and invariant testing) and formal verification tools.
-- **Do** use OpenZeppelin's `SafeERC20` wrapper to prevent silent transfer failures from non-standard ERC-20 tokens.
-- **Don't** use `tx.origin` for authorization; always use `msg.sender` to defend against phishing and proxy attacks.
-- **Don't** rely on `block.timestamp` or `block.number` for random number generation; integrate Chainlink VRF.
-- **Don't** deploy unverified or unaudited contracts to production mainnets.
+**Do**:
+
+- Use Solidity `^0.8.24` or higher with native arithmetic overflow protection and custom errors (`error MyError()`) instead of string `require` messages.
+- Always adhere to the Checks-Effects-Interactions (CEI) pattern and apply `ReentrancyGuard` to all state-changing transfer functions.
+- Test smart contracts rigorously with Foundry (`forge test`, fuzzing, and invariant testing) and formal verification tools.
+- Use OpenZeppelin's `SafeERC20` wrapper to prevent silent transfer failures from non-standard ERC-20 tokens.
+
+**Don't**:
+
+- Use `tx.origin` for authorization; always use `msg.sender` to defend against phishing and proxy attacks.
+- Rely on `block.timestamp` or `block.number` for random number generation; integrate Chainlink VRF.
+- Deploy unverified or unaudited contracts to production mainnets.
 
 ## Troubleshooting
 

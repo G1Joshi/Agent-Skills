@@ -32,7 +32,7 @@ let () = Printf.printf "Tree depth: %d\n" (depth my_tree)
 
 ## Core Concepts
 
-#Hindley-Milner Type Inference & Pattern Matching
+### Hindley-Milner Type Inference & Pattern Matching
 
 Infers static types globally without requiring verbose type annotations:
 
@@ -49,7 +49,7 @@ let summarize_payment = function
   | Failed reason -> Printf.sprintf "Failed: %s" reason
 ```
 
-#Module System (Signatures & Functors)
+### Module System (Signatures & Functors)
 
 Powerful structural module system supporting parameterized modules (Functors):
 
@@ -66,7 +66,7 @@ module MakeSet (Item : COMPARABLE) = struct
 end
 ```
 
-#OCaml 5 Effect Handlers & Multicore Domains
+### OCaml 5 Effect Handlers & Multicore Domains
 
 Native CPU domain parallelism and structured non-blocking effects:
 
@@ -108,20 +108,20 @@ module MakeSet (Item : Comparable) = struct
 end
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use Dune as Standard Build System**: Build, test, and manage projects exclusively using `dune build` and `dune runtest`.
-- **Adopt OCaml 5+**: Utilize modern Multicore OCaml with concurrent Domain execution.
-- **Leverage Jane Street Base & Core**: Enhance the standard library using battle-tested `Base` and `Core`.
-- **Enforce Exhaustive Pattern Matching**: Address all compiler warnings (`-w +A`) regarding unhandled pattern cases.
+- Use Dune as Standard Build System: Build, test, and manage projects exclusively using `dune build` and `dune runtest`.
+- Adopt OCaml 5+: Utilize modern Multicore OCaml with concurrent Domain execution.
+- Leverage Jane Street Base & Core: Enhance the standard library using battle-tested `Base` and `Core`.
+- Enforce Exhaustive Pattern Matching: Address all compiler warnings (`-w +A`) regarding unhandled pattern cases.
 
 **Don't**:
 
-- **Don't use polymorphic equality (`=`) carelessly**: Polymorphic equality can crash at runtime on functional closures; use typed comparators.
-- **Don't rely on unhandled exceptions for control flow**: Represent failure explicitly using `Result.t` or `Option.t`.
-- **Don't mutate state across Domains without synchronization**: Use atomic variables (`Atomic.t`) when sharing memory between threads.
+- Use polymorphic equality (`=`) carelessly: Polymorphic equality can crash at runtime on functional closures; use typed comparators.
+- Rely on unhandled exceptions for control flow: Represent failure explicitly using `Result.t` or `Option.t`.
+- Mutate state across Domains without synchronization: Use atomic variables (`Atomic.t`) when sharing memory between threads.
 
 ## Troubleshooting
 

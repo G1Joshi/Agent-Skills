@@ -30,7 +30,7 @@ end
 
 ## Core Concepts
 
-#Tables as Universal Data Structures
+### Tables as Universal Data Structures
 
 Lua represents arrays, hashes, objects, modules, and namespaces using a single unified primitive: the Table:
 
@@ -52,7 +52,7 @@ for key, value in pairs(config) do
 end
 ```
 
-#Metatables & Object-Oriented Inheritance
+### Metatables & Object-Oriented Inheritance
 
 Overloads table behaviors (operators, indexing, custom methods) via metamethods:
 
@@ -76,7 +76,7 @@ acc:deposit(50)
 print("Account balance:", acc.balance) -- 150
 ```
 
-#Coroutines for Cooperative Concurrency
+### Coroutines for Cooperative Concurrency
 
 Fibers with manual yield and resume control:
 
@@ -120,20 +120,20 @@ local v = Vector2.new(3, 4)
 print("Magnitude:", v:magnitude()) -- Output: 5
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Always Declare Variables as `local`**: Global variables by default pollute `_G` and degrade performance; use `local var = ...`.
-- **Remember Lua Arrays are 1-Indexed**: Arrays start at index `1`, not `0`.
-- **Use LuaJIT where Supported**: Leverage the LuaJIT compiler for near C-speed execution in OpenResty and games.
-- **Cache Global Function Lookups**: Localize hot functions (`local sub = string.sub`) in tight loops to eliminate global table lookups.
+- Always Declare Variables as `local`: Global variables by default pollute `_G` and degrade performance; use `local var = ...`.
+- Remember Lua Arrays are 1-Indexed: Arrays start at index `1`, not `0`.
+- Use LuaJIT where Supported: Leverage the LuaJIT compiler for near C-speed execution in OpenResty and games.
+- Cache Global Function Lookups: Localize hot functions (`local sub = string.sub`) in tight loops to eliminate global table lookups.
 
 **Don't**:
 
-- **Don't store `nil` values in arrays**: Storing `nil` inside sequential tables breaks length operator (`#`) calculations.
-- **Don't create circular metatable references**: Infinite recursion during index lookups causes stack overflow errors.
-- **Don't concatenate strings repeatedly in loops**: Use `table.insert` and `table.concat` to avoid O(N^2) memory reallocations.
+- Store `nil` values in arrays: Storing `nil` inside sequential tables breaks length operator (`#`) calculations.
+- Create circular metatable references: Infinite recursion during index lookups causes stack overflow errors.
+- Concatenate strings repeatedly in loops: Use `table.insert` and `table.concat` to avoid O(N^2) memory reallocations.
 
 ## Troubleshooting
 

@@ -32,7 +32,7 @@ end
 
 ## Core Concepts
 
-#Compile-Time Static Type Inference
+### Compile-Time Static Type Inference
 
 Provides the syntax of Ruby with the type-safety of a compiled language without redundant type annotations:
 
@@ -50,7 +50,7 @@ puts compute_discount(100)       # 100
 puts compute_discount(100, "VIP") # 80.0
 ```
 
-#Concurrency via Fibers & Channels (CSP)
+### Concurrency via Fibers & Channels (CSP)
 
 Lightweight cooperative green threads scheduled cooperatively on an event loop:
 
@@ -68,7 +68,7 @@ message = channel.receive
 puts "Received: #{message}"
 ```
 
-#C-Binding Interoperability
+### C-Binding Interoperability
 
 Calls external C dynamic libraries natively with zero wrapper boilerplate:
 
@@ -100,28 +100,28 @@ pid = LibC.getpid
 puts "Current process ID: #{pid}"
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Build with `--release` for Production**: Always pass `--release` to enable aggressive LLVM dead-code elimination and inlining.
-- **Use Non-Nilable Types**: Benefit from Crystal's compile-time null safety; handle `nil` explicitly with `.try` or `if val`.
-- **Use Static Builds via Docker/Alpine**: Compile fully static Linux binaries using `docker run --rm -v $(pwd):/workspace crystallang/crystal:latest-alpine`.
-- **Structure Concurrency Around Channels**: Share memory by communicating through typed channels rather than shared mutable pointers.
+- Build with `--release` for Production: Always pass `--release` to enable aggressive LLVM dead-code elimination and inlining.
+- Use Non-Nilable Types: Benefit from Crystal's compile-time null safety; handle `nil` explicitly with `.try` or `if val`.
+- Use Static Builds via Docker/Alpine: Compile fully static Linux binaries using `docker run --rm -v $(pwd):/workspace crystallang/crystal:latest-alpine`.
+- Structure Concurrency Around Channels: Share memory by communicating through typed channels rather than shared mutable pointers.
 
 **Don't**:
 
-- **Don't use `Object#as` blindly**: Unchecked type assertions cause runtime type cast exceptions; use pattern matching or `.is_a?`.
-- **Don't perform blocking CPU-bound loops in fibers**: Cooperatively yield CPU control using `Fiber.yield` in tight loops.
-- **Don't deploy debug builds**: Non-release Crystal binaries are significantly larger and order of magnitude slower.
+- Use `Object#as` blindly: Unchecked type assertions cause runtime type cast exceptions; use pattern matching or `.is_a?`.
+- Perform blocking CPU-bound loops in fibers: Cooperatively yield CPU control using `Fiber.yield` in tight loops.
+- Deploy debug builds: Non-release Crystal binaries are significantly larger and order of magnitude slower.
 
 ## Troubleshooting
 
-| Error                             | Cause                                                | Solution                                                            |
-| :-------------------------------- | :--------------------------------------------------- | :------------------------------------------------------------------ |
-| `type must be (Type), not (Type   | Nil)`                                                | Nil-checking missing before accessing methods on nullable variable. | Use `var.not_nil!` or guard with `if var`. |
-| `Can't use Type as type in union` | Incompatible types combined without common ancestor. | Explicitly annotate union type or cast with `.as(TargetType)`.      |
-| `undefined constant in shard`     | Missing dependency or `shards.yml` not resolved.     | Run `shards install` to install project dependencies.               |
+| Error                                    | Cause                                                               | Solution                                                       |
+| :--------------------------------------- | :------------------------------------------------------------------ | :------------------------------------------------------------- |
+| `type must be (Type), not (Type \| Nil)` | Nil-checking missing before accessing methods on nullable variable. | Use `var.not_nil!` or guard with `if var`.                     |
+| `Can't use Type as type in union`        | Incompatible types combined without common ancestor.                | Explicitly annotate union type or cast with `.as(TargetType)`. |
+| `undefined constant in shard`            | Missing dependency or `shards.yml` not resolved.                    | Run `shards install` to install project dependencies.          |
 
 ## References
 

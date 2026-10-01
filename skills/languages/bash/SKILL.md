@@ -31,7 +31,7 @@ fi
 
 ## Core Concepts
 
-#Strict Error Handling (`set -euo pipefail`)
+### Strict Error Handling (`set -euo pipefail`)
 
 Guarantees script execution aborts on unhandled errors, unset variables, and piped command failures:
 
@@ -46,7 +46,7 @@ IFS=$'
 # -o pipefail: Pipeline exit status matches the last failing command
 ```
 
-#Robust Parameter Expansion & Default Values
+### Robust Parameter Expansion & Default Values
 
 Safely handles optional and required script variables:
 
@@ -62,7 +62,7 @@ filename="archive_2026.tar.gz"
 base="${filename%%.*}" # "archive_2026"
 ```
 
-#Trap Signals for Reliable Cleanup
+### Trap Signals for Reliable Cleanup
 
 Ensures temporary files and child processes are cleaned up upon exit or interruption:
 
@@ -100,28 +100,27 @@ trap cleanup EXIT ERR INT TERM
 echo "Working in: $TMP_DIR"
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Always Quote Variables**: Wrap variables in double quotes (`"${MY_VAR}"`) to prevent word splitting and glob expansion bugs.
-- **Lint with ShellCheck**: Run `shellcheck` in CI to catch syntax pitfalls, portability bugs, and quoting errors automatically.
-- **Use `[[ ... ]]` for Conditions**: Prefer modern Bash conditional evaluation `[[ $var == "val" ]]` over legacy `[ ... ]`.
-- **Use Local Variables in Functions**: Always declare variables inside functions with `local var="value"`.
+- Always Quote Variables: Wrap variables in double quotes (`"${MY_VAR}"`) to prevent word splitting and glob expansion bugs.
+- Lint with ShellCheck: Run `shellcheck` in CI to catch syntax pitfalls, portability bugs, and quoting errors automatically.
+- Use `[[ ... ]]` for Conditions: Prefer modern Bash conditional evaluation `[[ $var == "val" ]]` over legacy `[ ... ]`.
+- Use Local Variables in Functions: Always declare variables inside functions with `local var="value"`.
 
 **Don't**:
 
-- **Don't parse `ls` output**: Use globbing loops (`for file in *.txt; do ... done`) instead of parsing `ls`.
-- **Don't use unquoted `eval`**: `eval` executes arbitrary string inputs and introduces catastrophic shell injection vulnerabilities.
-- **Don't write multi-thousand line monolithic bash scripts**: Transition complex scripts to Python or Go when logic grows large.
+- Parse `ls` output: Use globbing loops (`for file in *.txt; do ... done`) instead of parsing `ls`.
+- Use unquoted `eval`: `eval` executes arbitrary string inputs and introduces catastrophic shell injection vulnerabilities.
+- Write multi-thousand line monolithic bash scripts: Transition complex scripts to Python or Go when logic grows large.
 
 ## Troubleshooting
 
 | Error                                  | Cause                                                             | Solution                                                      |
 | :------------------------------------- | :---------------------------------------------------------------- | :------------------------------------------------------------ |
 | `syntax error: unexpected end of file` | Unclosed quotes, missing `fi`, `done`, or unbalanced parentheses. | Run `bash -n script.sh` to validate syntax without executing. |
-| `command not found: $'                 |
-| '`                                     | Windows CRLF line endings present in shell script.                | Convert line endings with `dos2unix script.sh`.               |
+| `command not found: $'\r'`             | Windows CRLF line endings present in shell script.                | Convert line endings with `dos2unix script.sh`.               |
 | `unbound variable (with set -u)`       | Referencing unset environment or script variable.                 | Provide default value: `${VAR:-default_val}`.                 |
 
 ## References

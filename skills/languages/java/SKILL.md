@@ -28,7 +28,7 @@ public record User(String id, String name, String email) {
 
 ## Core Concepts
 
-#Virtual Threads (Project Loom - Java 21+ LTS)
+### Virtual Threads (Project Loom - Java 21+ LTS)
 
 Lightweight user-mode threads managed by the JVM rather than the OS, allowing synchronous blocking code to scale to millions of concurrent tasks:
 
@@ -54,7 +54,7 @@ public class VirtualThreadDemo {
 }
 ```
 
-#Records & Pattern Matching (Java 17/21)
+### Records & Pattern Matching (Java 17/21)
 
 Concise immutable data carriers with expressive pattern matching:
 
@@ -74,7 +74,7 @@ public class TransactionHandler {
 }
 ```
 
-#Modern Foreign Function & Memory API (Project Panama)
+### Modern Foreign Function & Memory API (Project Panama)
 
 Interacts directly with native C libraries and off-heap memory safely without JNI:
 
@@ -93,7 +93,11 @@ public class NativeInterop {
 
 ## Common Patterns
 
-### Streams & Collections
+### Immutable Collection Transformations with Streams
+
+**Problem**: Verbose collection filtering and grouping introducing mutable intermediate states.
+
+**Solution**:
 
 ```java
 // Immutable collections
@@ -114,6 +118,10 @@ Map<String, List<User>> byRole = users.stream()
 
 ### Optional
 
+**Problem**: Null reference returns causing unpredictable NullPointerExceptions without compile-time safeguards.
+
+**Solution**:
+
 ```java
 Optional<User> user = Optional.ofNullable(findUser(id));
 
@@ -127,20 +135,20 @@ user.ifPresentOrElse(
 );
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Adopt Java 21 or 25 LTS**: Leverage Virtual Threads, Pattern Matching, Records, and Sequenced Collections.
-- **Prefer Virtual Threads Over Reactive Complexity**: Replace complex WebFlux/RxJava reactive chains with clean synchronous blocking code on virtual threads.
-- **Use Records for DTOs and Value Objects**: Eliminate Lombok boilerplate by using native Java `record`.
-- **Tune Modern Garbage Collectors**: Use ZGC (`-XX:+UseZGC -XX:+ZGenerational`) for sub-millisecond GC pause times on multi-gigabyte heaps.
+- Adopt Java 21 or 25 LTS: Leverage Virtual Threads, Pattern Matching, Records, and Sequenced Collections.
+- Prefer Virtual Threads Over Reactive Complexity: Replace complex WebFlux/RxJava reactive chains with clean synchronous blocking code on virtual threads.
+- Use Records for DTOs and Value Objects: Eliminate Lombok boilerplate by using native Java `record`.
+- Tune Modern Garbage Collectors: Use ZGC (`-XX:+UseZGC -XX:+ZGenerational`) for sub-millisecond GC pause times on multi-gigabyte heaps.
 
 **Don't**:
 
-- **Don't pool Virtual Threads**: Virtual threads are cheap and disposable; create them per task rather than using thread pools.
-- **Don't use `synchronized` blocks inside Virtual Threads**: Use `ReentrantLock` to avoid pinning virtual threads to OS carrier threads during I/O.
-- **Don't return raw `null`**: Use `Optional<T>` for return types to force callers to handle absence explicitly.
+- Pool Virtual Threads: Virtual threads are cheap and disposable; create them per task rather than using thread pools.
+- Use `synchronized` blocks inside Virtual Threads: Use `ReentrantLock` to avoid pinning virtual threads to OS carrier threads during I/O.
+- Return raw `null`: Use `Optional<T>` for return types to force callers to handle absence explicitly.
 
 ## Troubleshooting
 

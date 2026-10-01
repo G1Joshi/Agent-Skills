@@ -35,7 +35,7 @@ Modern HTML5 and CSS3 for semantic web structure and responsive styling.
 
 ## Core Concepts
 
-#Semantic HTML5 & Accessible Landmark Roles
+### Semantic HTML5 & Accessible Landmark Roles
 
 Replaces generic `<div>` soup with structural elements that assistive technologies understand:
 
@@ -68,7 +68,7 @@ Replaces generic `<div>` soup with structural elements that assistive technologi
 </html>
 ```
 
-#Modern CSS Layout (Grid & Subgrid)
+### Modern CSS Layout (Grid & Subgrid)
 
 Builds responsive multi-column layouts without external CSS frameworks:
 
@@ -89,7 +89,7 @@ Builds responsive multi-column layouts without external CSS frameworks:
 }
 ```
 
-#Container Queries & CSS Custom Properties
+### Container Queries & CSS Custom Properties
 
 Adapts styling based on container container width rather than the global browser viewport:
 
@@ -119,7 +119,11 @@ Adapts styling based on container container width rather than the global browser
 
 ## Common Patterns
 
-### Flexbox Layout
+### Centered Responsive Component Layout
+
+**Problem**: Vertically and horizontally centering responsive card elements across varying viewport dimensions.
+
+**Solution**:
 
 ```css
 /* Center content */
@@ -150,6 +154,10 @@ Adapts styling based on container container width rather than the global browser
 ```
 
 ### CSS Grid
+
+**Problem**: Constructing multi-dimensional grid layouts and responsive page containers without fragile positioning hacks.
+
+**Solution**:
 
 ```css
 /* Responsive grid */
@@ -187,6 +195,10 @@ Adapts styling based on container container width rather than the global browser
 
 ### Responsive Design
 
+**Problem**: Maintaining layout proportion, typography readability, and container responsiveness across disparate screen viewports.
+
+**Solution**:
+
 ```css
 /* Mobile-first approach */
 .container {
@@ -214,24 +226,24 @@ Adapts styling based on container container width rather than the global browser
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Always Include Viewport Meta Tag**: Ensure `<meta name="viewport" content="width=device-width, initial-scale=1.0">` is present.
-- **Use Native CSS Nesting and `:has()`**: Eliminate Sass build steps by leveraging native browser CSS nesting and relational selectors.
-- **Design with Accessibility in Mind**: Ensure color contrast ratios meet WCAG AA standards (4.5:1) and all images have descriptive `alt` tags.
-- **Implement Fluid Typography with `clamp()`**: Use `font-size: clamp(1rem, 2.5vw, 2rem);` for seamless responsive scaling.
+- Always Include Viewport Meta Tag: Ensure `<meta name="viewport" content="width=device-width, initial-scale=1.0">` is present.
+- Use Native CSS Nesting and `:has()`: Eliminate Sass build steps by leveraging native browser CSS nesting and relational selectors.
+- Design with Accessibility in Mind: Ensure color contrast ratios meet WCAG AA standards (4.5:1) and all images have descriptive `alt` tags.
+- Implement Fluid Typography with `clamp()`: Use `font-size: clamp(1rem, 2.5vw, 2rem);` for seamless responsive scaling.
 
 **Don't**:
 
-- **Don't use `!important` to resolve specificity issues**: Structure cascade layers with `@layer` instead of overriding specificity brute-force.
-- **Don't disable focus outlines without alternatives**: Never write `outline: none;` without providing an accessible `:focus-visible` ring.
-- **Don't use non-semantic elements for interactive buttons**: Never use `<div onclick="...">`; always use `<button>` to ensure keyboard accessibility.
+- Use `!important` to resolve specificity issues: Structure cascade layers with `@layer` instead of overriding specificity brute-force.
+- Disable focus outlines without alternatives: Never write `outline: none;` without providing an accessible `:focus-visible` ring.
+- Use non-semantic elements for interactive buttons: Never use `<div onclick="...">`; always use `<button>` to ensure keyboard accessibility.
 
 ## Troubleshooting
 
-| Issue                   | Cause               | Solution                  |
+| Error                   | Cause               | Solution                  |
 | ----------------------- | ------------------- | ------------------------- |
 | Layout overflow         | Fixed widths        | Use percentage or min/max |
 | Flex items not wrapping | Missing `flex-wrap` | Add `flex-wrap: wrap`     |

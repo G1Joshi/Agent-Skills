@@ -31,7 +31,7 @@ suspend fun fetchUser(id: String): User? {
 
 ## Core Concepts
 
-#Kotlin Coroutines & Structured Concurrency
+### Kotlin Coroutines & Structured Concurrency
 
 Lightweight cooperative multitasking with automated cancellation propagation:
 
@@ -49,7 +49,7 @@ suspend fun fetchUserProfile(userId: String): UserProfile = coroutineScope {
 }
 ```
 
-#Kotlin Flow (Asynchronous Cold Streams)
+### Kotlin Flow (Asynchronous Cold Streams)
 
 Reactive streams with built-in backpressure and transformation operators:
 
@@ -65,7 +65,7 @@ fun streamStockPrices(symbol: String): Flow<Double> = flow {
  .flowOn(Dispatchers.IO)
 ```
 
-#Extension Functions & Scope Functions
+### Extension Functions & Scope Functions
 
 Extends existing classes without inheritance and scopes variable operations:
 
@@ -82,7 +82,11 @@ val user = User().apply {
 
 ## Common Patterns
 
-### Coroutines
+### Parallel Coroutine Execution
+
+**Problem**: Fetching multiple remote resources concurrently without blocking the main execution thread.
+
+**Solution**:
 
 ```kotlin
 // Suspend function
@@ -112,6 +116,10 @@ fun observeUsers(): Flow<List<User>> = flow {
 
 ### Extension Functions
 
+**Problem**: Adding domain-specific utility operations to standard or library types without inheritance.
+
+**Solution**:
+
 ```kotlin
 fun String.isValidEmail(): Boolean {
     return Regex("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}\$").matches(this)
@@ -125,20 +133,20 @@ inline fun <T> Result<T>.onSuccess(action: (T) -> Unit): Result<T> {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Leverage Kotlin Coroutines over Reactive Streams**: Replace complex RxJava pipelines with clean coroutines and Flow.
-- **Use Sealed Interfaces for UI State**: Model UI and domain state using `sealed interface` for exhaustive `when` expressions.
-- **Specify Dispatchers Explicitly**: Use `Dispatchers.IO` for disk/network I/O, `Dispatchers.Default` for CPU math, and `Dispatchers.Main` for UI.
-- **Prefer Value Classes (`@JvmInline value class`)**: Create zero-allocation domain primitives for IDs and units of measure.
+- Leverage Kotlin Coroutines over Reactive Streams: Replace complex RxJava pipelines with clean coroutines and Flow.
+- Use Sealed Interfaces for UI State: Model UI and domain state using `sealed interface` for exhaustive `when` expressions.
+- Specify Dispatchers Explicitly: Use `Dispatchers.IO` for disk/network I/O, `Dispatchers.Default` for CPU math, and `Dispatchers.Main` for UI.
+- Prefer Value Classes (`@JvmInline value class`): Create zero-allocation domain primitives for IDs and units of measure.
 
 **Don't**:
 
-- **Don't use `GlobalScope.launch`**: Always use structured concurrency with scoped lifecycles to prevent goroutine/coroutine leaks.
-- **Don't use the `!!` force-unwrap operator**: Handle nullables cleanly using `?.let { ... }` or Elvis operator `?:`.
-- **Don't expose mutable collections**: Expose read-only `List<T>` interfaces; keep `MutableList<T>` private inside classes.
+- Use `GlobalScope.launch`: Always use structured concurrency with scoped lifecycles to prevent goroutine/coroutine leaks.
+- Use the `!!` force-unwrap operator: Handle nullables cleanly using `?.let { ... }` or Elvis operator `?:`.
+- Expose mutable collections: Expose read-only `List<T>` interfaces; keep `MutableList<T>` private inside classes.
 
 ## Troubleshooting
 

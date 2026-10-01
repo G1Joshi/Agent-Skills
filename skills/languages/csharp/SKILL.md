@@ -30,7 +30,7 @@ public class UserService
 
 ## Core Concepts
 
-#Records & Pattern Matching (C# 12/13)
+### Records & Pattern Matching (C# 12/13)
 
 Immutable data structures with value equality and expressive switch expressions:
 
@@ -50,7 +50,7 @@ public static class OrderClassifier
 }
 ```
 
-#Memory Optimization with `Span<T>` and `ReadOnlySpan<T>`
+### Memory Optimization with `Span<T>` and `ReadOnlySpan<T>`
 
 Allocates and slices continuous memory buffers on the stack without heap GC allocations:
 
@@ -63,7 +63,7 @@ public static bool TryParseYear(ReadOnlySpan<char> dateSpan, out int year)
 }
 ```
 
-#Async / Await with `ValueTask`
+### Async / Await with `ValueTask`
 
 Efficient asynchronous programming minimizing task object allocations on hot paths:
 
@@ -79,7 +79,11 @@ public async ValueTask<UserProfile> GetUserProfileAsync(string userId)
 
 ## Common Patterns
 
-### LINQ
+### Declarative Data Transformations with LINQ
+
+**Problem**: Imperative nested loops and mutation when filtering, projecting, and sorting collections.
+
+**Solution**:
 
 ```csharp
 // Query syntax
@@ -103,6 +107,10 @@ var byCountry = users
 
 ### Pattern Matching
 
+**Problem**: Verbose cascading conditional checks and manual type casting leading to runtime type errors.
+
+**Solution**:
+
 ```csharp
 string GetStatus(object obj) => obj switch
 {
@@ -119,20 +127,20 @@ if (numbers is [var first, _, var last])
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Enable Nullable Reference Types (`<Nullable>enable</Nullable>`)**: Catch null reference exceptions at compile time across the codebase.
-- **Use Dependency Injection & Options Pattern**: Inject strongly-typed configurations via `IOptions<T>` and constructor injection.
-- **Use `ValueTask<T>` on Frequently Cached Code Paths**: Reduce GC allocations by returning `ValueTask` when operations often complete synchronously.
-- **Leverage Native AOT Compilation**: Compile .NET applications to native machine code (`PublishAot=true`) for sub-10ms startup and tiny memory footprints.
+- Enable Nullable Reference Types (`<Nullable>enable</Nullable>`): Catch null reference exceptions at compile time across the codebase.
+- Use Dependency Injection & Options Pattern: Inject strongly-typed configurations via `IOptions<T>` and constructor injection.
+- Use `ValueTask<T>` on Frequently Cached Code Paths: Reduce GC allocations by returning `ValueTask` when operations often complete synchronously.
+- Leverage Native AOT Compilation: Compile .NET applications to native machine code (`PublishAot=true`) for sub-10ms startup and tiny memory footprints.
 
 **Don't**:
 
-- **Don't block async code with `.Result` or `.Wait()`**: Synchronous blocking on asynchronous tasks causes immediate thread pool deadlocks.
-- **Don't use mutable shared singletons without thread safety**: Use `ConcurrentDictionary` or proper synchronization primitives.
-- **Don't instantiate `HttpClient` per request**: Use `IHttpClientFactory` to prevent socket exhaustion.
+- Block async code with `.Result` or `.Wait()`: Synchronous blocking on asynchronous tasks causes immediate thread pool deadlocks.
+- Use mutable shared singletons without thread safety: Use `ConcurrentDictionary` or proper synchronization primitives.
+- Instantiate `HttpClient` per request: Use `IHttpClientFactory` to prevent socket exhaustion.
 
 ## Troubleshooting
 

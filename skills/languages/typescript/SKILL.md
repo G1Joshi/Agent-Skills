@@ -34,7 +34,7 @@ async function fetchUser(id: string): Promise<User | undefined> {
 
 ## Core Concepts
 
-#Advanced Type-Level Programming: Conditional & Mapped Types
+### Advanced Type-Level Programming: Conditional & Mapped Types
 
 Type transformations using conditional logic, `infer`, and template literal types:
 
@@ -59,7 +59,7 @@ type ApiParams = ExtractRouteParams<"/users/:userId/posts/:postId">;
 // Equivalent to: "userId" | "postId"
 ```
 
-#Discriminated Unions & Exhaustive Type Narrowing
+### Discriminated Unions & Exhaustive Type Narrowing
 
 Modeling finite domain states with compiler-verified completeness:
 
@@ -98,7 +98,7 @@ function renderState<T>(state: AsyncData<T>): string {
 }
 ```
 
-#Satisfies Operator & Exact Literal Inference
+### Satisfies Operator & Exact Literal Inference
 
 Validating structure conformance without losing precise literal types:
 
@@ -152,6 +152,10 @@ function handleResult<T>(result: Result<T>) {
 
 ### Utility Types
 
+**Problem**: Manually recreating duplicate interfaces for partial, selected, or read-only subsets of domain models.
+
+**Solution**:
+
 ```typescript
 // Make all properties optional
 type Partial<T> = { [P in keyof T]?: T[P] };
@@ -166,15 +170,20 @@ type UserCreate = Omit<User, "id" | "createdAt">;
 type UserId = string & { readonly brand: unique symbol };
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** enable `"strict": true` and `"noUncheckedIndexedAccess": true` in `tsconfig.json` for bulletproof type safety.
-- **Do** use runtime validation libraries like `Zod` or `Valibot` at API boundaries to parse untrusted JSON into verified types.
-- **Do** leverage the `satisfies` operator to validate types without widening literal types or losing autocomplete.
-- **Do** favor `type` over `interface` for complex unions and tuples; use `interface` when public declaration merging is desired.
-- **Don't** use `any`; use `unknown` and narrow types using type guards, `instanceof`, or discriminated unions.
-- **Don't** use non-null assertions (`foo!.bar`); handle null/undefined explicitly with optional chaining (`?.`) and nullish coalescing (`??`).
-- **Don't** perform double-casting (`foo as unknown as Bar`) to bypass compile-time type errors.
+**Do**:
+
+- Enable `"strict": true` and `"noUncheckedIndexedAccess": true` in `tsconfig.json` for bulletproof type safety.
+- Use runtime validation libraries like `Zod` or `Valibot` at API boundaries to parse untrusted JSON into verified types.
+- Leverage the `satisfies` operator to validate types without widening literal types or losing autocomplete.
+- Favor `type` over `interface` for complex unions and tuples; use `interface` when public declaration merging is desired.
+
+**Don't**:
+
+- Use `any`; use `unknown` and narrow types using type guards, `instanceof`, or discriminated unions.
+- Use non-null assertions (`foo!.bar`); handle null/undefined explicitly with optional chaining (`?.`) and nullish coalescing (`??`).
+- Perform double-casting (`foo as unknown as Bar`) to bypass compile-time type errors.
 
 ## Troubleshooting
 

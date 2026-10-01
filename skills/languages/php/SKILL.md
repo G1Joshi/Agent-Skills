@@ -30,7 +30,7 @@ foreach ($colors as $color) {
 
 ## Core Concepts
 
-#Modern Strict Typing & Constructor Promotion (PHP 8.2+)
+### Modern Strict Typing & Constructor Promotion (PHP 8.2+)
 
 Enforces strict scalar types, readonly classes, and promoted constructor properties:
 
@@ -58,7 +58,7 @@ enum OrderStatus: string
 }
 ```
 
-#Expressive `match` Expressions & First-Class Callables
+### Expressive `match` Expressions & First-Class Callables
 
 Replaces verbose `switch` statements with strict type comparison and returned values:
 
@@ -73,7 +73,7 @@ function getDiscountPercentage(OrderStatus $status): float
 }
 ```
 
-#Modern Fiber-Based Concurrency & Persistent Runtimes
+### Modern Fiber-Based Concurrency & Persistent Runtimes
 
 Runs concurrent fibers and persistent memory workers with FrankenPHP:
 
@@ -115,20 +115,20 @@ $user = new UserProfile(1, 'Jane', 'jane@example.com');
 echo $user->name;
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Always Add `declare(strict_types=1);`**: Enforce strict scalar type checking at the top of every single PHP file.
-- **Use PHPStan or Psalm at Level 8+**: Integrate static analysis in CI to eliminate type bugs and undefined method calls.
-- **Deploy with FrankenPHP or Octane**: Maximize throughput by serving applications via persistent workers in production.
-- **Use `DateTimeImmutable`**: Prevent accidental time-mutation bugs by replacing mutable `DateTime` with `DateTimeImmutable`.
+- Always Add `declare(strict_types=1);`: Enforce strict scalar type checking at the top of every single PHP file.
+- Use PHPStan or Psalm at Level 8+: Integrate static analysis in CI to eliminate type bugs and undefined method calls.
+- Deploy with FrankenPHP or Octane: Maximize throughput by serving applications via persistent workers in production.
+- Use `DateTimeImmutable`: Prevent accidental time-mutation bugs by replacing mutable `DateTime` with `DateTimeImmutable`.
 
 **Don't**:
 
-- **Don't use raw superglobals (`$_POST`, `$_GET`)**: Validate incoming parameters via framework Request classes and validation schemas.
-- **Don't use weak comparison (`==`)**: Always use strict equality (`===`) to avoid unintended type coercion.
-- **Don't ignore Composer lock files**: Always commit `composer.lock` and run `composer install --no-dev --optimize-autoloader` in production.
+- Use raw superglobals (`$_POST`, `$_GET`): Validate incoming parameters via framework Request classes and validation schemas.
+- Use weak comparison (`==`): Always use strict equality (`===`) to avoid unintended type coercion.
+- Ignore Composer lock files: Always commit `composer.lock` and run `composer install --no-dev --optimize-autoloader` in production.
 
 ## Troubleshooting
 

@@ -29,7 +29,7 @@ fn main() {
 
 ## Core Concepts
 
-#Ownership, Borrowing & Lifetimes
+### Ownership, Borrowing & Lifetimes
 
 Rust guarantees memory safety without a GC using compile-time affine type systems:
 
@@ -60,7 +60,7 @@ impl<'a> TokenView<'a> {
 }
 ```
 
-#Robust Error Handling with Result & Thiserror
+### Robust Error Handling with Result & Thiserror
 
 Idiomatic domain error modeling without runtime exceptions:
 
@@ -93,7 +93,7 @@ pub fn validate_and_parse(id: u64, header: &str) -> Result<String> {
 }
 ```
 
-#Asynchronous Concurrency with Tokio & Channels
+### Asynchronous Concurrency with Tokio & Channels
 
 Structured async tasks communicating over bounded multi-producer, single-consumer channels:
 
@@ -154,15 +154,20 @@ pub fn get_user(id: i64) -> Result<String> {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
-- **Do** leverage Clippy lints (`cargo clippy -- -D warnings`) and automated formatting in CI pipelines.
-- **Do** favor custom `enum` errors with `thiserror` for libraries, and `anyhow` for top-level binaries and CLIs.
-- **Do** use `Arc<tokio::sync::RwLock<T>>` or actor channels rather than standard blocking mutexes in asynchronous code.
-- **Do** prefer iterator combinators (`map`, `filter`, `fold`) over explicit index loops for zero-cost performance optimization.
-- **Don't** use `.unwrap()` in production paths; use `.expect("descriptive context")` or the `?` question mark operator.
-- **Don't** default to `.clone()` to satisfy the borrow checker; restructure ownership or borrow references whenever possible.
-- **Don't** write `unsafe` blocks without documented `// SAFETY:` invariants explaining why undefined behavior cannot occur.
+**Do**:
+
+- Leverage Clippy lints (`cargo clippy -- -D warnings`) and automated formatting in CI pipelines.
+- Favor custom `enum` errors with `thiserror` for libraries, and `anyhow` for top-level binaries and CLIs.
+- Use `Arc<tokio::sync::RwLock<T>>` or actor channels rather than standard blocking mutexes in asynchronous code.
+- Prefer iterator combinators (`map`, `filter`, `fold`) over explicit index loops for zero-cost performance optimization.
+
+**Don't**:
+
+- Use `.unwrap()` in production paths; use `.expect("descriptive context")` or the `?` question mark operator.
+- Default to `.clone()` to satisfy the borrow checker; restructure ownership or borrow references whenever possible.
+- Write `unsafe` blocks without documented `// SAFETY:` invariants explaining why undefined behavior cannot occur.
 
 ## Troubleshooting
 

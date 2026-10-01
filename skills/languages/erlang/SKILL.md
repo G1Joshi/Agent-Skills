@@ -5,7 +5,7 @@ description: Expert Erlang programming assistance covering BEAM virtual machine,
 
 # Erlang
 
-Erlang powered WhatsApp and the telecom backbone. OTP 27 (2024) adds a **JSON module** and triple-quoted strings. It is the foundation of Elixir.
+Erlang is a battle-tested functional programming language designed for massive concurrency, high fault-tolerance, and distributed telecom systems on the BEAM virtual machine.
 
 ## When to Use
 
@@ -26,7 +26,7 @@ start() ->
 
 ## Core Concepts
 
-#Open Telecom Platform (OTP) GenServer Behavior
+### Open Telecom Platform (OTP) GenServer Behavior
 
 Standardized generic client-server framework managing state, calls, and asynchronous casts:
 
@@ -48,7 +48,7 @@ handle_cast(inc, Count)        -> {noreply, Count + 1}.
 terminate(_Reason, _State)    -> ok.
 ```
 
-#Pattern Matching Function Clauses
+### Pattern Matching Function Clauses
 
 Functions declare multiple clauses matching input parameters structurally:
 
@@ -61,7 +61,7 @@ tax(Amount, {state, "NY"}) -> Amount * 0.08875;
 tax(Amount, {state, _Other}) -> Amount * 0.05.
 ```
 
-#Hot Code Upgrades
+### Hot Code Upgrades
 
 Reloads module code live in memory while preserving active process state:
 
@@ -98,20 +98,20 @@ loop(Count) ->
     end.
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Adhere Strictly to OTP Principles**: Build applications around standard OTP behaviors (`gen_server`, `gen_statem`, `supervisor`).
-- **Use Erlang Term Storage (ETS) for Shared Cache**: Leverage ETS tables for high-concurrency in-memory read lookups across processes.
-- **Run Dialyzer for Static Type Analysis**: Add `-spec` type specifications to all public functions and run Dialyzer in CI.
-- **Monitor BEAM Metrics via Telemetry**: Track process count, reductions, and scheduler utilization.
+- Adhere Strictly to OTP Principles: Build applications around standard OTP behaviors (`gen_server`, `gen_statem`, `supervisor`).
+- Use Erlang Term Storage (ETS) for Shared Cache: Leverage ETS tables for high-concurrency in-memory read lookups across processes.
+- Run Dialyzer for Static Type Analysis: Add `-spec` type specifications to all public functions and run Dialyzer in CI.
+- Monitor BEAM Metrics via Telemetry: Track process count, reductions, and scheduler utilization.
 
 **Don't**:
 
-- **Don't register thousands of named processes**: Atom tables are global and un-garbage-collected; dynamic atoms risk crashing the VM.
-- **Don't use defensive try/catch everywhere**: Let processes crash on unexpected errors; let supervisors reset them to known good state.
-- **Don't block schedulers with non-yielding C-NIFs**: Keep C Native Implemented Functions (NIFs) under 1ms or use dirty schedulers.
+- Register thousands of named processes: Atom tables are global and un-garbage-collected; dynamic atoms risk crashing the VM.
+- Use defensive try/catch everywhere: Let processes crash on unexpected errors; let supervisors reset them to known good state.
+- Block schedulers with non-yielding C-NIFs: Keep C Native Implemented Functions (NIFs) under 1ms or use dirty schedulers.
 
 ## Troubleshooting
 

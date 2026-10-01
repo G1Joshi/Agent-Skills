@@ -28,7 +28,7 @@ foreach ($p in $processes) {
 
 ## Core Concepts
 
-#Object-Oriented Pipeline Architecture
+### Object-Oriented Pipeline Architecture
 
 Commands pass strongly-typed .NET objects rather than plain text; downstream commands access properties directly:
 
@@ -40,7 +40,7 @@ Get-Process |
   Select-Object -First 5 -Property Name, Id, @{Name="RAM_MB"; Expression={$_.WorkingSet64 / 1MB}}
 ```
 
-#Advanced Parameter Validation & Cmdlet Binding
+### Advanced Parameter Validation & Cmdlet Binding
 
 Enforces parameter types, mandatory attributes, and validation rules:
 
@@ -63,7 +63,7 @@ function Invoke-Deployment {
 }
 ```
 
-#Error Action Preferences and Try/Catch
+### Error Action Preferences and Try/Catch
 
 Handles terminating and non-terminating errors cleanly:
 
@@ -107,20 +107,20 @@ function Remove-StaleLogs {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Follow Standard Approved Verb-Noun Naming**: Use approved verbs (`Get-`, `Set-`, `New-`, `Remove-`, `Invoke-`).
-- **Use PowerShell 7+ (pwsh)**: Standardize on cross-platform PowerShell 7+; avoid legacy Windows PowerShell 5.1.
-- **Add `[CmdletBinding()]` to Custom Functions**: Gain automatic support for `-Verbose`, `-Debug`, and `-ErrorAction`.
-- **Use PSScriptAnalyzer in CI**: Run automated static analysis to catch security flaws and code quality issues.
+- Follow Standard Approved Verb-Noun Naming: Use approved verbs (`Get-`, `Set-`, `New-`, `Remove-`, `Invoke-`).
+- Use PowerShell 7+ (pwsh): Standardize on cross-platform PowerShell 7+; avoid legacy Windows PowerShell 5.1.
+- Add `[CmdletBinding()]` to Custom Functions: Gain automatic support for `-Verbose`, `-Debug`, and `-ErrorAction`.
+- Use PSScriptAnalyzer in CI: Run automated static analysis to catch security flaws and code quality issues.
 
 **Don't**:
 
-- **Don't use command aliases in production scripts**: Avoid `ls`, `cat`, `curl`, and `select`; use full cmdlet names (`Get-ChildItem`).
-- **Don't parse text output with regex when objects exist**: Access object properties directly (`$proc.Id`) rather than parsing text.
-- **Don't store plaintext passwords**: Use `PSCredential` with SecretManagement or Azure Key Vault.
+- Use command aliases in production scripts: Avoid `ls`, `cat`, `curl`, and `select`; use full cmdlet names (`Get-ChildItem`).
+- Parse text output with regex when objects exist: Access object properties directly (`$proc.Id`) rather than parsing text.
+- Store plaintext passwords: Use `PSCredential` with SecretManagement or Azure Key Vault.
 
 ## Troubleshooting
 

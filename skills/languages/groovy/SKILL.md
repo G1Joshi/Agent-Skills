@@ -30,7 +30,7 @@ println "Admins: ${adminNames.join(', ')}"
 
 ## Core Concepts
 
-#Dynamic Typing with Optional Static Compilation (`@CompileStatic`)
+### Dynamic Typing with Optional Static Compilation (`@CompileStatic`)
 
 Blends dynamic scripting with high-performance static bytecode compilation:
 
@@ -45,7 +45,7 @@ class Calculator {
 }
 ```
 
-#Closures & Builder Pattern
+### Closures & Builder Pattern
 
 First-class executable code blocks powering Gradle and Jenkins DSLs:
 
@@ -68,7 +68,7 @@ pipeline {
 }
 ```
 
-#Collections & GPath Navigation
+### Collections & GPath Navigation
 
 Manipulates lists, maps, and nested data with concise expressions:
 
@@ -116,20 +116,20 @@ pipeline {
 }
 ```
 
-## Best Practices (2026)
+## Best Practices
 
 **Do**:
 
-- **Use `@CompileStatic` on Production Services**: Enable static compilation on performance-critical backend classes to match pure Java speed.
-- **Leverage the Spock Framework**: Use Spock (`given:`, `when:`, `then:`) for highly readable testing of Java applications.
-- **Use the Safe Navigation Operator (`?.`)**: Prevent `NullPointerException` errors using Groovy's null-safe navigation (`user?.profile?.email`).
-- **Keep Jenkinsfiles Declarative**: Prefer Declarative Pipelines over complex, untestable Scripted Pipelines.
+- Use `@CompileStatic` on Production Services: Enable static compilation on performance-critical backend classes to match pure Java speed.
+- Leverage the Spock Framework: Use Spock (`given:`, `when:`, `then:`) for highly readable testing of Java applications.
+- Use the Safe Navigation Operator (`?.`): Prevent `NullPointerException` errors using Groovy's null-safe navigation (`user?.profile?.email`).
+- Keep Jenkinsfiles Declarative: Prefer Declarative Pipelines over complex, untestable Scripted Pipelines.
 
 **Don't**:
 
-- **Don't write complex business backends without static typing**: Dynamic dispatch without type checks introduces runtime bugs.
-- **Don't use `def` everywhere in large codebases**: Declare explicit parameter and return types to aid readability and IDE autocompletion.
-- **Don't mix closures with unmanaged global state**: Keep closures pure to prevent thread race conditions in concurrent pipelines.
+- Write complex business backends without static typing: Dynamic dispatch without type checks introduces runtime bugs.
+- Use `def` everywhere in large codebases: Declare explicit parameter and return types to aid readability and IDE autocompletion.
+- Mix closures with unmanaged global state: Keep closures pure to prevent thread race conditions in concurrent pipelines.
 
 ## Troubleshooting
 
